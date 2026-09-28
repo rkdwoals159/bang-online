@@ -1,0 +1,178 @@
+[
+  {
+    "typeId": "barrel",
+    "nameEn": "Barrel",
+    "count": 2,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_barile.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "dynamite",
+    "nameEn": "Dynamite",
+    "count": 1,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_dinamite.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "jail",
+    "nameEn": "Jail",
+    "count": 3,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_prigione.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "mustang",
+    "nameEn": "Mustang",
+    "count": 2,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_mustang.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "remington",
+    "nameEn": "Remington",
+    "count": 1,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_remington.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "carabine",
+    "nameEn": "Rev. Carabine",
+    "count": 1,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_carabine.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "schofield",
+    "nameEn": "Schofield",
+    "count": 3,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_schofield.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "scope",
+    "nameEn": "Scope",
+    "count": 1,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_mirino.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "volcanic",
+    "nameEn": "Volcanic",
+    "count": 2,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_volcanic.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "winchester",
+    "nameEn": "Winchester",
+    "count": 1,
+    "border": "BLUE",
+    "assetPath": "../assets/cards/playing/01_winchester.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "bang",
+    "nameEn": "BANG!",
+    "count": 25,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_bang.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "beer",
+    "nameEn": "Beer",
+    "count": 6,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_birra.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "cat_balou",
+    "nameEn": "Cat Balou",
+    "count": 4,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_catbalou.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "duel",
+    "nameEn": "Duel",
+    "count": 3,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_duello.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "gatling",
+    "nameEn": "Gatling",
+    "count": 1,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_gatling.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "general_store",
+    "nameEn": "General Store",
+    "count": 2,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_emporio.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "indians",
+    "nameEn": "Indians!",
+    "count": 2,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_indiani.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "missed",
+    "nameEn": "Missed!",
+    "count": 12,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_mancato.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "panic",
+    "nameEn": "Panic!",
+    "count": 4,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_panico.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "saloon",
+    "nameEn": "Saloon",
+    "count": 1,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_saloon.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "stagecoach",
+    "nameEn": "Stagecoach",
+    "count": 2,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_diligenza.png",
+    "source": "S3"
+  },
+  {
+    "typeId": "wells_fargo",
+    "nameEn": "Wells Fargo",
+    "count": 1,
+    "border": "BROWN",
+    "assetPath": "../assets/cards/playing/01_wellsfargo.png",
+    "source": "S3"
+  }
+]

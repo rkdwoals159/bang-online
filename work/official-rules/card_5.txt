@@ -1,0 +1,8 @@
+
+REGOLE CARTA
+
+
+ Cat Balou 
+Force “any one player” to “discard a card”, regardless of 
+the distance.
+

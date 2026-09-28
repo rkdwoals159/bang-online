@@ -1,0 +1,7 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-room-sync-02",
+  "roomId": "room_example",
+  "knownVersion": 3,
+  "actorId": "client-supplied"
+}

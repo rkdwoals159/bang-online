@@ -1,0 +1,12 @@
+node_modules/
+dist/
+**/dist/
+**/.next/
+**/.wrangler/
+**/.sites-runtime/
+**/coverage/
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+npm-debug.log*
+pnpm-debug.log*

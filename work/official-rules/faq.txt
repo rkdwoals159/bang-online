@@ -1,0 +1,92 @@
+
+PAGE 1
+Q01. Can players talk during the game?
+A. Of course! That’s one of the most amusing aspects of the game. However, players cannot ask 
+questions directly related to the playing of the cards (e.g. they cannot ask the Sheriff if they can 
+play a Gatling).
+Q02. How can a player with a Barrel in play avoid a shot from Slab the Killer?
+A. First of all, he can “draw!”: if he reveals a Heart card, he can avoid the shot with just one Missed! 
+card in hand. Otherwise, he needs two Missed! cards. He cannot “draw!” twice.
+Q03. Can I play a BANG! if I have already played a Gatling in the same turn?
+A. Yes. Even if the two cards have similar effects, the Gatling is not a BANG! card.
+Q04. Can I choose a player at a distance greater than 1 when playing a Panic! card if I have a 
+Weapon card in play?
+A. No. Weapons don’t change the distance between players: they simply allow to reach more 
+distant players with a BANG! card. However, cards which actually modify the distance (e.g. Mustang 
+and Scope, and the ability of characters like Rose Doolan and Paul Regret) must be considered in 
+these situations.
+Q05. Who is considered to be responsible of the elimination of a player with cards like 
+Indians! and Gatling?
+A. Unlike the Dynamite, the player who played the Gatling or the Indians! is considered to be 
+responsible of the elimination of a player. All special actions due to this elimination apply to him 
+(for example, if he just killed an Outlaw this way, he draws the 3 cards reward).
+Q06. Can I play a BANG! if I used one or more BANG! cards in the same turn because of a 
+Duel?
+A. Yes. The BANG! cards used for the Duel are not counted because they are “discarded”, not 
+“played”.
+Q07. When a player is eliminated, in which order his cards are put in the discard pile?
+A. The player being eliminated chooses the order.
+Q08. Can I affect “role” or “character” cards in some way?
+A. No! “Role” and “Character” cards are never affected during the game by any card.
+Q09. Can I play Saloon when there are only two players in play?
+A. Yes, it is not a Beer card. However, you can do it during your turn only.
+Q10. Can I play a Saloon if I am losing my last life point?
+A. No. Unlike Beer, Saloon can be played only during step 2 of your turn, and only if you are capable 
+of playing cards. For example, if you lose your last life point after a Duel in your turn, you are 
+eliminated before you could use Saloon.
+Q11. If I am eliminated, do I regain a life point when someone else plays Saloon?
+A. Of course not! When it says “all other players” it means “all other players still alive”.
+Q12. Can I voluntarily discard my cards?
+A. No, neither cards from your hand nor cards in play in front of you. Only the character Sid Ketchum 
+can discard exactly 2 cards when he chooses so to regain one life point.
+F .A.Q.
+Frequently
+Asked
+Questions
+
+
+PAGE 2
+Q13. Can I play a card while the effect of another one is not yet terminated (e.g. play a Panic! 
+while that player is choosing which card to draw for a General Store)?
+A. No. Before playing any card you must wait for the previous one to end all its effects.
+Q14. If the Dynamite explodes eliminating a player, does the character Vulture Sam draw the 
+Dynamite along with all other cards of the player eliminated?
+A. No. To complete the effect of the Dynamite you have to discard it after it explodes. So when 
+Vulture Sam gets all the cards of the player killed, the Dynamite is already in  the discard pile.
+Q15. Can a Jailed player play a Beer in his turn?
+A. Only if he is losing his last life point.
+Q16. Can I play a Beer if I am at full life points?
+A. Yes: the Beer will simply have no effect at all.
+Q17. Does Burt Cassidy or El Gringo draw a card when he loses his last life point – so if it’s a 
+Beer, they can save themselves?
+A. No, if they lose their last life point without a Beer in their hand, they are dead. However, if Burt 
+Cassidy plays immediately a Beer card from the hand, saving himself and remaining alive, he will be 
+able to draw the card due to the lost life point.
+Q18. If Vulture Sam eliminates a Deputy, as a Sheriff, does he discard all his cards before or 
+after getting the cards of the Deputy just eliminated?
+A. First Vulture Sam gets all the cards from the Deputy just eliminated. Then, he discards all of his 
+cards (which now include the cards just obtained from that Deputy).
+Q19. How many Missed! cards are required to cancel a Gatling played by Slab the Killer?
+A. Only one. The special ability of Slab the Killer applies to BANG! cards only.
+Q20. Can Calamity Janet play Missed! cards during a Duel as if they were BANG! cards?
+A. Yes.
+Q21. If El Gringo plays a Duel and lose, can he draw a card from the player who won the 
+Duel?
+A. No: El Gringo draws a card from the player who played the card which caused the life point loss. 
+But since the Duel was played by El Gringo himself, his ability is not triggered.
+Q22. If Suzy Lafayette plays a Duel, which is her last card, can she draw another one before 
+the Duel ends?
+A. No, she must wait until the end of the Duel.
+Q23. If an Outlaw plays a Duel and loses, does the player who won the Duel draw the 3 cards 
+reward?
+A. No. The reward goes to the player who played the card which was responsible of the elimination 
+of the Outlaw. But since that card was played by the Outlaw himself, no one can gain the reward.
+Q24. How many cards Burt Cassidy draws if he is hit by the Dynamite (and survives)?
+A. Three cards.
+Q25. Can I play a Beer card if there are only two players alive?
+A. Yes, but it has no effect at all.
+Q26. Can Sid Ketchum use his ability even outside his turn, like a Beer card?
+A. Yes, he can.
+ BANG!®: F.A.Q.
+ © MMX daVinci Editrice S.r.l.
+ www.dvgiochi.com

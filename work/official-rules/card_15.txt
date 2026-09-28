@@ -1,0 +1,14 @@
+
+REGOLE CARTA
+
+
+ Barrel 
+The Barrel allows you to “draw!” when you are the target of a BANG!:
+- if you draw a Heart card, you are 
+Missed!
+ (just like if you 
+played a 
+Missed!
+ card);
+- otherwise nothing happens.
+

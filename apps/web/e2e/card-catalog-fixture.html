@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>T60 card catalog fixtures</title>
+    <style>
+      :root { font-family: system-ui, sans-serif; color: #20382a; background: #f2f0e7; }
+      body { margin: 0; padding: 1rem; }
+      h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+      p { margin: 0.35rem 0 1rem; }
+      .fixture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+      .fixture-card { display: grid; justify-items: center; align-content: start; gap: 0.35rem; min-width: 0; padding: 0.6rem; border: 1px solid #b8b09e; border-radius: 0.65rem; background: #fffdf7; }
+      .fixture-card .playing-card { width: 116px !important; }
+      .fixture-meta { display: grid; justify-items: center; gap: 0.15rem; text-align: center; font-size: 0.76rem; }
+      .fixture-meta code { overflow-wrap: anywhere; }
+      .fixture-actions { max-width: 42rem; margin: 1rem auto; }
+      .fixture-notice { padding: 0.75rem; border-radius: 0.5rem; background: #fff5d8; }
+      #fixture-status { margin: 0 0 1rem; padding: 0.5rem; border: 1px solid #647a5e; border-radius: 0.4rem; background: white; font-size: 0.85rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>T60 카드 표시 검증 fixture</h1>
+      <p id="fixture-status" role="status">fixture를 준비하고 있습니다.</p>
+      <div id="root"></div>
+    </main>
+    <script type="module" src="/e2e/card-catalog-fixture.tsx"></script>
+  </body>
+</html>

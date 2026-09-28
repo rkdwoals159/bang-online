@@ -1,0 +1,1188 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "df1e5860-5ec0-401e-a275-02b714bf7e71",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "command_receipts": {
+      "name": "command_receipts",
+      "columns": {
+        "actor_player_id": {
+          "name": "actor_player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "command_id": {
+          "name": "command_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "match_id": {
+          "name": "match_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "outcome_json": {
+          "name": "outcome_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "command_receipts_actor_player_id_guest_sessions_id_fk": {
+          "name": "command_receipts_actor_player_id_guest_sessions_id_fk",
+          "tableFrom": "command_receipts",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "actor_player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "command_receipts_match_id_matches_id_fk": {
+          "name": "command_receipts_match_id_matches_id_fk",
+          "tableFrom": "command_receipts",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "command_receipts_room_id_rooms_id_fk": {
+          "name": "command_receipts_room_id_rooms_id_fk",
+          "tableFrom": "command_receipts",
+          "tableTo": "rooms",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "command_receipts_actor_player_id_command_id_pk": {
+          "columns": [
+            "actor_player_id",
+            "command_id"
+          ],
+          "name": "command_receipts_actor_player_id_command_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "command_receipts_request_hash_check": {
+          "name": "command_receipts_request_hash_check",
+          "value": "length(\"command_receipts\".\"request_hash\") > 0"
+        },
+        "command_receipts_outcome_json_check": {
+          "name": "command_receipts_outcome_json_check",
+          "value": "json_valid(\"command_receipts\".\"outcome_json\")"
+        },
+        "command_receipts_single_aggregate_check": {
+          "name": "command_receipts_single_aggregate_check",
+          "value": "\"command_receipts\".\"match_id\" IS NULL OR \"command_receipts\".\"room_id\" IS NULL"
+        }
+      }
+    },
+    "commit_guards": {
+      "name": "commit_guards",
+      "columns": {
+        "marker_id": {
+          "name": "marker_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregate_id": {
+          "name": "aggregate_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expected_version": {
+          "name": "expected_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "commit_guards_expected_version_check": {
+          "name": "commit_guards_expected_version_check",
+          "value": "\"commit_guards\".\"expected_version\" >= 0"
+        }
+      }
+    },
+    "guest_sessions": {
+      "name": "guest_sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "guest_sessions_token_hash_unique": {
+          "name": "guest_sessions_token_hash_unique",
+          "columns": [
+            "token_hash"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "guest_sessions_display_name_length_check": {
+          "name": "guest_sessions_display_name_length_check",
+          "value": "length(\"guest_sessions\".\"display_name\") BETWEEN 1 AND 256"
+        }
+      }
+    },
+    "invite_attempts": {
+      "name": "invite_attempts",
+      "columns": {
+        "bucket_hash": {
+          "name": "bucket_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "failures_json": {
+          "name": "failures_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "last_invalid_at": {
+          "name": "last_invalid_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_activity_at": {
+          "name": "last_activity_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "retry_delay_ms": {
+          "name": "retry_delay_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "retry_at": {
+          "name": "retry_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "invite_attempts_failures_json_check": {
+          "name": "invite_attempts_failures_json_check",
+          "value": "json_valid(\"invite_attempts\".\"failures_json\") AND json_type(\"invite_attempts\".\"failures_json\") = 'array'"
+        },
+        "invite_attempts_retry_delay_ms_check": {
+          "name": "invite_attempts_retry_delay_ms_check",
+          "value": "\"invite_attempts\".\"retry_delay_ms\" >= 0"
+        },
+        "invite_attempts_version_check": {
+          "name": "invite_attempts_version_check",
+          "value": "\"invite_attempts\".\"version\" >= 0"
+        }
+      }
+    },
+    "invite_lookup_reservations": {
+      "name": "invite_lookup_reservations",
+      "columns": {
+        "reservation_id": {
+          "name": "reservation_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bucket_hash": {
+          "name": "bucket_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reserved_at": {
+          "name": "reserved_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "invite_reservations_expiry_idx": {
+          "name": "invite_reservations_expiry_idx",
+          "columns": [
+            "expires_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "invite_lookup_reservations_bucket_hash_invite_attempts_bucket_hash_fk": {
+          "name": "invite_lookup_reservations_bucket_hash_invite_attempts_bucket_hash_fk",
+          "tableFrom": "invite_lookup_reservations",
+          "tableTo": "invite_attempts",
+          "columnsFrom": [
+            "bucket_hash"
+          ],
+          "columnsTo": [
+            "bucket_hash"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "invite_reservations_expiry_check": {
+          "name": "invite_reservations_expiry_check",
+          "value": "\"invite_lookup_reservations\".\"expires_at\" > \"invite_lookup_reservations\".\"reserved_at\""
+        }
+      }
+    },
+    "match_events": {
+      "name": "match_events",
+      "columns": {
+        "match_id": {
+          "name": "match_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_seq": {
+          "name": "event_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "actor_player_id": {
+          "name": "actor_player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "match_events_event_id_unique": {
+          "name": "match_events_event_id_unique",
+          "columns": [
+            "event_id"
+          ],
+          "isUnique": true
+        },
+        "match_events_match_version_idx": {
+          "name": "match_events_match_version_idx",
+          "columns": [
+            "match_id",
+            "version"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "match_events_match_id_matches_id_fk": {
+          "name": "match_events_match_id_matches_id_fk",
+          "tableFrom": "match_events",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "match_events_actor_player_id_guest_sessions_id_fk": {
+          "name": "match_events_actor_player_id_guest_sessions_id_fk",
+          "tableFrom": "match_events",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "actor_player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "match_events_match_id_event_seq_pk": {
+          "columns": [
+            "match_id",
+            "event_seq"
+          ],
+          "name": "match_events_match_id_event_seq_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "match_events_event_seq_check": {
+          "name": "match_events_event_seq_check",
+          "value": "\"match_events\".\"event_seq\" > 0"
+        },
+        "match_events_version_check": {
+          "name": "match_events_version_check",
+          "value": "\"match_events\".\"version\" > 0"
+        },
+        "match_events_type_check": {
+          "name": "match_events_type_check",
+          "value": "length(\"match_events\".\"type\") > 0"
+        },
+        "match_events_payload_json_check": {
+          "name": "match_events_payload_json_check",
+          "value": "json_valid(\"match_events\".\"payload_json\") AND json_type(\"match_events\".\"payload_json\") = 'object'"
+        }
+      }
+    },
+    "match_players": {
+      "name": "match_players",
+      "columns": {
+        "match_id": {
+          "name": "match_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "seat_index": {
+          "name": "seat_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "alive": {
+          "name": "alive",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "eliminated_at": {
+          "name": "eliminated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "connection_state": {
+          "name": "connection_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'disconnected'"
+        }
+      },
+      "indexes": {
+        "match_players_match_seat_unique": {
+          "name": "match_players_match_seat_unique",
+          "columns": [
+            "match_id",
+            "seat_index"
+          ],
+          "isUnique": true
+        },
+        "match_players_player_idx": {
+          "name": "match_players_player_idx",
+          "columns": [
+            "player_id",
+            "match_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "match_players_match_id_matches_id_fk": {
+          "name": "match_players_match_id_matches_id_fk",
+          "tableFrom": "match_players",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "match_players_player_id_guest_sessions_id_fk": {
+          "name": "match_players_player_id_guest_sessions_id_fk",
+          "tableFrom": "match_players",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "match_players_match_id_player_id_pk": {
+          "columns": [
+            "match_id",
+            "player_id"
+          ],
+          "name": "match_players_match_id_player_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "match_players_seat_index_check": {
+          "name": "match_players_seat_index_check",
+          "value": "\"match_players\".\"seat_index\" BETWEEN 0 AND 6"
+        },
+        "match_players_alive_check": {
+          "name": "match_players_alive_check",
+          "value": "\"match_players\".\"alive\" IN (0, 1)"
+        },
+        "match_players_connection_state_check": {
+          "name": "match_players_connection_state_check",
+          "value": "\"match_players\".\"connection_state\" IN ('connected', 'disconnected')"
+        },
+        "match_players_eliminated_check": {
+          "name": "match_players_eliminated_check",
+          "value": "(\"match_players\".\"alive\" = 1 AND \"match_players\".\"eliminated_at\" IS NULL) OR (\"match_players\".\"alive\" = 0 AND \"match_players\".\"eliminated_at\" IS NOT NULL)"
+        }
+      }
+    },
+    "matches": {
+      "name": "matches",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_seq": {
+          "name": "event_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ruleset_version": {
+          "name": "ruleset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "state_schema_version": {
+          "name": "state_schema_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "state_json": {
+          "name": "state_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "room_version": {
+          "name": "room_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "matches_status_updated_idx": {
+          "name": "matches_status_updated_idx",
+          "columns": [
+            "status",
+            "updated_at"
+          ],
+          "isUnique": false
+        },
+        "matches_room_latest_idx": {
+          "name": "matches_room_latest_idx",
+          "columns": [
+            "room_id",
+            "\"room_version\" desc",
+            "\"created_at\" desc",
+            "\"started_at\" desc",
+            "\"id\" desc"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "matches_room_id_rooms_id_fk": {
+          "name": "matches_room_id_rooms_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "rooms",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "matches_status_check": {
+          "name": "matches_status_check",
+          "value": "\"matches\".\"status\" IN ('playing', 'paused', 'completed', 'recovery_required')"
+        },
+        "matches_version_check": {
+          "name": "matches_version_check",
+          "value": "\"matches\".\"version\" >= 0"
+        },
+        "matches_event_seq_check": {
+          "name": "matches_event_seq_check",
+          "value": "\"matches\".\"event_seq\" >= 0"
+        },
+        "matches_ruleset_version_check": {
+          "name": "matches_ruleset_version_check",
+          "value": "length(\"matches\".\"ruleset_version\") > 0"
+        },
+        "matches_state_schema_version_check": {
+          "name": "matches_state_schema_version_check",
+          "value": "\"matches\".\"state_schema_version\" > 0"
+        },
+        "matches_state_json_check": {
+          "name": "matches_state_json_check",
+          "value": "json_valid(\"matches\".\"state_json\") AND json_type(\"matches\".\"state_json\") = 'object'"
+        },
+        "matches_room_version_check": {
+          "name": "matches_room_version_check",
+          "value": "\"matches\".\"room_version\" IS NULL OR \"matches\".\"room_version\" >= 0"
+        }
+      }
+    },
+    "outbox": {
+      "name": "outbox",
+      "columns": {
+        "cursor": {
+          "name": "cursor",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregate_id": {
+          "name": "aggregate_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "aggregate_version": {
+          "name": "aggregate_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_seq": {
+          "name": "event_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "retry_count": {
+          "name": "retry_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "outbox_event_id_unique": {
+          "name": "outbox_event_id_unique",
+          "columns": [
+            "event_id"
+          ],
+          "isUnique": true
+        },
+        "outbox_unpublished_cursor_idx": {
+          "name": "outbox_unpublished_cursor_idx",
+          "columns": [
+            "cursor"
+          ],
+          "isUnique": false,
+          "where": "\"outbox\".\"published_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "outbox_aggregate_version_check": {
+          "name": "outbox_aggregate_version_check",
+          "value": "\"outbox\".\"aggregate_version\" >= 0"
+        },
+        "outbox_event_seq_check": {
+          "name": "outbox_event_seq_check",
+          "value": "\"outbox\".\"event_seq\" >= 0"
+        },
+        "outbox_kind_check": {
+          "name": "outbox_kind_check",
+          "value": "\"outbox\".\"kind\" IN ('match:changed', 'room:changed')"
+        },
+        "outbox_payload_json_check": {
+          "name": "outbox_payload_json_check",
+          "value": "json_valid(\"outbox\".\"payload_json\") AND json_type(\"outbox\".\"payload_json\") = 'object'"
+        },
+        "outbox_retry_count_check": {
+          "name": "outbox_retry_count_check",
+          "value": "\"outbox\".\"retry_count\" >= 0"
+        },
+        "outbox_payload_kind_check": {
+          "name": "outbox_payload_kind_check",
+          "value": "(\n    (\"outbox\".\"kind\" = 'match:changed'\n      AND json_type(\"outbox\".\"payload_json\", '$.matchId') = 'text'\n      AND json_type(\"outbox\".\"payload_json\", '$.version') = 'integer'\n      AND json_type(\"outbox\".\"payload_json\", '$.eventSeq') = 'integer')\n    OR\n    (\"outbox\".\"kind\" = 'room:changed'\n      AND json_type(\"outbox\".\"payload_json\", '$.roomId') = 'text'\n      AND json_type(\"outbox\".\"payload_json\", '$.version') = 'integer')\n  )"
+        }
+      }
+    },
+    "room_players": {
+      "name": "room_players",
+      "columns": {
+        "room_id": {
+          "name": "room_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "seat_index": {
+          "name": "seat_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ready": {
+          "name": "ready",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "joined_at": {
+          "name": "joined_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "last_presence_at": {
+          "name": "last_presence_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "room_players_room_seat_unique": {
+          "name": "room_players_room_seat_unique",
+          "columns": [
+            "room_id",
+            "seat_index"
+          ],
+          "isUnique": true
+        },
+        "room_players_player_idx": {
+          "name": "room_players_player_idx",
+          "columns": [
+            "player_id",
+            "room_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "room_players_room_id_rooms_id_fk": {
+          "name": "room_players_room_id_rooms_id_fk",
+          "tableFrom": "room_players",
+          "tableTo": "rooms",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "room_players_player_id_guest_sessions_id_fk": {
+          "name": "room_players_player_id_guest_sessions_id_fk",
+          "tableFrom": "room_players",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "room_players_room_id_player_id_pk": {
+          "columns": [
+            "room_id",
+            "player_id"
+          ],
+          "name": "room_players_room_id_player_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "room_players_seat_index_check": {
+          "name": "room_players_seat_index_check",
+          "value": "\"room_players\".\"seat_index\" BETWEEN 0 AND 6"
+        },
+        "room_players_ready_check": {
+          "name": "room_players_ready_check",
+          "value": "\"room_players\".\"ready\" IN (0, 1)"
+        }
+      }
+    },
+    "rooms": {
+      "name": "rooms",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_player_id": {
+          "name": "owner_player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "invite_code_hash": {
+          "name": "invite_code_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'waiting'"
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+        }
+      },
+      "indexes": {
+        "rooms_invite_code_hash_unique": {
+          "name": "rooms_invite_code_hash_unique",
+          "columns": [
+            "invite_code_hash"
+          ],
+          "isUnique": true
+        },
+        "rooms_status_created_idx": {
+          "name": "rooms_status_created_idx",
+          "columns": [
+            "status",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "rooms_owner_player_id_guest_sessions_id_fk": {
+          "name": "rooms_owner_player_id_guest_sessions_id_fk",
+          "tableFrom": "rooms",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "owner_player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "rooms_status_check": {
+          "name": "rooms_status_check",
+          "value": "\"rooms\".\"status\" IN ('waiting', 'starting', 'in_game', 'paused', 'completed', 'closed')"
+        },
+        "rooms_capacity_check": {
+          "name": "rooms_capacity_check",
+          "value": "\"rooms\".\"capacity\" BETWEEN 4 AND 7"
+        },
+        "rooms_version_check": {
+          "name": "rooms_version_check",
+          "value": "\"rooms\".\"version\" >= 0"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {
+      "matches_room_latest_idx": {
+        "columns": {
+          "\"room_version\" desc": {
+            "isExpression": true
+          },
+          "\"created_at\" desc": {
+            "isExpression": true
+          },
+          "\"started_at\" desc": {
+            "isExpression": true
+          },
+          "\"id\" desc": {
+            "isExpression": true
+          }
+        }
+      }
+    }
+  }
+}

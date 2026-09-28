@@ -1,0 +1,7 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-sync-recovery-02",
+  "status": "rejected",
+  "error": { "code": "RECOVERY_REQUIRED" },
+  "matchId": "must-not-be-returned"
+}

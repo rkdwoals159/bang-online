@@ -1,0 +1,255 @@
+.match-status {
+  display: grid;
+  width: min(100% - 32px, 920px);
+  margin: 24px auto;
+  gap: 16px;
+  color: #26372d;
+}
+
+.match-status__header,
+.match-status__log-heading,
+.match-status__turn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.match-status__header,
+.match-status__turn,
+.match-status__result,
+.match-status__log,
+.match-status__input-gate {
+  padding: 18px 20px;
+  border: 1px solid rgba(35, 63, 46, 0.16);
+  border-radius: 16px;
+  background: #fffdf7;
+  box-shadow: 0 8px 24px rgba(33, 54, 40, 0.06);
+}
+
+.match-status__header h2,
+.match-status__log-heading h3,
+.match-status__result h3 {
+  margin: 0;
+  color: #1d3c2d;
+  font-family: Georgia, "Malgun Gothic", serif;
+  font-size: clamp(20px, 4vw, 26px);
+}
+
+.match-status__eyebrow {
+  margin: 0 0 6px;
+  color: #8c6827;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.match-status__badge {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid rgba(140, 104, 39, 0.25);
+  border-radius: 999px;
+  background: #fbf5e6;
+  color: #684b18;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.match-status--completed .match-status__badge {
+  border-color: rgba(29, 60, 45, 0.2);
+  background: #edf4ee;
+  color: #1d3c2d;
+}
+
+.match-status--paused .match-status__badge,
+.match-status--recovery_required .match-status__badge {
+  border-color: rgba(143, 58, 48, 0.2);
+  background: #fbefec;
+  color: #8f3a30;
+}
+
+.match-status__turn {
+  justify-content: flex-start;
+  gap: clamp(28px, 8vw, 88px);
+}
+
+.match-status__turn > div {
+  display: grid;
+  gap: 5px;
+}
+
+.match-status__label {
+  color: #657168;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.match-status__turn strong {
+  color: #1d3c2d;
+  font-size: 17px;
+}
+
+.match-status__message {
+  margin: 0;
+  color: #59675d;
+  font-size: 14px;
+}
+
+.match-status__result {
+  border-color: rgba(29, 60, 45, 0.24);
+  background: #f1f7f1;
+}
+
+.match-status__result p:last-child {
+  margin: 8px 0 0;
+  color: #46574c;
+  line-height: 1.5;
+}
+
+.match-status__result-faction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 14px 0 0;
+  color: #46574c;
+}
+
+.match-status__result-faction strong {
+  color: #1d3c2d;
+  font-size: 18px;
+}
+
+.match-status__result-group {
+  margin-top: 16px;
+}
+
+.match-status__result-group h4 {
+  margin: 0 0 7px;
+  color: #59675d;
+  font-size: 13px;
+}
+
+.match-status__result-group ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 5px;
+  list-style: none;
+}
+
+.match-status__result-group li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #26372d;
+  line-height: 1.45;
+}
+
+.match-status__result-message {
+  margin: 16px 0 0;
+  color: #46574c;
+  line-height: 1.5;
+}
+
+.match-status__return-lobby {
+  display: grid;
+  justify-items: start;
+  margin-top: 18px;
+  gap: 10px;
+}
+
+.match-status__return-lobby .button {
+  min-height: 44px;
+}
+
+.match-status__return-lobby-error {
+  margin: 0;
+  color: #8f3a30;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.match-status__log-heading > span {
+  color: #68766c;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.match-status__events {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.match-status__events li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(35, 63, 46, 0.1);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.match-status__event-seq {
+  flex: 0 0 auto;
+  color: #8c6827;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.match-status__empty-log {
+  margin: 14px 0 0;
+  color: #6c786f;
+  font-size: 14px;
+}
+
+.match-status__input-gate {
+  min-width: 0;
+}
+
+.match-status__input-gate:disabled {
+  color: #68766c;
+}
+
+.match-status__input-gate legend {
+  padding: 0 7px;
+  color: #1d3c2d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.match-status__input-gate p {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+@media (max-width: 520px) {
+  .match-status__header,
+  .match-status__turn,
+  .match-status__result,
+  .match-status__log,
+  .match-status__input-gate {
+    padding: 15px;
+  }
+
+  .match-status__return-lobby .button {
+    width: 100%;
+  }
+
+  .match-status__header,
+  .match-status__log-heading {
+    align-items: flex-start;
+  }
+
+  .match-status__turn {
+    gap: 24px;
+  }
+}

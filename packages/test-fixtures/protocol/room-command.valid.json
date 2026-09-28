@@ -1,0 +1,7 @@
+{
+  "protocolVersion": 1,
+  "commandId": "018f8e3d-1234-4123-8123-123456789abc",
+  "expectedVersion": 0,
+  "type": "CREATE_ROOM",
+  "payload": { "capacity": 6, "rulesetVersion": "base4-ko-online-1.0", "displayName": "Wild West" }
+}

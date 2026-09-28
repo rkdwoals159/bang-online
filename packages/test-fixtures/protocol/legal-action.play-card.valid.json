@@ -1,0 +1,8 @@
+{
+  "type": "PLAY_CARD",
+  "payload": {
+    "cardInstanceId": "self-card-1",
+    "targetPlayerId": "player-2",
+    "asCardType": "bang"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@bang/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json",
+    "dev": "tsx src/main.ts",
+    "dev:pglite": "tsx src/main.ts --pglite-dev",
+    "test:runtime": "node --experimental-strip-types --loader ../../packages/engine/test/setup/ts-source-loader.mjs --test test/runtime/runtime.test.ts"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-socket": "0.2.11",
+    "@types/node": "22.15.0",
+    "@types/pg": "8.15.5",
+    "socket.io-client": "4.8.1",
+    "tsx": "4.19.0"
+  },
+  "dependencies": {
+    "pg": "8.16.0",
+    "socket.io": "4.8.1"
+  }
+}

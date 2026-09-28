@@ -1,0 +1,20 @@
+
+REGOLE CARTA
+
+
+ Bang! 
+BANG!
+ cards are the main method to reduce other players’ 
+life points. If you want to play a 
+BANG!
+ card to hit one of the 
+players, determine:
+a)
+ what
+ the distance
+ to that player is; and
+b)
+ if your 
+weapon is capable of reaching
+ that distance.
+

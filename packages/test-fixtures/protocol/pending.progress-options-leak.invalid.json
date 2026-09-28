@@ -1,0 +1,10 @@
+{
+  "interactionId": "i-7",
+  "kind": "BANG_RESPONSE",
+  "allowedChoices": [],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 2 },
+  "responseOptions": [
+    { "interactionId": "i-7", "choice": "USE_MISSED", "cardInstanceId": "player-2-private-card" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-room-waiting-01",
+  "roomId": "room-1",
+  "version": 0,
+  "requiresFullSnapshot": true,
+  "room": {
+    "roomId": "room-1",
+    "status": "waiting",
+    "activeMatchId": null,
+    "ownerPlayerId": "player-1",
+    "capacity": 4,
+    "rulesetVersion": "base4-ko-online-1.0",
+    "members": [
+      { "playerId": "player-1", "displayName": "Host", "seatIndex": 0, "ready": false }
+    ],
+    "viewer": { "playerId": "player-1", "isOwner": true }
+  }
+}

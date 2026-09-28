@@ -1,0 +1,7 @@
+{
+  "type": "USE_ABILITY",
+  "payload": {
+    "abilityId": "sid-ketchum",
+    "cardInstanceIds": ["self-card-2", "self-card-3"]
+  }
+}

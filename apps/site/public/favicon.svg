@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BANG! 온라인">
+  <rect width="64" height="64" rx="16" fill="#1d3c2d"/>
+  <circle cx="32" cy="32" r="25" fill="none" stroke="#dfb85e" stroke-width="3"/>
+  <path d="m32 11 4.1 8.3 9.2 1.3-6.7 6.5 1.6 9.2-8.2-4.3-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.3z" fill="#dfb85e"/>
+  <rect x="25" y="30" width="14" height="12" rx="2" fill="#f8e8b6"/>
+  <text x="32" y="39" fill="#1d3c2d" font-family="Georgia,serif" font-size="12" font-weight="900" text-anchor="middle">B!</text>
+</svg>

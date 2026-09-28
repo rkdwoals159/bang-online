@@ -1,0 +1,11 @@
+{
+  "interactionId": "i-7",
+  "kind": "BANG_RESPONSE",
+  "allowedChoices": ["TAKE_HIT"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-7", "choice": "TAKE_HIT" }
+  ],
+  "context": { "sourceCardInstanceId": "hidden-card" }
+}

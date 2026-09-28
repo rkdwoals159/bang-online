@@ -1,0 +1,7 @@
+{
+  "cardCount": 80,
+  "typeCount": 22,
+  "characterCount": 16,
+  "roleTypeCount": 4,
+  "note": "definitionId is public catalogue identity, never use it as a hidden runtime cardInstanceId. Asset paths are relative to development-plan/, not data/. Images contain printed rank/suit and must be masked or illustration-cropped before instance overlays."
+}

@@ -1,0 +1,12 @@
+
+REGOLE CARTA
+
+
+ Scope 
+When you have a 
+Scope
+ in play, you see all the other players 
+at a distance decreased by 1. However, other players still 
+see you at the normal distance. Distances less than 1 are 
+considered to be 1.
+

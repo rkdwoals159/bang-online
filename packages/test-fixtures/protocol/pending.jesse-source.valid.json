@@ -1,0 +1,11 @@
+{
+  "interactionId": "i-jesse",
+  "kind": "JESSE_FIRST_DRAW",
+  "allowedChoices": ["DRAW_FROM_PILE", "TAKE_FROM_HAND"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-jesse", "choice": "DRAW_FROM_PILE" },
+    { "interactionId": "i-jesse", "choice": "TAKE_FROM_HAND", "sourcePlayerId": "player-3" }
+  ]
+}

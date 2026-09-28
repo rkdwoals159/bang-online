@@ -1,0 +1,36 @@
+{
+  "protocolVersion": 1,
+  "requestId": "sync-1",
+  "matchId": "m1",
+  "version": 7,
+  "eventSeq": 2,
+  "requiresFullSnapshot": true,
+  "snapshot": {
+    "status": "playing",
+    "viewer": { "playerId": "p1", "seatIndex": 0, "mode": "active" },
+    "publicTable": {
+      "players": [
+        {
+          "playerId": "p1",
+          "displayName": "Player One",
+          "seatIndex": 0,
+          "characterId": "bart-cassidy",
+          "hp": 4,
+          "maxHp": 4,
+          "eliminated": false,
+          "handCount": 3,
+          "role": "sheriff",
+          "inPlay": []
+        }
+      ],
+      "turn": { "currentPlayerId": "p1", "phase": "play" },
+      "deckCount": 67,
+      "publicDiscard": { "topCard": null, "count": 0 }
+    },
+    "selfPrivate": null,
+    "pendingInteraction": null
+  },
+  "visibleEvents": [
+    { "eventSeq": 3, "type": "TURN_STARTED", "occurredAt": "2026-09-29T00:00:01.000Z", "payload": { "playerId": "p1" } }
+  ]
+}

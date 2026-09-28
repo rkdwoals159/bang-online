@@ -1,0 +1,16 @@
+{
+  "interactionId": "i-bang-1",
+  "kind": "BANG_RESPONSE",
+  "allowedChoices": ["TAKE_HIT"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-bang-1", "choice": "TAKE_HIT" }
+  ],
+  "discardOrder": {
+    "requiredCount": 1,
+    "allowedCards": [
+      { "cardInstanceId": "own-card-1", "typeId": "bang", "rank": "A", "suit": "SPADES" }
+    ]
+  }
+}

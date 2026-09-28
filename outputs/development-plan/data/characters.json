@@ -1,0 +1,114 @@
+[
+  {
+    "characterId": "bart_cassidy",
+    "nameEn": "Bart Cassidy",
+    "baseMaxHp": 4,
+    "ruleId": "C01",
+    "assetPath": "../assets/cards/characters/01_bartcassidy.png"
+  },
+  {
+    "characterId": "black_jack",
+    "nameEn": "Black Jack",
+    "baseMaxHp": 4,
+    "ruleId": "C02",
+    "assetPath": "../assets/cards/characters/01_blackjack.png"
+  },
+  {
+    "characterId": "calamity_janet",
+    "nameEn": "Calamity Janet",
+    "baseMaxHp": 4,
+    "ruleId": "C03",
+    "assetPath": "../assets/cards/characters/01_calamityjanet.png"
+  },
+  {
+    "characterId": "el_gringo",
+    "nameEn": "El Gringo",
+    "baseMaxHp": 3,
+    "ruleId": "C04",
+    "assetPath": "../assets/cards/characters/01_elgringo.png"
+  },
+  {
+    "characterId": "jesse_jones",
+    "nameEn": "Jesse Jones",
+    "baseMaxHp": 4,
+    "ruleId": "C05",
+    "assetPath": "../assets/cards/characters/01_jessejones.png"
+  },
+  {
+    "characterId": "jourdonnais",
+    "nameEn": "Jourdonnais",
+    "baseMaxHp": 4,
+    "ruleId": "C06",
+    "assetPath": "../assets/cards/characters/01_jourdonnais.png"
+  },
+  {
+    "characterId": "kit_carlson",
+    "nameEn": "Kit Carlson",
+    "baseMaxHp": 4,
+    "ruleId": "C07",
+    "assetPath": "../assets/cards/characters/01_kitcarlson.png"
+  },
+  {
+    "characterId": "lucky_duke",
+    "nameEn": "Lucky Duke",
+    "baseMaxHp": 4,
+    "ruleId": "C08",
+    "assetPath": "../assets/cards/characters/01_luckyduke.png"
+  },
+  {
+    "characterId": "paul_regret",
+    "nameEn": "Paul Regret",
+    "baseMaxHp": 3,
+    "ruleId": "C09",
+    "assetPath": "../assets/cards/characters/01_paulregret.png"
+  },
+  {
+    "characterId": "pedro_ramirez",
+    "nameEn": "Pedro Ramirez",
+    "baseMaxHp": 4,
+    "ruleId": "C10",
+    "assetPath": "../assets/cards/characters/01_pedroramirez.png"
+  },
+  {
+    "characterId": "rose_doolan",
+    "nameEn": "Rose Doolan",
+    "baseMaxHp": 4,
+    "ruleId": "C11",
+    "assetPath": "../assets/cards/characters/01_rosedoolan.png"
+  },
+  {
+    "characterId": "sid_ketchum",
+    "nameEn": "Sid Ketchum",
+    "baseMaxHp": 4,
+    "ruleId": "C12",
+    "assetPath": "../assets/cards/characters/01_sidketchum.png"
+  },
+  {
+    "characterId": "slab_the_killer",
+    "nameEn": "Slab the Killer",
+    "baseMaxHp": 4,
+    "ruleId": "C13",
+    "assetPath": "../assets/cards/characters/01_slab.png"
+  },
+  {
+    "characterId": "suzy_lafayette",
+    "nameEn": "Suzy Lafayette",
+    "baseMaxHp": 4,
+    "ruleId": "C14",
+    "assetPath": "../assets/cards/characters/01_suzylafayette.png"
+  },
+  {
+    "characterId": "vulture_sam",
+    "nameEn": "Vulture Sam",
+    "baseMaxHp": 4,
+    "ruleId": "C15",
+    "assetPath": "../assets/cards/characters/01_vulturesam.png"
+  },
+  {
+    "characterId": "willy_the_kid",
+    "nameEn": "Willy the Kid",
+    "baseMaxHp": 4,
+    "ruleId": "C16",
+    "assetPath": "../assets/cards/characters/01_willythekid.png"
+  }
+]

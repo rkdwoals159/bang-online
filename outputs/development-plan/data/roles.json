@@ -1,0 +1,52 @@
+{
+  "types": [
+    {
+      "roleId": "sheriff",
+      "assetPath": "../assets/cards/roles/01_sceriffo.png"
+    },
+    {
+      "roleId": "deputy",
+      "assetPath": "../assets/cards/roles/01_vice.png"
+    },
+    {
+      "roleId": "outlaw",
+      "assetPath": "../assets/cards/roles/01_fuorilegge.png"
+    },
+    {
+      "roleId": "renegade",
+      "assetPath": "../assets/cards/roles/01_rinnegato.png"
+    }
+  ],
+  "countsByPlayers": {
+    "4": [
+      1,
+      0,
+      2,
+      1
+    ],
+    "5": [
+      1,
+      1,
+      2,
+      1
+    ],
+    "6": [
+      1,
+      1,
+      3,
+      1
+    ],
+    "7": [
+      1,
+      2,
+      3,
+      1
+    ]
+  },
+  "countOrder": [
+    "sheriff",
+    "deputy",
+    "outlaw",
+    "renegade"
+  ]
+}

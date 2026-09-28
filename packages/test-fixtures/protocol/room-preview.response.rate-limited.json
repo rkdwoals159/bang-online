@@ -1,0 +1,6 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req_preview_limited",
+  "status": "rejected",
+  "error": { "code": "RATE_LIMITED", "retryAfterMs": 1000 }
+}

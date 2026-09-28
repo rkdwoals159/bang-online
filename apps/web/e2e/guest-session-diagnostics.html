@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guest session browser diagnostic</title>
+  </head>
+  <body>
+    <main>
+      <h1>Guest session browser diagnostic</h1>
+      <p>This local-only harness records request metadata and the public response body. It never reads or prints cookies.</p>
+      <label for="display-name">Display name</label>
+      <input id="display-name" value="T60 browser diagnostic" />
+      <button id="submit" type="button">Submit guest session</button>
+      <button id="receiver-probe" type="button">Probe transport fetch receiver</button>
+      <pre id="result" aria-live="polite">Waiting</pre>
+    </main>
+    <script>
+      const button = document.querySelector("#submit");
+      const displayName = document.querySelector("#display-name");
+      const result = document.querySelector("#result");
+
+      document.querySelector("#receiver-probe").addEventListener("click", async () => {
+        const requestUrl = new URL("/api/guest-sessions", document.location.href);
+        const fetcher = window.fetch;
+        const transportShape = { fetcher };
+        try {
+          const response = await transportShape.fetcher(requestUrl, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+          const body = response.status === 204 ? null : await response.json();
+          result.textContent = JSON.stringify({
+            requestUrl: requestUrl.href,
+            requestOrigin: document.location.origin,
+            responseStatus: response.status,
+            responseBody: body,
+          }, null, 2);
+        } catch (error) {
+          result.textContent = JSON.stringify({
+            requestUrl: requestUrl.href,
+            requestOrigin: document.location.origin,
+            fetchError: String(error),
+          }, null, 2);
+        }
+      });
+
+      button.addEventListener("click", async () => {
+        const requestUrl = new URL("/api/guest-sessions", document.location.href);
+        const startedAt = new Date().toISOString();
+        const request = {
+          protocolVersion: 1,
+          displayName: displayName.value,
+        };
+        try {
+          const response = await fetch(requestUrl, {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(request),
+          });
+          let responseBody;
+          try {
+            responseBody = await response.json();
+          } catch (error) {
+            responseBody = { parseError: String(error) };
+          }
+          const restoreResponse = await fetch(requestUrl, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+          const restoreBody = restoreResponse.status === 204 ? null : await restoreResponse.json();
+          const assignedRoomsUrl = new URL("/api/guest-sessions/rooms", document.location.href);
+          const assignedRoomsResponse = await fetch(assignedRoomsUrl, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+          const assignedRoomsBody = assignedRoomsResponse.status === 204 ? null : await assignedRoomsResponse.json();
+          result.textContent = JSON.stringify({
+            startedAt,
+            requestUrl: requestUrl.href,
+            requestOrigin: document.location.origin,
+            requestMethod: "POST",
+            requestBody: request,
+            responseUrl: response.url,
+            responseStatus: response.status,
+            responseType: response.type,
+            responseBody,
+            restore: { url: restoreResponse.url, status: restoreResponse.status, body: restoreBody },
+            assignedRooms: { url: assignedRoomsResponse.url, status: assignedRoomsResponse.status, body: assignedRoomsBody },
+          }, null, 2);
+        } catch (error) {
+          result.textContent = JSON.stringify({
+            startedAt,
+            requestUrl: requestUrl.href,
+            requestOrigin: document.location.origin,
+            requestMethod: "POST",
+            requestBody: request,
+            fetchError: String(error),
+          }, null, 2);
+        }
+      });
+    </script>
+  </body>
+</html>

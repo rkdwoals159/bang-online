@@ -1,0 +1,17 @@
+{
+  "interactionId": "i-discard-1",
+  "kind": "DISCARDS_ORDER",
+  "allowedChoices": ["ORDER_CARDS"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-discard-1", "choice": "ORDER_CARDS" }
+  ],
+  "discardOrder": {
+    "requiredCount": 3,
+    "allowedCards": [
+      { "cardInstanceId": "own-card-1", "typeId": "bang", "rank": "A", "suit": "SPADES" },
+      { "cardInstanceId": "own-card-2", "typeId": "beer", "rank": "6", "suit": "HEARTS" }
+    ]
+  }
+}

@@ -1,0 +1,632 @@
+PAGE 1
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+1
+info@dvgames.com  |  www.dvgames.com
+Il presente documento illustra le regole da torneo di BANG! e si divide in:
+Benché sia possibile gestire il torneo senza l’ausilio di un PC, è preferibile che l’arbitro  
+abbia a disposizione un PC e una stampante, nonché l’ultima versione del BANG! 
+Tournament Manager. Questo documento spiega tutte le procedure del torneo, anche quelle da 
+utilizzare nel caso non si abbia un PC.
+1. REGOLE DA TORNEO
+Il torneo è costituito da una fase a punteggio, obbligatoria, e da una fase a duello, facoltativa.
+Nella fase a punteggio di un torneo di BANG! si usano le carte e le regole del gioco base. Previa 
+approvazione dell’editore e comunicazione ai partecipanti, nella fase a punteggio è possibile 
+aggiungere ai personaggi del gioco base quelli dell’espansione BANG! Dodge City.
+Alla fase a punteggio segue una fase a duello, in cui si usano le carte e le regole del gioco  
+BANG! The Duel. A discrezione dell’Organizzatore e previa comunicazione ai partecipanti, 
+il torneo può concludersi con la fase a punteggio, senza svolgere la fase a duello. 
+La fase a punteggio si gioca in un numero di turni variabili tra 3 e 5, in base al numero dei 
+giocatori, e inizia con la formazione dei vari tavoli di gioco, mediante un abbinamento casuale 
+tra i partecipanti.
+Nel caso in cui nel torneo non sia prevista una fase a duello, la classifica ottenuta al termine  
+dei turni è definitiva. Nel caso in cui nel torneo sia prevista una fase a duello, i migliori quattro  
+(o multipli di 4, vedi 1.3 Deroghe) giocatori si sfidano in duelli a eliminazione diretta uno contro  
+uno e la classifica definitiva è determinata dall’esito dei duelli.
+NUMERO DI GIOCATORI 10-14 15-24 25 O PIÙ
+TURNI DI GIOCO: 3 4 5
+Campionato Nazionale
+Regolamento da torneo 2025-26
+1. Regole da torneo
+1.1 La fase a punteggio
+1.2 La fase a duello
+1.3 Deroghe
+1.4 Abbandono
+2. Condotta di gara
+3. L’arbitro 
+4. Casistica generale e FAQ
+5. Altro
+PAGE 2
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+2
+info@dvgames.com  |  www.dvgames.com
+1. 1 LA FASE A PUNTEGGIO
+In base al numero di giocatori vengono creati casualmente i tavoli da gioco, con un numero 
+prefissato di giocatori, come nella tabella che segue.
+TABELLA DEI TAVOLI
+NUMERO DI  
+TAVOLI 1 2 3 4 5 6 7 8 9 10
+10 5 5
+11 6 5
+12 6 6
+13 7 6
+14 7 7
+15 5 5 5
+16 6 5 5  
+17 6 6 5
+18 6 6 6  
+19 6 6 7
+20 5 5 5 5
+21 6 5 5 5
+22 6 6 5 5
+23 6 6 6 5
+24 6 6 6 6
+25 5 5 5 5 5  
+26 6 5 5 5 5
+27 6 6 5 5 5
+28 6 6 6 5 5
+29 6 6 6 6 5
+30 6 6 6 6 6
+31 6 5 5 5 5 5
+32 6 6 5 5 5 5
+33 6 6 6 5 5 5
+34 6 6 6 6 5 5
+35 6 6 6 6 6 5
+36 6 6 6 6 6 6
+GIOCATORI
+PAGE 3
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+3
+info@dvgames.com  |  www.dvgames.com
+NUMERO DI  
+TAVOLI 1 2 3 4 5 6 7 8 9 10
+37 6 6 5 5 5 5 5
+38 6 6 6 5 5 5 5
+39 6 6 6 6 5 5 5
+40 5 5 5 5 5 5 5 5
+41 6 5 5 5 5 5 5 5
+42 6 6 5 5 5 5 5 5
+43 6 6 6 5 5 5 5 5
+44 6 6 6 6 5 5 5 5
+45 6 6 6 6 6 5 5 5
+46 6 6 6 6 6 6 5 5
+47 6 6 6 6 6 6 6 5
+48 6 6 6 6 6 6 6 6
+49 6 6 6 6 5 5 5 5 5
+50 5 5 5 5 5 5 5 5 5 5
+Per tornei in cui è prevista la partecipazione di più di 50 giocatori, si può chiedere l’apposita 
+tabella all’editore (vedi Regolamento Organizzativo - 9. Riferimenti). Il BTM calcolerà 
+automaticamente la formazione dei tavoli fino a 100 partecipanti.
+Per ogni tavolo, viene preparata la “scheda di gioco”: la scheda contiene la lista dei giocatori  
+che giocano allo stesso tavolo, ordinata da 1 a 5, 6 o 7 in base al numero di giocatori, e 
+il risultato della partita, che va compilato al termine della stessa. Nella scheda di gioco 
+si appuntano inoltre le smazzate, spuntando le apposite caselle e prima di far scattare il 
+Mezzogiorno di Fuoco (vedi Il meccanismo “mezzogiorno di fuoco”, a pag. 6). 
+Esempio. Con 27 giocatori si giocheranno 5 turni. In ogni turno, il numero di tavoli è 5, e i tavoli sono 
+composti da 6, 6, 5, 5 e 5 giocatori. L’arbitro stampa le schede per tutti i tavoli, fa sedere i giocatori 
+al rispettivo tavolo e consegna loro la scheda. (Senza ausilio del PC: l’arbitro sorteggia casualmente 
+i tavoli e gli Sceriffi. È importante che un giocatore non ricopra più di una volta il ruolo di Sceriffo 
+nell’intero torneo. Ad esempio, l’arbitro assegna a ciascun giocatore una carta di un mazzo di carte 
+francesi. Mescola il mazzo, ed estrae le carte corrispondenti agli Sceriffi, sulle quali fa un segno distintivo. 
+Poi estrae i giocatori per i rispettivi tavoli. Nei turni seguenti, toglie dal mazzo le carte contrassegnate 
+prima di estrarre i nuovi Sceriffi e le rimette quando estrae tutti gli altri giocatori ai tavoli).
+I giocatori devono sedersi al tavolo nell’ordine in cui sono stati estratti: il secondo si posiziona  
+a sinistra del primo, ecc. Il giocatore numero “1” per ciascun tavolo è lo Sceriffo; l’arbitro dà a 
+ogni altro giocatore una carta ruolo, coperta, estratta a caso.
+A seconda del numero di turni previsti dal torneo, all’inizio del torneo ogni giocatore ha a 
+disposizione i seguenti BANG!-dollari ($ in breve): 
+Ogni giocatore potrà guadagnare altri $ vincendo partite nel corso del torneo. 
+GIOCATORI
+TORNEO DA 3 TURNI TORNEO DA 4 TURNI TORNEO DA 5 TURNI
+300$ 400$ 500$
+PAGE 4
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+4
+info@dvgames.com  |  www.dvgames.com
+A questo punto si procede con l’asta dei personaggi.
+Lo Sceriffo mischia e scopre a caso tanti personaggi quanti sono i giocatori al tavolo, più uno. 
+Esempio. Con 6 giocatori al tavolo, si scopriranno 7 personaggi.
+Poi lo Sceriffo sceglie uno dei personaggi scoperti e fa un’offerta. L’offerta minima per un 
+personaggio è di 10$; per le offerte valgono solo i multipli di 10$. Il giocatore alla sua sinistra  
+può rilanciare o passare. Se passa è fuori dalla mano, e in seguito non può più rilanciare  
+per avere quel personaggio. Non si può offrire più di quanto si ha. I giocatori sono tenuti 
+a conoscere la propria disponibilità di $ durante il torneo. Se un giocatore ha erroneamente 
+e involontariamente speso all’asta un importo in $ superiore a quello in suo possesso, 
+l’ammontare viene comunque addebitato e il punteggio del giocatore diventa negativo.
+Quando tutti i giocatori tranne uno hanno passato, quel giocatore si aggiudica il personaggio. 
+La cifra pagata viene registrata dallo Sceriffo sulla scheda di gioco. Si prosegue quindi con il 
+giocatore alla sinistra di chi ha vinto l’ultima asta. Egli sceglie un personaggio fra quelli che 
+restano, fa la sua offerta iniziale, e così via, fino all’assegnazione di tutti i personaggi.  
+Chi si è già aggiudicato un personaggio non può più partecipare a nessuna asta. L’ultimo 
+giocatore ingaggerà uno tra i due personaggi restanti per 10$. 
+ 
+Eccezione: se un giocatore inizia l’asta con 10$ o meno, non può mai rilanciare. 
+L’organizzatore può decidere di rimuovere la fase di asta dei personaggi, per ridurre la durata 
+del torneo (vedi 1.3, Deroghe). Dopo che i ruoli sono stati assegnati, l’arbitro mischia e assegna 
+a ciascun giocatore due personaggi a caso: per ciascun giocatore, a partire dallo Sceriffo, viene 
+dato un personaggio scoperto, poi, sempre a partire dallo Sceriffo, viene dato un secondo 
+personaggio scoperto. I giocatori prendono in mano i loro due personaggi e devono sceglierne 
+uno con cui giocare. Il personaggio scelto viene messo coperto davanti a loro, mentre quello 
+scartato viene piazzato in una pila di carte coperte accanto al mazzo. Quando tutti i giocatori 
+hanno scelto un personaggio, lo rivelano simultaneamente.
+Una volta scelto, un personaggio non può essere cambiato per alcun motivo. L’arbitro rimuove 
+dal gioco le carte non scelte, così che la partita può iniziare. Le carte vengono distribuite dallo 
+Sceriffo in base al numero di punti vita a partire da se stesso e proseguendo in senso orario. Al 
+termine della partita, i giocatori chiamano l’arbitro. L’arbitro, coadiuvato dai giocatori, completa 
+la scheda di gioco inserendo i ruoli dei giocatori, e la condizione che ha determinato la fine 
+della partita; poi fotografa la scheda e la ripone sul tavolo arbitrale.
+A ogni giocatore spetta un ammontare di $, come descritto nelle tabelle delle vincite che 
+seguono. I $ vinti da ciascun giocatore possono essere usati già dall’asta successiva per 
+acquisire il personaggio. Il punteggio di ogni giocatore è sempre dato dai $ iniziali previsti in 
+base al numero di turni, più la somma dei suoi guadagni meno i soldi spesi durante le aste. 
+I $ totali di ciascun giocatore sono segreti fino al termine della fase a punteggio. Ciascun 
+giocatore, su richiesta, può essere informato dall’arbitro solo sul proprio totale.
+L’arbitro riporta i risultati nel BANG! Tournament Manager. Man mano che i dati vengono inseriti, 
+si genera una classifica tra i giocatori. La classifica dei giocatori è segreta: solo l’arbitro  
+la conosce. Per i tornei senza ausilio del PC: l’arbitro prende nota dei giocatori che hanno  
+svolto il ruolo di Sceriffo nel turno svolto.
+Ogni giocatore riceve $ in base al proprio ruolo e all’esito della partita, come indicato 
+dalle seguenti tabelle.
+PAGE 5
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+5
+info@dvgames.com  |  www.dvgames.com
+NUMERO  
+DI GIOCATORI 5 6 7
+Fuorilegge 1.800$ 1.500$ 1.700$
+Rinnegato 0$ 0$ 0$
+Sceriffo 0$ 0$ 0$
+Vice 0$ 0$ 0$
+NUMERO  
+DI GIOCATORI 5 6 7
+Rinnegato 2.400$ 2.600$ 2.800$
+Sceriffo 0$ 0$ 0$
+Vice 0$ 0$ 0$
+Fuorilegge 0$ 0$ 0$
+I TURNI SUCCESSIVI
+L’arbitro predispone il necessario per il nuovo turno di gioco. Il BANG! Tournament Manager 
+assegna le nuove posizioni ai tavoli in modo casuale, nel rispetto di due vincoli: nessun 
+giocatore può ricoprire il ruolo di Sceriffo più di una volta nel torneo e, se possibile, a nessun 
+giocatore deve essere assegnata l’ultima posizione al tavolo più di una volta. Se il numero di 
+giocatori dovesse essere cambiato in seguito a degli abbandoni, il numero di tavoli e la loro 
+composizione deve essere adeguata di conseguenza.
+ 
+Senza ausilio del PC: i giocatori vengono assegnati casualmente a nuovi tavoli, nel rispetto  
+della norma per cui nessuno può ricoprire il ruolo di Sceriffo più di una volta nell’intero torneo.  
+(Vedi 1.1, Esempio). L’estrazione delle posizioni ai tavoli da gioco è obbligatoria a ogni nuovo turno.
+NUMERO DI GIOCATORI 5 6 7
+Sceriffo 1.200$ 1.600$ 1.200$
+Vice 1.200$ 1.600$ 1.200$
+Rinnegato eliminato  
+per ultimo, dallo Sceriffo * 300$ 350$ 400$
+Rinnegato eliminato  
+non per ultimo 0$ 0$ 0$
+Fuorilegge 0$ 0$ 0$
+* Il Rinnegato è arrivato al duello finale contro lo Sceriffo, ma ha perso
+VINCONO I FUORILEGGE VINCE IL RINNEGATO
+VINCE LA LEGGE
+PAGE 6
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+6
+info@dvgames.com  |  www.dvgames.com
+IL MECCANISMO “MEZZOGIORNO DI FUOCO”
+Ogni turno dovrebbe terminare in un ragionevole lasso di tempo. Perché ciò si verifichi 
+con continuità, trova applicazione il meccanismo denominato “Mezzogiorno di fuoco”, 
+illustrato di seguito:
+•  Tavoli da 5 giocatori: a partire dalla terza volta in cui il mazzo degli scarti viene rimischiato 
+(quindi all’inizio della quarta smazzata, ovvero subito dopo che è stata spuntata la terza 
+casella delle smazzate nella Scheda di Gioco), e cominciando dallo Sceriffo, ogni giocatore 
+all’inizio del proprio turno perde un punto vita. Se dopo aver perso il punto vita il giocatore 
+è ancora vivo, allora può giocare il proprio turno regolarmente; altrimenti è fuori dal gioco 
+(n.b.: se il punto vita che si perde è l’ultimo, si può giocare una Birra per restare in gioco, ad 
+eccezione  
+del caso in cui siano rimasti in vita solo due giocatori);
+•  Tavoli da 6: come sopra e cominciando dal giocatore dopo lo Sceriffo;
+•   Tavoli da 7: come sopra, e cominciando dallo Sceriffo.
+LA CLASSIFICA
+Al termine della fase a punteggio, dopo aver esaminato la correttezza dei dati inseriti, l’arbitro 
+convalida e rende pubblica la classifica. Se il torneo è costituito esclusivamente dalla fase  
+a punteggio, la classifica è definitiva; si assegna il bonus ai quattro giocatori più alti in classifica  
+e il vincitore del torneo è il giocatore che ha ottenuto il punteggio più alto. Se due o più 
+giocatori hanno pari punti al termine della fase a punteggio, si utilizza il criterio di spareggio 
+detto “sistema Marogi”: al giocatore viene assegnato un coefficiente ottenuto calcolando la 
+media della somma dei punteggi degli avversari incontrati nei vari turni di gioco. Chi ottiene il 
+valore più alto, si troverà davanti in classifica. In caso di ulteriore parità, si considera il numero  
+di vittorie per ciascuno dei giocatori coinvolti nello spareggio. Infine, se la situazione di parità  
+non è stata risolta, il programma sorteggia casualmente il giocatore più avanti in classifica.
+(Senza ausilio del PC: l’arbitro sorteggia casualmente il giocatore che occuperà il posto più alto in 
+classifica).
+1.2 LA FASE A DUELLO
+Se il torneo è costituito anche da una fase a duello, i quattro giocatori col maggior punteggio 
+finale disputano due duelli semifinali (1° contro 4°, e 2° contro 3°) a eliminazione diretta. Se due 
+o più giocatori hanno pari punti al termine della fase a punteggio, si utilizza il medesimo sistema 
+di spareggio citato sopra, al fine di stabilire la posizione e gli abbinamenti della semifinale.  
+I vincitori dei duelli semifinali si sfidano in un duello finale per determinare 1° e 2° posizione, 
+mentre i perdenti dei duelli semifinali si sfidano per determinare 3° e 4° posizione. Se la finale 
+per 3° e 4° posizione non viene disputata, la 3° posizione viene assegnata al giocatore che ha 
+ottenuto più punti nella fase a punteggio. In base alla posizione ottenuta e al numero di turni 
+svolti, si assegna il bonus a ciascun giocatore. Il vincitore del torneo è il giocatore che, per esito 
+dei duelli, ha conquistato la 1° posizione in classifica.
+PAGE 7
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+7
+info@dvgames.com  |  www.dvgames.com
+IL DUELLO
+I duelli si svolgono con le carte del gioco BANG! The Duel. 
+L’arbitro sorteggia il giocatore a cui sarà assegnato il ruolo della Legge e di conseguenza  
+quello a cui sarà assegnato il ruolo di Fuorilegge. L’arbitro scopre casualmente 6 personaggi  
+di fronte a ciascun giocatore. Ognuno ne sceglie in segreto 4 e scarta i restanti due.  
+Ogni giocatore sceglie i due personaggi con i quali iniziare, e decide quale dei due sarà  
+il personaggio attivo all’inizio della partita. 
+L’arbitro imposta un orologio per scacchi a 30 minuti per ciascun giocatore (nei comuni 
+smartphone è possibile scaricare gratuitamente l’applicazione Orologio da scacchi – Chess 
+Clock). Ogni giocatore, al suo turno, avvia il timer e lo interrompe nel momento 
+in cui il suo turno è concluso. Quando il mazzo deve essere rimescolato il timer viene messo in 
+pausa. Se per cause esterne il turno del giocatore viene interrotto,  
+il giocatore mette il timer in pausa fino alla ripresa della partita.
+Quando un personaggio viene eliminato dal gioco, il timer del giocatore viene messo in pausa.  
+Il giocatore può scegliere con quale tra i personaggi della riserva rimpiazzarlo.
+Se il tempo a disposizione di un giocatore termina, la partita si conclude e vince l’avversario.
+Se un giocatore qualificato ai duelli finali grazie alla fase a punteggio si ritira, la vittoria viene 
+assegnata a tavolino all’avversario. Non sono previsti ripescaggi tramite scorrimento della classifica.
+BONUS PREMIO
+• PER TORNEI SENZA FASE A DUELLO 
+Ai primi quattro classificati del torneo va il seguente bonus premio in $:  
+POSIZIONE IN CLASSIFICA 3 TURNI DI GIOCO 4 TURNI DI GIOCO 5 TURNI DI GIOCO
+Primo classificato 75$ 100$ 125$
+Secondo classificato 75$ 100$ 125$
+Terzo classificato 75$ 100$ 125$
+Quarto classificato 75$ 100$ 125$
+POSIZIONE IN CLASSIFICA 3 TURNI DI GIOCO 4 TURNI DI GIOCO 5 TURNI DI GIOCO
+Primo classificato 600$ 800$ 1000$
+Secondo classificato 300$ 400$ 500$
+Terzo classificato 150$ 200$ 250$
+Quarto classificato 75$ 100$ 125$
+Attenzione: per tornei con fase a duello la classifica dei primi quattro è sempre determinata 
+dall’esito dei duelli finali, indipendentemente dai dollari guadagnati nella fase a punteggio.
+• PER TORNEI CON FASE A DUELLO
+Ai primi quattro classificati del torneo va il seguente bonus premio in $:
+PAGE 8
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+8
+info@dvgames.com  |  www.dvgames.com
+1.3 DEROGHE
+In specifiche circostanze è possibile apportare modifiche al regolamento da torneo,  
+al fine di limitarne la durata e di garantire un’esperienza di gioco il più possibile agevole  
+e piacevole per i giocatori. Le variazioni consentite sono:
+•  Variazione del numero di turni di gioco. Se i turni di gioco diminuiscono rispetto a quanto 
+stabilito per un certo numero di partecipanti, i $ iniziali per ciascun giocatore diminuiranno di 
+conseguenza (vedi 1.1 La fase a punteggi);
+•  Imposizione di limiti di durata al torneo, tramite il sistema del Mezzogiorno di fuoco a tempo. 
+Il limite di tempo non può mai essere inferiore a 30 minuti, escluso il tempo impiegato per le 
+aste (in ogni caso, l’inizio della quarta smazzata segna l’inizio del Mezzogiorno di fuoco anche 
+per i tornei in cui viene previsto un Mezzogiorno di fuoco a tempo);
+• Riduzione del limite di durata dei duelli, impostando il timer a 25 minuti per giocatore.
+Per le deroghe sopra citate è necessaria l’approvazione preventiva dell’editore e la comunicazione ai 
+giocatori prima dell’inizio del torneo. Le variazioni non preventivamente comunicate all’editore e ai 
+partecipanti del torneo comportano la non omologazione del torneo stesso.
+• Riduzione del numero di personaggi a duello: 3 su 5 invece di 4 su 6;
+• Rimozione delle aste e scelta casuale tra due personaggi (vedi 1.1 La fase a punteggio).
+Per le deroghe sopra citate non è necessaria l’autorizzazione dell’editore; i partecipanti devono 
+essere informati delle variazioni prima dell’avvio del torneo. In casi eccezionali, per sopravvenuti 
+problemi di tempo, l’organizzatore può mettere in atto le sopraindicate modifiche mentre il torneo è 
+in corso, previo consenso unanime dei partecipanti.
+•  Accesso dei primi 8 giocatori alla fase a duello - solo per tornei con più di 18 partecipanti;
+•  Rimozione del limite di durata ai duelli, per cui non si utilizza il timer.
+Per le deroghe sopra citate non è necessaria l’autorizzazione dell’editore; i partecipanti devono 
+essere informati della variazione prima dell’avvio del torneo.
+1.4 ABBANDONO
+Un giocatore può abbandonare il torneo in qualunque momento, comunicandolo all’arbitro.  
+Quel giocatore non può più rientrare in gioco nello stesso torneo. L’abbandono non influisce  
+sul calcolo del numero di turni del giocatore, ossia in caso di abbandono il calcolo della media 
+viene effettuato in base al numero totale dei turni del torneo, non a quelli effettivamente disputati  
+dal giocatore. (vedi Regolamento Organizzativo e Normativo, 3.4 Norme per la validità dei tornei).
+Se l’abbandono avviene durante un turno, il giocatore scarta la propria mano, e il personaggio 
+perde l’abilità.
+Il personaggio resta in gioco in modo passivo:
+• esegue eventuali controlli su Prigione e Dinamite, ma salta sempre il proprio turno;
+•   viene considerato nel calcolo della distanza, ed è un bersaglio valido per BANG!, ecc. 
+fino a che non viene eliminato;
+•   non può pescare né giocare nessuna carta, né beneficia degli effetti di Barile e Mustang  
+di fronte a sé;
+•   se viene eliminato, si seguono le normali regole (se era un Fuorilegge si ha diritto alla 
+ricompensa, se era un Vice ed è eliminato dallo Sceriffo quest’ultimo scarta tutto, ecc.);
+•  il giocatore guadagna normalmente $ a fine partita in base al proprio ruolo e al risultato, 
+poi esce definitivamente dal torneo.
+PAGE 9
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+9
+info@dvgames.com  |  www.dvgames.com
+CASI PARTICOLARI:
+- Saloon: il personaggio guadagna il punto vita.
+- Emporio: al turno del personaggio si seleziona a caso una delle carte rimaste, che viene scartata.
+-  BANG!, Indiani!, Duello, Gatling, ecc.: il personaggio non reagisce, non potendo, e non avendo 
+comunque carte in mano.
+- Barile: il personaggio non estrae, non potendo usare carte di fronte a sé.
+Se l’abbandono avviene tra due turni della fase a punteggio o è avvenuto durante il turno, 
+l’arbitro contrassegna il giocatore come “ritirato”. I giocatori ritirati non disputano altri turni, 
+e non sono presi in considerazione nel sorteggio dei nuovi tavoli attraverso il BTM.
+Se durante l’ultimo turno della fase a punteggi di un torneo da 10 giocatori si verifica 
+l’abbandono di un giocatore, la partita prosegue e il personaggio viene fatto giocare in 
+modo passivo (vedi sopra); in caso di un minor numero di giocatori il torneo non potrà essere 
+omologato. Anche nel caso in cui l’abbandono di un giocatore in un torneo da 10 giocatori 
+avviene prima della disposizione ai tavoli per l’ultimo turno della fase a punteggi, il torneo 
+non può proseguire e non potrà essere omologato.
+Se l’abbandono avviene durante lo svolgimento di un duello, l’avversario vince. Se l’abbandono 
+avviene da parte di un giocatore qualificato a un duello prima dello svolgimento dello stesso,  
+non è consentita la convocazione al duello del successivo miglior qualificato, ma la vittoria  
+è assegnata a tavolino all’avversario che il giocatore avrebbe dovuto affrontare.
+Il comportamento dei giocatori che abbandonano i tornei in maniera reiterata nel corso  
+della stagione può essere attenzionato dagli organizzatori e dall’editore a fini disciplinari.
+2. CONDOTTA DI GARA
+I giocatori sono tenuti a seguire le regole di BANG! e di BANG! The Duel e il presente 
+regolamento, a rispettare tutte le decisioni dell’arbitro e a comportarsi in maniera sportiva, 
+rispettosa, leale ed educata in ogni momento.
+Tutti i giocatori sono responsabili del corretto svolgimento delle partite, e sono tenuti a 
+competere al meglio delle loro capacità e abilità in ogni momento del torneo. È vietata 
+qualsiasi forma di collusione da parte dei giocatori. La collusione tra giocatori, l’imbroglio o una 
+condotta non appropriata non sono tollerabili. Una lista non esaustiva di comportamenti che 
+costituiscono collusione tra giocatori, imbroglio o condotta inappropriata, è la seguente: 
+•  giocare non avendo cura della regolarità del torneo e senza richiedere in prima persona ad altri 
+giocatori che adottano condotte inappropriate di assumere un atteggiamento corretto ai tavoli;
+• giocare palesemente contro la propria fazione;
+•  accordarsi in due o più giocatori per non giocare secondo un ragionevole standard di 
+competizione in una partita del torneo al fine di fornire a una squadra o a un altro giocatore 
+determinati vantaggi o benefici. Altresì, giocare volutamente per raggiungere questi scopi  
+pur senza essersi esplicitamente accordato con altri giocatori; 
+•  perdere deliberatamente una partita del torneo per ottenere un compenso o per qualsiasi 
+altro motivo, o sollecitare o indurre un altro giocatore a farlo;
+•  dare agli altri giocatori istruzioni reiterate sulle azioni da compiere al tavolo, allo scopo  
+di giocare al loro posto o di pilotarne forzatamente le scelte;
+•  mostrare la propria carta ruolo. Quando succede per errore, la partita continua, ma se l’arbitro 
+assume che sia stato fatto di proposito, deve interpretarla come un’infrazione grave;
+PAGE 10
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+10
+info@dvgames.com  |  www.dvgames.com
+• guardare le carte in mano a un avversario; 
+• dare false informazioni di gioco (numero di pallottole possedute, ecc.);
+• chiedere o ricevere consigli da persone esterne alla partita;
+• accordarsi su come far terminare la partita;
+• spendere intenzionalmente all’asta un importo di $ superiore a quello disponibile;
+• barare;
+• giocare volutamente in modo troppo lento;
+• mentire all’arbitro;
+• contestare le decisioni dell’arbitro;
+• dire parolacce o bestemmiare;
+• provocare o offendere gli altri giocatori, l’organizzatore, l’arbitro o gli spettatori;
+• manomettere il timer o ritardarne intenzionalmente l’avvio;
+• intimidire o minacciare gli altri giocatori, l’arbitro o gli spettatori.
+Un giocatore può chiamare un arbitro ad assistere alla partita se crede che un avversario 
+stia violando le regole, o stia tenendo una condotta di gara non appropriata.
+ 
+3. L’ARBITRO 
+L’arbitro non può prendere parte come giocatore al torneo che sta arbitrando. L’arbitro è tenuto 
+a conoscere bene il regolamento di BANG!, le FAQ e il regolamento da torneo in vigore, e ha 
+il dovere di applicare le regole in modo equo per assicurare uno svolgimento regolare della 
+competizione. Nel caso in cui il torneo preveda anche una fase a duello, l’arbitro è tenuto a 
+conoscere le regole del gioco BANG! The Duel.
+L’arbitro deve presenziare per tutta la durata del torneo. Può scegliere quale tavolo seguire 
+e intervenire ove ritiene necessario, per facilitare il corretto svolgimento del gioco tra i 
+partecipanti. Quando chiamato a un tavolo per risolvere un’infrazione alle regole del gioco e/o 
+dei regolamenti normativi, deve recarsi dai giocatori coinvolti e assumere decisioni in merito 
+ai casi. Ha autorità decisionale anche per i casi particolari non espressamente previsti dal 
+regolamento. 
+Quando chiamato a valutare l’intenzionalità di errori o comportamenti contrari ai regolamenti 
+da parte dei giocatori, all’arbitro è richiesto assumere gradi di tolleranza in conto del livello 
+di esperienza dei giocatori al tavolo. La reiterazione di comportamenti scorretti va sempre 
+sanzionata.
+L’arbitro deve tenere nascosti e a tutti i giocatori i $ disponibili dei vari partecipanti; ogni 
+giocatore può essere informato dall’arbitro solo sul proprio totale.
+L’arbitro garantisce il corretto svolgimento dei sorteggi e delle singole partite, vigila sulla 
+corretta applicazione dei regolamenti e sul comportamento dei giocatori assumendo un grado  
+di tolleranza sulla base della propria esperienza e di quella dei giocatori ai tavoli.
+L’arbitro può chiedere all’organizzatore di allontanare chiunque intralci lo svolgimento  
+del torneo. All’arbitro spetta la decisione finale su tutte le controversie. Le decisioni dell’arbitro 
+sono definitive e inappellabili.
+PAGE 11
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+11
+info@dvgames.com  |  www.dvgames.com
+PENALITÀ
+Chiunque dovesse tenere una condotta di gara non appropriata può subire una penalità  
+a discrezione dell’arbitro, in base alla volontarietà e gravità di tale comportamento.
+Le penalità sono di due tipi: 
+1.  Ammonizione: ha lo scopo di avvisare il giocatore che la sua condotta di gioco non è 
+appropriata; se un giocatore riceve una seconda ammonizione nel corso dello stesso torneo, 
+viene automaticamente espulso;
+2.  Espulsione: in questo caso, il giocatore viene direttamente escluso dal torneo. Ci si comporta 
+come nel caso di un abbandono.
+La valutazione della gravità di eventuali infrazioni commesse e la conseguente penalità  
+da applicare è a totale e inappellabile discrezione dell’arbitro.
+L’arbitro è tenuto a registrare le ammonizioni assegnate durante il torneo e i nominativi  
+dei giocatori espulsi durante il torneo, dandone pronta comunicazione all’editore.
+Al giocatore espulso da un torneo sarà conteggiato il punteggio ottenuto fino all’espulsione e il 
+numero di turni svolti come se avesse lo avesse concluso, ai fini dei calcoli della Classifica.
+SANZIONI
+L’editore, dopo aver ricevuto comunicazione dall’arbitro e/o aver verificato le segnalazioni di 
+partecipanti ai tornei, può emettere nei confronti di un giocatore o di un organizzatore che è 
+entrato in collusione con altri giocatori, ha imbrogliato o tenuto una condotta non appropriata, i 
+seguenti provvedimenti:
+•  Diffida: ha lo scopo di avvisare il giocatore che la sua condotta di gioco non è stata 
+appropriata; il comportamento del giocatore viene attenzionato e nuove irregolarità possono 
+portare a un allontanamento dal campionato;
+•  Annullamento del torneo: per il singolo giocatore che si è reso responsabile del 
+comportamento non appropriato, per tutti i giocatori coinvolti o per tutti i partecipanti 
+a seconda della gravità dell’episodio. In questi casi l’editore può considerare di operare 
+diminuzioni dei punteggi e delle medie dei giocatori coinvolti per penalizzarli in classifica.
+•  Ban: ha lo scopo di proibire la partecipazione al Campionato come organizzatore e/o 
+giocatore per un periodo di tempo stabilito dall’editore.
+PAGE 12
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+12
+info@dvgames.com  |  www.dvgames.com
+4. CASISTICA GENERALE E FAQ
+•  Se viene riscontrata un’infrazione delle regole, vale il principio di non poter ripristinare  
+lo stato precedente di gioco, dopo che viene giocata una qualsiasi carta successiva,  
+anche a partita conclusa. 
+Esempio: un giocatore manca un BANG! da parte di un giocatore che non poteva colpirlo a causa 
+della distanza, l’arbitro non sta seguendo quel tavolo e nessun altro giocatore segnala l’infrazione 
+-> entrambi i giocatori consumano la loro carta, il turno non viene rigiocato e la partita prosegue.
+•  Se un giocatore si dimentica di attivare la propria abilità, quella possibilità è sfumata per lo 
+stesso principio riportato sopra. L’arbitro vigila sulla reiterazione di tale comportamento al fine 
+di valutare in base al grado di esperienza suo e dei giocatori ai tavoli che questo non faccia 
+parte di una condotta antisportiva e sleale.
+•  Si possono ricordare poteri e abilità agli altri giocatori, anche come parte di uno schema di 
+bluff. L’arbitro vigila sulla reiterazione di tale comportamento al fine di valutare in base al 
+grado di esperienza suo e dei giocatori ai tavoli che questo non faccia parte di una condotta 
+antisportiva e sleale.
+•  Non si può guardare il mazzo degli scarti. Occorre prestare attenzione che il mazzo degli 
+scarti non riveli troppe informazioni.
+• È consentito parlare, salvo comportamenti inappropriati (vedi 2. Condotta di gara).
+• È consentito parlare apertamente del proprio ruolo; il bluff è altrettanto consentito.
+• Non è possibile scartare una carta se le carte in mano non superano il limite alla fine del turno.
+•  Non è obbligatorio giocare una carta se lo si ritiene non opportuno. 
+Esempio: non è obbligatorio giocare un Mancato! in risposta ad un BANG! se non lo si ritiene opportuno.
+• Si possono usare Panico! e Cat Balou su se stessi.
+•  Un giocatore con due punti vita a cui scoppia la Dinamite può giocare due Birre e rimanere in 
+vita con un solo punto (2 punti vita di partenza – 3 della Dinamite + 2 Birre = 1).
+•  Non si può giocare un Mancato! per evitare di perdere il punto vita a causa del meccanismo 
+“Mezzogiorno di fuoco”.
+•  Se un giocatore è in Prigione tutte le sue carte in gioco hanno comunque effetto. Continua a 
+beneficiare degli effetti di Barile e Mustang. 
+Esempio: si resta in Prigione solo se non si “estrae” cuori all’inizio del turno, altrimenti il giocatore 
+gioca il proprio turno normalmente. Se non “estrae” cuori, salta il turno, ma al prossimo turno il 
+giocatore gioca normalmente (a meno che non sia giocata contro di lui una nuova Prigione, nel 
+qual caso l’“estrarre” va fatto di nuovo). Prima e dopo di ciò, il giocatore è libero, efficiente e con 
+tutto il suo armamentario pronto. Quando si “estrae” per la Prigione, la carta estratta va scartata 
+assieme alla Prigione (e sotto di questa) indipendentemente dall’esito.
+•  Le abilità dei personaggi devono attendere che nei loro confronti si completi l’effetto  
+della carta giocata per attivarsi.
+•  Si può giocare una Birra anche se si è al massimo dei punti vita o se sono rimasti in gioco solo 
+2 giocatori: la Birra in questi casi non ha effetto.
+PAGE 13
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+13
+info@dvgames.com  |  www.dvgames.com
+•  Non si può giocare dalla mano una carta blu identica a una già in gioco di fronte a sé, ma la si 
+può eventualmente scartare a fine turno se si eccede il limite di carte in mano.
+•  Il giocatore sceglie l’ordine con cui le sue carte finiscono negli scarti quando è eliminato 
+o quando scarta più di una carta nel suo turno.
+•  Il mazzo degli scarti viene rimescolato quando un giocatore deve pescare una carta del mazzo 
+e lo stesso è terminato. Quando si rimescola il mazzo degli scarti, viene inclusa anche l’ultima 
+carta giocata. 
+Esempi: 
+- Pedro Ramirez deve pescare e il mazzo è terminato. In questa situazione non ci sono carte 
+nel mazzo, ma ce ne sono nella pila degli scarti. Pedro Ramirez può pescare la prima carta 
+dagli scarti, poi si rimescola il mazzo degli scarti, e poi pesca la seconda carta dal mazzo; 
+oppure si può rimescolare il mazzo degli scarti e quindi Pedro Ramirez pesca le prime due 
+carte dal mazzo appena rimescolato; la scelta tocca a Pedro Ramirez; 
+- c’è una sola carta nel mazzo e un giocatore gioca Diligenza. Il giocatore pesca la prima 
+carta, quindi il mazzo degli scarti viene rimescolato (inclusa la Diligenza giocata), poi pesca la 
+seconda carta.
+•  I giocatori eliminati possono restare al tavolo e assistere alla fine della partita, ma senza 
+vedere i ruoli ancora nascosti, né parlare durante il gioco, né fare segni di alcun tipo. 
+Se un giocatore eliminato disturba gli altri, può essere immediatamente allontanato 
+dall’arbitro. Se un giocatore eliminato tenta di comunicare informazioni sulle carte uscite 
+o non uscite o sui Ruoli o sulla condotta da tenere, va allontanato dal tavolo e, a giudizio 
+dell’arbitro, può essere sanzionato con una penalità (vedi 3. L’arbitro).
+•  Quando un giocatore gioca per errore una carta in modo non legale (per es. BANG! o Panico! 
+su un avversario a distanza non raggiungibile), la carta può essere ripresa in mano e non viene 
+considerata “bruciata”. Tuttavia, l’arbitro può stabilire il livello di tolleranza dell’azione in base 
+all’esperienza dei giocatori al tavolo. Qualora l’errore sia ritenuto volontario, o reiterato come 
+parte di una strategia di gioco, a insindacabile giudizio dell’arbitro sarà ritenuta condotta 
+antisportiva con tutte le conseguenze del caso (vedi 2. Condotta di gara). Il discorso è diverso 
+per la Finale Nazionale, in cui la carta verrà considerata “bruciata”.
+•  Nel caso vengano eliminati più giocatori da una singola carta o effetto, si attende 
+l’eliminazione di tutti (cioè il completamento dell’ultimo effetto giocato) prima di verificare 
+le condizioni di vittoria (per esempio, se un Rinnegato con un Indiani! o Gatling elimina 
+tutti gli altri giocatori in gioco, vince la partita, indipendentemente dall’ordine di giro).
+PERSONAGGI
+•  Bart Cassidy: se viene ferito dalla Dinamite e sopravvive, pesca una carta per ciascun punto 
+vita perso.
+•  El Gringo: se viene ferito da Suzy Lafayette con l’ultima carta di lei, si attivano entrambe 
+le abilità in quest’ordine: Suzy Lafayette pesca una carta, poi El Gringo gliela pesca 
+perché da lei ferito, successivamente Suzy Lafayette pesca un’altra carta.
+•  Jourdonnais: se possiede una carta Barile in gioco, può estrarre una seconda volta per 
+lo stesso BANG!.
+•  Sid Ketchum: non può scartare due carte per recuperare un punto vita durante la risoluzione 
+dell’effetto di un’altra carta, ma può recuperare l’ultimo punto vita anche nel turno di un 
+avversario, come con la Birra. L’abilità di Sid Kecthum si intende utilizzabile non in qualunque 
+PAGE 14
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+14
+info@dvgames.com  |  www.dvgames.com
+momento in senso lato, ma in qualunque momento in cui potrebbe legalmente giocare una 
+Birra.
+•  Slab the Killer: il giocatore che è bersaglio di una sua carta BANG! può, a propria discrezione, 
+scartare una sola carta Mancato! invece che due dalla sua mano, tuttavia, in assenza di ulteriori 
+effetti, deve subire il colpo e perdere un punto vita come di consueto.
+•  Suzy Lafayette: se gioca un Emporio come sua ultima carta, attende che l’Emporio completi il 
+suo effetto e dopo, avendo pescato con esso una carta, non pesca perché non è senza carte: 
+ne ha una (non “fa in tempo” ad attivare l’abilità). Se finisce le carte durante un Duello, deve 
+attendere che l’effetto del Duello termini prima di pescare. Se sta per subire un BANG! da Slab 
+the Killer e ha in mano una sola carta Mancato!, può giocarlo, e può pescare immediatamente 
+un’altra carta: nel caso fosse un altro Mancato!, può giocarlo immediatamente per non subire il 
+colpo, per poi pescare di nuovo.
+•  Vulture Sam: se uccide un Vice da Sceriffo, perde tutte le carte, comprese quelle che prende 
+con l’abilità speciale.
+BANG! THE DUEL
+•  Il simbolo  indica che l’effetto della carta è sempre attivo. Un personaggio con un’abilità  
+è da considerarsi attivo solo quando è il PA, ma la sua abilità funziona sempre, anche quando 
+egli è il PR.
+• Quando un personaggio perde il suo ultimo punto vita, la sua abilità non si attiva.
+•  Quando un giocatore finisce il proprio mazzo di pesca, se è il primo giocatore a cui finisce, 
+mischia tutte le carte degli scarti e forma così un nuovo mazzo comune da cui pescare. 
+L’avversario continuerà a pescare dal suo mazzo fino a che non finisce, poi comincerà anche 
+lui a pescare dal mazzo comune. Quando il mazzo comune finisce, il giocatore di turno 
+rimischia tutti gli scarti per formarne uno nuovo.
+•  Nel caso in cui un giocatore compia una mossa contraria al regolamento, ad esempio giocare 
+un equipaggiamento sul personaggio Attivo, la carta viene ripresa in mano. Tuttavia se il 
+comportamento viene reiterato è passibile di sanzione in quanto condotta antisportiva.
+•  Raffica: se l’avversario ha zero equipaggiamenti non subisce alcun colpo. La raffica deve  
+essere svolta interamente, a prescindere che chi la spara sia vivo o morto. Allo stesso modo,  
+gli effetti di risposta al fuoco si devono risolvere a prescindere che chi la gioca sia vivo  
+o morto al momento della risoluzione.
+•  Emporio: nel caso in cui in uno dei due mazzi sia rimasta una sola carta, si prende l’unica carta 
+rimasta e le rimanenti 3 dal mazzo comune. Se l’altro mazzo non è esaurito si prende l’unica 
+carta rimasta, 2 carte dall’altro mazzo (o 1 se fosse l’unica carta rimasta), e le rimanenti dal 
+mazzo comune (ovvero 1 o 2 carte). Non si può formare un mazzo comune prima che finisca 
+almeno uno dei due mazzi di fazione.
+•  Gli equipaggiamenti senza  non funzionano quando il personaggio equipaggiato è il 
+personaggio in retroguardia. N.b. Quando un personaggio in retroguardia è bersaglio di un 
+colpo diventa temporaneamente attivo; quindi alcuni equipaggiamenti (ad esempio Barile e 
+PAGE 15
+Copyright © MMXXV daVinci Editrice S.r.l.
+Campionato nazionale di BANG!
+15
+info@dvgames.com  |  www.dvgames.com
+Cappello) funzionano anche sul personaggio in retroguardia, nonostante non abbiano la .
+•  Wild Bill: Se l’avversario scarta una carta dalla tua mano o un equipaggiamento di Wild Bill,  
+il suo PA è bersaglio di un . 
+•  Bull Anderson pesca carte dalla sua abilità prima delle carte pescate per la morte di un 
+personaggio. L’abilità di Bull Anderson costituisce un’eccezione rispetto alla regola generale 
+(così come Vulture Sam nel gioco base).
+•  Dalon Ranger, Bull Anderson, Jango, Bill Thightman, Pat Garret, Dalton Bros, Babe Leroy, Wyatt Ear: 
+è il giocatore proprietario del personaggio a pescare, e non l’avversario.
+•   Toco Ramirez: “Puoi usare una qualunque carta dalla mano come fosse una Colt”. 
+Conta come “unico BANG!” del turno.
+5. ALTRO
+Il presente documento annulla e sostituisce ogni versione precedente. DV Games si riserva  
+il diritto di modificare qualsiasi documento relativo ai tornei senza preavviso. È compito degli 
+organizzatori e dei giocatori essere informati sulle norme e regole vigenti. Copia integrale  
+del presente documento in corso di validità deve essere sempre tenuta a disposizione di tutti  
+i giocatori in occasione di ogni torneo ufficiale.
+Campionato nazionale 2025-2026 – Regolamento da torneo
+Versione 1.0, aggiornata al 30/07/2025
+Copyright © MMXXV daVinci Editrice S.r.l.
+Un ringraziamento a: Emiliano Sciarra, Sergio Roscini, Marco e Roberto Perilli, Gianluca Mazzoli 
+ e all’intera Community dei giocatori, organizzatori e arbitri del Campionato di BANG!

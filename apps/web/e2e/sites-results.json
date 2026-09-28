@@ -1,0 +1,539 @@
+{
+  "task": "T106",
+  "generatedAt": "2026-09-28T20:14:54.095Z",
+  "mode": "local-only portable Sites Worker; no public Site, external provider, or deployment",
+  "workerBaseUrl": "http://127.0.0.1:8799",
+  "runtime": {
+    "node": "v22.23.1",
+    "localWrangler": true,
+    "isolatedMiniflareTests": true
+  },
+  "legacyAcceptance": {
+    "passed": 95,
+    "total": 97,
+    "D06": "NOT RUN",
+    "D18": "NOT RUN",
+    "modified": false
+  },
+  "commands": {
+    "siteMiniflareTests": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "tests": 35,
+      "passed": 35,
+      "failed": 0,
+      "subtests": [
+        "Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior",
+        "D1 expected-version CAS allows one writer for concurrent match commands",
+        "room and match sync use strict canonical parsers and viewer-scoped private projections",
+        "unsupported match schema and ruleset disclose recovery only to members and never mutate state",
+        "existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders",
+        "SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation",
+        "guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped",
+        "invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset",
+        "concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected",
+        "room ready/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once",
+        "completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and reset readiness",
+        "HTTP origin/content-type/body limits, strict command parsing, and closed-room lifecycle are enforced",
+        "D1 batch statement failure rolls back earlier writes",
+        "same-version concurrent match commits admit one writer and leave no guard marker",
+        "stale expectedVersion performs no state, event, receipt, or outbox writes",
+        "receipt replay returns the original outcome and a changed hash is rejected without writes",
+        "event, state, receipt, and outbox writes roll back together on outbox conflict",
+        "outbox cursor queries are monotonic and can be restricted to allowed aggregates",
+        "parallel START_MATCH replay writes room, match, receipt and both outbox signals once",
+        "START_MATCH restarts the latest completed match, preserves history, and resolves equal timestamps by room version",
+        "START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match",
+        "START_MATCH rejects an in-progress latest match and stale completed-match restart without writes",
+        "concurrent completed-match restarts admit one writer and reject the stale contender without writes",
+        "completed-match restart rolls room, match, receipt, players, and outbox back together",
+        "fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation",
+        "unsupported state schema is returned as a safe recovery error",
+        "D1 invite limiter persists reservations across limiter instances and admits at most five",
+        "D1 invite limiter success JOIN reset clears prior failures and retry backoff",
+        "same-version concurrent room mutations write one player row and one receipt",
+        "room, player, receipt, and outbox writes roll back together on statement failure",
+        "malformed state JSON fails schema validation before it can be written",
+        "stored snapshot validation checks catalog enums and every resolution record shape",
+        "Drizzle SQL breakpoints split into idempotent D1 statements",
+        "fresh D1 bootstraps concurrently, records one checksummed migration and optimizes indexes",
+        "Drizzle migration ledger rejects SQL edits after application"
+      ],
+      "outputTail": "m, match, receipt and both outbox signals once\n  ---\n  duration_ms: 1815.9784\n  type: 'test'\n  ...\n# Subtest: START_MATCH restarts the latest completed match, preserves history, and resolves equal timestamps by room version\nok 20 - START_MATCH restarts the latest completed match, preserves history, and resolves equal timestamps by room version\n  ---\n  duration_ms: 3194.8456\n  type: 'test'\n  ...\n# Subtest: START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match\nok 21 - START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match\n  ---\n  duration_ms: 2548.9393\n  type: 'test'\n  ...\n# Subtest: START_MATCH rejects an in-progress latest match and stale completed-match restart without writes\nok 22 - START_MATCH rejects an in-progress latest match and stale completed-match restart without writes\n  ---\n  duration_ms: 2910.0235\n  type: 'test'\n  ...\n# Subtest: concurrent completed-match restarts admit one writer and reject the stale contender without writes\nok 23 - concurrent completed-match restarts admit one writer and reject the stale contender without writes\n  ---\n  duration_ms: 2557.593\n  type: 'test'\n  ...\n# Subtest: completed-match restart rolls room, match, receipt, players, and outbox back together\nok 24 - completed-match restart rolls room, match, receipt, players, and outbox back together\n  ---\n  duration_ms: 2709.1745\n  type: 'test'\n  ...\n# Subtest: fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation\nok 25 - fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation\n  ---\n  duration_ms: 2865.5217\n  type: 'test'\n  ...\n# Subtest: unsupported state schema is returned as a safe recovery error\nok 26 - unsupported state schema is returned as a safe recovery error\n  ---\n  duration_ms: 1676.9811\n  type: 'test'\n  ...\n# Subtest: D1 invite limiter persists reservations across limiter instances and admits at most five\nok 27 - D1 invite limiter persists reservations across limiter instances and admits at most five\n  ---\n  duration_ms: 4132.5913\n  type: 'test'\n  ...\n# Subtest: D1 invite limiter success JOIN reset clears prior failures and retry backoff\nok 28 - D1 invite limiter success JOIN reset clears prior failures and retry backoff\n  ---\n  duration_ms: 3060.9971\n  type: 'test'\n  ...\n# Subtest: same-version concurrent room mutations write one player row and one receipt\nok 29 - same-version concurrent room mutations write one player row and one receipt\n  ---\n  duration_ms: 1137.1977\n  type: 'test'\n  ...\n# Subtest: room, player, receipt, and outbox writes roll back together on statement failure\nok 30 - room, player, receipt, and outbox writes roll back together on statement failure\n  ---\n  duration_ms: 1055.5297\n  type: 'test'\n  ...\n# Subtest: malformed state JSON fails schema validation before it can be written\nok 31 - malformed state JSON fails schema validation before it can be written\n  ---\n  duration_ms: 1045.8962\n  type: 'test'\n  ...\n# Subtest: stored snapshot validation checks catalog enums and every resolution record shape\nok 32 - stored snapshot validation checks catalog enums and every resolution record shape\n  ---\n  duration_ms: 2.0419\n  type: 'test'\n  ...\n# Subtest: Drizzle SQL breakpoints split into idempotent D1 statements\nok 33 - Drizzle SQL breakpoints split into idempotent D1 statements\n  ---\n  duration_ms: 4.7752\n  type: 'test'\n  ...\n# Subtest: fresh D1 bootstraps concurrently, records one checksummed migration and optimizes indexes\nok 34 - fresh D1 bootstraps concurrently, records one checksummed migration and optimizes indexes\n  ---\n  duration_ms: 2176.8957\n  type: 'test'\n  ...\n# Subtest: Drizzle migration ledger rejects SQL edits after application\nok 35 - Drizzle migration ledger rejects SQL edits after application\n  ---\n  duration_ms: 1581.1471\n  type: 'test'\n  ...\n1..35\n# tests 35\n# suites 0\n# pass 35\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 44867.8108"
+    },
+    "webTransportAndRoutes": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --experimental-strip-types --loader ./packages/engine/test/setup/ts-source-loader.mjs --test apps/web/test/sites-transport.test.mjs apps/web/src/app/routes.test.mjs",
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "tests": 20,
+      "passed": 20,
+      "failed": 0,
+      "subtests": [
+        "direct room, role, game, result and invite URLs resolve to the expected path state",
+        "popstate refreshes the route key for back/forward and invite query changes",
+        "RoomView activeMatchId drives lobby, sync, game and result projections",
+        "room connection notice is accessible and stays until authoritative route sync succeeds",
+        "connected CONNECTION errors trigger one route resync attempt without an effect loop",
+        "reconnect sync waits for the current RoomView and then its active match projection",
+        "unconfirmed active viewers see the private role reveal before actions, including on direct game paths",
+        "post-start role reveal redirects to the registered canonical role route",
+        "role confirmation stays in one tab session and a fresh tab must confirm separately",
+        "role and character face copy is supplied for every canonical base-game entry",
+        "role reveal renders only the viewer's role and character with canonical rule copy",
+        "match route composition passes private hand, legalActions, pending and result projection to features",
+        "result return uses one exact empty command then waits for a newer lobby sync projection",
+        "rejected or thrown return transport keeps the result operation retryable",
+        "room operations can wait for the new cookie-authenticated socket connection",
+        "production builds select Sites HTTP/SSE and local Vite selects Socket.IO",
+        "Sites requests use strict DTO parsing, cookie credentials and same-payload command retry",
+        "room preview, create and join use the existing HTTP DTO mapping",
+        "SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor",
+        "malformed API responses do not become transport state"
+      ],
+      "outputTail": "thout an effect loop\n  ---\n  duration_ms: 0.1684\n  type: 'test'\n  ...\n# Subtest: reconnect sync waits for the current RoomView and then its active match projection\nok 6 - reconnect sync waits for the current RoomView and then its active match projection\n  ---\n  duration_ms: 0.5913\n  type: 'test'\n  ...\n# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths\nok 7 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths\n  ---\n  duration_ms: 0.2609\n  type: 'test'\n  ...\n# Subtest: post-start role reveal redirects to the registered canonical role route\nok 8 - post-start role reveal redirects to the registered canonical role route\n  ---\n  duration_ms: 0.3559\n  type: 'test'\n  ...\n# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately\nok 9 - role confirmation stays in one tab session and a fresh tab must confirm separately\n  ---\n  duration_ms: 0.5403\n  type: 'test'\n  ...\n# Subtest: role and character face copy is supplied for every canonical base-game entry\nok 10 - role and character face copy is supplied for every canonical base-game entry\n  ---\n  duration_ms: 0.2711\n  type: 'test'\n  ...\n# Subtest: role reveal renders only the viewer's role and character with canonical rule copy\nok 11 - role reveal renders only the viewer's role and character with canonical rule copy\n  ---\n  duration_ms: 4.8626\n  type: 'test'\n  ...\n# Subtest: match route composition passes private hand, legalActions, pending and result projection to features\nok 12 - match route composition passes private hand, legalActions, pending and result projection to features\n  ---\n  duration_ms: 38.5798\n  type: 'test'\n  ...\n# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection\nok 13 - result return uses one exact empty command then waits for a newer lobby sync projection\n  ---\n  duration_ms: 0.863\n  type: 'test'\n  ...\n# Subtest: rejected or thrown return transport keeps the result operation retryable\nok 14 - rejected or thrown return transport keeps the result operation retryable\n  ---\n  duration_ms: 0.3138\n  type: 'test'\n  ...\n# Subtest: room operations can wait for the new cookie-authenticated socket connection\nok 15 - room operations can wait for the new cookie-authenticated socket connection\n  ---\n  duration_ms: 1.163\n  type: 'test'\n  ...\n# (node:4168) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n# --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./packages/engine/test/setup/ts-source-loader.mjs\", pathToFileURL(\"./\"));'\n# (Use `node --trace-warnings ...` to show where the warning was created)\n# Subtest: production builds select Sites HTTP/SSE and local Vite selects Socket.IO\nok 16 - production builds select Sites HTTP/SSE and local Vite selects Socket.IO\n  ---\n  duration_ms: 1.2576\n  type: 'test'\n  ...\n# Subtest: Sites requests use strict DTO parsing, cookie credentials and same-payload command retry\nok 17 - Sites requests use strict DTO parsing, cookie credentials and same-payload command retry\n  ---\n  duration_ms: 41.6911\n  type: 'test'\n  ...\n# Subtest: room preview, create and join use the existing HTTP DTO mapping\nok 18 - room preview, create and join use the existing HTTP DTO mapping\n  ---\n  duration_ms: 10.4051\n  type: 'test'\n  ...\n# Subtest: SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor\nok 19 - SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor\n  ---\n  duration_ms: 44.0523\n  type: 'test'\n  ...\n# Subtest: malformed API responses do not become transport state\nok 20 - malformed API responses do not become transport state\n  ---\n  duration_ms: 0.9786\n  type: 'test'\n  ...\n1..20\n# tests 20\n# suites 0\n# pass 20\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 2002.78"
+    },
+    "siteTypecheck": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "outputTail": ""
+    },
+    "siteBuild": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe scripts/run-framework.mjs build",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "outputTail": "vinext build  (Vite 8.0.13)\n\n[1/5] analyze client references...\n\u001b[2K\rtransforming...✓ 291 modules transformed.\nrendering chunks...\n✓ built in 1.73s\n[2/5] analyze server references...\n\u001b[2K\rtransforming...✓ 150 modules transformed.\nrendering chunks...\n✓ built in 671ms\n[3/5] build rsc environment...\n\u001b[2K\rtransforming...✓ 288 modules transformed.\nrendering chunks...\ncomputing gzip size...\n✓ built in 1.48s\n[4/5] build client environment...\n\u001b[2K\rtransforming...✓ 162 modules transformed.\nrendering chunks...\ncomputing gzip size...\n✓ built in 1.32s\n[5/5] build ssr environment...\n\u001b[2K\rtransforming...✓ 126 modules transformed.\nrendering chunks...\ncomputing gzip size...\n✓ built in 1.20s\n\u001b[0m\n  Route (app)\n  ┌ ? /      \n  └ ƒ /:path+\n\n  ƒ Dynamic  ? Unknown\n\n  ? Some routes could not be classified. vinext currently uses static analysis\n    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.\n    Automatic classification will be improved in a future release.\n\n  Build complete. Run `vinext start` to start the production server."
+    },
+    "workerSmokeSyntax": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --check e2e/worker-http-smoke.mjs",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "outputTail": ""
+    },
+    "localWorkerStart": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/t106-state --ip 127.0.0.1 --inspector-port 0 --port 8799",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "readyUrl": "http://127.0.0.1:8799",
+      "readyStatus": 200,
+      "outputTail": "───────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/GameAppMount-BJEwuwbm.js                                                                                     │ esm  │ 0.18 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/implicit-tags-B7JO5AlV.js                                                                                    │ esm  │ 1.63 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/isr-cache-DChAiiBY.js                                                                                        │ esm  │ 4.81 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/navigation-runtime-BmwpjuPd.js                                                                               │ esm  │ 0.78 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/page-B6WKcutX.js                                                                                             │ esm  │ 0.23 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/page-itTwiT8S.js                                                                                             │ esm  │ 0.23 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/record-Crmk5sem.js                                                                                           │ esm  │ 4.85 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/rolldown-runtime-DUnMT5BP.js                                                                                 │ esm  │ 0.68 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/root-params-0DVgYa50.js                                                                                      │ esm  │ 1.21 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/rsc-CVy_C17F.js                                                                                              │ esm  │ 0.71 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ _next/static/text-stream-D_m1-_T4.js                                                                                      │ esm  │ 18.96 KiB  │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ __vite_rsc_assets_manifest.js                                                                                             │ esm  │ 2.26 KiB   │\n├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────┤\n│ Total (37 modules)                                                                                                        │      │ 813.91 KiB │\n└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────┴────────────┘\n⎔ Starting local server...\n[wrangler:info] ✨ Parsed 1 valid header rule.\n[wrangler:info] Ready on http://127.0.0.1:8799"
+    },
+    "workerHttpSmoke": {
+      "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "checks": [
+        {
+          "id": "S01.worker-default-fetch",
+          "status": "PASS",
+          "detail": "dist/server/index.js exports the default fetch handler"
+        },
+        {
+          "id": "S01.static-assets",
+          "status": "PASS",
+          "detail": "dist/client contains 42 Korean PNG assets and favicon.svg"
+        },
+        {
+          "id": "S01.worker-dependency-boundary",
+          "status": "PASS",
+          "detail": "48 emitted JS bundles contain no pg or Socket.IO server/client dependency specifiers"
+        },
+        {
+          "id": "S01.local-html-and-static-http",
+          "status": "PASS",
+          "detail": "GET /: 200 HTML; GET /rooms/t106-direct-route: 200 HTML; GET /assets/cards/playing/01_bang.png: 200 image/png (116634 bytes); GET /favicon.svg: 200 image/svg+xml; GET /api/t106-unknown-route: NOT_FOUND HTTP 404 JSON"
+        },
+        {
+          "id": "S02.session-http",
+          "status": "PASS",
+          "detail": "Worker GET/POST guest session shape, no-store, HttpOnly/Secure/SameSite=Lax, restore identity and tamper/missing-cookie behavior passed; raw credential absent from response JSON"
+        },
+        {
+          "id": "S04-S07.worker-4p-http-flow",
+          "status": "PASS",
+          "detail": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        },
+        {
+          "id": "S04-S07.worker-7p-http-flow",
+          "status": "PASS",
+          "detail": "7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        }
+      ],
+      "outputTail": "PASS S01.worker-default-fetch: dist/server/index.js exports the default fetch handler\nPASS S01.static-assets: dist/client contains 42 Korean PNG assets and favicon.svg\nPASS S01.worker-dependency-boundary: 48 emitted JS bundles contain no pg or Socket.IO server/client dependency specifiers\nPASS S01.local-html-and-static-http: GET /: 200 HTML; GET /rooms/t106-direct-route: 200 HTML; GET /assets/cards/playing/01_bang.png: 200 image/png (116634 bytes); GET /favicon.svg: 200 image/svg+xml; GET /api/t106-unknown-route: NOT_FOUND HTTP 404 JSON\nPASS S02.session-http: Worker GET/POST guest session shape, no-store, HttpOnly/Secure/SameSite=Lax, restore identity and tamper/missing-cookie behavior passed; raw credential absent from response JSON\nPASS S04-S07.worker-4p-http-flow: 4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored\nPASS S04-S07.worker-7p-http-flow: 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored\nSUMMARY 7 PASS / 0 FAIL"
+    },
+    "localWorkerStop": {
+      "command": "taskkill.exe /PID 10852 /T /F",
+      "cwd": "apps\\site",
+      "exitCode": 0,
+      "status": "PASS",
+      "workerPid": 10852,
+      "outputTail": "ooms 200 OK (28ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (64ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (69ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (60ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (33ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (35ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (37ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (34ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/commands 200 OK (59ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/sync 200 OK (20ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/sync 200 OK (29ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/sync 200 OK (17ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/sync 200 OK (17ms)\n[wrangler:info] GET /api/notifications/events 200 OK (17ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/commands 200 OK (37ms)\n[wrangler:info] GET /api/notifications/events 200 OK (13ms)\n[wrangler:info] POST /api/matches/m_oirGXOkHvCi8_r1eKXF-2nxT/commands 200 OK (12ms)\n[wrangler:info] GET /api/guest-sessions 200 OK (6ms)\n[wrangler:info] POST /api/rooms/r_fOoKY-ma5Nlx5jCoRxEFR6Ag/sync 200 OK (24ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (7ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (6ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (7ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (6ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (6ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (6ms)\n[wrangler:info] POST /api/guest-sessions 201 Created (16ms)\n[wrangler:info] POST /api/rooms 200 OK (22ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (60ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (55ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (58ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (63ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (59ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (31ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (58ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (38ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (35ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (35ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (32ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (31ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (33ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/commands 200 OK (50ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (24ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (20ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (17ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (18ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (20ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (18ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/sync 200 OK (19ms)\n[wrangler:info] GET /api/notifications/events 200 OK (12ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/commands 200 OK (39ms)\n[wrangler:info] GET /api/notifications/events 200 OK (15ms)\n[wrangler:info] POST /api/matches/m_AtjzUurFglzwKLOyE9S5kocz/commands 200 OK (11ms)\n[wrangler:info] GET /api/guest-sessions 200 OK (7ms)\n[wrangler:info] POST /api/rooms/r_KucWmQ8_Y3uX2VYXO8faRxum/sync 200 OK (23ms)"
+    }
+  },
+  "gates": [
+    {
+      "id": "S01",
+      "assertions": [
+        {
+          "id": "S01-A1",
+          "title": "Worker entry exports default fetch",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S01.worker-default-fetch",
+          "result": "dist/server/index.js exports the default fetch handler"
+        },
+        {
+          "id": "S01-A2",
+          "title": "Worker client output includes 42 card/role/character PNGs and favicon",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S01.static-assets",
+          "result": "dist/client contains 42 Korean PNG assets and favicon.svg"
+        },
+        {
+          "id": "S01-A3",
+          "title": "Worker/client bundle excludes pg and Socket.IO",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S01.worker-dependency-boundary",
+          "result": "48 emitted JS bundles contain no pg or Socket.IO server/client dependency specifiers"
+        },
+        {
+          "id": "S01-A4",
+          "title": "Worker serves root/direct route/static resources and safe API 404",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S01.local-html-and-static-http",
+          "result": "GET /: 200 HTML; GET /rooms/t106-direct-route: 200 HTML; GET /assets/cards/playing/01_bang.png: 200 image/png (116634 bytes); GET /favicon.svg: 200 image/svg+xml; GET /api/t106-unknown-route: NOT_FOUND HTTP 404 JSON"
+        },
+        {
+          "id": "S01-A5",
+          "title": "Home and direct room route render in one CUA context/profile",
+          "status": "PASS",
+          "command": "Manual parent CUA browser check on local Worker; one in-app browser profile/context",
+          "fixture": "http://127.0.0.1:8799/ and http://127.0.0.1:8799/rooms/new",
+          "result": "Root opened home and /rooms/new in separate tabs within one in-app browser context/profile; home navigation and the direct room guest-name field/continue button rendered. This is route smoke only, not a full game flow."
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "S02",
+      "assertions": [
+        {
+          "id": "S02-A1",
+          "title": "Guest create/restore/204/invalid-cookie/401 HTTP shapes",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S02.session-http",
+          "result": "Worker GET/POST guest session shape, no-store, HttpOnly/Secure/SameSite=Lax, restore identity and tamper/missing-cookie behavior passed; raw credential absent from response JSON"
+        },
+        {
+          "id": "S02-A2",
+          "title": "Cookie flags and no-store behavior",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S02.session-http",
+          "result": "Worker GET/POST guest session shape, no-store, HttpOnly/Secure/SameSite=Lax, restore identity and tamper/missing-cookie behavior passed; raw credential absent from response JSON"
+        },
+        {
+          "id": "S02-A3",
+          "title": "Raw session credential omitted from JSON and stored only as D1 hash",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped",
+          "result": "PASS; the fixture reads the issued cookie, checks no JSON copy and compares D1 token_hash to SHA-256"
+        },
+        {
+          "id": "S02-A4",
+          "title": "Scan all local Worker request/error logs for raw session secrets",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "The Worker log stream was not captured/scanned for generated cookie credentials."
+        }
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "id": "S03",
+      "assertions": [
+        {
+          "id": "S03-A1",
+          "title": "Five failed invite lookups are admitted, sixth is limited; delay/expiry and valid-state errors follow contract",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset",
+          "result": "PASS; fixed-clock HTTP fixtures cover rolling expiry, peer-IP trust, backoff and invalid-vs-valid invitation states"
+        },
+        {
+          "id": "S03-A2",
+          "title": "D1 reservation is shared across limiter instances and successful JOIN clears the failure window",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "D1 invite limiter persists reservations across limiter instances and admits at most five",
+          "result": "PASS; the same isolated D1 binding is used by concurrent limiter instances"
+        },
+        {
+          "id": "S03-A3",
+          "title": "A successful JOIN reset clears previous failures and exponential retry delay",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "D1 invite limiter success JOIN reset clears prior failures and retry backoff",
+          "result": "PASS; isolated D1 fixture checks reservation allowance before/after JOIN success"
+        },
+        {
+          "id": "S03-A4",
+          "title": "Repeat invite abuse from separately restarted/isolated real Worker processes",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "Miniflare handler/D1 concurrency was tested; independently managed Worker processes were not started for this abuse fixture."
+        }
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "id": "S04",
+      "assertions": [
+        {
+          "id": "S04-A1",
+          "title": "Room command receipt replay returns original outcome and hash mismatch rejects",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected",
+          "result": "PASS; isolated D1 route fixture replays CREATE/JOIN command IDs and checks COMMAND_ID_REUSED"
+        },
+        {
+          "id": "S04-A2",
+          "title": "Stale room version rejects without mutation",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "room ready/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once",
+          "result": "PASS; room fixture asserts STALE_VERSION/currentVersion and unchanged room/match/receipt/outbox counts"
+        },
+        {
+          "id": "S04-A3",
+          "title": "Concurrent join/start has one writer",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected",
+          "result": "PASS; two concurrent same-version JOIN/START_MATCH requests produce one success and one stale rejection"
+        },
+        {
+          "id": "S04-A4",
+          "title": "Room/player/match/receipt/outbox writes roll back together on failures",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "room, player, receipt, and outbox writes roll back together on statement failure",
+          "result": "PASS; D1 statement failure fixture checks all row counts and commit guards after rollback"
+        },
+        {
+          "id": "S04-A5",
+          "title": "Real local Worker 4P and 7P create/join/ready/start lifecycle",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S04-S07.worker-4p-http-flow + S04-S07.worker-7p-http-flow",
+          "result": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored; 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "id": "S05",
+      "assertions": [
+        {
+          "id": "S05-A1",
+          "title": "Same-version match commands admit one writer and leave stale contender without writes",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "D1 expected-version CAS allows one writer for concurrent match commands",
+          "result": "PASS; isolated D1 service concurrency fixture checks one accepted and one stale command"
+        },
+        {
+          "id": "S05-A2",
+          "title": "Accepted ACK replay and reused command ID do not duplicate events/outbox/state",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior",
+          "result": "PASS; match command fixture compares event and outbox counts before/after exact request replay"
+        },
+        {
+          "id": "S05-A3",
+          "title": "Live Worker accepts a current actor legal END_TURN and exact replay is duplicate ACK in 4P and 7P fixtures",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S04-S07.worker-4p-http-flow + S04-S07.worker-7p-http-flow",
+          "result": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored; 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        },
+        {
+          "id": "S05-A4",
+          "title": "Two independent browser contexts submit different commands at the same match version",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "Root had one in-app browser context/profile and completed only home plus /rooms/new route smoke in separate tabs; independent cookie/browser contexts for concurrent commands were unavailable."
+        }
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "id": "S06",
+      "assertions": [
+        {
+          "id": "S06-A1",
+          "title": "Strict canonical room/match sync parsers and private viewer projections",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "room and match sync use strict canonical parsers and viewer-scoped private projections",
+          "result": "PASS; Miniflare fixtures cover authenticated participant and outsider projection responses"
+        },
+        {
+          "id": "S06-A2",
+          "title": "4P/7P Worker match sync passes canonical parser and viewer identity/private-self boundary",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S04-S07.worker-4p-http-flow + S04-S07.worker-7p-http-flow",
+          "result": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored; 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        },
+        {
+          "id": "S06-A3",
+          "title": "Unsupported schema/ruleset is disclosed only to member and never mutates state",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "unsupported match schema and ruleset disclose recovery only to members and never mutate state",
+          "result": "PASS; member and outsider sync fixture validates strict rejection shape and no-write state"
+        },
+        {
+          "id": "S06-A4",
+          "title": "Live 4P/7P SSE contains only current member room/match invalidation fields",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S04-S07.worker-4p-http-flow + S04-S07.worker-7p-http-flow",
+          "result": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored; 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        },
+        {
+          "id": "S06-A5",
+          "title": "Scan all browser HTML and Worker logs for hidden projections/internal context",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "The live smoke checks canonical sync/SSE bodies; it does not inspect all emitted HTML/log records for secret sentinel strings."
+        }
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "id": "S07",
+      "assertions": [
+        {
+          "id": "S07-A1",
+          "title": "SSE auth refresh, member allowlist, cancellation and cursor resume",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation",
+          "result": "PASS; server fixture checks membership before cursor reads and verifies reconnect after cancellation"
+        },
+        {
+          "id": "S07-A2",
+          "title": "Live 4P/7P Worker stream emits allowlisted invalidation; reconnect from last cursor sees new match version",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx e2e/worker-http-smoke.mjs",
+          "fixture": "S04-S07.worker-4p-http-flow + S04-S07.worker-7p-http-flow",
+          "result": "4 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored; 7 guests created, joined by private invite, readied, started and synced; member SSE allowed only room/match invalidations and reconnected after its last cursor; current actor completed legal END_TURN and identical command replay returned its prior accepted ACK; owner session/room sync restored"
+        },
+        {
+          "id": "S07-A3",
+          "title": "Client transport closes hidden streams and reconnects visibly with cursor/full sync",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --experimental-strip-types --loader ./packages/engine/test/setup/ts-source-loader.mjs --test apps/web/test/sites-transport.test.mjs apps/web/src/app/routes.test.mjs",
+          "fixture": "SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor",
+          "result": "PASS; fake EventSource/visibility fixture verifies lifecycle and sync after invalidation; not a real browser tab"
+        },
+        {
+          "id": "S07-A4",
+          "title": "Real browser tab hide/close, network loss, and resumed full-page sync",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "Root's one in-app browser context/profile verified only / and /rooms/new in separate tabs. Independent browser contexts and real game-page visibility/network recovery were unavailable; transport mocks and Worker HTTP/SSE are supporting non-browser evidence only."
+        }
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "id": "S08",
+      "assertions": [
+        {
+          "id": "S08-A1",
+          "title": "D1-backed command receipt survives repository recreation; independent runtime starts empty",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation",
+          "result": "PASS; Miniflare fixture checks repository recreation over stored D1 and isolation of a separate runtime"
+        },
+        {
+          "id": "S08-A2",
+          "title": "Full initialized match snapshot/completed restart state remains valid in D1",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match",
+          "result": "PASS; fixture checks turn-start/draw snapshot, same roster rotation, card-ID separation and preserved prior match history"
+        },
+        {
+          "id": "S08-A3",
+          "title": "Unsupported stored state is safely rejected/member-only",
+          "status": "PASS",
+          "command": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import tsx --test test/storage/migrations.test.ts test/storage/d1-storage.test.ts test/server/session-room.test.ts test/server/match-sync.test.ts",
+          "fixture": "unsupported state schema is returned as a safe recovery error",
+          "result": "PASS; Miniflare storage test plus match-sync recovery test check unsupported schema no-write boundaries"
+        },
+        {
+          "id": "S08-A4",
+          "title": "Restart the local Wrangler Worker and recover the same guest, seat, role, hand, pending cursor and exact command receipt",
+          "status": "NOT RUN",
+          "command": null,
+          "fixture": null,
+          "result": "S08 full Worker process-restart path was not exercised; only isolated D1/repository fixtures were run."
+        }
+      ],
+      "status": "PARTIAL"
+    }
+  ],
+  "fullBrowserFlows": {
+    "status": "NOT RUN",
+    "fourPlayer": "NOT RUN",
+    "sevenPlayer": "NOT RUN",
+    "unmet": [
+      "4P browser UI: create room, join all seats, set readiness, and start",
+      "7P browser UI: create room, join all seats, set readiness, and start",
+      "turn actions and response-card/response-chain UI",
+      "elimination/cleanup UI and winner/result presentation",
+      "browser reconnect after reload or network loss with the same seat and state",
+      "return-to-lobby UI and readiness reset after a completed game"
+    ],
+    "reason": "Root used one accessible in-app browser context/profile and verified only the home route and direct /rooms/new guest-entry route in separate tabs. Independent browser cookie contexts for complete UI games were unavailable; the workspace has no Playwright or agent-browser package."
+  },
+  "publicDeploymentAndRemoteD1": "NOT RUN (out of scope for T106)",
+  "counts": {
+    "assertions": {
+      "pass": 29,
+      "fail": 0,
+      "notRun": 6,
+      "total": 35
+    },
+    "gates": {
+      "pass": 2,
+      "partial": 6,
+      "fail": 0
+    }
+  }
+}

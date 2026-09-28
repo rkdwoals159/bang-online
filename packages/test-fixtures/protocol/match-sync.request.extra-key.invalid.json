@@ -1,0 +1,8 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-match-sync-02",
+  "matchId": "match_example",
+  "knownVersion": 7,
+  "afterEventSeq": 12,
+  "actorId": "client-supplied"
+}

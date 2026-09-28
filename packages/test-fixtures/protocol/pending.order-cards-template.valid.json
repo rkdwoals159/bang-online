@@ -1,0 +1,16 @@
+{
+  "interactionId": "i-discard",
+  "kind": "DISCARDS_ORDER",
+  "allowedChoices": ["ORDER_CARDS"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-discard", "choice": "ORDER_CARDS" }
+  ],
+  "discardOrder": {
+    "requiredCount": 1,
+    "allowedCards": [
+      { "cardInstanceId": "own-card-1", "typeId": "bang", "rank": "A", "suit": "SPADES" }
+    ]
+  }
+}

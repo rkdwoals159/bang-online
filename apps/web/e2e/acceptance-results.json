@@ -1,0 +1,1374 @@
+{
+  "generatedAt": "2026-09-28T07:28:21Z",
+  "origin": "http://127.0.0.1:3003",
+  "serverOrigin": "http://127.0.0.1:3003",
+  "results": {
+    "ENV": {
+      "status": "PASS",
+      "detail": "server /healthz=200; Vite /rooms/new=200; existing services left running"
+    },
+    "D10": {
+      "status": "PASS",
+      "detail": "Browser room r_i3DfsLJ6pOVdAh_SIxBrXCgf: guest B refreshed the active lobby and returned to the same room/seat; a second tab at the same .51 origin restored the same guest and re-entered the same seat. Combined with the recorded API pending-stage reconnect, duplicate receipt, unchanged version, and unchanged effect witness, all stated D10 checks are covered."
+    },
+    "D17": {
+      "status": "PASS",
+      "detail": "20 ASCII and 20-codepoint names accepted; 21-codepoint/control names rejected; HTML echoed literally; invalid-preview rate limit observed (UI rendering not checked); prior browser evidence: 20 ASCII and 20-codepoint names accepted; 21-codepoint/control names rejected; HTML echoed literally; invalid-preview rate limit observed (UI rendering not checked); prior browser evidence: API run accepted 20 ASCII and 20-codepoint names, rejected 21-codepoint/control names, observed invalid-preview rate limiting, and exposed no stack trace. Browser evidence shows <img src=x> rendered literally as text in seats/results and invalid invite preview showed a generic Korean error."
+    },
+    "D16": {
+      "status": "PASS",
+      "detail": "capacity 3/8 returned BAD_REQUEST; unready 4-seat room START_MATCH returned ROOM_NOT_READY; room remained waiting at same version"
+    },
+    "D03": {
+      "status": "PASS",
+      "detail": "two concurrent SET_READY commands at one room version: one accepted, one STALE_VERSION, one committed version increment"
+    },
+    "D05": {
+      "status": "PASS",
+      "detail": "nonmember actual room/match sync returned generic NOT_FOUND_OR_FORBIDDEN without IDs; arbitrary room:join event disconnected the socket; reconnect and both membership checks remained denied"
+    },
+    "D04": {
+      "status": "PASS",
+      "detail": "match:command actorId injection returned BAD_REQUEST; version unchanged"
+    },
+    "D11": {
+      "status": "PASS",
+      "detail": "in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination; eliminated responder KICK_MEMBER=ROOM_FORBIDDEN with room/match versions and pending cleanup unchanged; eliminated responder submitted its own ORDER_CARDS cleanup, hand=0, inPlay=0; outsider, owner, and eliminated-member denial plus self-cleanup exception were exercised; prior browser evidence: in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination; prior browser evidence: API run: outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN, owner KICK_MEMBER=ROOM_LOCKED, and eliminated responder KICK_MEMBER=ROOM_FORBIDDEN; room/match versions and pending cleanup stayed unchanged. The eliminated responder then submitted its own ORDER_CARDS cleanup, leaving hand=0 and inPlay=0. Browser evidence separately shows eliminated C 2/2 and Sheriff D 1/1 cleanup submitted."
+    },
+    "D06": {
+      "status": "NOT RUN",
+      "detail": "Initial 4P and 7P member sync snapshots were pairwise checked: each active seat received its own hand/count and role, other non-Sheriff roles were null, foreign hand card IDs and a seed field were absent. The ack() wrapper observed 454 match:sync response objects, not every raw ACK packet. onAny observed 1374 decoded room/match change events; only room:changed and match:changed payload keys were audited. No exhaustive accepted/error command ACK audit, raw WebSocket frame audit, every-state per-seat snapshot audit, deck-order audit, or legalActions hidden-card inference test was run. D06 remains NOT RUN."
+    },
+    "D01": {
+      "status": "PASS",
+      "detail": "injected loss of the first server-to-client Engine.IO WebSocket ACK frame before Socket.IO packet decoding; the action committed exactly once, the same guest reconnected and replayed the same commandId/payload, the duplicate receipt matched the dropped receipt version/eventSeq, and card/HP/reward/state effect witness did not change on replay"
+    },
+    "D02": {
+      "status": "PASS",
+      "detail": "changed command fields under same commandId returned COMMAND_ID_REUSED; version unchanged"
+    },
+    "D07": {
+      "status": "PASS",
+      "detail": "server accepted a zone-only cat_balou request without a target card ID and moved exactly one target hand card; its ID appeared only as the public discard top card; no hidden hand card ID appeared outside a public discard projection"
+    },
+    "D19": {
+      "status": "PASS",
+      "detail": "Both 4P and 7P browser games completed lobby/ready/start/private role reveal/turns and responses/elimination/result/owner return to the same waiting room. 4P room r_-EE6tGR0eRSlRJqh3E8LwMTl returned at 4/4 seats, all unready, start disabled. 7P fresh room r_YAwB3GmOetWaEyaZS1YM1hUa returned at 7/7, all unready, start disabled. At least one reconnect is documented: same-guest second B tab restored the same 4P room/match seat projection. Duplicate-action receipt/version across reconnect and reconnect during a pending interaction were not verified; those D10 conditions remain unverified. The prior 5/7 room's generic F/G preview failures were not root-caused and were not used as evidence for the fresh 7P pass."
+    },
+    "D18": {
+      "status": "NOT RUN",
+      "detail": "after completed Socket.IO game, START_MATCH returned a distinct match identity and new initial hand IDs had no overlap with saved final hands; seed visible=false; deck-wide identity, fresh role assignment, and seed non-reuse were not fully verifiable from the allowed sync projection"
+    },
+    "D08": {
+      "status": "PASS",
+      "detail": "On isolated ports 3003/5436 and the separate D08 PGlite database, the dedicated server process shut down gracefully and restarted the process against the same directory while DISCARDS_ORDER was pending at step 1/1. All four room/match guest projections, aggregate version/event sequence, HP/card state, responder identity and exact options matched after reconnect; a server-issued legal response was accepted and advanced the saved interaction."
+    },
+    "D09": {
+      "status": "PASS",
+      "detail": "Integrated isolated PGlite fault injection on 3004/5437: a test-only wrapper around the isolated server's own pg.Pool rejected COMMIT after the exact target transaction had completed its matches, match_events, command_receipts, outbox, and savepoint-release queries. The real transaction error path issued ROLLBACK; in-process DB witnesses showed version, eventSeq, serialized state, event rows, receipt, and outbox unchanged. Replaying the same command then committed. A one-shot preload dropped that exact committed match:changed notification and the client transport dropped the postcommit ACK. DB evidence showed one accepted receipt, two command event rows and one outbox row at version 5->6, with the outbox marked published; the observer saw no dropped notification, remained at its previous projection until explicit sync, then recovered the committed state. Reconnect/replay returned the same receipt with duplicate=true and no additional version/event/outbox rows."
+    },
+    "D12": {
+      "status": "PASS",
+      "detail": "Root CUA visual/accessibility acceptance on isolated 4-guest room r_WFCubFK898xuLKQF-fBx-n8q: with C responding to BANG_RESPONSE at version 6, an origin-scoped proxy blocked C origin 127.0.0.62:5177/socket.io and destroyed its WebSocket. C showed the accessible notice “연결 끊김 · 재접속 시 현재 판을 복구합니다” with response controls disabled. Observer B remained at version 6 with C pending for 42 seconds and saw no auto-pass or damage. Unblocking restored the same guest tab at version 6 with the same prompt/options; C accepted “피해 받기” and the match advanced to version 7 with C at 3/4 HP. No timeout, automatic resolution, duplicate effect, or lost legal continuation was observed."
+    },
+    "D13": {
+      "status": "PASS",
+      "detail": "Root CUA completed keyboard-only target/submit at desktop width and 360x800 CSS iframe, Bang defense, Beer rescue from 0 to 1 HP, lethal damage and elimination choice, death-cleanup Panic selection/submission, and three-card ordered discard. Target state/enabled submit and focus were observed; card zoom opened, Escape closed it, and focus returned to the trigger."
+    },
+    "D14": {
+      "status": "PASS",
+      "detail": "Root CUA visually inspected the D14 fixture: all 80 physical cards rendered through production PlayingCardFace; accessibility evidence distinguished Stagecoach 9-SPADES definition IDs stagecoach_01 and stagecoach_02. The screenshot showed matching printed rank/suit overlays on adjacent variants (including Barrel Q♠/K♠ and Jail J♠/4♥/10♠) without overlap."
+    },
+    "D15": {
+      "status": "PASS",
+      "detail": "Root CUA opened the fixture's forced image-failure mode. The browser rendered the production fallback '뱅! 이미지 없음' with A♠; keyboard Space selected the legal Bang and opened action controls. Card details showed A · 스페이드, the allowed target, and '사거리 내 다른 생존자 1명을 공격합니다.' No image-delay path was exercised."
+    },
+    "MATCH4": {
+      "status": "FAIL",
+      "detail": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    deckCount: 49,\n    discard: {\n      count: 23,\n      topCard: {\n...\n    },\n+   ownHand: null,\n-   ownHand: [\n-     'ci_ad0139309a85469ad15177ffd8217288_g',\n-     'ci_24a3345fa5cf88352a0dc35462552048_o'\n-   ],\n    pending: null,\n    players: [\n      {\n        eliminated: true,\n        handCount: 0,\n"
+    },
+    "MATCH7": {
+      "status": "FAIL",
+      "detail": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    deckCount: 21,\n    discard: {\n      count: 34,\n      topCard: {\n...\n    },\n+   ownHand: null,\n-   ownHand: [\n-     'ci_5ffbac8a5a92a1dd8a480b36aa95f9f0_v'\n-   ],\n    pending: null,\n    players: [\n      {\n        eliminated: true,\n        handCount: 0,\n"
+    }
+  },
+  "apiExecution": {
+    "nodeVersion": "v22.23.1",
+    "startedAt": "2026-09-28T05:04:13.434Z",
+    "command": "$env:T60_ORIGIN='http://127.0.0.1:3003'; $env:T60_SERVER_ORIGIN='http://127.0.0.1:3003'; $env:T60_WEB_ORIGIN='http://127.0.0.1:5176'; node apps/web/e2e/run-acceptance.mjs",
+    "results": {
+      "ENV": {
+        "status": "PASS",
+        "detail": "server /healthz=200; Vite /rooms/new=200; existing services left running"
+      },
+      "D10": {
+        "status": "NOT RUN",
+        "detail": "same guest reconnected during DISCARDS_ORDER step 1/1, restored the exact responder projection/options, then reconnected again and replayed the identical commandId/payload; duplicate receipt and unchanged version/state/effect witness confirmed. Browser refresh and second-tab seat restoration are recorded separately; this API run alone does not establish the full D10 flow.; prior browser evidence: Browser room r_i3DfsLJ6pOVdAh_SIxBrXCgf: guest B refreshed the active lobby and returned to the same room/seat; a second tab at the same .51 origin restored the same guest and re-entered the same seat. Combined with the recorded API pending-stage reconnect, duplicate receipt, unchanged version, and unchanged effect witness, all stated D10 checks are covered."
+      },
+      "D17": {
+        "status": "PASS",
+        "detail": "20 ASCII and 20-codepoint names accepted; 21-codepoint/control names rejected; HTML echoed literally; invalid-preview rate limit observed (UI rendering not checked); prior browser evidence: 20 ASCII and 20-codepoint names accepted; 21-codepoint/control names rejected; HTML echoed literally; invalid-preview rate limit observed (UI rendering not checked); prior browser evidence: API run accepted 20 ASCII and 20-codepoint names, rejected 21-codepoint/control names, observed invalid-preview rate limiting, and exposed no stack trace. Browser evidence shows <img src=x> rendered literally as text in seats/results and invalid invite preview showed a generic Korean error."
+      },
+      "D16": {
+        "status": "PASS",
+        "detail": "capacity 3/8 returned BAD_REQUEST; unready 4-seat room START_MATCH returned ROOM_NOT_READY; room remained waiting at same version"
+      },
+      "D03": {
+        "status": "PASS",
+        "detail": "two concurrent SET_READY commands at one room version: one accepted, one STALE_VERSION, one committed version increment"
+      },
+      "D04": {
+        "status": "PASS",
+        "detail": "match:command actorId injection returned BAD_REQUEST; version unchanged"
+      },
+      "D05": {
+        "status": "PASS",
+        "detail": "nonmember actual room/match sync returned generic NOT_FOUND_OR_FORBIDDEN without IDs; arbitrary room:join event disconnected the socket; reconnect and both membership checks remained denied"
+      },
+      "D11": {
+        "status": "PASS",
+        "detail": "in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination; eliminated responder KICK_MEMBER=ROOM_FORBIDDEN with room/match versions and pending cleanup unchanged; eliminated responder submitted its own ORDER_CARDS cleanup, hand=0, inPlay=0; outsider, owner, and eliminated-member denial plus self-cleanup exception were exercised; prior browser evidence: in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination; prior browser evidence: API run: outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN, owner KICK_MEMBER=ROOM_LOCKED, and eliminated responder KICK_MEMBER=ROOM_FORBIDDEN; room/match versions and pending cleanup stayed unchanged. The eliminated responder then submitted its own ORDER_CARDS cleanup, leaving hand=0 and inPlay=0. Browser evidence separately shows eliminated C 2/2 and Sheriff D 1/1 cleanup submitted."
+      },
+      "D06": {
+        "status": "NOT RUN",
+        "detail": "4P and 7P all-seat snapshots/private projections were checked; 454 member match:sync ACKs and 1374 room/match change notifications were observed. Notifications contained only their public room/match IDs and version cursors. This did not fully audit every command/error ACK, hidden-card inference through legalActions, or deck/seed ordering, so full D06 remains unverified."
+      },
+      "D01": {
+        "status": "PASS",
+        "detail": "injected loss of the first server-to-client Engine.IO WebSocket ACK frame before Socket.IO packet decoding; the action committed exactly once, the same guest reconnected and replayed the same commandId/payload, the duplicate receipt matched the dropped receipt version/eventSeq, and card/HP/reward/state effect witness did not change on replay"
+      },
+      "D02": {
+        "status": "PASS",
+        "detail": "changed command fields under same commandId returned COMMAND_ID_REUSED; version unchanged"
+      },
+      "D07": {
+        "status": "PASS",
+        "detail": "server accepted a zone-only cat_balou request without a target card ID and moved exactly one target hand card; its ID appeared only as the public discard top card; no hidden hand card ID appeared outside a public discard projection"
+      },
+      "D19": {
+        "status": "FAIL",
+        "detail": "4-seat Socket.IO API game completed; actions=38, accepted=38, responses=10, endTurns=6, outcome=true, all public roles=true; required browser flow/reconnect/re-lobby was not executed; 7-seat Socket.IO API game completed; actions=159, accepted=159, responses=65, endTurns=22, outcome=true, all public roles=true; required 7-seat browser flow/reconnect/re-lobby was not executed"
+      },
+      "D18": {
+        "status": "NOT RUN",
+      "detail": "After completed Socket.IO game, START_MATCH returned a distinct match identity and new initial hand IDs had no overlap with saved final hands; seed visible=false. Runtime GameState has no seed field and production match randomness comes from crypto.randomBytes through an injected RandomSource. The allowed sync projection cannot prove full deck/role freshness or seed non-reuse, so D18 remains NOT RUN."
+      },
+      "D08": {
+        "status": "NOT RUN",
+        "detail": "no restart/fault injection; the existing shared local server was left running as required"
+      },
+      "D09": {
+        "status": "NOT RUN",
+        "detail": "no DB commit/ACK fault-injection hook is exposed through the owned E2E paths"
+      },
+      "D12": {
+        "status": "NOT RUN",
+        "detail": "API-only responder disconnect stall lasted 30000ms; version, pending interaction, and match status stayed unchanged. The player-facing no-timeout/state-preservation notice was not checked in UI."
+      },
+      "D13": {
+        "status": "NOT RUN",
+        "detail": "360px keyboard-only action flow requires responsive viewport control in the browser"
+      },
+      "D14": {
+        "status": "NOT RUN",
+        "detail": "80-card face/duplicate Stagecoach rendering requires a dedicated full-catalog visual fixture"
+      },
+      "D15": {
+        "status": "NOT RUN",
+        "detail": "image failure/fallback could not be forced through the available browser controls"
+      }
+    },
+    "pendingReconnectEvidence": {
+      "roomId": "r_BIN9fRYc170EY_oevec-E2uP",
+      "matchId": "m_sJijwc3QO-Rg_hlV-eZ4Kk0w",
+      "playerId": "p_XM3WY_tPIDHxbs0YI1oe3Y0J",
+      "interactionId": "interaction_a061e578-c3a8-41e1-bbfc-32f62c6ad341",
+      "kind": "DISCARDS_ORDER",
+      "step": {
+        "current": 1,
+        "total": 1
+      },
+      "responderProjectionRestored": true,
+      "versionBeforeResponse": 44,
+      "versionAfterFirstResponse": 45,
+      "firstAckCallbackRan": false,
+      "firstAckPacketDroppedBeforeCallback": true,
+      "ackLossInjectionBoundary": "Engine.IO WebSocket transport onData: server ACK frame dropped before Socket.IO packet decoding",
+      "droppedAckPacket": {
+        "payloadPrefix": "43",
+        "payloadLength": 151,
+        "status": "accepted",
+        "aggregateVersion": 45,
+        "eventSeq": 85
+      },
+      "transportAckLossInjected": true,
+      "commandIdReplayedOnNewSocket": true,
+      "duplicate": true,
+      "receiptVersion": 45,
+      "receiptEventSeq": 85,
+      "replayReceiptMatchesDroppedReceipt": true,
+      "stateAndEffectWitnessUnchangedAfterReplay": true,
+      "oneTimeCardHpOrRewardEffect": true,
+      "effectWitnessAfterFirstResponse": {
+        "status": "completed",
+        "players": [
+          {
+            "playerId": "p_XM3WY_tPIDHxbs0YI1oe3Y0J",
+            "hp": 0,
+            "handCount": 0,
+            "eliminated": true,
+            "inPlay": []
+          },
+          {
+            "playerId": "p_x6VCmOfxu1PkS1J4UeNr4n0l",
+            "hp": 3,
+            "handCount": 3,
+            "eliminated": false,
+            "inPlay": [
+              "ci_0b6d9250b259d74fca833a155cdb2265_7"
+            ]
+          },
+          {
+            "playerId": "p_DeDukYSO5ki4ozTBnndBsTNy",
+            "hp": 4,
+            "handCount": 4,
+            "eliminated": false,
+            "inPlay": [
+              "ci_06e07aaa3a36b34428b3c4fe1dc4ab5e_9"
+            ]
+          },
+          {
+            "playerId": "p_6H6mDt-9wq7ORHEfEmldsflp",
+            "hp": 4,
+            "handCount": 1,
+            "eliminated": false,
+            "inPlay": [
+              "ci_bb7b30c871bce826e14eae38e36d7e57_e",
+              "ci_9a01198fc158ea21998b28850117fff3_12"
+            ]
+          }
+        ],
+        "deckCount": 40,
+        "discard": {
+          "topCard": {
+            "cardInstanceId": "ci_dc9392ee2251d2bb915e3f2ae854cf49_y",
+            "typeId": "missed",
+            "rank": "J",
+            "suit": "CLUBS"
+          },
+          "count": 28
+        },
+        "ownHand": null,
+        "pending": null,
+        "outcome": {
+          "winningFaction": "outlaws",
+          "winningPlayerIds": [
+            "p_x6VCmOfxu1PkS1J4UeNr4n0l",
+            "p_6H6mDt-9wq7ORHEfEmldsflp"
+          ]
+        }
+      }
+    },
+    "deathCleanupKickEvidence": {
+      "responderPlayerId": "p_XM3WY_tPIDHxbs0YI1oe3Y0J",
+      "responseCode": "ROOM_FORBIDDEN",
+      "roomVersionUnchanged": true,
+      "matchVersionUnchanged": true,
+      "pendingStageUnchanged": true,
+      "passed": true,
+      "selfCleanupAccepted": true,
+      "cleanupHandCountAfter": 0,
+      "cleanupInPlayCountAfter": 0
+    },
+    "pendingStallEvidence": {
+      "durationMs": 30000,
+      "interactionId": "interaction_a061e578-c3a8-41e1-bbfc-32f62c6ad341",
+      "kind": "DISCARDS_ORDER",
+      "step": {
+        "current": 1,
+        "total": 1
+      },
+      "matchVersionUnchanged": true,
+      "pendingStageUnchanged": true,
+      "matchStatusUnchanged": true,
+      "uiNoticeChecked": false
+    },
+    "matchRunAudits": [
+      {
+        "capacity": 4,
+        "notifications": {
+          "checked": 177,
+          "problems": []
+        },
+        "syncAckCount": 111
+      },
+      {
+        "capacity": 7,
+        "notifications": {
+          "checked": 1197,
+          "problems": []
+        },
+        "syncAckCount": 343
+      }
+    ],
+    "finishedAt": "2026-09-28T03:57:15.213Z",
+    "auxiliaryIsolationProbe": {
+      "serverPort": 3003,
+      "pglitePort": 5436,
+      "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d08-20260928",
+      "outcome": "The server reported schema ready and listening, then the test-owned process was stopped. No game was created or restarted in this probe. The separate database directory was preserved.",
+      "command": "$dataRoot = Join-Path $env:LOCALAPPDATA 'BangOnline'; $dataDir = Join-Path $dataRoot 'pglite-t60-d08-20260928'; $env:HOST='127.0.0.1'; $env:PORT='3003'; $env:PGLITE_PORT='5436'; $env:PGLITE_DATA_DIR=$dataDir; $env:WEB_ORIGIN='http://127.0.0.1:5176'; node .\\apps\\server\\node_modules\\tsx\\dist\\cli.mjs .\\apps\\server\\src\\main.ts --pglite-dev"
+    },
+    "d08RestartExecution": {
+      "nodeVersion": "v22.23.1",
+      "startedAt": "2026-09-28T04:44:37.242Z",
+      "finishedAt": "2026-09-28T04:44:49.133Z",
+      "command": "node apps/web/e2e/run-d08-restart.mjs; node --import file://<workspace>/apps/web/e2e/d08-server-preload.mjs --import file://<workspace>/apps/server/node_modules/tsx/dist/loader.mjs apps/server/src/main.ts --pglite-dev (spawned by runner)",
+      "ports": {
+        "server": 3003,
+        "pglite": 5436
+      },
+      "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d08-20260928",
+      "primaryT60ServerHealthBefore": 200,
+      "primaryT60ServerHealthAfter": 200,
+      "serverStarts": 2,
+      "processLogs": [
+        {
+          "source": "stdout",
+          "line": "[server] Database schema ready; HTTP and Socket.IO listening at 127.0.0.1:3003."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] Local PGlite Socket database ready at 127.0.0.1:5436."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] shutdown complete."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] Database schema ready; HTTP and Socket.IO listening at 127.0.0.1:3003."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] Local PGlite Socket database ready at 127.0.0.1:5436."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] shutdown complete."
+        }
+      ],
+      "evidence": {
+        "isolatedDatabaseVerified": true,
+        "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d08-20260928",
+        "separateFromPrimaryT60Database": true,
+        "d08PortsFreeBeforeStart": true,
+        "primaryHealthBefore": 200,
+        "initialStart": {
+          "processId": 19288,
+          "healthStatus": 200,
+          "httpReadyLog": true,
+          "pgliteReadyLog": true
+        },
+        "roomId": "r_qokAoPG3P7KBvW-_215IIYhz",
+        "completedGamesBeforePending": 0,
+        "acceptedCommandsBeforePending": 4,
+        "serverPorts": {
+          "http": 3003,
+          "pglite": 5436
+        },
+        "matchId": "m_0MfraYSIarL_tjf-Bztmyx9F",
+        "observedPendingKinds": [
+          "BANG_RESPONSE",
+          "DISCARDS_ORDER"
+        ],
+        "pending": {
+          "interactionId": "interaction_f356f062-c9b4-4476-b312-f524b4eca2fa",
+          "kind": "DISCARDS_ORDER",
+          "currentResponderPlayerId": "p_RKXN6XA4Z__W3tsuxKF28YQ_",
+          "step": {
+            "current": 1,
+            "total": 1
+          },
+          "allowedChoices": [
+            "ORDER_CARDS"
+          ],
+          "responseOptions": [
+            {
+              "choice": "ORDER_CARDS",
+              "fields": [
+                "choice",
+                "interactionId"
+              ]
+            }
+          ],
+          "discardRequiredCount": 1,
+          "discardAllowedCardCount": 5,
+          "responderHandCount": 5,
+          "hpByPlayer": [
+            {
+              "playerId": "p_RKXN6XA4Z__W3tsuxKF28YQ_",
+              "hp": 4,
+              "eliminated": false
+            },
+            {
+              "playerId": "p_SDRHnTYqtmDzzEPGLi6zJjQR",
+              "hp": 3,
+              "eliminated": false
+            },
+            {
+              "playerId": "p_BH8qIFthOBqFlo-A6xE11e-Z",
+              "hp": 4,
+              "eliminated": false
+            },
+            {
+              "playerId": "p_l3o51Thwmwzvj0lDmZsw72Fk",
+              "hp": 4,
+              "eliminated": false
+            }
+          ],
+          "responderMode": "active"
+        },
+        "beforeRestart": {
+          "p_BH8qIFthOBqFlo-A6xE11e-Z": {
+            "version": 9,
+            "eventSeq": 6,
+            "digest": "7827df589a12cfebce43963401dbe44bd46d06ec6a324690cd9421059664943a"
+          },
+          "p_l3o51Thwmwzvj0lDmZsw72Fk": {
+            "version": 9,
+            "eventSeq": 6,
+            "digest": "5f5697e58e3b497d3daccefee4633be301bc9aa79ca26b655bda167b8db50de8"
+          },
+          "p_RKXN6XA4Z__W3tsuxKF28YQ_": {
+            "version": 9,
+            "eventSeq": 6,
+            "digest": "2cd15052a96b92151193ba4c046309f6ed233817fef6f40264bb61888d79b97e"
+          },
+          "p_SDRHnTYqtmDzzEPGLi6zJjQR": {
+            "version": 9,
+            "eventSeq": 6,
+            "digest": "ea2ccf399a99ab690c8d47629538a19662907e59e4426ceb1ed9711babce184a"
+          }
+        },
+        "roomBeforeRestart": {
+          "p_BH8qIFthOBqFlo-A6xE11e-Z": {
+            "version": 8,
+            "status": "in_game",
+            "activeMatchId": "m_0MfraYSIarL_tjf-Bztmyx9F",
+            "digest": "08ec9173e571731b3ccd6aa11d54afb0841898acbbaeb798f7a23ee8d4b7dc28"
+          },
+          "p_l3o51Thwmwzvj0lDmZsw72Fk": {
+            "version": 8,
+            "status": "in_game",
+            "activeMatchId": "m_0MfraYSIarL_tjf-Bztmyx9F",
+            "digest": "05fe362ec36bce798a6fa54b6b7b67587ce0dcb74f1102005b6bc01cd861f2c0"
+          },
+          "p_RKXN6XA4Z__W3tsuxKF28YQ_": {
+            "version": 8,
+            "status": "in_game",
+            "activeMatchId": "m_0MfraYSIarL_tjf-Bztmyx9F",
+            "digest": "51bcbf34f1fac0238cd24d40cafc747059d35de67d5f7f74004c8d1c6b2da9a4"
+          },
+          "p_SDRHnTYqtmDzzEPGLi6zJjQR": {
+            "version": 8,
+            "status": "in_game",
+            "activeMatchId": "m_0MfraYSIarL_tjf-Bztmyx9F",
+            "digest": "517e3122f41372668c02ddc6ecdadd39ef662a91c435bb0e159516da6d9c597f"
+          }
+        },
+        "responderPlayerId": "p_RKXN6XA4Z__W3tsuxKF28YQ_",
+        "restartAttempted": true,
+        "terminationOwnershipCheck": {
+          "processTree": [
+            {
+              "processId": 21928,
+              "parentProcessId": 23396,
+              "name": "node.exe",
+              "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+              "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d08-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+            },
+            {
+              "processId": 21836,
+              "parentProcessId": 21928,
+              "name": "conhost.exe",
+              "executablePath": "C:\\Windows\\system32\\conhost.exe",
+              "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+            }
+          ],
+          "listeners": [
+            {
+              "port": 3003,
+              "owningProcessId": 21928
+            },
+            {
+              "port": 5436,
+              "owningProcessId": 21928
+            }
+          ],
+          "processIdMatches": true,
+          "executableMatches": true,
+          "commandLineMatches": true,
+          "listenerOwnersMatch": true
+        },
+        "gracefulShutdown": {
+          "code": 0,
+          "signal": null,
+          "gracefulRequestSent": true,
+          "gracefulShutdownLog": true,
+          "forcedTermination": false,
+          "ownershipBeforeShutdown": {
+            "processTree": [
+              {
+                "processId": 19288,
+                "parentProcessId": 23396,
+                "name": "node.exe",
+                "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+                "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d08-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+              },
+              {
+                "processId": 12280,
+                "parentProcessId": 19288,
+                "name": "conhost.exe",
+                "executablePath": "C:\\Windows\\system32\\conhost.exe",
+                "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+              }
+            ],
+            "listeners": [
+              {
+                "port": 3003,
+                "owningProcessId": 19288
+              },
+              {
+                "port": 5436,
+                "owningProcessId": 19288
+              }
+            ],
+            "processIdMatches": true,
+            "executableMatches": true,
+            "commandLineMatches": true,
+            "listenerOwnersMatch": true
+          },
+          "ownership": null,
+          "d08PortsReleased": true
+        },
+        "restart": {
+          "processId": 21928,
+          "healthStatus": 200,
+          "httpReadyLog": true,
+          "pgliteReadyLog": true
+        },
+        "sameDatabaseAndPortsOnRestart": true,
+        "serverSpawnEnvironments": [
+          {
+            "pid": 19288,
+            "host": "127.0.0.1",
+            "serverPort": "3003",
+            "pglitePort": "5436",
+            "dataDirectory": "C:\\Users\\user\\AppData\\Local\\BangOnline\\pglite-t60-d08-20260928"
+          },
+          {
+            "pid": 21928,
+            "host": "127.0.0.1",
+            "serverPort": "3003",
+            "pglitePort": "5436",
+            "dataDirectory": "C:\\Users\\user\\AppData\\Local\\BangOnline\\pglite-t60-d08-20260928"
+          }
+        ],
+        "allGuestProjectionsRestoredExactly": true,
+        "allRoomProjectionsRestoredExactly": true,
+        "responderOptionsRestoredExactly": true,
+        "nonResponderPermissionsRestored": true,
+        "beforeProjectionDigests": {
+          "p_BH8qIFthOBqFlo-A6xE11e-Z": "7827df589a12cfebce43963401dbe44bd46d06ec6a324690cd9421059664943a",
+          "p_l3o51Thwmwzvj0lDmZsw72Fk": "5f5697e58e3b497d3daccefee4633be301bc9aa79ca26b655bda167b8db50de8",
+          "p_RKXN6XA4Z__W3tsuxKF28YQ_": "2cd15052a96b92151193ba4c046309f6ed233817fef6f40264bb61888d79b97e",
+          "p_SDRHnTYqtmDzzEPGLi6zJjQR": "ea2ccf399a99ab690c8d47629538a19662907e59e4426ceb1ed9711babce184a"
+        },
+        "afterProjectionDigests": {
+          "p_BH8qIFthOBqFlo-A6xE11e-Z": "7827df589a12cfebce43963401dbe44bd46d06ec6a324690cd9421059664943a",
+          "p_l3o51Thwmwzvj0lDmZsw72Fk": "5f5697e58e3b497d3daccefee4633be301bc9aa79ca26b655bda167b8db50de8",
+          "p_RKXN6XA4Z__W3tsuxKF28YQ_": "2cd15052a96b92151193ba4c046309f6ed233817fef6f40264bb61888d79b97e",
+          "p_SDRHnTYqtmDzzEPGLi6zJjQR": "ea2ccf399a99ab690c8d47629538a19662907e59e4426ceb1ed9711babce184a"
+        },
+        "afterRestartVersion": 9,
+        "afterRestartEventSeq": 6,
+        "legalContinuation": {
+          "commandType": "RESPOND",
+          "choice": "ORDER_CARDS",
+          "accepted": true,
+          "versionAfter": 10,
+          "eventSeqAfter": 8,
+          "pendingStageAdvancedOrCleared": true,
+          "resultingPendingKind": null,
+          "resultingStatus": "playing",
+          "publicStateDigestBefore": "850a119bc107d722c5f2a984846277eb4ce2c39349157c43ec32e34f610be02b",
+          "publicStateDigestAfter": "acfd908d9d43dad397ba68fde60fd39b533cc0b0ddc341a4228f7f3c239810ab"
+        },
+        "finalD08ServerCleanup": {
+          "code": 0,
+          "signal": null,
+          "gracefulRequestSent": true,
+          "gracefulShutdownLog": true,
+          "forcedTermination": false,
+          "ownershipBeforeShutdown": {
+            "processTree": [
+              {
+                "processId": 21928,
+                "parentProcessId": 23396,
+                "name": "node.exe",
+                "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+                "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d08-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+              },
+              {
+                "processId": 21836,
+                "parentProcessId": 21928,
+                "name": "conhost.exe",
+                "executablePath": "C:\\Windows\\system32\\conhost.exe",
+                "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+              }
+            ],
+            "listeners": [
+              {
+                "port": 3003,
+                "owningProcessId": 21928
+              },
+              {
+                "port": 5436,
+                "owningProcessId": 21928
+              }
+            ],
+            "processIdMatches": true,
+            "executableMatches": true,
+            "commandLineMatches": true,
+            "listenerOwnersMatch": true
+          },
+          "ownership": null,
+          "d08PortsReleased": true
+        }
+      }
+    },
+    "isolatedApiRun": {
+      "status": "COMPLETED",
+      "startedAt": "2026-09-28T05:04:08.897Z",
+      "finishedAt": "2026-09-28T05:04:57.944Z",
+      "serverOrigin": "http://127.0.0.1:3003",
+      "webOrigin": "http://127.0.0.1:5176",
+      "ports": {
+        "server": 3003,
+        "pglite": 5436
+      },
+      "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d08-20260928",
+      "primaryDatabaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-20260928",
+      "databaseIsSeparate": true,
+      "primaryHealthBefore": 200,
+      "primaryHealthAfter": 200,
+      "startOwnership": {
+        "runnerSpawnPid": 9468,
+        "processTree": [
+          {
+            "pid": 9468,
+            "parentPid": 22056,
+            "name": "node.exe",
+            "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+            "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d08-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+          },
+          {
+            "pid": 16304,
+            "parentPid": 9468,
+            "name": "conhost.exe",
+            "executablePath": "C:\\Windows\\system32\\conhost.exe",
+            "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+          }
+        ],
+        "listeners": [
+          {
+            "port": 3003,
+            "pid": 9468
+          },
+          {
+            "port": 5436,
+            "pid": 9468
+          }
+        ],
+        "childIsExpectedNodeServer": true,
+        "allListenersOwnedBySpawnedTree": true
+      },
+      "runnerExit": {
+        "code": 0,
+        "signal": null
+      },
+      "gracefulShutdown": {
+        "code": 0,
+        "signal": null,
+        "gracefulShutdownLogged": true,
+        "portsReleased": true,
+        "ownershipBeforeStop": {
+          "runnerSpawnPid": 9468,
+          "processTree": [
+            {
+              "pid": 9468,
+              "parentPid": 22056,
+              "name": "node.exe",
+              "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+              "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d08-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+            },
+            {
+              "pid": 16304,
+              "parentPid": 9468,
+              "name": "conhost.exe",
+              "executablePath": "C:\\Windows\\system32\\conhost.exe",
+              "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+            }
+          ],
+          "listeners": [
+            {
+              "port": 3003,
+              "pid": 9468
+            },
+            {
+              "port": 5436,
+              "pid": 9468
+            }
+          ],
+          "childIsExpectedNodeServer": true,
+          "allListenersOwnedBySpawnedTree": true
+        }
+      },
+      "serverLogs": [
+        {
+          "source": "stdout",
+          "line": "[server] Database schema ready; HTTP and Socket.IO listening at 127.0.0.1:3003."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] Local PGlite Socket database ready at 127.0.0.1:5436."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] shutdown complete."
+        }
+      ],
+      "runnerLogs": [
+        {
+          "source": "stdout",
+          "line": "ENV PASS server /healthz=200; Vite /rooms/new=200; existing services left running"
+        },
+        {
+          "source": "stdout",
+          "line": "D10 NOT RUN same cookie restored the guest identity (HTTP 200) and authenticated Socket.IO reconnect succeeded, but assigned seats were [] and browser refresh/two-tab/seat continuity were not exercised"
+        },
+        {
+          "source": "stdout",
+          "line": "D17 PASS 20 ASCII and 20-codepoint names accepted; 21-codepoint/control names rejected; HTML echoed literally; invalid-preview rate limit observed (UI rendering not checked)"
+        },
+        {
+          "source": "stdout",
+          "line": "D16 PASS capacity 3/8 returned BAD_REQUEST; unready 4-seat room START_MATCH returned ROOM_NOT_READY; room remained waiting at same version"
+        },
+        {
+          "source": "stdout",
+          "line": "D03 PASS two concurrent SET_READY commands at one room version: one accepted, one STALE_VERSION, one committed version increment"
+        },
+        {
+          "source": "stdout",
+          "line": "D04 PASS unknown actorId field was rejected with BAD_REQUEST; no room was created"
+        },
+        {
+          "source": "stdout",
+          "line": "D05 PASS nonmember actual room/match sync returned generic NOT_FOUND_OR_FORBIDDEN without IDs; arbitrary room:join event disconnected the socket; reconnect and both membership checks remained denied"
+        },
+        {
+          "source": "stdout",
+          "line": "D11 NOT RUN in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination"
+        },
+        {
+          "source": "stdout",
+          "line": "D06 NOT RUN four active guest match:sync projections matched own seats; broader wire-frame audit runs after both simulations"
+        },
+        {
+          "source": "stdout",
+          "line": "D01 NOT RUN identical match command replay returned duplicate=true with the same aggregateVersion/eventSeq and one synced version change, but first ACK was not dropped and card/HP/reward effects were not exercised"
+        },
+        {
+          "source": "stdout",
+          "line": "D02 PASS changed command fields under same commandId returned COMMAND_ID_REUSED; version unchanged"
+        },
+        {
+          "source": "stdout",
+          "line": "D04 PASS match:command actorId injection returned BAD_REQUEST; version unchanged"
+        },
+        {
+          "source": "stdout",
+          "line": "D07 PASS server accepted a zone-only cat_balou request without a target card ID and moved exactly one target hand card; its ID appeared only as the public discard top card; no hidden hand card ID appeared outside a public discard projection"
+        },
+        {
+          "source": "stdout",
+          "line": "D19 FAIL 4-seat Socket.IO API game completed; actions=38, accepted=38, responses=10, endTurns=6, outcome=true, all public roles=true; required browser flow/reconnect/re-lobby was not executed"
+        },
+        {
+          "source": "stdout",
+          "line": "D19_4P_SUMMARY {\"status\":\"completed\",\"actions\":38,\"accepted\":38,\"responses\":10,\"endTurns\":6}"
+        },
+        {
+          "source": "stdout",
+          "line": "D07 PASS server accepted a zone-only cat_balou request without a target card ID and moved exactly one target hand card; its ID appeared only as the public discard top card; no hidden hand card ID appeared outside a public discard projection"
+        },
+        {
+          "source": "stdout",
+          "line": "D19 FAIL 4-seat Socket.IO API game completed; actions=38, accepted=38, responses=10, endTurns=6, outcome=true, all public roles=true; required browser flow/reconnect/re-lobby was not executed; 7-seat Socket.IO API game completed; actions=159, accepted=159, responses=65, endTurns=22, outcome=true, all public roles=true; required 7-seat browser flow/reconnect/re-lobby was not executed"
+        },
+        {
+          "source": "stdout",
+          "line": "D18 NOT RUN after completed Socket.IO game, START_MATCH returned a distinct match identity and new initial hand IDs had no overlap with saved final hands; seed visible=false; deck-wide identity, fresh role assignment, and seed non-reuse were not fully verifiable from the allowed sync projection"
+        },
+        {
+          "source": "stdout",
+          "line": "D19_7P_SUMMARY {\"status\":\"completed\",\"actions\":159,\"accepted\":159,\"responses\":65,\"endTurns\":22}"
+        },
+        {
+          "source": "stdout",
+          "line": "D08 NOT RUN no restart/fault injection; the existing shared local server was left running as required"
+        },
+        {
+          "source": "stdout",
+          "line": "D09 NOT RUN no DB commit/ACK fault-injection hook is exposed through the owned E2E paths"
+        },
+        {
+          "source": "stdout",
+          "line": "D12 NOT RUN API-only responder disconnect stall lasted 30000ms; version, pending interaction, and match status stayed unchanged. The player-facing no-timeout/state-preservation notice was not checked in UI."
+        },
+        {
+          "source": "stdout",
+          "line": "D13 NOT RUN 360px keyboard-only action flow requires responsive viewport control in the browser"
+        },
+        {
+          "source": "stdout",
+          "line": "D14 NOT RUN 80-card face/duplicate Stagecoach rendering requires a dedicated full-catalog visual fixture"
+        },
+        {
+          "source": "stdout",
+          "line": "D15 NOT RUN image failure/fallback could not be forced through the available browser controls"
+        },
+        {
+          "source": "stdout",
+          "line": "D10 NOT RUN same guest reconnected during DISCARDS_ORDER step 1/1, restored the exact responder projection/options, then reconnected again and replayed the identical commandId/payload; duplicate receipt and unchanged version/state/effect witness confirmed. Browser refresh and second-tab seat restoration are recorded separately; this API run alone does not establish the full D10 flow."
+        },
+        {
+          "source": "stdout",
+          "line": "D01 PASS injected loss of the first server-to-client Engine.IO WebSocket ACK frame before Socket.IO packet decoding; the action committed exactly once, the same guest reconnected and replayed the same commandId/payload, the duplicate receipt matched the dropped receipt version/eventSeq, and card/HP/reward/state effect witness did not change on replay"
+        },
+        {
+          "source": "stdout",
+          "line": "D11 PASS in-game outsider KICK_MEMBER=NOT_FOUND_OR_FORBIDDEN; owner KICK_MEMBER=ROOM_LOCKED; room/match versions and seats unchanged=true; tested denial cases match the protocol; eliminated-player self-cleanup exception not exercised because no match reached elimination; eliminated responder KICK_MEMBER=ROOM_FORBIDDEN with room/match versions and pending cleanup unchanged; eliminated responder submitted its own ORDER_CARDS cleanup, hand=0, inPlay=0; outsider, owner, and eliminated-member denial plus self-cleanup exception were exercised"
+        },
+        {
+          "source": "stdout",
+          "line": "D06 NOT RUN 4P and 7P all-seat snapshots/private projections were checked; 454 member match:sync ACKs and 1374 room/match change notifications were observed. Notifications contained only their public room/match IDs and version cursors. This did not fully audit every command/error ACK, hidden-card inference through legalActions, or deck/seed ordering, so full D06 remains unverified."
+        },
+        {
+          "source": "stdout",
+          "line": "RESULTS /C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/acceptance-results.json"
+        }
+      ],
+      "error": null,
+      "command": "node apps/web/e2e/run-isolated-api-acceptance.mjs"
+    },
+    "d09Run": {
+      "status": "PASS",
+      "startedAt": "2026-09-28T06:42:00.509Z",
+      "finishedAt": "2026-09-28T06:42:10.682Z",
+      "command": "node apps/web/e2e/run-d09-fault-acceptance.mjs",
+      "serverOrigin": "http://127.0.0.1:3004",
+      "webOrigin": "http://127.0.0.1:5176",
+      "ports": {
+        "server": 3004,
+        "pglite": 5437
+      },
+      "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d09-20260928-0607",
+      "databaseIsSeparate": true,
+      "databaseWitnessPath": "test-only IPC to isolated server's own pg.Pool; no second PGlite socket client",
+      "primaryHealthBefore": 200,
+      "primaryHealthAfter": 200,
+      "processOwnership": {
+        "spawnPid": 16240,
+        "processTree": [
+          {
+            "pid": 16240,
+            "parentPid": 16304,
+            "name": "node.exe",
+            "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+            "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d09-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+          },
+          {
+            "pid": 21696,
+            "parentPid": 16240,
+            "name": "conhost.exe",
+            "executablePath": "C:\\Windows\\system32\\conhost.exe",
+            "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+          }
+        ],
+        "listeners": [
+          {
+            "port": 5437,
+            "pid": 16240
+          },
+          {
+            "port": 3004,
+            "pid": 16240
+          }
+        ],
+        "bothPortsListening": true,
+        "expectedServer": true,
+        "allListenersOwnedBySpawnedTree": true
+      },
+      "precommitFault": {
+        "injection": "test-only pg client wrapper rejected COMMIT for this exact match/version after UPDATE matches, all target match_events and command_receipts/outbox INSERTs, and RELEASE SAVEPOINT completed",
+        "transactionEvidence": {
+          "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+          "version": 6,
+          "matchUpdated": true,
+          "eventInsertCount": 2,
+          "receiptInserted": true,
+          "outboxInserted": true,
+          "savepointReleased": true,
+          "commitFaultInjected": true
+        },
+        "transport": "disconnect",
+        "socketDisconnectReason": "io server disconnect",
+        "rollbackSqlObserved": true,
+        "rollbackWitness": {
+          "matchVersionUnchanged": true,
+          "eventSeqUnchanged": true,
+          "serializedStateUnchanged": true,
+          "matchEventCountUnchanged": true,
+          "receiptCountForCommand": 0,
+          "matchOutboxCountUnchanged": true,
+          "targetOutboxRows": 0
+        },
+        "sameCommandCommittedAfterInjectedFailure": true,
+        "retryCommittedVersion": 6
+      },
+      "postcommitAckLoss": {
+        "injection": "client Engine.IO WebSocket onData dropped server ACK frame before Socket.IO packet decode",
+        "capturedFirstAck": {
+          "protocolVersion": 1,
+          "commandId": "311053c8-6860-4651-af74-dbeafdb278f5",
+          "status": "accepted",
+          "duplicate": false,
+          "aggregateVersion": 6,
+          "eventSeq": 2
+        },
+        "callbackRan": false,
+        "replayReceipt": {
+          "protocolVersion": 1,
+          "commandId": "311053c8-6860-4651-af74-dbeafdb278f5",
+          "status": "accepted",
+          "duplicate": true,
+          "aggregateVersion": 6,
+          "eventSeq": 2
+        },
+        "receiptRowCount": 1,
+        "matchEventCountStableOnReplay": true,
+        "matchOutboxRowsStableOnReplay": true
+      },
+      "outboxNotificationLoss": {
+        "injection": "preload dropped one exact match:changed event for the target aggregate/version; publisher then marked its durable outbox row published",
+        "droppedNotification": {
+          "type": "T60_D09_OUTBOX_NOTIFICATION_DROPPED",
+          "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+          "version": 6,
+          "eventSeq": 2
+        },
+        "observerReceivedNotificationCount": 0,
+        "observerBaselineVersionBeforeExplicitSync": 5,
+        "committedReceiptRows": 1,
+        "committedMatchEventRowsAtTargetVersion": 2,
+        "committedOutboxRowsAtTargetVersion": 1,
+        "outboxPublished": true,
+        "observerReceivedNoInvalidationUntilExplicitSync": true,
+        "explicitSyncRecoveredCommittedState": true,
+        "replayDidNotChangeVersionOrEventOrOutboxCounts": true
+      },
+      "gracefulShutdown": {
+        "code": 0,
+        "signal": null,
+        "portsReleased": true,
+        "ownershipBeforeStop": {
+          "spawnPid": 16240,
+          "processTree": [
+            {
+              "pid": 16240,
+              "parentPid": 16304,
+              "name": "node.exe",
+              "executablePath": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe",
+              "commandLine": "C:\\Users\\user\\AppData\\Local\\hermes\\node\\node.exe --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/e2e/d09-server-preload.mjs --import file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/server/node_modules/tsx/dist/loader.mjs C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\src\\main.ts --pglite-dev"
+            },
+            {
+              "pid": 21696,
+              "parentPid": 16240,
+              "name": "conhost.exe",
+              "executablePath": "C:\\Windows\\system32\\conhost.exe",
+              "commandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+            }
+          ],
+          "listeners": [
+            {
+              "port": 5437,
+              "pid": 16240
+            },
+            {
+              "port": 3004,
+              "pid": 16240
+            }
+          ],
+          "bothPortsListening": true,
+          "expectedServer": true,
+          "allListenersOwnedBySpawnedTree": true
+        }
+      },
+      "serverIpcEvidence": [
+        {
+          "type": "T60_D09_PRECOMMIT_FAULT_ARMED",
+          "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+          "version": 6
+        },
+        {
+          "type": "T60_D09_PRECOMMIT_FAULT_INJECTED",
+          "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+          "version": 6,
+          "transactionEvidence": {
+            "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+            "version": 6,
+            "matchUpdated": true,
+            "eventInsertCount": 2,
+            "receiptInserted": true,
+            "outboxInserted": true,
+            "savepointReleased": true,
+            "commitFaultInjected": true
+          }
+        },
+        {
+          "type": "T60_D09_ROLLBACK_OBSERVED",
+          "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+          "version": 6,
+          "transactionEvidence": {
+            "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+            "version": 6,
+            "matchUpdated": true,
+            "eventInsertCount": 2,
+            "receiptInserted": true,
+            "outboxInserted": true,
+            "savepointReleased": true,
+            "commitFaultInjected": true,
+            "rollbackObserved": true
+          }
+        }
+      ],
+      "error": null,
+      "executionPhase": "duplicate-receipt-and-final-witness",
+      "serverLogs": [
+        {
+          "source": "stdout",
+          "line": "[server] Database schema ready; HTTP and Socket.IO listening at 127.0.0.1:3004."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] Local PGlite Socket database ready at 127.0.0.1:5437."
+        },
+        {
+          "source": "stdout",
+          "line": "[server] shutdown complete."
+        }
+      ],
+      "reusedPriorTestOwnedDatabase": true,
+      "roomId": "r_TnSxXzZqy7Yeq_KqAhtRPIec",
+      "matchId": "m_5kdhLdJ_27ZtXFW9cAivZZZH",
+      "commandType": "PLAY_CARD",
+      "commandId": "311053c8-6860-4651-af74-dbeafdb278f5",
+      "versionTransition": "5->6",
+      "eventSeqTransition": "0->2"
+    }
+  },
+  "browserEvidence": {
+    "browser": "Codex in-app browser via CUA, actual UI interaction",
+    "isolatedEnvironment": {
+      "vite": "127.0.0.1:5176 (host aliases 127.0.0.20-127.0.0.36 used for separate guest origins)",
+      "server": "127.0.0.1:3002",
+      "pglite": "127.0.0.1:5435",
+      "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-20260928",
+      "command": "$env:T60_ORIGIN='http://127.0.0.1:5176'; $env:T60_SERVER_ORIGIN='http://127.0.0.1:3002'; node apps/web/e2e/run-acceptance.mjs",
+      "preservation": "Existing services on 3000/3001, 5173-5175, and 5433/5434, prior DB, and pre-existing browser tabs were not changed. T60 isolated services and database were retained for follow-up."
+    },
+    "fourPlayer": {
+      "status": "PASS: browser game reached result and returned to the same waiting room",
+      "roomId": "r_-EE6tGR0eRSlRJqh3E8LwMTl",
+      "matchId": "not captured in the rendered route/accessibility tree",
+      "seed": "not exposed by the UI and not captured",
+      "playerTabs": [
+        "127.0.0.20:5176",
+        "127.0.0.21:5176",
+        "127.0.0.22:5176",
+        "127.0.0.23:5176"
+      ],
+      "reconnect": "A second browser tab for the same B guest restored the same room/match seat projection; duplicate-action receipt/version behavior was not checked in that browser step.",
+      "observed": "All four guest UIs entered the room, readied, started the match, revealed private roles, and reached game UI. Sheriff role was public and non-Sheriff roles were hidden during play; other seats exposed hand counts, while each tab showed only its own hand. Multiple Indians responses and General Store seat choices were completed. Two players were eliminated; each submitted its own pending hand cleanup (C 2/2, D 1/1), after which the UI reached the result route. Result showed Outlaw victory, winners, and all roles. After the T96 gate fix, the owner clicked '대기실로 돌아가기'; the same room lobby opened with 4/4 seats retained, every seat '준비 중', and start disabled.",
+      "resultRoute": "http://127.0.0.20:5176/rooms/r_-EE6tGR0eRSlRJqh3E8LwMTl/result",
+      "returnToLobby": "PASS: owner clicked the visible button; route changed to /rooms/r_-EE6tGR0eRSlRJqh3E8LwMTl, the room remained 4/4, all seats were unready, and start was disabled."
+    },
+    "sevenPlayer": {
+      "status": "PASS: seven-player browser game completed and returned to the waiting room",
+      "roomId": "r_YAwB3GmOetWaEyaZS1YM1hUa",
+      "playerTabs": [
+        "127.0.0.20:5176",
+        "127.0.0.21:5176",
+        "127.0.0.22:5176",
+        "127.0.0.23:5176",
+        "127.0.0.24:5176",
+        "127.0.0.25:5176",
+        "127.0.0.26:5176"
+      ],
+      "resultRoute": "http://127.0.0.20:5176/rooms/r_YAwB3GmOetWaEyaZS1YM1hUa/result",
+      "observed": "A fresh 7-seat room was created. B-G joined from six UI sessions; before each JOIN the current invite preview, occupancy, and room version were refreshed. All seven guests became ready, the owner started, each guest viewed its own role/character, and all entered the game. Roles: Sheriff D; Deputies C/F; Outlaws A/B/E; Renegade G. Turns and responses included Sheriff Bang against E, E choosing damage and using El Gringo's hand steal; Sheriff Remington, Scope, Dynamite, and General Store, with all seven sequential picks; E's Jail judgment; Jesse Jones F choosing E's hand for the first draw; F Bang against E, E choosing damage; and an F-E Duel where both alternated Bang responses and E then accepted elimination. E submitted its pending one-card cleanup. G used Schofield and successive Willie Bangs to reduce Sheriff D to 1 HP; owner A submitted the server-requested 6/10-card cleanup in order. B equipped Winchester, played Bang at D, and D chose damage and accepted elimination. The result showed server-confirmed Outlaw victory. Owner D clicked '대기실로 돌아가기'; the same room lobby reopened at 7/7, all seats were '준비 중', and start was disabled. E saw one transient network error at initial join; same-route reload/reconnect succeeded and E's seat was present at 3/7. The earlier 5/7 room r_2sPoYGrrDTaGEpk0Do1WnMw4 was preserved; the reason its F/G previews had failed was not established, and this fresh flow succeeded using a fresh one-time invite code and current-version previews. No invite code or credential is recorded."
+    },
+    "d10ReconnectProbe": {
+      "observedOn": "2026-09-28",
+      "roomId": "r_i3DfsLJ6pOVdAh_SIxBrXCgf",
+      "origins": [
+        "127.0.0.50:5176",
+        "127.0.0.51:5176",
+        "127.0.0.54:5176",
+        "127.0.0.55:5176"
+      ],
+      "observed": "Guest B refreshed the active lobby and returned to the same room and seat. A second tab at the same .51 origin restored the same guest and room, then entered the same seat.",
+      "credentialsRecorded": false
+    },
+    "d12PendingDisconnect": {
+      "observedOn": "2026-09-28",
+      "roomId": "r_i3DfsLJ6pOVdAh_SIxBrXCgf",
+      "kind": "BANG_RESPONSE",
+      "step": {
+        "current": 1,
+        "total": 1
+      },
+      "version": 6,
+      "responderSeat": "D",
+      "disconnectedResponder": "D",
+      "observer": "C",
+      "disconnectedDurationMs": 41200,
+      "observerVersionCursorAndResponderUnchanged": true,
+      "autoPassedOrDamaged": false,
+      "restoredServerIssuedChoices": [
+        "Jourdonnais judgment",
+        "take damage"
+      ],
+      "explicitNoTimeoutOrStatePreservationNoticeVisible": false,
+      "observedBeforeT97UiFix": true,
+      "supersededByPostT97VisualRun": true
+    },
+    "t97D12Recheck": {
+      "observedOn": "2026-09-28",
+      "result": "PASS",
+      "sourceReview": "pages.tsx and routes.test.mjs confirm the accessible disconnect notice, disabled inputs before authoritative sync, room-then-active-match recovery, and a guarded retry after CONNECTION; source tests are not browser evidence.",
+      "workerCuaState": {
+        "apps": [],
+        "browsers": []
+      },
+      "tabCreationAttempts": [
+        {
+          "browser": "iab",
+          "result": "Browser is not available"
+        },
+        {
+          "browser": "chrome",
+          "result": "Browser is not available"
+        }
+      ],
+      "exploratoryHeadlessEdge": {
+        "browser": "Edg/154.0.4258.37",
+        "launchPid": 22836,
+        "devtoolsPort": 9229,
+        "initialRoute": "http://127.0.0.1:5176/rooms/new",
+        "action": "Created one UI guest session; no room or match was created; no pending prompt, disconnect, or Offline/Online sequence was exercised.",
+        "countedAsD12Evidence": false,
+        "shutdown": "Sent CDP Browser.close; verified profile-matched Edge process exited and port 9229 became free.",
+        "temporaryProfileDirectoryRetained": true
+      },
+      "primaryServices": "No server/database restart; server 3002 /healthz remained HTTP 200; ports 3002/5435/5176 remained listening and 3003/5436/9229 were free after shutdown.",
+      "blocker": "The earlier worker-scope CUA limitation was superseded by the root CUA visual run recorded in browserEvidence.t97D12VisualRun.",
+      "supersededByRootCuaRun": "browserEvidence.t97D12VisualRun"
+    },
+    "t97D12VisualRun": {
+      "observedOn": "2026-09-28",
+      "preciseTimestamp": "not captured",
+      "source": "Root Codex in-app browser CUA with visual/accessibility observation; not the T60 CLI runner.",
+      "roomId": "r_WFCubFK898xuLKQF-fBx-n8q",
+      "guests": 4,
+      "gameTabs": [
+        "127.0.0.60:5177",
+        "127.0.0.61:5177",
+        "127.0.0.62:5177",
+        "127.0.0.63:5177"
+      ],
+      "isolatedServices": {
+        "viteAndNetworkControlProxy": "127.0.0.1:5177",
+        "server": "127.0.0.1:3005",
+        "pgliteSocket": "127.0.0.1:5438",
+        "databaseDirectory": "%LOCALAPPDATA%\\BangOnline\\pglite-t60-d12-20260928"
+      },
+      "networkFault": {
+        "blockedOrigin": "http://127.0.0.62:5177/socket.io",
+        "method": "origin-scoped custom Vite proxy blocked the Socket.IO path and destroyed that origin WebSocket, then unblocked it"
+      },
+      "pendingInteraction": {
+        "kind": "BANG_RESPONSE",
+        "version": 6,
+        "currentResponder": "C",
+        "disconnectedGuest": "C",
+        "durationMs": 42000,
+        "visibleNotice": "연결 끊김 · 재접속 시 현재 판을 복구합니다",
+        "responseControlsDisabledWhileDisconnected": true,
+        "observer": "B",
+        "observerStayedAtVersionAndPendingResponder": true,
+        "autoPassedOrDamaged": false,
+        "sameGuestTabAutoReconnected": true,
+        "restoredSameVersionPromptAndOptions": true,
+        "legalResponse": "피해 받기",
+        "afterResponseVersion": 7,
+        "responderHpAfterResponse": {
+          "current": 3,
+          "maximum": 4
+        }
+      },
+      "credentialsRecorded": false,
+      "outcome": "PASS"
+    },
+    "t98D13PartialVisualRun": {
+      "observedOn": "2026-09-28",
+      "preciseTimestamp": "not captured",
+      "source": "Root Codex in-app browser CUA visual/accessibility observation; not the T60 CLI runner.",
+      "roomId": "r_WFCubFK898xuLKQF-fBx-n8q",
+      "viteOrigin": "127.0.0.61:5177",
+      "viewport": "360x800 CSS iframe",
+      "observed": [
+        "At 360px, keyboard selected a legal Panic target and selected/submitted Duel against C; the target checkbox and enabled submit state were observed.",
+        "Guest C at desktop width reloaded and keyboard-submitted Bang; guest B at 360px keyboard-submitted the next Bang.",
+        "At 360px, card zoom opened, Escape closed it, and focus returned to the trigger."
+      ],
+      "notTested": [
+        "Rescue choice by keyboard.",
+        "Discard-order choice by keyboard.",
+        "A complete desktop D13 keyboard flow."
+      ],
+      "countedAsD13Pass": false,
+      "result": "PARTIAL; superseded by browserEvidence.t60D13CompletionVisualRun"
+    },
+    "t60D13CompletionVisualRun": {
+      "observedOn": "2026-09-28",
+      "preciseTimestamp": "not captured",
+      "source": "Root Codex in-app browser CUA with visual/accessibility observation; not the T60 CLI runner.",
+      "roomId": "r_WFCubFK898xuLKQF-fBx-n8q",
+      "viteOrigin": "127.0.0.61:5177",
+      "mobileViewport": "360x800 CSS iframe",
+      "keyboardFlow": [
+        "At desktop width, D keyboard-selected Bang, selected target C, and submitted the enabled action.",
+        "At 360px, C keyboard-accepted Bang damage (HP 1 to 0), selected the server-provided Beer rescue (HP 0 to 1), later accepted another damage, and chose the sole '탈락 수락' option.",
+        "C received the DEATH_CLEANUP ordered-discard prompt, checked the sole Panic card (1/1), submitted by keyboard, and was confirmed with zero hand cards.",
+        "Earlier evidence in this same room confirmed mobile Panic targeting/submission, Duel target/submission, Bang defense, desktop Bang response, and a three-card ordered discard."
+      ],
+      "focusAndZoom": {
+        "targetSelectionAndEnabledSubmitObserved": true,
+        "keyboardFocusObserved": true,
+        "cardZoomOpened": true,
+        "escapeClosedZoom": true,
+        "focusReturnedToTrigger": true
+      },
+      "result": "PASS"
+    },
+    "t60D14CatalogVisualRun": {
+      "observedOn": "2026-09-28",
+      "preciseTimestamp": "not captured",
+      "source": "Root Codex in-app browser CUA visual/accessibility inspection; not the T60 CLI runner.",
+      "viteOrigin": "127.0.0.61:5177",
+      "fixtureRoute": "/e2e/card-catalog-fixture.html",
+      "physicalCardCount": 80,
+      "distinctDefinitionIds": 80,
+      "stagecoachAccessibleEntries": ["stagecoach_01", "stagecoach_02"],
+      "observed": "Both Stagecoach 9♠ copies had distinct IDs. Screenshot showed printed rank/suit overlays matching adjacent physical records, including Barrel Q♠/K♠ and Jail J♠/4♥/10♠, with no overlap.",
+      "result": "PASS"
+    },
+    "t60D15FailedImageVisualRun": {
+      "observedOn": "2026-09-28",
+      "preciseTimestamp": "not captured",
+      "source": "Root Codex in-app browser CUA visual/accessibility inspection; not the T60 CLI runner.",
+      "viteOrigin": "127.0.0.61:5177",
+      "fixtureRoute": "/e2e/card-catalog-fixture.html?mode=d15&failImage=1",
+      "imageFailure": "Card request resolved to non-image text/html; no latency path was exercised.",
+      "fallbackTextVisible": "뱅! 이미지 없음",
+      "rankSuitVisible": "A♠",
+      "keyboardSelectable": true,
+      "detailsVisible": {
+        "rankSuit": "A · 스페이드",
+        "effect": "사거리 내 다른 생존자 1명을 공격합니다.",
+        "allowedTarget": true
+      },
+      "result": "PASS"
+    }
+  },
+  "testFixtureValidation": {
+    "observedAt": "2026-09-28T07:13:37Z",
+    "source": "T60 test worker HTTP GET of root CUA's existing Vite origin; no browser session, room, or server state changed.",
+    "viteOrigin": "http://127.0.0.61:5177",
+    "page": "/e2e/card-catalog-fixture.html",
+    "module": "/e2e/card-catalog-fixture.tsx",
+    "pageHttpStatus": 200,
+    "transformedModuleHttpStatus": 200,
+    "d14Fixture": "Renders all BASE_PHYSICAL_CARDS records with production PlayingCardFace and exposes unique definition/card-instance IDs and printed rank/suit metadata, including both Stagecoach copies.",
+    "d15Fixture": "mode=d15&failImage=1 rewrites the production card image URL to /__t60_d15_missing_image__.png; that URL returned HTTP 200 text/html, a non-image response expected to fire the browser image error handler.",
+    "browserVisualOrInteractionObserved": true,
+    "acceptanceCounted": true,
+    "verifiedBy": [
+      "browserEvidence.t60D14CatalogVisualRun",
+      "browserEvidence.t60D15FailedImageVisualRun"
+    ]
+  },
+  "d06AuditAssessment": {
+    "assessedAt": "2026-09-28T07:28:21Z",
+    "acceptanceRow": "06_ACCEPTANCE_TESTS.md AT-D06: review all in-game player snapshots, ACKs, errors, and WebSocket frames; no other hand face/ID, role, deck order, or seed; only deckCount disclosed; legalActions cannot infer hidden cards.",
+    "existingRunnerEvidence": {
+      "snapshotScope": "Initial 4P and 7P member match:sync projections only. Pairwise checks compare each own hand count and hand, hidden role fields, other-seat hand array absence, foreign hand instance IDs, and an absent seed field.",
+      "syncAckResponses": 454,
+      "ackCaptureBoundary": "Decoded response objects recorded by the runner ack() helper; not an exhaustive raw ACK-frame capture.",
+      "notificationEvents": 1374,
+      "notificationCaptureBoundary": "Socket.IO onAny decoded events; current audit inspects only room:changed and match:changed keys/payload identifiers.",
+      "deckCount": "Public sync projection checks are present; full draw-pile/deck-order field audit was not performed.",
+      "legalActions": "No inference-oriented audit was run."
+    },
+    "blockingCriteria": [
+      "Capture and inspect all relevant raw server-to-client WebSocket packets, including accepted and rejected command ACK frames.",
+      "Audit every active player's snapshot at each relevant live state, including hidden card face/ID and role boundaries.",
+      "Prove deck order/seed fields are absent and only public deckCount is disclosed throughout those frames.",
+      "Exercise or soundly analyze legalActions for hidden-card inference."
+    ],
+    "isolatedD06Run": "NOT RUN: the current runner/projection evidence does not meet the full row; a new exhaustive capture and per-state audit would require a broader runner change and full isolated execution.",
+    "status": "NOT RUN"
+  },
+  "verificationSummary": {
+    "engineCases": {
+      "verified": 78,
+      "total": 78,
+      "source": "existing root evidence; not rerun by this T60 pass"
+    },
+    "integratedD": {
+      "pass": 17,
+      "fail": 0,
+      "notRun": 2,
+      "total": 19
+    },
+    "combined": {
+      "verified": 95,
+      "total": 97
+    }
+  },
+  "webOrigin": "http://127.0.0.1:5176"
+}

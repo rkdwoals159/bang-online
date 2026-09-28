@@ -1,0 +1,22 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-room-game-01",
+  "roomId": "room-1",
+  "version": 5,
+  "requiresFullSnapshot": true,
+  "room": {
+    "roomId": "room-1",
+    "status": "in_game",
+    "activeMatchId": "match-1",
+    "ownerPlayerId": "player-1",
+    "capacity": 4,
+    "rulesetVersion": "base4-ko-online-1.0",
+    "members": [
+      { "playerId": "player-1", "displayName": "Host", "seatIndex": 0, "ready": true },
+      { "playerId": "player-2", "displayName": "Guest 2", "seatIndex": 1, "ready": true },
+      { "playerId": "player-3", "displayName": "Guest 3", "seatIndex": 2, "ready": true },
+      { "playerId": "player-4", "displayName": "Guest 4", "seatIndex": 3, "ready": true }
+    ],
+    "viewer": { "playerId": "player-2", "isOwner": false }
+  }
+}

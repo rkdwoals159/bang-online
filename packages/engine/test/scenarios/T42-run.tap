@@ -1,0 +1,481 @@
+TAP version 13
+# (node:20456) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: AT-A01 4–7 player setup role composition, private roles, and distinct characters
+ok 1 - AT-A01 4–7 player setup role composition, private roles, and distinct characters
+  ---
+  duration_ms: 44.0086
+  type: 'test'
+  ...
+# Subtest: AT-A02 Paul Regret has 4 HP as Sheriff and 3 HP otherwise at setup
+ok 2 - AT-A02 Paul Regret has 4 HP as Sheriff and 3 HP otherwise at setup
+  ---
+  duration_ms: 22.6745
+  type: 'test'
+  ...
+# Subtest: AT-A03 deterministic engine acceptance scenario
+ok 3 - AT-A03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.6289
+  type: 'test'
+  ...
+# Subtest: AT-A04 deterministic engine acceptance scenario
+ok 4 - AT-A04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 5.0276
+  type: 'test'
+  ...
+# Subtest: AT-A05 deterministic engine acceptance scenario
+ok 5 - AT-A05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 37.5879
+  type: 'test'
+  ...
+# Subtest: AT-A06 deterministic engine acceptance scenario
+ok 6 - AT-A06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 21.3307
+  type: 'test'
+  ...
+# Subtest: AT-A07 deterministic engine acceptance scenario
+ok 7 - AT-A07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.5887
+  type: 'test'
+  ...
+# Subtest: AT-A08 deterministic engine acceptance scenario
+ok 8 - AT-A08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 4.727
+  type: 'test'
+  ...
+# Subtest: AT-A09 deterministic engine acceptance scenario
+ok 9 - AT-A09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 4.0656
+  type: 'test'
+  ...
+# Subtest: AT-A10 deterministic engine acceptance scenario
+ok 10 - AT-A10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.7093
+  type: 'test'
+  ...
+# Subtest: AT-A11 deterministic engine acceptance scenario
+ok 11 - AT-A11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.3384
+  type: 'test'
+  ...
+# Subtest: AT-A12 deterministic engine acceptance scenario
+ok 12 - AT-A12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 21.6212
+  type: 'test'
+  ...
+# Subtest: AT-A13 deterministic engine acceptance scenario
+ok 13 - AT-A13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 14.3923
+  type: 'test'
+  ...
+# Subtest: AT-A14 deterministic engine acceptance scenario
+ok 14 - AT-A14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.8015
+  type: 'test'
+  ...
+# Subtest: AT-A15 deterministic engine acceptance scenario
+ok 15 - AT-A15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.7383
+  type: 'test'
+  ...
+# Subtest: AT-B01 deterministic engine acceptance scenario
+ok 16 - AT-B01 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.9272
+  type: 'test'
+  ...
+# Subtest: AT-B02 deterministic engine acceptance scenario
+ok 17 - AT-B02 deterministic engine acceptance scenario
+  ---
+  duration_ms: 21.2765
+  type: 'test'
+  ...
+# Subtest: AT-B03 deterministic engine acceptance scenario
+ok 18 - AT-B03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 42.18
+  type: 'test'
+  ...
+# Subtest: AT-B04 deterministic engine acceptance scenario
+ok 19 - AT-B04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 21.1397
+  type: 'test'
+  ...
+# Subtest: AT-B05 deterministic engine acceptance scenario
+ok 20 - AT-B05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 34.7388
+  type: 'test'
+  ...
+# Subtest: AT-B06 deterministic engine acceptance scenario
+ok 21 - AT-B06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 44.2041
+  type: 'test'
+  ...
+# Subtest: AT-B07 deterministic engine acceptance scenario
+ok 22 - AT-B07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.2519
+  type: 'test'
+  ...
+# Subtest: AT-B08 deterministic engine acceptance scenario
+ok 23 - AT-B08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 28.1372
+  type: 'test'
+  ...
+# Subtest: AT-B09 deterministic engine acceptance scenario
+ok 24 - AT-B09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 20.9689
+  type: 'test'
+  ...
+# Subtest: AT-B10 deterministic engine acceptance scenario
+ok 25 - AT-B10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.786
+  type: 'test'
+  ...
+# Subtest: AT-B11 deterministic engine acceptance scenario
+ok 26 - AT-B11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 21.9711
+  type: 'test'
+  ...
+# Subtest: AT-B12 deterministic engine acceptance scenario
+ok 27 - AT-B12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 42.4127
+  type: 'test'
+  ...
+# Subtest: AT-B13 deterministic engine acceptance scenario
+ok 28 - AT-B13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.456
+  type: 'test'
+  ...
+# Subtest: AT-B14 deterministic engine acceptance scenario
+ok 29 - AT-B14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.5017
+  type: 'test'
+  ...
+# Subtest: AT-B15 deterministic engine acceptance scenario
+ok 30 - AT-B15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 7.0585
+  type: 'test'
+  ...
+# Subtest: AT-B16 deterministic engine acceptance scenario
+ok 31 - AT-B16 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.8515
+  type: 'test'
+  ...
+# Subtest: AT-B17 deterministic engine acceptance scenario
+ok 32 - AT-B17 deterministic engine acceptance scenario
+  ---
+  duration_ms: 14.8766
+  type: 'test'
+  ...
+# Subtest: AT-B18 deterministic engine acceptance scenario
+ok 33 - AT-B18 deterministic engine acceptance scenario
+  ---
+  duration_ms: 36.1141
+  type: 'test'
+  ...
+# Subtest: AT-B19 deterministic engine acceptance scenario
+ok 34 - AT-B19 deterministic engine acceptance scenario
+  ---
+  duration_ms: 8.0817
+  type: 'test'
+  ...
+# Subtest: AT-B20 deterministic engine acceptance scenario
+ok 35 - AT-B20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.3771
+  type: 'test'
+  ...
+# Subtest: AT-B21 deterministic engine acceptance scenario
+ok 36 - AT-B21 deterministic engine acceptance scenario
+  ---
+  duration_ms: 23.4064
+  type: 'test'
+  ...
+# Subtest: AT-B22 deterministic engine acceptance scenario
+ok 37 - AT-B22 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.938
+  type: 'test'
+  ...
+# Subtest: AT-B23 deterministic engine acceptance scenario
+ok 38 - AT-B23 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.0929
+  type: 'test'
+  ...
+# Subtest: AT-B24 deterministic engine acceptance scenario
+ok 39 - AT-B24 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.4521
+  type: 'test'
+  ...
+# Subtest: AT-B25 deterministic engine acceptance scenario
+ok 40 - AT-B25 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.8475
+  type: 'test'
+  ...
+# Subtest: AT-B26 deterministic engine acceptance scenario
+ok 41 - AT-B26 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.1216
+  type: 'test'
+  ...
+# Subtest: AT-B27 deterministic engine acceptance scenario
+ok 42 - AT-B27 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.7006
+  type: 'test'
+  ...
+# Subtest: AT-B28 deterministic engine acceptance scenario
+ok 43 - AT-B28 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.3087
+  type: 'test'
+  ...
+# Subtest: AT-B29 deterministic engine acceptance scenario
+ok 44 - AT-B29 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.244
+  type: 'test'
+  ...
+# Subtest: AT-B30 deterministic engine acceptance scenario
+ok 45 - AT-B30 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.5144
+  type: 'test'
+  ...
+# Subtest: AT-C01 deterministic engine acceptance scenario
+ok 46 - AT-C01 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.2246
+  type: 'test'
+  ...
+# Subtest: AT-C02 deterministic engine acceptance scenario
+ok 47 - AT-C02 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.2889
+  type: 'test'
+  ...
+# Subtest: AT-C03 deterministic engine acceptance scenario
+ok 48 - AT-C03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.9721
+  type: 'test'
+  ...
+# Subtest: AT-C04 deterministic engine acceptance scenario
+ok 49 - AT-C04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.0396
+  type: 'test'
+  ...
+# Subtest: AT-C05 deterministic engine acceptance scenario
+ok 50 - AT-C05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.5922
+  type: 'test'
+  ...
+# Subtest: AT-C06 deterministic engine acceptance scenario
+ok 51 - AT-C06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.4471
+  type: 'test'
+  ...
+# Subtest: AT-C07 deterministic engine acceptance scenario
+ok 52 - AT-C07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 27.9319
+  type: 'test'
+  ...
+# Subtest: AT-C08 deterministic engine acceptance scenario
+ok 53 - AT-C08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.3381
+  type: 'test'
+  ...
+# Subtest: AT-C09 deterministic engine acceptance scenario
+ok 54 - AT-C09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.0208
+  type: 'test'
+  ...
+# Subtest: AT-C10 deterministic engine acceptance scenario
+ok 55 - AT-C10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.2304
+  type: 'test'
+  ...
+# Subtest: AT-C11 deterministic engine acceptance scenario
+ok 56 - AT-C11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 4.7671
+  type: 'test'
+  ...
+# Subtest: AT-C12 deterministic engine acceptance scenario
+ok 57 - AT-C12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.6748
+  type: 'test'
+  ...
+# Subtest: AT-C13 deterministic engine acceptance scenario
+ok 58 - AT-C13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 12.7188
+  type: 'test'
+  ...
+# Subtest: AT-C14 deterministic engine acceptance scenario
+ok 59 - AT-C14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.1634
+  type: 'test'
+  ...
+# Subtest: AT-C15 deterministic engine acceptance scenario
+ok 60 - AT-C15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.0136
+  type: 'test'
+  ...
+# Subtest: AT-C16 deterministic engine acceptance scenario
+ok 61 - AT-C16 deterministic engine acceptance scenario
+  ---
+  duration_ms: 39.754
+  type: 'test'
+  ...
+# Subtest: AT-C17 deterministic engine acceptance scenario
+ok 62 - AT-C17 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.6294
+  type: 'test'
+  ...
+# Subtest: AT-C18 deterministic engine acceptance scenario
+ok 63 - AT-C18 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.5233
+  type: 'test'
+  ...
+# Subtest: AT-C19 deterministic engine acceptance scenario
+ok 64 - AT-C19 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.8277
+  type: 'test'
+  ...
+# Subtest: AT-C20 deterministic engine acceptance scenario
+ok 65 - AT-C20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.4013
+  type: 'test'
+  ...
+# Subtest: AT-C21 deterministic engine acceptance scenario
+ok 66 - AT-C21 deterministic engine acceptance scenario
+  ---
+  duration_ms: 10.9588
+  type: 'test'
+  ...
+# Subtest: AT-C22 deterministic engine acceptance scenario
+ok 67 - AT-C22 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.73
+  type: 'test'
+  ...
+# Subtest: AT-C23 deterministic engine acceptance scenario
+ok 68 - AT-C23 deterministic engine acceptance scenario
+  ---
+  duration_ms: 26.3612
+  type: 'test'
+  ...
+# Subtest: AT-C24 deterministic engine acceptance scenario
+ok 69 - AT-C24 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.6539
+  type: 'test'
+  ...
+# Subtest: AT-C25 deterministic engine acceptance scenario
+ok 70 - AT-C25 deterministic engine acceptance scenario
+  ---
+  duration_ms: 23.1489
+  type: 'test'
+  ...
+# Subtest: AT-C26 deterministic engine acceptance scenario
+ok 71 - AT-C26 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.6685
+  type: 'test'
+  ...
+# Subtest: AT-C27 deterministic engine acceptance scenario
+ok 72 - AT-C27 deterministic engine acceptance scenario
+  ---
+  duration_ms: 10.8636
+  type: 'test'
+  ...
+# Subtest: AT-C28 deterministic engine acceptance scenario
+ok 73 - AT-C28 deterministic engine acceptance scenario
+  ---
+  duration_ms: 24.5957
+  type: 'test'
+  ...
+# Subtest: AT-C29 deterministic engine acceptance scenario
+ok 74 - AT-C29 deterministic engine acceptance scenario
+  ---
+  duration_ms: 37.1941
+  type: 'test'
+  ...
+# Subtest: AT-C30 deterministic engine acceptance scenario
+ok 75 - AT-C30 deterministic engine acceptance scenario
+  ---
+  duration_ms: 14.9979
+  type: 'test'
+  ...
+# Subtest: AT-C31 deterministic engine acceptance scenario
+ok 76 - AT-C31 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.026
+  type: 'test'
+  ...
+# Subtest: AT-C32 deterministic engine acceptance scenario
+ok 77 - AT-C32 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.6224
+  type: 'test'
+  ...
+# Subtest: AT-D20 deterministic engine acceptance scenario
+ok 78 - AT-D20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 33.8748
+  type: 'test'
+  ...
+1..78
+# tests 78
+# suites 0
+# pass 78
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2031.6004

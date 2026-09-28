@@ -1,0 +1,21 @@
+{
+  "name": "bang-online",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "check": "pnpm --recursive --workspace-concurrency=1 run check",
+    "sites:db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "sites:db:check": "drizzle-kit check --config drizzle.config.ts",
+    "sites:build": "pnpm --filter @bang/site build && node scripts/build-sites.mjs",
+    "build": "pnpm run sites:build"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2",
+    "typescript": "7.0.2"
+  }
+}

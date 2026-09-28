@@ -1,0 +1,13 @@
+{
+  "interactionId": "i-lucky",
+  "kind": "LUCKY_DRAW",
+  "allowedChoices": ["SELECT_JUDGMENT"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-lucky", "choice": "SELECT_JUDGMENT", "selectedCardInstanceId": "c1", "orderedCardInstanceIds": ["c1", "c2"] },
+    { "interactionId": "i-lucky", "choice": "SELECT_JUDGMENT", "selectedCardInstanceId": "c1", "orderedCardInstanceIds": ["c2", "c1"] },
+    { "interactionId": "i-lucky", "choice": "SELECT_JUDGMENT", "selectedCardInstanceId": "c2", "orderedCardInstanceIds": ["c1", "c2"] },
+    { "interactionId": "i-lucky", "choice": "SELECT_JUDGMENT", "selectedCardInstanceId": "c2", "orderedCardInstanceIds": ["c2", "c1"] }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-preview-01",
+  "status": "rejected",
+  "error": { "code": "INVITE_INVALID" }
+}

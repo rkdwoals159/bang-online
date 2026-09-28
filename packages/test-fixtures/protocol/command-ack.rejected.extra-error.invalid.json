@@ -1,0 +1,12 @@
+{
+  "protocolVersion": 1,
+  "commandId": "018f8e3d-1234-4123-8123-123456789abc",
+  "status": "rejected",
+  "error": {
+    "code": "STALE_VERSION",
+    "messageKey": "server.stale_version",
+    "retryable": true,
+    "currentVersion": 4,
+    "debugState": { "secret": "must-not-be-returned" }
+  }
+}

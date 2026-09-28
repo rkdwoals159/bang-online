@@ -1,0 +1,9 @@
+{
+  "protocolVersion": 1,
+  "commandId": "018f8e3d-1234-4123-8123-123456789abc",
+  "actorId": "p_forged",
+  "matchId": "m_example",
+  "expectedVersion": 0,
+  "type": "END_TURN",
+  "payload": {}
+}

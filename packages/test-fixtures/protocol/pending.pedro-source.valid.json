@@ -1,0 +1,11 @@
+{
+  "interactionId": "i-pedro",
+  "kind": "PEDRO_DISCARD_TOP",
+  "allowedChoices": ["SELECT_SOURCE"],
+  "currentResponderPlayerId": "player-2",
+  "step": { "current": 1, "total": 1 },
+  "responseOptions": [
+    { "interactionId": "i-pedro", "choice": "SELECT_SOURCE", "source": "DISCARD_TOP" },
+    { "interactionId": "i-pedro", "choice": "SELECT_SOURCE", "source": "DRAW_PILE_TOP" }
+  ]
+}

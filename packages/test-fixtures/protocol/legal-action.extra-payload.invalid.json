@@ -1,0 +1,8 @@
+{
+  "type": "PLAY_CARD",
+  "payload": {
+    "cardInstanceId": "self-card-1",
+    "actorId": "player-1",
+    "secretRole": "sheriff"
+  }
+}

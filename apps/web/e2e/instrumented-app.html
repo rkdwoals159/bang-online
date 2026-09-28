@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17231b" />
+    <title>BANG! 온라인 · T60 network trace</title>
+    <script>
+      history.replaceState(null, "", "/rooms/new");
+
+      const t60FetchRecords = [];
+      const originalFetch = window.fetch.bind(window);
+      const t60Panel = document.createElement("pre");
+      t60Panel.id = "t60-network-log";
+      t60Panel.setAttribute("aria-label", "T60 request status log");
+      t60Panel.style.cssText = "position:fixed;z-index:99999;right:1rem;bottom:1rem;width:min(44rem,calc(100vw - 2rem));max-height:35vh;overflow:auto;background:#101820;color:#eaf3eb;padding:1rem;border:2px solid #4c6b55;white-space:pre-wrap;font:12px/1.45 ui-monospace,monospace;";
+      document.addEventListener("DOMContentLoaded", () => document.body.append(t60Panel));
+
+      function redact(value) {
+        if (Array.isArray(value)) return value.map(redact);
+        if (typeof value !== "object" || value === null) return value;
+        return Object.fromEntries(Object.entries(value).map(([key, child]) => [
+          key,
+          /invite|credential|secret|cookie|token|password|playerId|roomId/i.test(key) ? "[redacted]" : redact(child),
+        ]));
+      }
+
+      function record(entry) {
+        t60FetchRecords.push(entry);
+        const safeRecords = t60FetchRecords.map(redact);
+        t60Panel.textContent = JSON.stringify({
+          pageUrl: location.href,
+          pageOrigin: location.origin,
+          records: safeRecords,
+        }, null, 2);
+        window.dispatchEvent(new CustomEvent("t60:request-recorded", { detail: entry }));
+      }
+
+      window.__t60FetchRecords = t60FetchRecords;
+      window.fetch = async (input, init = {}) => {
+        const requestUrl = new URL(typeof input === "string" ? input : input.url, location.href);
+        const requestBody = typeof init.body === "string" ? (() => {
+          try { return redact(JSON.parse(init.body)); } catch { return "[non-JSON body omitted]"; }
+        })() : undefined;
+        const startedAt = new Date().toISOString();
+        try {
+          const response = await originalFetch(input, init);
+          const responseText = await response.clone().text();
+          let responseBody = responseText;
+          try { responseBody = redact(JSON.parse(responseText)); } catch { responseBody = responseText.slice(0, 500); }
+          record({
+            startedAt,
+            requestUrl: requestUrl.href,
+            requestOrigin: location.origin,
+            method: init.method ?? (typeof input === "object" ? input.method : "GET"),
+            credentials: init.credentials ?? "same-origin",
+            requestBody,
+            responseUrl: response.url,
+            responseStatus: response.status,
+            responseType: response.type,
+            responseBody,
+          });
+          return response;
+        } catch (error) {
+          record({
+            startedAt,
+            requestUrl: requestUrl.href,
+            requestOrigin: location.origin,
+            method: init.method ?? (typeof input === "object" ? input.method : "GET"),
+            credentials: init.credentials ?? "same-origin",
+            requestBody,
+            fetchError: String(error),
+          });
+          throw error;
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

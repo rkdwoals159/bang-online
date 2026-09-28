@@ -1,0 +1,7 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-sync-01",
+  "status": "rejected",
+  "error": { "code": "NOT_FOUND_OR_FORBIDDEN" },
+  "roomId": "must-not-be-returned"
+}

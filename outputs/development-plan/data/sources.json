@@ -1,0 +1,32 @@
+[
+  {
+    "sourceId": "S1",
+    "url": "https://www.dvgiochi.com/giochi/bang/download/Bang_rules_ENG.pdf",
+    "accessed": "2026-09-27",
+    "sha256": "08001b2c4ebb606cb1a0831b85e1a1c1a61e85a3dbd64bc2ae14d1ce8425871d"
+  },
+  {
+    "sourceId": "S2",
+    "url": "https://www.dvgiochi.com/giochi/bang/download/Bang!_FAQ_ENG.pdf",
+    "accessed": "2026-09-27",
+    "sha256": "9d736344ff1c4fb9552d46ae8ebbe26efcc1c6699308467be3bfd61e48b5cad6"
+  },
+  {
+    "sourceId": "S3",
+    "url": "https://bang.dvgiochi.com/cardslist.php?id=1&lang=en",
+    "accessed": "2026-09-27",
+    "sha256": "34e7b358124ed6d0326ba83d70e1fa71fb2a1d386152d46abd8abaa956855769"
+  },
+  {
+    "sourceId": "S4",
+    "url": "https://bang.dvgiochi.com/quickhelp.php?lang=en",
+    "accessed": "2026-09-27",
+    "sha256": "7a326f1e4f99de4655b2ef9c6f308d4208c89414d5528260292cefb53f3ad3b8"
+  },
+  {
+    "sourceId": "S5",
+    "url": "https://www.dvgiochi.com/bang_champ/MaterialeCampionato/BANG!%20Campionato%20nazionale_Regolamento-daTorneo.pdf",
+    "accessed": "2026-09-27",
+    "sha256": "26fb7140953d59febd270b298aee1c44149a85ebad56072bfc9588c68256c355"
+  }
+]

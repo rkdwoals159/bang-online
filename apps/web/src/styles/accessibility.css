@@ -1,0 +1,92 @@
+/* Shared keyboard focus treatment for controls across the game. */
+:where(
+  button,
+  a[href],
+  input:not([type="hidden"]),
+  select,
+  textarea,
+  summary,
+  [role="button"],
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 3px solid #203c2b;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px #fffdf6, 0 0 0 5px #f1ce70;
+}
+
+:where(
+  .game-table__hand-list,
+  .game-actions__cards,
+  .reaction-prompt__discard-candidates,
+  .reaction-prompt__options
+) {
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(
+  .game-table__hand-list,
+  .game-actions__cards,
+  .reaction-prompt__discard-candidates,
+  .reaction-prompt__options
+) :focus-visible {
+  scroll-margin-inline: 1rem;
+}
+
+.visually-hidden:not(:focus):not(:active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 600px) {
+  .game-table .game-table__hand-list {
+    max-width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 2px 10px;
+  }
+
+  .game-table .game-table__hand-list > li {
+    width: auto;
+    min-width: 0;
+    flex: 0 0 min(100%, 16rem);
+  }
+
+  .game-table .game-table__hand-list > li > span {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .reaction-prompt .reaction-prompt__options {
+    display: flex;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 5px 2px 10px;
+    scroll-snap-type: x proximity;
+  }
+
+  .reaction-prompt .reaction-prompt__options > li {
+    flex: 0 0 min(85vw, 16rem);
+    scroll-snap-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .game-table__hand-list,
+    .game-actions__cards,
+    .reaction-prompt__discard-candidates,
+    .reaction-prompt__options
+  ) {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+}
