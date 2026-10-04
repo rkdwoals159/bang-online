@@ -1,0 +1,42 @@
+{
+  "observedAt": "2026-10-04T11:35:41.406Z",
+  "projectId": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+  "audience": "public (preserved)",
+  "sourceCommit": "0196a34eff7c99f17fdfc14f91016ab3462f05f3",
+  "savedVersion": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_a0b92fd0bb2c8191a29b76fd226a45b4",
+  "versionNumber": 4,
+  "deploymentId": "appgdep_6ac239d57ef8819199a14778ed0f66ec",
+  "status": "succeeded",
+  "url": "https://bang-online-ko.rkdwoals159.chatgpt.site",
+  "updatedAt": "2026-10-04T11:34:59.743144+00:00",
+  "failureMessage": null,
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000be088209911027b66cd6eef1",
+    "content_hash": "sha256:ae53ac429cf8eb3a96e4ab5361eccd00e456a1e69017381868b52e708aec4194",
+    "size_bytes": 6717440,
+    "file_count": 110
+  },
+  "github": {
+    "repository": "https://github.com/rkdwoals159/bang-online",
+    "codeCommit": "0196a34eff7c99f17fdfc14f91016ab3462f05f3",
+    "push": "succeeded"
+  },
+  "verification": {
+    "automatedTests": 657,
+    "passed": 657,
+    "types": "PASS",
+    "build": "PASS",
+    "localHttpGames": [
+      4,
+      7
+    ],
+    "staticHeaders": "PASS",
+    "browserScope": "one local browser context with a controlled fixture",
+    "originalAcceptance": "95/97; D06/D18 NOT RUN",
+    "productionS09": "NOT RUN",
+    "productionAfterLatency": "NOT MEASURED"
+  },
+  "migrationsChanged": false,
+  "productionFixturesWritten": false
+}

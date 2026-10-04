@@ -56,7 +56,11 @@
 - Miniflare를 사용하는 파일이 종료 대기에 머무는 현상이 재발하여 완료되지 않은 최종 시도를 별도 보존했다. Site runner에 `--test-force-exit`을 적용하고 개별 테스트 180초 및 전체 프로세스 제한을 둔다. 테스트가 실제 완료되기 전의 체크포인트는 PASS로 승격하지 않는다. `--resume`은 같은 입력 fingerprint의 이미 완료된 묶음만 재사용한다.
 - 초기 병행 실행 중 Miniflare bridge fetch 실패/파일 종료 timeout이 발생했다. 초기 JSON과 TAP을 보존했다. 로컬 Worker 및 다른 무거운 suite를 중단한 독립 직렬 재실행은 49/49 PASS였고, 최근 로그 regression 추가 후 전체 검증을 다시 실행했다. 초기 실패를 통과로 덮어쓰지 않았다.
 
-## 범위와 남아 있는 제한
+## 운영 반영
+
+동일한 공개 Site **버전 4 게시 SUCCEEDED**, 2026-10-04T11:34:59Z. [운영 사이트](https://bang-online-ko.rkdwoals159.chatgpt.site), 소스 `0196a34eff7c99f17fdfc14f91016ab3462f05f3`. GitHub main 코드 push 성공. [배포 영수증](deployment-result.json)에 버전/배포/아카이브/검증 범위를 기록했다. 운영 DB fixture 생성 및 migration 변경 없이 게시했다. 기존 탭은 새 UI를 읽기 위해 한 번 새로고침하면 된다.
+
+## 검증 범위와 남아 있는 제한
 
 원래 수락 기준 **97개 중 95개 검증, D06/D18 NOT RUN**은 유지한다. 운영 환경 전체 4/7인 독립 브라우저 대국·재접속 S09도 **NOT RUN**이다. 이번 자동 테스트 합계는 원래 97개 수락 케이스 합계와 다르다.
 
