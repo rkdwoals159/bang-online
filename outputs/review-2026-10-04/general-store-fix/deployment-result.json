@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-04T12:22:27.919Z",
+  "source": {
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "checkout_path": "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2",
+    "commit_sha": "15566e1a32efdbff06cb05df10a909a6ac098f5a",
+    "archive": "C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/.sites-runtime/general-store-fix-20261004.tar.gz"
+  },
+  "savedVersion": {
+    "id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_15029d8fb4f88191b4d7fa12a1a69f34",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "version_number": 5,
+    "source": {
+      "commit_sha": "15566e1a32efdbff06cb05df10a909a6ac098f5a"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000077b881f58c40f2562b5bda3a",
+      "content_hash": "sha256:f653077b39654ed6ea646080b4586c12210ef19dbcc05e977b6a9eb4c9191725",
+      "size_bytes": 6727680,
+      "file_count": 110
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ac244de84c081918a764f6f711d2ac3",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "title": "뱅! 온라인",
+    "version_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_15029d8fb4f88191b4d7fa12a1a69f34",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://bang-online-ko.rkdwoals159.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6abacbd5c54c8191abdbb8c55b15de64",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-04T12:22:08.070090+00:00"
+  },
+  "github": {
+    "remote": "https://github.com/rkdwoals159/bang-online",
+    "branch": "main",
+    "sourceCommit": "15566e1a32efdbff06cb05df10a909a6ac098f5a",
+    "pushed": true
+  },
+  "verification": {
+    "automatedTests": 520,
+    "passed": 520,
+    "evidence": "verification.json",
+    "localBrowser": "4-card chooser, Beer detail zoom, choose Beer, 3-card waiting pool",
+    "originalAcceptance": "95/97; D06/D18 NOT RUN",
+    "productionS09": "NOT RUN",
+    "fullNodeAndD1StorageSuitesThisFix": "NOT RUN"
+  },
+  "appliedMigrationsChanged": false
+}

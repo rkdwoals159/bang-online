@@ -35,4 +35,4 @@
 
 ## 적용
 
-기존 public Site에 게시합니다. 이전 프런트엔드의 엄격한 snapshot parser는 추가 필드를 처리하지 못하므로 열린 탭은 한 번 새로고침해야 합니다. 게시 결과와 정확한 소스 commit은 `deployment-result.json`에 기록합니다.
+기존 public Site에 **버전 5 게시가 성공**했습니다(2026-10-04T12:22:08Z). 소스 `15566e1a32efdbff06cb05df10a909a6ac098f5a`는 GitHub main에도 업로드됐습니다. 이전 프런트엔드의 엄격한 snapshot parser는 추가 필드를 처리하지 못하므로 열린 탭은 한 번 새로고침해야 합니다. [게시 결과](deployment-result.json)에 정확한 버전·배포·소스 식별자를 기록했습니다.
