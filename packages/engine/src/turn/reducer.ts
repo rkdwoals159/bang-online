@@ -117,6 +117,17 @@ function beginNextTurn(state: GameState, currentPlayerId: string): TurnTransitio
   });
 }
 
+/** Move only after the full effect/death/victory boundary has closed. */
+export function advanceAfterCurrentPlayerElimination(state: GameState): TurnTransitionResult {
+  const current = currentSeat(state, state.turn.currentPlayerId, true);
+  if (!current.ok) return { ok: false, error: current.error };
+  const resolutionError = requireResolutionIdle(state);
+  if (resolutionError) return { ok: false, error: resolutionError };
+  return current.seat.public.eliminated
+    ? beginNextTurn(state, state.turn.currentPlayerId)
+    : { ok: true, state };
+}
+
 /**
  * Called after the start-effect layer has resolved Dynamite and then Jail.
  * The caller owns those effects and must use skipTurnAfterStartResolution if

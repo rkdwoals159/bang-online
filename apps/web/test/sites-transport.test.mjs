@@ -227,6 +227,7 @@ test("room preview, create and join use the existing HTTP DTO mapping", async ()
     roomId: "room-1", version: 1, occupancy: 1, status: "waiting",
   });
   transport.connect();
+  const unwatch = transport.watchRoom("room-1");
   eventSources[0].source.open();
   const createCommand = {
     protocolVersion: 1,
@@ -253,6 +254,7 @@ test("room preview, create and join use the existing HTTP DTO mapping", async ()
   assert.ok(calls.some(({ url }) => url === "/api/rooms"));
   assert.ok(calls.some(({ url }) => url === "/api/rooms/room-1/commands"));
   await waitUntil(() => calls.some(({ url }) => url === "/api/rooms/room-1/sync"), "room command did not sync");
+  unwatch();
   transport.disconnect();
 });
 
@@ -318,7 +320,7 @@ test("SSE messages only invalidate, hidden streams close, and visible reconnect 
   assert.equal(eventSources[0].source.closed, true, "hidden tab should close its stream");
   visibility.setVisibility("visible");
   assert.equal(eventSources.length, 2);
-  assert.equal(eventSources[1].url, "/api/notifications/events?after=10");
+  assert.equal(eventSources[1].url, "/api/notifications/events?after=10&resource=match-1");
   assert.equal(eventSources[1].init.withCredentials, true);
   eventSources[1].source.open();
   await waitUntil(() => syncRequests.length >= 3, "visible reconnect did not perform authoritative sync");

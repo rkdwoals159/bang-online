@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
+test("Sites development and production explicitly use the Worker HTTP adapter", async () => {
+  const mount = await readFile(new URL("../../site/src/ui/GameAppMount.tsx", import.meta.url), "utf8");
+  assert.match(mount, /<App transportAdapter="sites-http-sse"/);
+});
+
 test("Sites imports the same app stylesheet as the local browser entry", async () => {
   const siteWrapper = new URL("../../site/app/game-ui.css", import.meta.url);
   const [wrapper, browserEntry, sharedStyle] = await Promise.all([

@@ -10,6 +10,7 @@ import {
   cardName,
   createActionCommand,
   findSidAbilityProposalIndex,
+  resolveSidAbilityProposal,
   getCardProposalIndexes,
   getTargetOptions,
   noHealBeerReasons,
@@ -208,8 +209,14 @@ export function ActionsPanel({
 
   function submitProposal(proposalIndex: number): void {
     if (!canAct) return;
-    const proposal = actions[proposalIndex];
+    let proposal = actions[proposalIndex];
     if (!proposal) return;
+    if (proposal.type === "USE_ABILITY" && proposal.costSelection) {
+      const resolved = resolveSidAbilityProposal(proposal,
+        visibleSidAbilitySelection?.firstCardInstanceId ?? null, visibleSidAbilitySelection?.secondCardInstanceId ?? null);
+      if (!resolved) return;
+      proposal = resolved;
+    }
     if (proposal.type === "PLAY_CARD" &&
         noHealBeerReasons(currentSnapshot, proposal.payload.cardInstanceId).length > 0) {
       const confirmed = visibleSelection?.kind === "card" &&
@@ -563,7 +570,9 @@ export function ActionsPanel({
                 ? selectedSidAbilityProposalIndex === null
                   ? <p className="game-actions__sid-feedback" role="status">지금 사용할 수 없는 조합이에요. 다른 카드를 골라 주세요.</p>
                   : (() => {
-                      const proposal = actions[selectedSidAbilityProposalIndex];
+                      const candidate = actions[selectedSidAbilityProposalIndex];
+                      const proposal = candidate ? resolveSidAbilityProposal(candidate,
+                        visibleSidAbilitySelection.firstCardInstanceId, visibleSidAbilitySelection.secondCardInstanceId) : null;
                       const costCards = proposal?.type === "USE_ABILITY"
                         ? proposal.payload.cardInstanceIds.map((id) => handById.get(id))
                         : [];

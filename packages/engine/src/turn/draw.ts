@@ -1,3 +1,4 @@
+import { emptySuzyDrawEvents } from "../effects/characters/suzy-lafayette.js";
 import { BASE_PHYSICAL_CARDS } from "../../../catalog/src/cards/index.js";
 import type { DeepReadonly, EffectEventDraft } from "../effects/api.js";
 import { jailStartEffect } from "../effects/cards/jail.js";
@@ -608,7 +609,13 @@ function finishDrawResolution(
   frameId: string,
   actorPlayerId: string,
   events: readonly EffectEventDraft[],
+  inputRandomForBoundary: RandomSource,
 ): TurnPhaseResult {
+  const suzyEvents = emptySuzyDrawEvents(state, inputRandomForBoundary, null);
+  const withSuzy = applyDrawEvents(state, suzyEvents);
+  if (!withSuzy) return failure("INVALID_DRAW_EVENT", "Suzy boundary draw did not match current zones.");
+  state = withSuzy;
+  events = [...events, ...suzyEvents];
   const popped = completeEffectStep(state, step);
   if (!popped.ok) return failure(popped.error.code, popped.error.message);
   const finished = finishEffectResolution(popped.state, step.effectId, frameId);
@@ -720,7 +727,7 @@ function resumeDraw(input: TurnDrawInput, frame: ResolutionFrame): TurnPhaseResu
     const applied = applyModuleEvents(input.state, result);
     if (!applied) return failure("INVALID_DRAW_EVENT", "Kit Carlson returned an event that does not match the current card zones.");
     events.push(...result.events);
-    return finishDrawResolution(applied, step, frameId, actorPlayerId, events);
+    return finishDrawResolution(applied, step, frameId, actorPlayerId, events, input.random);
   }
 
   const source = invokeSourceAbility(input.state, actorPlayerId, frameId, input.random, interactions);
@@ -750,7 +757,7 @@ function resumeDraw(input: TurnDrawInput, frame: ResolutionFrame): TurnPhaseResu
 
   const draw = normalDraws(state, actorPlayerId, frameId, input.random, events, firstSlotReplaced, interactions);
   if (!draw) return failure("INVALID_DRAW_EVENT", "Draw supply or a character module returned an event that does not match the current card zones.");
-  return finishDrawResolution(draw.state, step, frameId, actorPlayerId, events);
+  return finishDrawResolution(draw.state, step, frameId, actorPlayerId, events, input.random);
 }
 
 /** Executes or resumes one two-card turn draw, including its character hooks. */
@@ -782,7 +789,7 @@ export function executeTurnDraw(input: TurnDrawInput): TurnPhaseResult {
   const withCandidateEvents = applyDrawEvents(begun.state, events);
   if (!withCandidateEvents) return failure("INVALID_DRAW_EVENT", "Kit candidate events could not be applied to the T12 draw continuation.");
   state = withCandidateEvents;
-  if (state.status !== "playing") return finishDrawResolution(state, begun.step, frameId, input.actorPlayerId, events);
+  if (state.status !== "playing") return finishDrawResolution(state, begun.step, frameId, input.actorPlayerId, events, input.random);
 
   if (kitCandidates) {
     const hook = kitHook(state, kitCandidates);
@@ -799,7 +806,7 @@ export function executeTurnDraw(input: TurnDrawInput): TurnPhaseResult {
     const applied = applyModuleEvents(state, result);
     if (!applied) return failure("INVALID_DRAW_EVENT", "Kit Carlson returned an unsupported draw event.");
     events.push(...result.events);
-    return finishDrawResolution(applied, begun.step, frameId, input.actorPlayerId, events);
+    return finishDrawResolution(applied, begun.step, frameId, input.actorPlayerId, events, input.random);
   }
 
   const source = invokeSourceAbility(state, input.actorPlayerId, frameId, input.random, emptyInteractions());
@@ -826,6 +833,6 @@ export function executeTurnDraw(input: TurnDrawInput): TurnPhaseResult {
 
   const draw = normalDraws(state, input.actorPlayerId, frameId, input.random, events, firstSlotReplaced, interactions);
   if (!draw) return failure("INVALID_DRAW_EVENT", "Draw supply or a character module returned an event that does not match the current card zones.");
-  return finishDrawResolution(draw.state, begun.step, frameId, input.actorPlayerId, events);
+  return finishDrawResolution(draw.state, begun.step, frameId, input.actorPlayerId, events, input.random);
 }
 

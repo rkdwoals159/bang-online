@@ -636,12 +636,16 @@ test("restarts a completed match with a fresh seeded setup and preserves the pri
     );
     await database.query(
       `INSERT INTO match_events (match_id, event_seq, event_id, version, type, actor_player_id, payload_json)
-       VALUES ($1, 1, 'event-preserved-before-restart', 1, 'MATCH_FINISHED', $2, '{"preserved":true}'::jsonb)`,
-      [first.matchId, ownerId],
+       VALUES ($1, $3, 'event-preserved-before-restart', 1, 'MATCH_FINISHED', $2, '{"preserved":true}'::jsonb)`,
+      [first.matchId, ownerId, firstMatch.eventSeq + 1],
     );
     const completedBeforeRestart = await storage.getMatch(first.matchId);
     assert.ok(completedBeforeRestart);
     assert.equal(completedBeforeRestart.status, "completed");
+    const eventsBeforeRestart = await database.query(
+      "SELECT event_id, payload_json FROM match_events WHERE match_id = $1 ORDER BY event_seq",
+      [first.matchId],
+    );
 
     const restartCommand = {
       roomId: created.room.roomId,
@@ -676,12 +680,12 @@ test("restarts a completed match with a fresh seeded setup and preserves the pri
     );
     assert.deepEqual(await storage.getMatch(first.matchId), completedBeforeRestart);
     const previousEvents = await database.query<{ event_id: string; payload_json: Record<string, unknown> }>(
-      "SELECT event_id, payload_json FROM match_events WHERE match_id = $1",
+      "SELECT event_id, payload_json FROM match_events WHERE match_id = $1 ORDER BY event_seq",
       [first.matchId],
     );
-    assert.deepEqual(previousEvents.rows, [
-      { event_id: "event-preserved-before-restart", payload_json: { preserved: true } },
-    ]);
+    assert.deepEqual(previousEvents.rows, eventsBeforeRestart.rows);
+    assert.deepEqual(previousEvents.rows.at(-1),
+      { event_id: "event-preserved-before-restart", payload_json: { preserved: true } });
 
     const beforeRetry = await database.query<{ matches: string; players: string; receipts: string; outbox: string }>(
       `SELECT
@@ -866,8 +870,8 @@ test("returns a completed room to the same lobby and requires readiness before s
     );
     await database.query(
       `INSERT INTO match_events (match_id, event_seq, event_id, version, type, actor_player_id, payload_json)
-       VALUES ($1, 1, 'service-return-preserved-event', 1, 'MATCH_FINISHED', $2, '{"preserved":true}'::jsonb)`,
-      [started.matchId, ownerId],
+       VALUES ($1, $3, 'service-return-preserved-event', 1, 'MATCH_FINISHED', $2, '{"preserved":true}'::jsonb)`,
+      [started.matchId, ownerId, completedBeforeReturn.eventSeq + 1],
     );
     const completedMatch = await storage.getMatch(started.matchId);
     const priorEvents = await database.query(

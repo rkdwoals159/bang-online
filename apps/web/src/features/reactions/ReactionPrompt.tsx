@@ -213,6 +213,15 @@ export function ReactionPrompt({
 
       {notice ? <p className="reaction-prompt__notice" role="status" aria-live="polite">{notice}</p> : null}
 
+      {currentSnapshot.publicTable.luckyJudgment ? (
+        <div className="reaction-prompt__judgment" aria-label="공개 판정 카드">
+          <p>{({ jail: "감옥: 하트이면 턴 진행", dynamite: "다이너마이트: 스페이드 2–9이면 폭발",
+            barrel: "술통: 하트이면 방어", jourdonnais_virtual_barrel: "주르도네: 하트이면 방어" })[currentSnapshot.publicTable.luckyJudgment.sourceKind]}</p>
+          {currentSnapshot.publicTable.luckyJudgment.cards.map(card => <div key={card.cardInstanceId}>
+            <PlayingCardFace card={card} /><span>{cardFaceLabel(card)}</span><PlayingCardZoomButton card={card} />
+          </div>)}
+        </div>
+      ) : null}
       {isResponder && responderPrompt ? (
         <>
           <p className="reaction-prompt__instruction">
@@ -299,8 +308,8 @@ export function ReactionPrompt({
                         onClick={() => submitOption(option)}
                       >
                         <strong>{presentation.label}</strong>
-                        {pending.kind === "GENERAL_STORE_PICK" && cardFaces[0]
-                          ? <PlayingCardFace card={cardFaces[0]} /> : null}
+                        {["GENERAL_STORE_PICK", "KIT_CARLSON_PICK", "LUCKY_DRAW"].includes(pending.kind)
+                          ? cardFaces.map(card => <PlayingCardFace key={card.cardInstanceId} card={card} />) : null}
                         {presentation.detail ? <span>{presentation.detail}</span> : null}
                       </button>
                       {cardFaces.map((card) => (

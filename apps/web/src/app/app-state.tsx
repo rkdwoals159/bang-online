@@ -44,15 +44,16 @@ interface AppStateValue {
 
 const AppStateContext = createContext<AppStateValue | null>(null);
 
-export function AppStateProvider({ children }: { children: ReactNode }) {
+export function AppStateProvider({ children, adapter }: { children: ReactNode; adapter?: "sites-http-sse" | "socket-io" }) {
+  const useSitesTransport = adapter === "sites-http-sse" || (adapter === undefined && import.meta.env.PROD);
   // Sites creates its HTTP/SSE adapter synchronously. Local Vite loads the
   // Socket.IO module only in development, keeping it out of the Site bundle.
   const [transport, setTransport] = useState<GameTransport | null>(() =>
-    import.meta.env.PROD ? createSitesGameTransport() : null);
+    useSitesTransport ? createSitesGameTransport() : null);
   const [transportLoadFailed, setTransportLoadFailed] = useState(false);
 
   useEffect(() => {
-    if (import.meta.env.PROD) return;
+    if (useSitesTransport) return;
     let cancelled = false;
     void import("../transport/client.js")
       .then(({ createBrowserGameTransport }) => {
@@ -62,7 +63,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setTransportLoadFailed(true);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [useSitesTransport]);
 
   if (!transport) {
     return (

@@ -123,9 +123,18 @@ export function parseMatchCommand(input: unknown): ParseResult<MatchCommand> {
 export function parseCommandAck(input: unknown): ParseResult<CommandAck> {
   if (!isRecord(input) || input.protocolVersion !== 1 || !isText(input.commandId)) return bad();
   if (input.status === "accepted") {
-    if (!exactShape(input, ["protocolVersion", "commandId", "status", "duplicate", "aggregateVersion", "eventSeq"]) ||
+    if (!exactShape(input, ["protocolVersion", "commandId", "status", "duplicate", "aggregateVersion", "eventSeq"], ["matchProjection"]) ||
         typeof input.duplicate !== "boolean" || !isVersion(input.aggregateVersion) || !isVersion(input.eventSeq)) {
       return bad();
+    }
+    if (Object.hasOwn(input, "matchProjection")) {
+      const projection = input.matchProjection;
+      if (!isRecord(projection) || !exactShape(projection, ["snapshot", "visibleEvents"]) ||
+          !validMatchSnapshot(projection.snapshot) || !Array.isArray(projection.visibleEvents) ||
+          !projection.visibleEvents.every(validPublicMatchEvent)) return bad("$.matchProjection");
+      const events = projection.visibleEvents as PublicMatchEvent[];
+      if (!events.every((event, index) => event.eventSeq <= (input.eventSeq as number) &&
+          (index === 0 || event.eventSeq > events[index - 1]!.eventSeq))) return bad("$.matchProjection");
     }
     return good(input);
   }
@@ -278,7 +287,7 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
       !isVersion(input.viewer.seatIndex) || (input.viewer.mode !== "active" && input.viewer.mode !== "eliminated_observer")) return false;
 
   const table = input.publicTable;
-  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"], ["generalStoreCards"]) ||
+  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"], ["generalStoreCards", "luckyJudgment"]) ||
       !Array.isArray(table.players) || !table.players.every(validPublicPlayer) || !isRecord(table.turn) ||
       !exactShape(table.turn, ["currentPlayerId", "phase"]) || !isText(table.turn.currentPlayerId) ||
       !isText(table.turn.phase) || !isVersion(table.deckCount) || !isRecord(table.publicDiscard) ||
@@ -290,6 +299,14 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
        new Set(table.generalStoreCards.map(card => card.cardInstanceId)).size !== table.generalStoreCards.length ||
        !isRecord(input.pendingInteraction) || input.pendingInteraction.kind !== "GENERAL_STORE_PICK")) return false;
 
+  if (Object.hasOwn(table, "luckyJudgment")) {
+    const judgment = table.luckyJudgment;
+    if (!isRecord(judgment) || !exactKeys(judgment, ["sourceKind", "cards"]) ||
+        !["jail", "dynamite", "barrel", "jourdonnais_virtual_barrel"].includes(String(judgment.sourceKind)) ||
+        !Array.isArray(judgment.cards) || judgment.cards.length !== 2 || !judgment.cards.every(validPendingCardFace) ||
+        new Set(judgment.cards.map(card => card.cardInstanceId)).size !== 2 ||
+        !isRecord(input.pendingInteraction) || input.pendingInteraction.kind !== "LUCKY_DRAW") return false;
+  }
   if (input.selfPrivate !== null) {
     if (!isRecord(input.selfPrivate) || !exactShape(input.selfPrivate, ["role", "hand"]) ||
         !ROLE_IDS.has(input.selfPrivate.role as string) || !Array.isArray(input.selfPrivate.hand) ||
@@ -367,7 +384,16 @@ export function parseSyncRejectedResponse(input: unknown): ParseResult<SyncRejec
 
 /** Strict payload-only parser for server-proposed viewer legal actions. */
 export function parseLegalActionProposal(input: unknown): ParseResult<LegalActionProposal> {
-  if (!isRecord(input) || !exactKeys(input, ["type", "payload"]) || !isRecord(input.payload)) return bad();
+  if (!isRecord(input) || !exactShape(input, ["type", "payload"], ["costSelection"]) || !isRecord(input.payload)) return bad();
+  if (Object.hasOwn(input, "costSelection")) {
+    const selection = input.costSelection;
+    if (input.type !== "USE_ABILITY" || !isRecord(selection) ||
+        !exactShape(selection, ["requiredCount", "allowedCardInstanceIds"]) || selection.requiredCount !== 2 ||
+        !isStringList(selection.allowedCardInstanceIds) || selection.allowedCardInstanceIds.length < 2 ||
+        selection.allowedCardInstanceIds.length > 80 || new Set(selection.allowedCardInstanceIds).size !== selection.allowedCardInstanceIds.length ||
+        !isStringList(input.payload.cardInstanceIds) || input.payload.cardInstanceIds.some(id =>
+          !(selection.allowedCardInstanceIds as string[]).includes(id))) return bad("$.costSelection");
+  }
   const payload = input.payload;
   if (input.type === "PLAY_CARD") {
     const allowed = ["cardInstanceId", "targetPlayerId", "targetZone", "targetCardInstanceId", "asCardType"];
@@ -418,12 +444,17 @@ export function parsePendingInteractionView(
     const isDiscardOrder = input.kind === "DISCARDS_ORDER";
     const responderKeys = ["interactionId", "kind", "allowedChoices", "currentResponderPlayerId", "step", "responseOptions"];
     if (isDiscardOrder) responderKeys.push("discardOrder");
-    if (!exactKeys(input, responderKeys)) {
+    if (!exactShape(input, responderKeys, ["choiceCards"])) {
       return bad();
     }
     if (!Array.isArray(input.responseOptions) || !input.responseOptions.every((option) =>
       isRecord(option) && validPendingRespondOption(option) && option.interactionId === input.interactionId)) {
       return bad("$.responseOptions");
+    }
+    if (Object.hasOwn(input, "choiceCards") &&
+        (input.kind !== "KIT_CARLSON_PICK" || !Array.isArray(input.choiceCards) || input.choiceCards.length !== 3 ||
+         !input.choiceCards.every(validPendingCardFace) || new Set(input.choiceCards.map(card => card.cardInstanceId)).size !== 3)) {
+      return bad("$.choiceCards");
     }
     const expectedChoices = [...new Set((input.responseOptions as PendingRespondOption[]).map((option) => option.choice))];
     if (JSON.stringify(input.allowedChoices) !== JSON.stringify(expectedChoices)) return bad("$.allowedChoices");

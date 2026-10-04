@@ -1,7 +1,7 @@
 import type { GameState, JsonValue } from "../../../../packages/engine/src/state/types.js";
 import { withClient, withTransaction } from "./database-runtime.js";
 import type { PgClientLike, PgPoolLike } from "./database.js";
-import { insertMatchInTransaction, type NewRoom, type RoomRecord } from "./repository.js";
+import { insertMatchInTransaction, type MatchEventRecord, type NewRoom, type RoomRecord } from "./repository.js";
 
 type RoomStatus = RoomRecord["status"];
 type DatabaseInteger = number | string;
@@ -48,6 +48,7 @@ export interface SetRoomStatusInput extends RoomCommandBase {
 }
 
 export interface StartRoomWithMatchInput extends RoomCommandBase {
+  events?: readonly MatchEventRecord[];
   matchId: string;
   matchOutboxEventId: string;
   state: GameState;
@@ -821,6 +822,19 @@ export class RoomLifecycleRepository {
         input.state.version,
         input.state.eventSeq,
       );
+      const initialEvents = input.events ?? [];
+      if (input.events && (initialEvents.length !== input.state.eventSeq ||
+          new Set(initialEvents.map(event => event.eventId)).size !== initialEvents.length ||
+          initialEvents.some((event, index) => event.eventSeq !== index + 1 || event.version !== input.state.version))) {
+        throw new RoomLifecycleInvariantError("Initial event sequence must match its saved snapshot.");
+      }
+      for (const event of initialEvents) {
+        await client.query(`INSERT INTO match_events
+          (match_id, event_seq, event_id, version, type, actor_player_id, payload_json, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)`,
+        [input.matchId, event.eventSeq, event.eventId, event.version, event.type,
+          event.actorPlayerId, JSON.stringify(event.payload), event.createdAt]);
+      }
       await client.query("RELEASE SAVEPOINT room_start_writes");
       return { status: "applied", outcome };
     });

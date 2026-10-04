@@ -1,0 +1,142 @@
+TAP version 13
+# (node:24960) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: startup config reports missing PostgreSQL settings before opening the listener
+ok 1 - startup config reports missing PostgreSQL settings before opening the listener
+  ---
+  duration_ms: 4.1234
+  type: 'test'
+  ...
+# Subtest: runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+ok 2 - runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+  ---
+  duration_ms: 5708.6414
+  type: 'test'
+  ...
+# Subtest: START_MATCH enforces the ready owner roster, persists once, and syncs the exact match route
+ok 3 - START_MATCH enforces the ready owner roster, persists once, and syncs the exact match route
+  ---
+  duration_ms: 3812.8489
+  type: 'test'
+  ...
+# Subtest: node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+ok 4 - node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+  ---
+  duration_ms: 12112.838
+  type: 'test'
+  ...
+# (node:6652) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: looks up only active hashed sessions and creates an idempotent room with a safe preview
+ok 5 - looks up only active hashed sessions and creates an idempotent room with a safe preview
+  ---
+  duration_ms: 5106.5205
+  type: 'test'
+  ...
+# Subtest: starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+ok 6 - starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+  ---
+  duration_ms: 2942.379
+  type: 'test'
+  ...
+# Subtest: a duplicate room-start command returns the original match outcome without additional writes
+ok 7 - a duplicate room-start command returns the original match outcome without additional writes
+  ---
+  duration_ms: 3620.7432
+  type: 'test'
+  ...
+# Subtest: restarts directly from the latest completed match with atomic writes and preserved history
+ok 8 - restarts directly from the latest completed match with atomic writes and preserved history
+  ---
+  duration_ms: 5957.7872
+  type: 'test'
+  ...
+# Subtest: rejects in-game starts unless the latest same-room match is completed, with no writes
+ok 9 - rejects in-game starts unless the latest same-room match is completed, with no writes
+  ---
+  duration_ms: 14302.4871
+  type: 'test'
+  ...
+# Subtest: serializes concurrent direct restarts so only one new match becomes active
+ok 10 - serializes concurrent direct restarts so only one new match becomes active
+  ---
+  duration_ms: 2286.7394
+  type: 'test'
+  ...
+# Subtest: direct restart rechecks unchanged membership and readiness before writing
+ok 11 - direct restart rechecks unchanged membership and readiness before writing
+  ---
+  duration_ms: 6629.8417
+  type: 'test'
+  ...
+# Subtest: start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+ok 12 - start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+  ---
+  duration_ms: 16988.2231
+  type: 'test'
+  ...
+# Subtest: outbox failure rolls back the room, match, players, receipt, and preceding signal
+ok 13 - outbox failure rolls back the room, match, players, receipt, and preceding signal
+  ---
+  duration_ms: 2536.0961
+  type: 'test'
+  ...
+# Subtest: concurrent retries of one room-start command commit one match and return its original ID
+ok 14 - concurrent retries of one room-start command commit one match and return its original ID
+  ---
+  duration_ms: 5221.858
+  type: 'test'
+  ...
+# Subtest: serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+ok 15 - serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+  ---
+  duration_ms: 12574.2128
+  type: 'test'
+  ...
+# Subtest: persists room status changes and locks lobby membership outside WAITING
+ok 16 - persists room status changes and locks lobby membership outside WAITING
+  ---
+  duration_ms: 11438.3088
+  type: 'test'
+  ...
+# Subtest: rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+ok 17 - rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+  ---
+  duration_ms: 12691.5075
+  type: 'test'
+  ...
+# Subtest: rejects leave by a non-member without changing the room
+ok 18 - rejects leave by a non-member without changing the room
+  ---
+  duration_ms: 7122.776
+  type: 'test'
+  ...
+# Subtest: returns a completed match room to the lobby atomically and replays the original receipt
+ok 19 - returns a completed match room to the lobby atomically and replays the original receipt
+  ---
+  duration_ms: 13300.875
+  type: 'test'
+  ...
+# Subtest: rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+ok 20 - rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+  ---
+  duration_ms: 60324.179
+  type: 'test'
+  ...
+# Subtest: rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+ok 21 - rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+  ---
+  duration_ms: 7649.1661
+  type: 'test'
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 21
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 191734.6852

@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-05",
+  "core_full": { "pass": 500, "fail": 0 },
+  "web_full": { "pass": 126, "fail": 0 },
+  "sites_full": { "pass": 55, "fail": 0 },
+  "engine_final_regressions": { "pass": 8, "fail": 0, "overlap_with_core_full": 7, "additional_unique": 1 },
+  "unique_automatic_tests_passed": 682,
+  "typecheck": "PASS: contracts, engine, web, server, site",
+  "production_build": "PASS",
+  "browser_local_four_player_start": "PASS",
+  "browser_dialog_open_escape_focus_restore": "PASS",
+  "original_acceptance": { "pass": 95, "total": 97, "not_run": ["D06", "D18"] },
+  "production_full_flow_S09": "NOT RUN",
+  "production_latency_and_load_measurement": "NOT RUN",
+  "document_navigation_timing_measurement": "NOT RUN",
+  "database_migration_changes": false
+}

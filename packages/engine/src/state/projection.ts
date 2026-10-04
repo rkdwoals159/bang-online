@@ -85,6 +85,12 @@ function projectPendingInteraction(
       allowedChoices: [...new Set(responseOptions.map((option) => option.choice))],
       responseOptions,
       ...(discardOrder ? { discardOrder } : {}),
+      ...(pending.kind === "KIT_CARLSON_PICK" ? {
+        choiceCards: [...new Set(pending.options.flatMap(option => {
+          const ids = option.payload.selectedCardInstanceIds;
+          return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string") : [];
+        }))].map(toCardFace),
+      } : {}),
     };
   } else {
     view = {
@@ -186,6 +192,12 @@ export function projectMatchSnapshot(
         phase: state.turn.phase,
       },
       deckCount: state.zones.drawPileCardInstanceIds.length,
+      ...(state.resolution.pendingInteraction?.kind === "LUCKY_DRAW" ? {
+        luckyJudgment: {
+          sourceKind: state.resolution.pendingInteraction.context.sourceKind as "jail" | "dynamite" | "barrel" | "jourdonnais_virtual_barrel",
+          cards: state.zones.revealedPoolCardInstanceIds.map(toCardFace),
+        },
+      } : {}),
       publicDiscard: {
         topCard: discardTopId === undefined ? null : toCardFace(discardTopId),
         count: discardPile.length,
@@ -200,7 +212,7 @@ export function projectMatchSnapshot(
           role: viewerSeat.private.roleId,
           hand: viewerSeat.private.handCardInstanceIds.map(toCardFace),
         },
-    legalActions: buildLegalActionCandidates(state, viewerPlayerId),
+    legalActions: buildLegalActionCandidates(state, viewerPlayerId, { compactAbilityCosts: true }),
     ...(outcome ? { outcome } : {}),
     pendingInteraction: projectPendingInteraction(pending, viewerPlayerId, toCardFace),
   };

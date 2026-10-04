@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+ok 1 - WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+  ---
+  duration_ms: 3.2954
+  type: 'test'
+  ...
+# Subtest: unsupported and failing ModelContext registrations leave the game UI usable
+ok 2 - unsupported and failing ModelContext registrations leave the game UI usable
+  ---
+  duration_ms: 0.6332
+  type: 'test'
+  ...
+# Subtest: tool input validation rejects unknown keys and only sends server-projected legal actions
+ok 3 - tool input validation rejects unknown keys and only sends server-projected legal actions
+  ---
+  duration_ms: 2.8529
+  type: 'test'
+  ...
+# Subtest: guest and room entry tools reuse the existing normalized transport flow
+ok 4 - guest and room entry tools reuse the existing normalized transport flow
+  ---
+  duration_ms: 1.9806
+  type: 'test'
+  ...
+# Subtest: current state is viewer-scoped and room lobby tools use current versioned commands
+ok 5 - current state is viewer-scoped and room lobby tools use current versioned commands
+  ---
+  duration_ms: 2.2921
+  type: 'test'
+  ...
+# Subtest: tool discards follow the responder's exact private candidate set and count
+ok 6 - tool discards follow the responder's exact private candidate set and count
+  ---
+  duration_ms: 1.5733
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1163.4515

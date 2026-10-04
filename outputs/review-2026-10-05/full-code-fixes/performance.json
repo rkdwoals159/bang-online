@@ -1,0 +1,45 @@
+{
+  "scope": "local engine microbenchmark; no production/network latency claim",
+  "results": [
+    {
+      "playerCount": 4,
+      "handCount": 20,
+      "modes": {
+        "enumerated": {
+          "samples": 40,
+          "p50Ms": 0.799300000000585,
+          "p95Ms": 13.648700000000645,
+          "abilityProposalCount": 190,
+          "abilityJsonBytes": 30838
+        },
+        "compact": {
+          "samples": 40,
+          "p50Ms": 0.33259999999972933,
+          "p95Ms": 7.113400000000183,
+          "abilityProposalCount": 1,
+          "abilityJsonBytes": 1038
+        }
+      }
+    },
+    {
+      "playerCount": 7,
+      "handCount": 20,
+      "modes": {
+        "enumerated": {
+          "samples": 40,
+          "p50Ms": 0.8292000000001281,
+          "p95Ms": 31.358799999999974,
+          "abilityProposalCount": 190,
+          "abilityJsonBytes": 30838
+        },
+        "compact": {
+          "samples": 40,
+          "p50Ms": 0.5195000000003347,
+          "p95Ms": 27.664999999999964,
+          "abilityProposalCount": 1,
+          "abilityJsonBytes": 1039
+        }
+      }
+    }
+  ]
+}

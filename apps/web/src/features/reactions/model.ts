@@ -90,6 +90,10 @@ export async function sendAndRefreshResponse(
 ): Promise<{ acknowledgement: CommandAck; projection: ReactionProjection | null }> {
   const acknowledgement = await transport.sendMatchCommand(command);
   onAcknowledgement?.(acknowledgement);
+  if (acknowledgement.status === "accepted" && acknowledgement.matchProjection) {
+    return { acknowledgement, projection: { version: acknowledgement.aggregateVersion,
+      snapshot: acknowledgement.matchProjection.snapshot } };
+  }
   try {
     const response = await transport.syncMatch(command.matchId);
     return {
@@ -143,13 +147,21 @@ export function presentOption(
     if (player) detail.push(`${player.displayName}의 손패에서 무작위 선택`);
   }
 
+  if ("orderedCardInstanceIds" in option) {
+    detail.push(`버릴 순서: ${option.orderedCardInstanceIds.map(id => {
+      const card = ownHandById.get(id);
+      return card ? cardFaceLabel(card) : "카드";
+    }).join(" → ")}`);
+  }
   const ordinal = total > 1 ? `선택 ${position + 1}` : null;
   return { label: ordinal ? `${label} · ${ordinal}` : label, detail: detail.length > 0 ? detail.join(" · ") : null };
 }
 
 /** Only explicit face DTOs: own hand and the public General Store pool. */
 export function responseVisibleCards(snapshot: MatchSnapshotView): readonly CardFaceView[] {
-  return [...(snapshot.selfPrivate?.hand ?? []), ...(snapshot.publicTable.generalStoreCards ?? [])];
+  const pending = responderPromptFor(snapshot);
+  return [...(snapshot.selfPrivate?.hand ?? []), ...(snapshot.publicTable.generalStoreCards ?? []),
+    ...(snapshot.publicTable.luckyJudgment?.cards ?? []), ...(pending?.choiceCards ?? [])];
 }
 
 export function interactionLabel(kind: string): string {

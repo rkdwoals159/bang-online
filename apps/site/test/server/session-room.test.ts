@@ -11,6 +11,39 @@ import { countRows, createIsolatedD1 } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
 const FIXED_TIME = Date.parse("2026-09-27T12:00:00.000Z");
+
+test("R08 owner kick removes one waiting member, replays once, and allows the guest to rejoin", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const options = serviceOptions({ value: FIXED_TIME });
+    const guests = await Promise.all(["Owner", "P2", "P3", "P4"].map(name => createGuest(db, name, options)));
+    const { roomId, inviteCode } = await fillRoom(db, guests, options);
+    const repository = new D1StorageRepository(db);
+    const command = roomCommand("KICK_MEMBER", roomId, 3, { targetPlayerId: guests[3]!.playerId });
+    const kicked = assertRoomView((await sendRoomCommand(db, guests[0]!, options, command, roomId)).body);
+    assert.equal(kicked.members.length, 3);
+    assert.equal(kicked.members.some(member => member.playerId === guests[3]!.playerId), false);
+    assert.equal((await repository.getRoom(roomId))!.version, 4);
+    assertRoomView((await sendRoomCommand(db, guests[0]!, options, command, roomId)).body);
+    assert.equal((await repository.getRoom(roomId))!.version, 4);
+    const joined = assertRoomView((await sendRoomCommand(db, guests[3]!, options,
+      roomCommand("JOIN", roomId, 4, { inviteCode }), roomId)).body);
+    assert.equal(joined.members.length, 4);
+    const version = await readyAll(db, guests, options, roomId, 5);
+    const results = await Promise.all([
+      sendRoomCommand(db, guests[0]!, options, roomCommand("START_MATCH", roomId, version, {}), roomId),
+      sendRoomCommand(db, guests[0]!, options, roomCommand("KICK_MEMBER", roomId, version, { targetPlayerId: guests[3]!.playerId }), roomId),
+    ]);
+    assert.equal(results.filter(result => parseRoomView(result.body).ok).length, 1);
+    const final = (await repository.getRoom(roomId))!;
+    assert.equal(final.version, version + 1);
+    assert.equal(final.players.length, final.status === "in_game" ? 4 : 3);
+    if (final.status === "in_game") {
+      assertRejected((await sendRoomCommand(db, guests[0]!, options,
+        roomCommand("KICK_MEMBER", roomId, final.version, { targetPlayerId: guests[3]!.playerId }), roomId)).body, "ROOM_LOCKED");
+    }
+  } finally { await runtime.dispose(); }
+});
 let commandSequence = 1;
 
 interface Clock { value: number }
@@ -535,8 +568,8 @@ test("room ready/owner/version guards and concurrent START_MATCH persist the ful
       roomCommand("KICK_MEMBER", roomId, 3, { targetPlayerId: guests[3]!.playerId }), roomId);
     assertRejected(nonmemberKick.body, "NOT_FOUND_OR_FORBIDDEN");
     const ownerKick = await sendRoomCommand(db, guests[0]!, options,
-      roomCommand("KICK_MEMBER", roomId, 3, { targetPlayerId: guests[3]!.playerId }), roomId);
-    assertRejected(ownerKick.body, "COMMAND_UNAVAILABLE");
+      roomCommand("KICK_MEMBER", roomId, 3, { targetPlayerId: guests[0]!.playerId }), roomId);
+    assertRejected(ownerKick.body, "CANNOT_KICK_SELF");
     const nonOwnerKick = await sendRoomCommand(db, guests[1]!, options,
       roomCommand("KICK_MEMBER", roomId, 3, { targetPlayerId: guests[2]!.playerId }), roomId);
     assertRejected(nonOwnerKick.body, "ROOM_FORBIDDEN");
@@ -691,7 +724,8 @@ test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate on
     assert.ok(completedOldMatch);
     assert.equal(completedOldMatch.status, "completed");
     const oldEvents = await repository.listMatchEvents(oldMatchId);
-    assert.equal(oldEvents.length, 1);
+    assert.equal(oldEvents.length, oldMatchBeforeCompletion.eventSeq + 1);
+    assert.equal(oldEvents.at(-1)?.type, "MATCH_FINISHED");
     assert.equal(await repository.getLatestMatchIdForRoom(roomId), oldMatchId);
     const afterFirstStart = await repository.getRoom(roomId);
     assert.ok(afterFirstStart);
@@ -768,7 +802,7 @@ test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate on
     const completedNewMatch = await repository.getMatch(newMatchId);
     assert.ok(completedNewMatch);
     const completedEvents = await repository.listMatchEvents(newMatchId);
-    assert.equal(completedEvents.length, 1);
+    assert.equal(completedEvents.length, newMatch.eventSeq + 1);
 
     const beforeNonOwnerReturn = await countRows(db, "outbox");
     const nonOwnerReturn = await sendRoomCommand(db, guests[1]!, options,

@@ -1,5 +1,6 @@
 import type { CardRank, RoleId, Suit } from "../../../../packages/catalog/src/schema.js";
 import type { GameState, JsonValue, WinningFaction } from "../../../../packages/engine/src/state/types.js";
+import { BASE_PHYSICAL_CARDS } from "../../../../packages/catalog/src/cards/index.js";
 
 const ROLE_IDS: ReadonlySet<RoleId> = new Set(["sheriff", "deputy", "outlaw", "renegade"]);
 const CARD_SUITS: ReadonlySet<Suit> = new Set(["SPADES", "HEARTS", "DIAMONDS", "CLUBS"]);
@@ -215,6 +216,24 @@ export function parseMatchState(value: unknown, supportedSchemaVersion?: number)
   validateStateShape(value);
   if (supportedSchemaVersion !== undefined && value.schemaVersion !== supportedSchemaVersion) {
     throw new UnsupportedMatchStateError(value.schemaVersion, value.rulesetVersion);
+  }
+  if (value.schemaVersion === 1 && value.rulesetVersion === "base4-ko-online-1.0") {
+    const definitions = new Map(BASE_PHYSICAL_CARDS.map(card => [card.definitionId, card]));
+    const cards = Object.values(value.zones.cardsByInstanceId);
+    const allIds = [...value.zones.drawPileCardInstanceIds, ...value.zones.discardPileCardInstanceIds,
+      ...value.zones.revealedPoolCardInstanceIds, ...value.seats.flatMap(seat =>
+        [...seat.private.handCardInstanceIds, ...seat.public.inPlayCardInstanceIds])];
+    if (cards.length !== 80 || allIds.length !== 80 || new Set(allIds).size !== 80 ||
+        allIds.some(id => !Object.hasOwn(value.zones.cardsByInstanceId, id)) ||
+        new Set(cards.map(card => card.cardDefinitionId)).size !== 80 || cards.some(card => {
+          const definition = definitions.get(card.cardDefinitionId);
+          return !definition || definition.rank !== card.rank || definition.suit !== card.suit;
+        })) throw new StoredDataInvariantError("Base match must conserve all 80 catalog cards in exactly one zone each.");
+    if (new Set(value.seats.map(seat => seat.public.seatIndex)).size !== value.seats.length ||
+        value.seats.some(seat => seat.public.hp > seat.public.maxHp) ||
+        !value.seats.some(seat => seat.public.playerId === value.turn.currentPlayerId)) {
+      throw new StoredDataInvariantError("Base match seat/HP/turn references are inconsistent.");
+    }
   }
   return value;
 }

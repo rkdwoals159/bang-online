@@ -9,6 +9,29 @@ let ActionsPanel;
 let ReactionPrompt;
 let getPlayingCardDescription;
 
+test("R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers", () => {
+  const choiceCards = [
+    { cardInstanceId: "kit-bang", typeId: "bang", rank: "A", suit: "SPADES" },
+    { cardInstanceId: "kit-beer", typeId: "beer", rank: "7", suit: "HEARTS" },
+    { cardInstanceId: "kit-missed", typeId: "missed", rank: "8", suit: "CLUBS" },
+  ];
+  const kit = responderPending([{ interactionId: "interaction-1", choice: "CHOOSE_CARDS",
+    selectedCardInstanceIds: ["kit-bang", "kit-beer"] }]);
+  kit.kind = "KIT_CARLSON_PICK"; kit.choiceCards = choiceCards;
+  const kitMarkup = renderReaction(matchSnapshot({ pendingInteraction: kit, selfPrivate: { role: "sheriff", hand: [] } }));
+  assert.match(kitMarkup, /뱅!/); assert.match(kitMarkup, /맥주/); assert.match(kitMarkup, /카드 상세 보기/);
+  assert.doesNotMatch(kitMarkup, /kit-bang|kit-beer|kit-missed/);
+  const lucky = matchSnapshot({ viewerId: "player-b", selfPrivate: null, pendingInteraction: {
+    interactionId: "interaction-1", kind: "LUCKY_DRAW", currentResponderPlayerId: "player-a",
+    step: { current: 1, total: 1 }, allowedChoices: [],
+  } });
+  lucky.publicTable.luckyJudgment = { sourceKind: "jail", cards: choiceCards.slice(0, 2) };
+  const luckyMarkup = renderReaction(lucky);
+  assert.match(luckyMarkup, /공개 판정 카드/); assert.match(luckyMarkup, /감옥: 하트이면 턴 진행/);
+  assert.match(luckyMarkup, /뱅!/); assert.match(luckyMarkup, /맥주/);
+  assert.doesNotMatch(luckyMarkup, /선택 제출|선택 1/);
+});
+
 before(async () => {
   vite = await createServer({
     configFile: "apps/web/vite.config.ts",
@@ -102,19 +125,13 @@ test("every base playing card has Korean detail text from the ruleset summaries"
   }
 });
 
-test("hand zoom has a named dialog and stays separate from action selection", () => {
+test("hand zoom keeps named triggers and mounts detail content only when opened", () => {
   const markup = renderActions();
 
   assert.match(markup, /카드 상세 보기: 뱅!, A 스페이드/);
   assert.match(markup, /loading="lazy" decoding="async"/);
   assert.match(markup, /카드 상세 보기: 맥주, 7 하트/);
-  assert.match(markup, /<dialog[^>]+aria-modal="true"[^>]+aria-hidden="true"[^>]+aria-labelledby=/);
-  assert.match(markup, /뱅! 카드 상세/);
-  assert.match(markup, /닫기/);
-  assert.match(markup, /사용 대상과 방식/);
-  assert.match(markup, /바람/);
-  assert.match(markup, /맥주 카드 상세/);
-  assert.match(markup, /지금 가능한 사용 방법이 없어요/);
+  assert.doesNotMatch(markup, /<dialog|card-zoom__content|card-zoom__visual/);
   assert.doesNotMatch(markup, /<button\b[^>]*>(?:(?!<\/button>)[\s\S])*?<button\b/);
   assert.doesNotMatch(markup, /own-bang|own-beer|cardInstanceId/);
 });
@@ -134,7 +151,7 @@ test("response zoom is limited to card faces named by the current responder opti
   const markup = renderReaction(snapshot);
 
   assert.match(markup, /카드 상세 보기: 빗나감!, 8 하트/);
-  assert.match(markup, /카드 응답/);
+  assert.match(markup, /뱅! 응답/);
   assert.doesNotMatch(markup, /카드 상세 보기: 맥주, 7 하트/);
   assert.doesNotMatch(markup, /own-missed|own-beer|interaction-1|cardInstanceId/);
 

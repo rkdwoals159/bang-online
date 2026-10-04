@@ -19,6 +19,24 @@ import { createSyncProjectionHandlers, syncProjectionInternals } from "../../src
 
 const FIXED_DATE = new Date("2026-09-28T00:00:00.000Z");
 
+test("R05 only Black Jack's explicitly public second draw reaches the shared event projection", () => {
+  const state = makeState();
+  state.seats[0]!.public.characterId = "black_jack";
+  const [first, second, third] = state.zones.drawPileCardInstanceIds;
+  for (const [index, id] of [first, second, third].entries()) {
+    const event: MatchEventRecord = { eventId: `black-${index}`, eventSeq: index + 1, version: 1,
+      type: "CARD_DRAWN", actorPlayerId: "player-a", createdAt: FIXED_DATE,
+      payload: { cardInstanceId: id!, visibility: index === 1 ? "public" : "private",
+        reason: index === 1 ? "BLACK_JACK_SECOND_DRAW" : "DRAW", secret: "hidden" } };
+    const projected = syncProjectionInternals.projectEvent(event, state);
+    if (index === 1) {
+      assert.equal(projected?.type, "BLACK_JACK_CARD_REVEALED");
+      assert.equal((projected?.payload.card as { cardInstanceId: string }).cardInstanceId, second);
+      assert.equal(Object.hasOwn(projected!.payload, "secret"), false);
+    } else assert.equal(projected, undefined);
+  }
+});
+
 function makeState(): GameState {
   const state = initializeGame({
     players: [
@@ -226,7 +244,7 @@ test("match sync rechecks membership and returns only the viewer snapshot plus a
   assert.equal(response.matchId, "match-1");
   assert.equal(response.version, 8);
   assert.equal(response.eventSeq, 3);
-  assert.equal(response.requiresFullSnapshot, true);
+  assert.equal(response.requiresFullSnapshot, false);
   assert.equal(response.snapshot.viewer.playerId, "player-a");
   const viewerSeat = state.seats.find(({ public: player }) => player.playerId === "player-a");
   assert.ok(viewerSeat);

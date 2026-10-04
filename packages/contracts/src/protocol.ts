@@ -86,6 +86,8 @@ export interface CommandAccepted {
   duplicate: boolean;
   aggregateVersion: number;
   eventSeq: number;
+  /** Fresh match writes may return the committed viewer projection with their ACK. */
+  matchProjection?: { snapshot: MatchSnapshotView; visibleEvents: readonly PublicMatchEvent[] };
 }
 export interface CommandRejected {
   protocolVersion: typeof PROTOCOL_VERSION;
@@ -165,7 +167,10 @@ export interface PublicPlayerView {
 /** A viewer-scoped legal proposal contains only a canonical command type and payload. */
 export type LegalActionProposal =
   | Pick<Extract<MatchCommand, { type: "PLAY_CARD" }>, "type" | "payload">
-  | Pick<Extract<MatchCommand, { type: "USE_ABILITY" }>, "type" | "payload">
+  | (Pick<Extract<MatchCommand, { type: "USE_ABILITY" }>, "type" | "payload"> & {
+      /** Any distinct pair from this server-validated set is an allowed Sid cost. */
+      costSelection?: { requiredCount: 2; allowedCardInstanceIds: readonly string[] };
+    })
   | Pick<Extract<MatchCommand, { type: "END_TURN" }>, "type" | "payload">;
 
 export interface InteractionProgressStepView {
@@ -206,6 +211,8 @@ export interface PendingInteractionResponderView {
   responseOptions: readonly PendingRespondOption[];
   /** Present only for DISCARDS_ORDER; never sent to other viewers. */
   discardOrder?: PendingDiscardOrderView;
+  /** Kit's three candidates, visible only to the current responder. */
+  choiceCards?: readonly CardFaceView[];
 }
 
 export type PendingInteractionView =
@@ -230,8 +237,10 @@ export interface MatchSnapshotView {
     /** Remaining draw-pile size only; card identities and order stay private. */
     deckCount: number;
     publicDiscard: { topCard: CardFaceView | null; count: number };
-    /** Remaining public pool only while GENERAL_STORE_PICK is pending. Never Kit/Lucky private candidates. */
+    /** Remaining public pool only while GENERAL_STORE_PICK is pending. */
     generalStoreCards?: readonly CardFaceView[];
+    /** C08: both judgment candidates are public before Lucky chooses. */
+    luckyJudgment?: { sourceKind: "jail" | "dynamite" | "barrel" | "jourdonnais_virtual_barrel"; cards: readonly CardFaceView[] };
   };
   /** Present only to the authenticated active viewer; their own hand stays private even when their role is public. */
   selfPrivate: { role: RoleId; hand: readonly CardFaceView[] } | null;

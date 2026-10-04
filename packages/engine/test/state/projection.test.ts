@@ -35,8 +35,8 @@ test("General Store exposes remaining public faces to all seats without exposing
   }
 });
 
-test("revealed pool is not exported outside General Store, including private draw selections", () => {
-  for (const kind of [null, "KIT_CARLSON_PICK", "LUCKY_DRAW"]) {
+test("unassigned pools and Kit's private draw selection stay hidden from other seats", () => {
+  for (const kind of [null, "KIT_CARLSON_PICK"]) {
     const state = makeState();
     if (kind) addPendingInteraction(state, { choice: "SELECT_JUDGMENT", payload: { selectedCardInstanceId: "revealed-pool-card" } }, kind);
     const observer = projectMatchSnapshot(state, "player-a", physicalCards);

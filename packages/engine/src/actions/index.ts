@@ -63,6 +63,7 @@ function makeProbeContext(): ApplyMatchCommandContext {
 export function buildLegalActionCandidates(
   state: GameState,
   actorPlayerId: string,
+  options: { compactAbilityCosts?: boolean } = {},
 ): LegalActionProposal[] {
   if (state.status !== "playing" || state.turn.currentPlayerId !== actorPlayerId ||
       state.turn.phase !== "play" || !resolutionIsIdle(state)) return [];
@@ -166,6 +167,13 @@ export function buildLegalActionCandidates(
       const card = state.zones.cardsByInstanceId[id];
       return locations.get(id) === 1 && card?.cardInstanceId === id && CARD_TYPE_BY_DEFINITION_ID.has(card.cardDefinitionId);
     });
+    if (options.compactAbilityCosts && hand.length >= 2) {
+      const payload = { abilityId: "sid-ketchum" as const, cardInstanceIds: [hand[0]!, hand[1]!] as [string, string] };
+      if (!validateAbility(state, actorPlayerId, { type: "USE_ABILITY", payload })) {
+        proposals.push({ type: "USE_ABILITY", payload,
+          costSelection: { requiredCount: 2, allowedCardInstanceIds: hand } });
+      }
+    } else {
     for (let first = 0; first < hand.length; first += 1) {
       for (let second = first + 1; second < hand.length; second += 1) {
         const command: Extract<EngineCommand, { type: "USE_ABILITY" }> = {
@@ -179,6 +187,7 @@ export function buildLegalActionCandidates(
           proposals.push({ type: command.type, payload: command.payload });
         }
       }
+    }
     }
   }
 

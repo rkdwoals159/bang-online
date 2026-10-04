@@ -314,6 +314,24 @@ export class D1RoomService {
     });
   }
 
+  async kickMember(playerId: string, input: RoomActionInput & { targetPlayerId: string }): Promise<RoomView | null> {
+    const requestHash = await this.requestHash("KICK_MEMBER", [playerId, input.roomId, input.expectedVersion, input.targetPlayerId]);
+    if (await this.getPriorRoomReceipt(playerId, input.commandId, input.roomId, requestHash)) {
+      return this.roomViewForMember(input.roomId, playerId);
+    }
+    const room = await this.requireMembership(input.roomId, playerId);
+    this.assertVersion(room, input.expectedVersion);
+    this.assertWaiting(room.status);
+    if (room.ownerPlayerId !== playerId) throw new SiteRoomServiceError("ROOM_FORBIDDEN");
+    if (input.targetPlayerId === playerId) throw new SiteRoomServiceError("CANNOT_KICK_SELF");
+    if (!room.players.some(member => member.playerId === input.targetPlayerId)) {
+      throw new SiteRoomServiceError("MEMBER_NOT_FOUND");
+    }
+    return this.commitRoomMutation({ room, playerId, input, requestHash, changed: true,
+      status: room.status, ownerPlayerId: room.ownerPlayerId, occupancy: room.players.length - 1,
+      playerWrites: [{ operation: "delete", playerId: input.targetPlayerId }] });
+  }
+
   async closeRoom(playerId: string, input: RoomActionInput): Promise<RoomView | null> {
     const requestHash = await this.requestHash("CLOSE_ROOM", [playerId, input.roomId, input.expectedVersion]);
     const prior = await this.getPriorRoomReceipt(playerId, input.commandId, input.roomId, requestHash);
@@ -438,7 +456,11 @@ export class D1RoomService {
         matchId,
         matchOutboxEventId: opaqueId("evt_match", this.options.crypto),
         roomOutboxEventId: opaqueId("evt_room", this.options.crypto),
-        state: initialDraw.output.state,
+        state: { ...initialDraw.output.state, eventSeq: initialDraw.output.events.length },
+        events: initialDraw.output.events.map((event, index) => ({
+          ...event, eventId: opaqueId("evt", this.options.crypto), eventSeq: index + 1,
+          version: initialDraw.output.state.version, createdAt: this.now(),
+        })),
         startedAt: this.now(),
       });
       return {

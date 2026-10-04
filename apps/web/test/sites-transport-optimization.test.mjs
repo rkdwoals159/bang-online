@@ -3,6 +3,108 @@ import { test } from "node:test";
 import { sendAndRefreshAction } from "../src/features/actions/model.ts";
 import { sendAndRefreshResponse } from "../src/features/reactions/model.ts";
 import { SitesGameTransport } from "../src/transport/sites-client.ts";
+import { BrowserTransportStore } from "../src/transport/state.ts";
+
+test("P01 a committed ACK projection updates the store and UI without a second match read", async () => {
+  let reads = 0;
+  const transport = new SitesGameTransport({ fetcher: async (url, init) => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    if (url.endsWith("/sync")) { reads++; return Response.json(matchSync(JSON.parse(init.body))); }
+    if (url.endsWith("/commands")) return Response.json({ protocolVersion: 1,
+      commandId: JSON.parse(init.body).commandId, status: "accepted", duplicate: false,
+      aggregateVersion: 2, eventSeq: 2, matchProjection: { snapshot: matchSync({}).snapshot, visibleEvents: [] } });
+    throw new Error(url);
+  } });
+  await transport.restoreGuestSession();
+  await transport.syncMatch("match-1");
+  const action = await sendAndRefreshAction(transport, acceptedMatchCommand());
+  assert.equal(action.projection.version, 2);
+  assert.equal(transport.getSnapshot().matches["match-1"].version, 2);
+  const response = await sendAndRefreshResponse(transport, { ...acceptedMatchCommand(), commandId: "00000000-0000-4000-8000-000000000202" });
+  assert.equal(response.projection.version, 2);
+  assert.equal(reads, 1, "only the initial hydrate reads the match");
+  transport.disconnect();
+});
+
+test("R06 a stalled session body has a deadline and recovery can be retried", async () => {
+  let stalled = true;
+  let signal;
+  const transport = new SitesGameTransport({ readTimeoutMs: 20, fetcher: async (_url, init) => {
+    signal = init.signal;
+    return stalled ? { status: 200, json: () => new Promise(() => {}) } : Response.json(guest);
+  } });
+  await assert.rejects(transport.restoreGuestSession(), { code: "HTTP_REQUEST_FAILED" });
+  assert.equal(signal.aborted, true);
+  stalled = false;
+  assert.equal((await transport.restoreGuestSession()).player.playerId, guest.player.playerId);
+  transport.disconnect();
+});
+
+test("R06 an accepted command survives stalled sync without remaining busy or resending", async () => {
+  let writes = 0;
+  let stalled = true;
+  const transport = new SitesGameTransport({ readTimeoutMs: 20, fetcher: async (url, init) => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    if (url.endsWith("/commands")) {
+      writes++;
+      return Response.json({ protocolVersion: 1, commandId: JSON.parse(init.body).commandId,
+        status: "accepted", duplicate: false, aggregateVersion: 2, eventSeq: 2 });
+    }
+    if (url.endsWith("/sync")) return stalled ? new Promise(() => {}) : Response.json(matchSync(JSON.parse(init.body), { version: 2, eventSeq: 2 }));
+    throw new Error(url);
+  } });
+  await transport.restoreGuestSession();
+  const result = await sendAndRefreshAction(transport, acceptedMatchCommand());
+  assert.equal(result.acknowledgement.status, "accepted");
+  assert.equal(result.projection, null);
+  assert.deepEqual(transport.getSnapshot().pendingCommandIds, []);
+  assert.equal(writes, 1);
+  stalled = false;
+  assert.equal((await transport.syncMatch("match-1")).version, 2);
+  assert.equal(writes, 1);
+  transport.disconnect();
+});
+
+test("R09 EventSource construction errors fall back to HTTP polling and stop on disconnect", async () => {
+  let syncs = 0;
+  let attempts = 0;
+  const transport = new SitesGameTransport({ fallbackPollIntervalMs: 10, readTimeoutMs: 100,
+    fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      if (url.endsWith("/sync")) { syncs++; return Response.json(roomSync(JSON.parse(init.body))); }
+      throw new Error(url);
+    }, eventSourceFactory: () => { attempts++; throw new Error("unsupported"); } });
+  await transport.restoreGuestSession();
+  transport.connect();
+  const unwatch = transport.watchRoom("room-1");
+  try {
+    await new Promise(resolve => setTimeout(resolve, 45));
+    assert.ok(syncs >= 2);
+    assert.ok(attempts >= 1);
+    unwatch();
+    transport.disconnect();
+    const stopped = syncs;
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(syncs, stopped);
+  } finally { unwatch(); transport.disconnect(); }
+});
+
+test("R07 incremental sync keeps earlier public events through projection consumers", () => {
+  const store = new BrowserTransportStore();
+  store.setConnection("connected", true);
+  const first = matchSync({ requestId: "first", matchId: "match-1" });
+  const event = (eventSeq) => ({ eventSeq, type: "BEER_USED", occurredAt: "2026-10-04T00:00:00Z", payload: { healed: 1 } });
+  first.visibleEvents = [event(1)];
+  store.applyMatchSync(first);
+  const next = matchSync({ requestId: "next", matchId: "match-1" }, { version: 2, eventSeq: 2 });
+  next.requiresFullSnapshot = false;
+  next.visibleEvents = [event(2)];
+  store.applyMatchSync(next);
+  assert.deepEqual(store.getSnapshot().matches["match-1"].visibleEvents.map(event => event.eventSeq), [1, 2]);
+  next.version = 3; next.eventSeq = 3; next.requiresFullSnapshot = true; next.visibleEvents = [event(3)];
+  store.applyMatchSync(next);
+  assert.deepEqual(store.getSnapshot().matches["match-1"].visibleEvents.map(event => event.eventSeq), [3]);
+});
 
 test("a late match sync from a previous guest is rejected after identity changes", async () => {
   let currentGuest = guest;
@@ -448,7 +550,7 @@ test("parallel guest restore and seat recovery share each Sites HTTP read and pr
   assert.deepEqual(roomsA.map(({ roomId }) => roomId), ["room-1"]);
   assert.deepEqual(roomsB.map(({ roomId }) => roomId), ["room-1"]);
   assert.deepEqual(calls.map(({ url }) => url), [
-    "/api/guest-sessions", "/api/guest-sessions/rooms", "/api/rooms/room-1/sync",
+    "/api/guest-sessions", "/api/guest-sessions/rooms",
   ]);
   transport.disconnect();
 });

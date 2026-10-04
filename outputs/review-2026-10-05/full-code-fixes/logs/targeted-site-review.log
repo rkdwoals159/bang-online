@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: P02 scoped SSE checks membership and renews only the viewed room's lease
+ok 1 - P02 scoped SSE checks membership and renews only the viewed room's lease
+  ---
+  duration_ms: 6983.0896
+  type: 'test'
+  ...
+# Subtest: R07 and P01 successive command ACKs include private projections and delta sync preserves history
+ok 2 - R07 and P01 successive command ACKs include private projections and delta sync preserves history
+  ---
+  duration_ms: 4718.252
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14550.7883

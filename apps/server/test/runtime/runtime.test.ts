@@ -12,6 +12,7 @@ import { createRuntimeServer, startServer } from "../../src/main.ts";
 import { readPGliteDevConfig, readServerConfig, ServerConfigurationError } from "../../src/config.ts";
 import { withClient } from "../../src/storage/database-runtime.js";
 import { StorageRepository } from "../../src/storage/repository.js";
+import type { GameState } from "../../../../packages/engine/src/state/types.ts";
 import { createDatabase } from "../storage/pglite-pool.ts";
 
 function testConfig(databaseUrl = "postgresql://postgres:postgres@localhost:5432/bang_test") {
@@ -469,6 +470,27 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
     assert.equal(restoredRooms.status, 200);
     const restored = await restoredRooms.json() as Array<{ roomId: string; activeMatchId: string | null }>;
     assert.equal(restored.find(({ roomId }) => roomId === created.roomId)?.activeMatchId, matchId);
+
+    // Kit/Jesse/Pedro can legitimately pause the initial draw. Complete their
+    // canonical private prompt before expecting the play phase.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const initial = await withClient(pool, client => client.query<{ state_json: GameState }>(
+        "SELECT state_json FROM matches WHERE id = $1", [matchId]));
+      const state = initial.rows[0]!.state_json;
+      if (state.turn.phase === "play") break;
+      const responder = guests.find(guest => guest.playerId === state.resolution.pendingInteraction?.actorPlayerIds[0]);
+      assert.ok(responder);
+      const sync = await acknowledged(responder.socket, "match:sync", {
+        protocolVersion: 1, requestId: `initial-draw-${attempt}`, matchId, knownVersion: 0, afterEventSeq: 0,
+      }) as { snapshot: { pendingInteraction: { responseOptions: readonly Record<string, unknown>[] } } };
+      const option = sync.snapshot.pendingInteraction.responseOptions[0];
+      assert.ok(option);
+      const ack = await acknowledged(responder.socket, "match:command", {
+        protocolVersion: 1, commandId: globalThis.crypto.randomUUID(), matchId, expectedVersion: state.version,
+        type: "RESPOND", payload: option,
+      }) as { status: string };
+      assert.equal(ack.status, "accepted");
+    }
 
     const stored = await withClient(pool, async (client) => client.query<{ id: string; state_json: { turn: { phase: string } } }>(
       "SELECT id, state_json FROM matches WHERE room_id = $1",

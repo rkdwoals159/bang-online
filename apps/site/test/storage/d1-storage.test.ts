@@ -20,6 +20,22 @@ import { countRows, createIsolatedD1 } from "./d1-test-db.js";
 
 const playerIds = ["player-1", "player-2", "player-3", "player-4"] as const;
 
+test("base snapshot validation rejects lost, duplicated, unknown or altered cards and invalid HP", () => {
+  const initial = initializeGame({ players: playerIds.map(playerId => ({ playerId, displayName: playerId })), random: { nextFloat: () => 0 } });
+  assert.equal(parseMatchState(initial), initial);
+  const corruptions = [
+    (state: GameState) => { state.zones.drawPileCardInstanceIds.pop(); },
+    (state: GameState) => { state.zones.discardPileCardInstanceIds.push(state.zones.drawPileCardInstanceIds[0]!); },
+    (state: GameState) => { state.zones.drawPileCardInstanceIds[0] = "unknown"; },
+    (state: GameState) => { Object.values(state.zones.cardsByInstanceId)[0]!.rank = 42; },
+    (state: GameState) => { state.seats[0]!.public.hp = state.seats[0]!.public.maxHp + 1; },
+  ];
+  for (const corrupt of corruptions) {
+    const state = structuredClone(initial); corrupt(state);
+    assert.throws(() => parseMatchState(state), StoredDataInvariantError);
+  }
+});
+
 function makeState(overrides: Partial<GameState> = {}): GameState {
   const roles = ["sheriff", "deputy", "outlaw", "renegade"] as const;
   return {

@@ -124,7 +124,7 @@ export function PlayingCardZoomButton({
       >
         {triggerText}
       </button>
-      <dialog
+      {isOpen ? <dialog
         ref={dialogRef}
         className="card-zoom__dialog"
         aria-modal="true"
@@ -161,7 +161,7 @@ export function PlayingCardZoomButton({
             ) : null}
           </div>
         </div>
-      </dialog>
+      </dialog> : null}
     </div>
   );
 }

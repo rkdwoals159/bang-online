@@ -18,6 +18,78 @@ import { D1StorageRepository } from "../../src/storage/repository.js";
 import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
+
+test("P02 scoped SSE checks membership and renews only the viewed room's lease", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const owner = fixture.guests[0]!;
+    const other = await routeApiRequest(request("/api/rooms", { cookie: owner.cookie, body: {
+      protocolVersion: 1, commandId: nextCommandId(), expectedVersion: 0, type: "CREATE_ROOM",
+      payload: { capacity: 4, rulesetVersion: "base4-ko-online-1.0", displayName: "Other room" },
+    } }), { DB: db });
+    const otherRoom = await json(other) as { roomId: string };
+    assert.ok(otherRoom.roomId);
+    const opened = await handleNotificationsRoute(request(`/api/notifications/events?resource=${fixture.matchId}`, {
+      method: "GET", cookie: owner.cookie,
+    }), { DB: db }, { pollIntervalMs: 10 });
+    assert.equal(opened!.status, 200);
+    reader = opened!.body!.getReader();
+    const presence = new TextDecoder().decode((await readChunkWithTimeout(reader)).value!);
+    assert.ok(presence.includes(fixture.roomId));
+    assert.equal(presence.includes(otherRoom.roomId), false);
+    const leases = await db.prepare("SELECT room_id, last_presence_at FROM room_players WHERE player_id = ?")
+      .bind(owner.playerId).all<{ room_id: string; last_presence_at: string | null }>();
+    assert.ok(leases.results!.find(row => row.room_id === fixture.roomId)!.last_presence_at);
+    assert.equal(leases.results!.find(row => row.room_id === otherRoom.roomId)!.last_presence_at, null);
+    await reader.cancel(); reader = undefined;
+    const denied = await handleNotificationsRoute(request("/api/notifications/events?resource=unassigned", {
+      method: "GET", cookie: owner.cookie,
+    }), { DB: db });
+    assert.equal(denied!.status, 404);
+    const malformed = await handleNotificationsRoute(request("/api/notifications/events?resource=x&resource=x", {
+      method: "GET", cookie: owner.cookie,
+    }), { DB: db });
+    assert.equal(malformed!.status, 400);
+  } finally { await reader?.cancel(); await runtime.dispose(); }
+});
+
+test("R07 and P01 successive command ACKs include private projections and delta sync preserves history", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    const original = (await repository.getMatch(fixture.matchId))!;
+    const actor = fixture.guests.find(guest => guest.playerId === original.state.turn.currentPlayerId)!;
+    await giveCardFromDeckToHand(db, original.id, actor.playerId, "beer");
+    const before = (await repository.getMatch(original.id))!;
+    const beer = before.state.seats.find(seat => seat.public.playerId === actor.playerId)!.private.handCardInstanceIds
+      .find(id => BASE_PHYSICAL_CARDS.find(card => card.definitionId === before.state.zones.cardsByInstanceId[id]!.cardDefinitionId)?.typeId === "beer")!;
+    const played = await matchCommand(db, actor, before.id, "PLAY_CARD", before.version, { cardInstanceId: beer });
+    assert.equal(played.ack.status, "accepted");
+    if (played.ack.status !== "accepted") throw new Error("Expected accepted command.");
+    assert.ok(played.ack.matchProjection);
+    assert.equal(played.ack.matchProjection.snapshot.viewer.playerId, actor.playerId);
+    assert.ok(played.ack.matchProjection.visibleEvents.some(event => event.type === "BEER_USED"));
+    const encoded = JSON.stringify(played.ack.matchProjection);
+    for (const seat of before.state.seats.filter(seat => seat.public.playerId !== actor.playerId)) {
+      for (const id of seat.private.handCardInstanceIds) assert.equal(encoded.includes(id), false);
+    }
+    const sync = await routeApiRequest(request(`/api/matches/${before.id}/sync`, { cookie: actor.cookie,
+      body: { protocolVersion: 1, requestId: "review-delta", matchId: before.id,
+        knownVersion: before.version, afterEventSeq: before.eventSeq } }), { DB: db });
+    const parsed = parseMatchSyncResponse(await json(sync));
+    assert.ok(parsed.ok);
+    assert.equal(parsed.value.requiresFullSnapshot, false);
+    assert.deepEqual(parsed.value.visibleEvents, played.ack.matchProjection.visibleEvents);
+    const rawStoredReceipt = await db.prepare("SELECT outcome_json FROM command_receipts WHERE command_id = ?")
+      .bind(played.requestBody.commandId as string).first<{ outcome_json: string }>();
+    // Viewer snapshots are response data; durable receipts remain compact ACKs.
+    assert.ok(rawStoredReceipt);
+    assert.equal(Object.hasOwn(JSON.parse(rawStoredReceipt.outcome_json), "matchProjection"), false);
+  } finally { await runtime.dispose(); }
+});
 let sequence = 1;
 
 test("General Store HTTP sync includes public remaining faces and removes each selected card", async () => {

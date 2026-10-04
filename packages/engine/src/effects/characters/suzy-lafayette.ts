@@ -1,3 +1,6 @@
+import type { DeepReadonly } from "../api.js";
+import type { GameState } from "../../state/types.js";
+import type { RandomSource } from "../../random/shuffle.js";
 import { BASE_PHYSICAL_CARDS } from "../../../../catalog/src/cards/index.js";
 import { planDrawPileSupply } from "../draw-pile.js";
 import type { CharacterAbilityInput, CharacterAbilityModule, CharacterEffectResult } from "../character-api.js";
@@ -102,3 +105,13 @@ export const suzyLafayetteAbility: CharacterAbilityModule<"suzy_lafayette"> = (i
   if (input.hook.kind === "after_card_effect") return afterCardEffect(input);
   return noEffect();
 };
+
+/** Automatic C14 check at a completed effect/draw boundary, never during a Duel. */
+export function emptySuzyDrawEvents(state: DeepReadonly<GameState>, random: RandomSource, sourceCardInstanceId: string | null) {
+  const suzy = state.seats.find((seat) => seat.public.characterId === "suzy_lafayette" &&
+    !seat.public.eliminated && seat.public.hp > 0 && seat.private.handCardInstanceIds.length === 0);
+  if (state.status !== "playing" || !suzy) return [];
+  return planDrawPileSupply({ drawPileCardInstanceIds: state.zones.drawPileCardInstanceIds,
+    discardPileCardInstanceIds: state.zones.discardPileCardInstanceIds, requestedCount: 1,
+    actorPlayerId: suzy.public.playerId, sourceCardInstanceId, destination: "hand", random }).events;
+}

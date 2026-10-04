@@ -181,6 +181,11 @@ export function assertEngineProjectionPrivacy(state: GameState): void {
     const ownHand = allHands.get(viewerId) ?? new Set<string>();
     const ownsPrivateReveal = state.resolution.pendingInteraction?.actorPlayerIds.includes(viewerId) ?? false;
     const isGeneralStore = state.resolution.pendingInteraction?.kind === "GENERAL_STORE_PICK";
+    const isLuckyJudgment = state.resolution.pendingInteraction?.kind === "LUCKY_DRAW";
+    if (isLuckyJudgment) {
+      assert.deepEqual(view.publicTable.luckyJudgment?.cards.map(card => card.cardInstanceId),
+        state.zones.revealedPoolCardInstanceIds, "C08 both Lucky judgment faces are public");
+    } else assert.equal("luckyJudgment" in view.publicTable, false);
     if (isGeneralStore) {
       assert.deepEqual(view.publicTable.generalStoreCards, state.zones.revealedPoolCardInstanceIds.map(id => {
         const card = state.zones.cardsByInstanceId[id]!;
@@ -190,7 +195,7 @@ export function assertEngineProjectionPrivacy(state: GameState): void {
     const hiddenIds = [
       ...state.zones.drawPileCardInstanceIds,
       ...state.zones.discardPileCardInstanceIds.filter((id) => id !== visibleDiscardTop),
-      ...(ownsPrivateReveal || isGeneralStore ? [] : state.zones.revealedPoolCardInstanceIds),
+      ...(ownsPrivateReveal || isGeneralStore || isLuckyJudgment ? [] : state.zones.revealedPoolCardInstanceIds),
       ...[...allHands.entries()].flatMap(([owner, ids]) => owner === viewerId ? [] : [...ids]),
     ].filter((id) => !ownHand.has(id) && !publiclyVisibleInPlay.has(id) && id !== visibleDiscardTop);
     for (const hiddenCardId of hiddenIds) {

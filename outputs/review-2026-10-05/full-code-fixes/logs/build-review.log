@@ -1,0 +1,83 @@
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2K
+transforming...✓ 290 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - rsc:virtual-client-package (19%)
+  - vinext:css-data-url (15%)
+  - vinext:og-inline-fetch-assets (15%)
+  - alias (12%)
+  - vinext:rsc-client-reference-loaders (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 15.44s
+[2/5] analyze server references...
+[2K
+transforming...✓ 150 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (20%)
+  - vite-plugin-commonjs (10%)
+  - vinext:css-data-url (8%)
+  - vinext:middleware-server-only (7%)
+  - alias (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 5.10s
+[3/5] build rsc environment...
+[2K
+transforming...✓ 287 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:css-data-url (13%)
+  - vinext:og-inline-fetch-assets (13%)
+  - rsc:virtual-client-package (12%)
+  - alias (11%)
+  - vinext:middleware-server-only (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 7.40s
+[4/5] build client environment...
+[2K
+transforming...✓ 162 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (27%)
+  - rsc:virtual-client-package (15%)
+  - vinext:middleware-server-only (10%)
+  - rsc:use-client (7%)
+  - rsc:scan-strip (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 8.69s
+[5/5] build ssr environment...
+[2K
+transforming...✓ 126 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (25%)
+  - vinext:validate-middleware-exports (21%)
+  - vinext:css-data-url (9%)
+  - rsc:use-client (8%)
+  - rsc:use-server (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 10.56s
+[0m
+  Route (app)
+  ┌ ? /      
+  └ ƒ /:path+
+
+  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+  Build complete. Run `vinext start` to start the production server.
+

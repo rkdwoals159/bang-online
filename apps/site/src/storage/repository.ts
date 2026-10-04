@@ -201,6 +201,8 @@ export interface CreateRoomCommandInput extends Omit<NewRoom, "players"> {
 }
 
 export interface StartRoomWithMatchInput {
+  /** Initial turn events are stored atomically with the new match. */
+  events?: readonly MatchEventWrite[];
   roomId: string;
   actorPlayerId: string;
   commandId: string;
@@ -973,9 +975,11 @@ export class D1StorageRepository {
   }
 
   /** Renew this player's observation without changing membership or game state. */
-  async touchRoomPresence(playerId: string, observedAt = new Date()): Promise<number> {
+  async touchRoomPresence(playerId: string, observedAt = new Date(), roomIds?: readonly string[]): Promise<number> {
     requiredText(playerId, "Player ID");
     const observedAtText = timestamp(observedAt)!;
+    if (roomIds?.length === 0) return 0;
+    const scope = roomIds ? `AND room_id IN (${roomIds.map(() => "?").join(",")})` : "";
     const result = await this.db.prepare(`
       UPDATE room_players
       SET last_presence_at = CASE
@@ -983,7 +987,9 @@ export class D1StorageRepository {
         ELSE last_presence_at
       END
       WHERE player_id = ?
-    `).bind(observedAtText, observedAtText, playerId).run();
+        AND EXISTS (SELECT 1 FROM rooms WHERE rooms.id = room_players.room_id AND rooms.status <> 'closed')
+        ${scope}
+    `).bind(observedAtText, observedAtText, playerId, ...(roomIds ?? [])).run();
     return changes(result);
   }
 
@@ -1273,6 +1279,11 @@ export class D1StorageRepository {
       assertSameClockwiseRoster(room, completedMatch);
     }
     const state = parseMatchState(input.state);
+    if (input.events && (input.events.length !== state.eventSeq ||
+        new Set(input.events.map(event => event.eventId)).size !== input.events.length ||
+        input.events.some((event, index) => event.eventSeq !== index + 1 || event.version !== state.version))) {
+      throw new D1StorageInvariantError("Initial events must cover the new match cursor exactly once.");
+    }
     if (state.seats.length !== room.players.length) {
       throw new D1StorageInvariantError("Initial match state does not match the ready room roster.");
     }
@@ -1360,6 +1371,12 @@ export class D1StorageRepository {
     `).bind(version, room.id, input.expectedVersion, room.status, input.markerId),
     ...addMatchInsertStatements(this.db,
       { id: input.matchId, roomId: room.id, state, startedAt: input.startedAt }, input.markerId, version),
+    ...(input.events ?? []).map(event => this.db.prepare(`
+      INSERT INTO match_events (match_id, event_seq, event_id, version, type, actor_player_id, payload_json, created_at)
+      SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+      WHERE EXISTS (SELECT 1 FROM commit_guards WHERE marker_id = ?)
+    `).bind(input.matchId, event.eventSeq, event.eventId, event.version, event.type, event.actorPlayerId,
+      encodeJson(event.payload, "initial event payload"), timestamp(event.createdAt), input.markerId)),
     receiptWrite(this.db, receipt, { matchId: null, roomId: room.id }, input.markerId),
     roomOutboxWrite(this.db, input.roomOutboxEventId, room.id, version, input.markerId),
     matchOutboxWrite(this.db, input.matchOutboxEventId, input.matchId, state.version, state.eventSeq, input.markerId),

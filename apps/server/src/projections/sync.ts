@@ -101,13 +101,16 @@ function projectEvent(
   event: MatchEventRecord,
   state: GameState,
 ): PublicMatchEvent | undefined {
-  const fields = PUBLIC_EVENT_FIELDS[event.type];
+  const blackJackReveal = event.type === "CARD_DRAWN" && isRecord(event.payload) &&
+    event.payload.visibility === "public" && event.payload.reason === "BLACK_JACK_SECOND_DRAW" &&
+    state.seats.some(seat => seat.public.playerId === event.actorPlayerId && seat.public.characterId === "black_jack");
+  const fields = blackJackReveal ? ["rank", "suit"] : PUBLIC_EVENT_FIELDS[event.type];
   if (!fields) return undefined;
 
   const payload = projectPayloadFields(event.payload, fields);
   if (event.actorPlayerId !== null) payload.actorPlayerId = event.actorPlayerId;
 
-  if (PUBLIC_CARD_REVEAL_EVENTS.has(event.type) && isRecord(event.payload)) {
+  if ((blackJackReveal || PUBLIC_CARD_REVEAL_EVENTS.has(event.type)) && isRecord(event.payload)) {
     const cardInstanceId = typeof event.payload.cardInstanceId === "string"
       ? event.payload.cardInstanceId
       : event.payload.judgmentCardInstanceId;
@@ -127,7 +130,7 @@ function projectEvent(
 
   return {
     eventSeq: event.eventSeq,
-    type: event.type,
+    type: blackJackReveal ? "BLACK_JACK_CARD_REVEALED" : event.type,
     occurredAt: event.createdAt.toISOString(),
     payload,
   };
@@ -215,7 +218,7 @@ export function createSyncProjectionHandlers(dependencies: SyncProjectionDepende
         matchId: request.matchId,
         version: match.version,
         eventSeq: match.eventSeq,
-        requiresFullSnapshot: request.knownVersion !== match.version || !replayable,
+        requiresFullSnapshot: !replayable,
         snapshot: projectMatchSnapshot(match.state, context.playerId, BASE_PHYSICAL_CARDS),
         visibleEvents,
       };

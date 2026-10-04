@@ -207,7 +207,7 @@ export async function handleSyncRoute(
       matchId: match.id,
       version: match.version,
       eventSeq: match.eventSeq,
-      requiresFullSnapshot: parsed.value.knownVersion !== match.version || !replayable,
+      requiresFullSnapshot: !replayable,
       snapshot: projectMatchSnapshot(match.state, playerId, BASE_PHYSICAL_CARDS),
       visibleEvents,
     };

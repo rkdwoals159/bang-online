@@ -1,6 +1,8 @@
-import type { CommandAck, CommandRejected, MatchCommand } from "../../../../../packages/contracts/src/protocol.js";
+import type { CommandAccepted, CommandAck, CommandRejected, MatchCommand } from "../../../../../packages/contracts/src/protocol.js";
 import { parseCommandAck, parseMatchCommand } from "../../../../../packages/contracts/src/validation.js";
-import { BASE_DECK_RULESET_VERSION } from "../../../../../packages/catalog/src/cards/index.js";
+import { BASE_DECK_RULESET_VERSION, BASE_PHYSICAL_CARDS } from "../../../../../packages/catalog/src/cards/index.js";
+import { projectMatchSnapshot } from "../../../../../packages/engine/src/state/projection.js";
+import { syncProjectionInternals } from "../../../../../apps/server/src/projections/sync.js";
 import {
   applyMatchCommand,
   type ApplyMatchCommandContext,
@@ -44,6 +46,7 @@ const DIRECT_PROTOCOL_ENGINE_ERRORS = new Set([
 ]);
 
 export interface D1MatchServiceOptions {
+  includeMatchProjection?: boolean;
   now?: () => Date;
   crypto?: Crypto;
 }
@@ -153,7 +156,7 @@ function engineFailureAck(commandId: string, state: GameState, error: { code: st
     : { ack: rejected(commandId, "ILLEGAL_ACTION"), persistReceipt: true };
 }
 
-function accepted(commandId: string, state: GameState): CommandAck {
+function accepted(commandId: string, state: GameState): CommandAccepted {
   const ack: CommandAck = {
     protocolVersion: 1,
     commandId,
@@ -379,9 +382,19 @@ export class D1MatchService {
         };
         const drafts = [...result.events, ...continuation.events];
         const idFactory = () => opaqueId("evt", this.options.crypto);
-        const events = eventWrites(drafts, candidateState.version, match.eventSeq, idFactory);
+        const occurredAt = this.options.now?.() ?? new Date();
+        const events = eventWrites(drafts, candidateState.version, match.eventSeq, idFactory)
+          .map(event => ({ ...event, createdAt: occurredAt }));
         const nextState: GameState = { ...candidateState, eventSeq: match.eventSeq + events.length };
         const ack = accepted(command.commandId, nextState);
+        const reply: CommandAck = this.options.includeMatchProjection ? { ...ack, matchProjection: {
+          snapshot: projectMatchSnapshot(nextState, actorPlayerId, BASE_PHYSICAL_CARDS),
+          visibleEvents: events.flatMap(event => {
+            const projected = syncProjectionInternals.projectEvent(event, nextState);
+            return projected ? [projected] : [];
+          }),
+        } } : ack;
+        if (!parseCommandAck(reply).ok) throw new D1StorageInvariantError("Committed viewer projection failed its contract.");
         const commit: MatchCommitInput = {
           matchId: command.matchId,
           expectedVersion: command.expectedVersion,
@@ -401,7 +414,7 @@ export class D1MatchService {
         if (committed.status === "duplicate") {
           return receiptOutcomeAsAck(committed.outcome, command.commandId) ?? rejected(command.commandId, "INTERNAL_ERROR");
         }
-        return ack;
+        return reply;
       } catch (error) {
         if (error instanceof CommandIdReusedError) return rejected(command.commandId, "COMMAND_ID_REUSED");
         if (error instanceof MatchNotFoundError) return rejected(command.commandId, "NOT_A_PLAYER");

@@ -6,6 +6,7 @@ import { createServer } from "vite";
 import {
   createActionCommand,
   findSidAbilityProposalIndex,
+  resolveSidAbilityProposal,
   getCardProposalIndexes,
   getTargetOptions,
   noHealBeerReasons,
@@ -14,6 +15,15 @@ import {
 
 let vite;
 let ActionsPanel;
+
+test("P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs", () => {
+  const proposal = { type: "USE_ABILITY", payload: { abilityId: "sid-ketchum", cardInstanceIds: ["a", "b"] },
+    costSelection: { requiredCount: 2, allowedCardInstanceIds: ["a", "b", "c", "d"] } };
+  assert.equal(findSidAbilityProposalIndex([proposal], "c", "d"), 0);
+  assert.deepEqual(resolveSidAbilityProposal(proposal, "c", "d").payload.cardInstanceIds, ["c", "d"]);
+  assert.equal(resolveSidAbilityProposal(proposal, "a", "a"), null);
+  assert.equal(resolveSidAbilityProposal(proposal, "a", "unknown"), null);
+});
 
 before(async () => {
   vite = await createServer({

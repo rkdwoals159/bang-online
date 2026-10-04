@@ -75,7 +75,12 @@ async function authenticatedPlayer(
 }
 
 /** Room and match memberships share one D1 batch snapshot; room members supply presence leases. */
-async function currentMemberships(db: D1DatabaseLike, playerId: string): Promise<MembershipAggregates> {
+async function currentMemberships(db: D1DatabaseLike, playerId: string, resources: readonly string[] | null): Promise<MembershipAggregates> {
+  const placeholders = resources?.map(() => "?").join(",");
+  const roomScope = resources ? `AND (r.id IN (${placeholders}) OR EXISTS (
+    SELECT 1 FROM matches AS scoped WHERE scoped.room_id = r.id AND scoped.id IN (${placeholders})))` : "";
+  const matchScope = resources ? `AND (viewer.room_id IN (${placeholders}) OR m.id IN (${placeholders}))` : "";
+  const scopeValues = resources ? [...resources, ...resources] : [];
   const results = await db.batch([
     db.prepare(`
       SELECT r.id AS room_id, r.status AS room_status, latest.status AS latest_match_status,
@@ -87,21 +92,25 @@ async function currentMemberships(db: D1DatabaseLike, playerId: string): Promise
         ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1
       )
       JOIN room_players AS member ON member.room_id = r.id
-      WHERE viewer.player_id = ?
+      WHERE viewer.player_id = ? AND r.status <> 'closed'
+      ${roomScope}
       ORDER BY r.id, member.seat_index
-    `).bind(playerId),
+    `).bind(playerId, ...scopeValues),
     db.prepare(`
       SELECT m.id AS aggregate_id, m.status
       FROM room_players AS viewer
       JOIN matches AS m ON m.room_id = viewer.room_id
+      JOIN rooms AS r ON r.id = viewer.room_id
       WHERE viewer.player_id = ?
+        AND r.status <> 'closed'
         AND m.id = (
           SELECT latest.id FROM matches AS latest WHERE latest.room_id = viewer.room_id
           ORDER BY latest.room_version DESC, latest.created_at DESC, latest.started_at DESC, latest.id DESC LIMIT 1
         )
         AND EXISTS (SELECT 1 FROM match_players AS mp WHERE mp.match_id = m.id AND mp.player_id = ?)
+        ${matchScope}
       ORDER BY m.id
-    `).bind(playerId, playerId),
+    `).bind(playerId, playerId, ...scopeValues),
   ]);
   const rooms = new Map<string, RoomMembership>();
   for (const row of (results[0]?.results ?? []) as RoomMembershipRow[]) {
@@ -154,6 +163,7 @@ function createOutboxStream(
   playerId: string,
   initialMemberships: MembershipAggregates,
   initialCursor: number,
+  resources: readonly string[] | null,
 ): ReadableStream<Uint8Array> {
   const activePollIntervalMs = boundedInterval(options.pollIntervalMs, ACTIVE_POLL_INTERVAL_MS, 15_000);
   const idlePollIntervalMs = boundedInterval(
@@ -248,7 +258,7 @@ function createOutboxStream(
               close();
               return;
             }
-            memberships = await currentMemberships(env.DB, currentPlayerId);
+            memberships = await currentMemberships(env.DB, currentPlayerId, resources);
           }
           lastMemberships = memberships;
 
@@ -260,7 +270,7 @@ function createOutboxStream(
           const now = currentTime(options);
           if (now - lastPresenceRenewalAt >= PRESENCE_RENEWAL_INTERVAL_MS) {
             // This only updates the viewer's own lease rows; it never changes seats or game state.
-            await repository.touchRoomPresence(playerId, new Date(now));
+            await repository.touchRoomPresence(playerId, new Date(now), memberships.rooms.map(room => room.roomId));
             lastPresenceRenewalAt = now;
           }
           emitPresence(memberships, now);
@@ -335,17 +345,23 @@ export async function handleNotificationsRoute(
   const rawCursor = headerCursor !== null ? headerCursor : queryCursors[0] ?? null;
   const cursor = parseCursor(rawCursor);
   if (cursor === null) return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
+  const requestedResources = url.searchParams.getAll("resource");
+  if (requestedResources.length > 32 || requestedResources.some(id => id.length < 1 || id.length > 256) ||
+      new Set(requestedResources).size !== requestedResources.length) {
+    return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
+  }
+  const resources = requestedResources.length ? requestedResources : null;
 
   try {
     const playerId = await authenticatedPlayer(request, env, options);
     if (!playerId) return jsonResponse({ error: { code: "NOT_FOUND_OR_FORBIDDEN" } }, 404);
     // Check current membership before opening the stream or reading any outbox cursor.
-    const memberships = await currentMemberships(env.DB, playerId);
+    const memberships = await currentMemberships(env.DB, playerId, resources);
     if (memberships.rooms.length === 0 && memberships.matches.length === 0) {
       return jsonResponse({ error: { code: "NOT_FOUND_OR_FORBIDDEN" } }, 404);
     }
 
-    const stream = createOutboxStream(request, env, options, playerId, memberships, cursor);
+    const stream = createOutboxStream(request, env, options, playerId, memberships, cursor, resources);
     return new Response(stream, {
       status: 200,
       headers: {

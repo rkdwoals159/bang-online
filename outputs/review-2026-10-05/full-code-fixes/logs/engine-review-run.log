@@ -1,0 +1,2377 @@
+TAP version 13
+# (node:8064) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: candidate builder returns complete proposals accepted by T14 without changing state
+ok 1 - candidate builder returns complete proposals accepted by T14 without changing state
+  ---
+  duration_ms: 17.1756
+  type: 'test'
+  ...
+# Subtest: targets use only public zones and legal distance while preserving target selection payloads
+ok 2 - targets use only public zones and legal distance while preserving target selection payloads
+  ---
+  duration_ms: 5.7743
+  type: 'test'
+  ...
+# Subtest: Calamity Janet receives only the supported Missed-as-BANG proposal
+ok 3 - Calamity Janet receives only the supported Missed-as-BANG proposal
+  ---
+  duration_ms: 3.1646
+  type: 'test'
+  ...
+# Subtest: Sid card-pair actions are complete and no actions are proposed outside an idle play turn
+ok 4 - Sid card-pair actions are complete and no actions are proposed outside an idle play turn
+  ---
+  duration_ms: 3.9255
+  type: 'test'
+  ...
+# Subtest: optimized action projection exactly matches full effect probes across all characters and 4–7 seats
+ok 5 - optimized action projection exactly matches full effect probes across all characters and 4–7 seats
+  ---
+  duration_ms: 1422.8117
+  type: 'test'
+  ...
+# Subtest: Sid projection never proposes a duplicate or multiply located cost card
+ok 6 - Sid projection never proposes a duplicate or multiply located cost card
+  ---
+  duration_ms: 0.8659
+  type: 'test'
+  ...
+# Subtest: pure gates match effect probes with equipment, BANG quota, healing and eliminated seats
+ok 7 - pure gates match effect probes with equipment, BANG quota, healing and eliminated seats
+  ---
+  duration_ms: 19.7587
+  type: 'test'
+  ...
+# (node:17920) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a successful physical BANG increments once and T11 rejects the next ordinary BANG
+ok 8 - a successful physical BANG increments once and T11 rejects the next ordinary BANG
+  ---
+  duration_ms: 37.043
+  type: 'test'
+  ...
+# Subtest: a successful Calamity Missed-to-BANG conversion increments the effective BANG quota
+ok 9 - a successful Calamity Missed-to-BANG conversion increments the effective BANG quota
+  ---
+  duration_ms: 2.1175
+  type: 'test'
+  ...
+# Subtest: rejected and failed BANG commands leave the quota unchanged
+ok 10 - rejected and failed BANG commands leave the quota unchanged
+  ---
+  duration_ms: 2.3696
+  type: 'test'
+  ...
+# Subtest: successful non-BANG PLAY_CARD commands do not change the BANG quota
+ok 11 - successful non-BANG PLAY_CARD commands do not change the BANG quota
+  ---
+  duration_ms: 0.9109
+  type: 'test'
+  ...
+# Subtest: Volcanic and Willy keep accumulating successful BANG uses while unlimited
+ok 12 - Volcanic and Willy keep accumulating successful BANG uses while unlimited
+  ---
+  duration_ms: 2.1993
+  type: 'test'
+  ...
+# Subtest: Duel and Indians BANG response submissions do not count as PLAY_CARD uses
+ok 13 - Duel and Indians BANG response submissions do not count as PLAY_CARD uses
+  ---
+  duration_ms: 3.2743
+  type: 'test'
+  ...
+# (node:9728) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: END_TURN reuses the turn reducer and rejects wrong actor or phase without mutation
+ok 14 - END_TURN reuses the turn reducer and rejects wrong actor or phase without mutation
+  ---
+  duration_ms: 50.6665
+  type: 'test'
+  ...
+# Subtest: END_TURN opens a saved hand-limit order and RESPOND completes the discard transition
+ok 15 - END_TURN opens a saved hand-limit order and RESPOND completes the discard transition
+  ---
+  duration_ms: 5.88
+  type: 'test'
+  ...
+# Subtest: legal PLAY_CARD dispatch is deterministic for the same state, command, and prepared RNG
+ok 16 - legal PLAY_CARD dispatch is deterministic for the same state, command, and prepared RNG
+  ---
+  duration_ms: 3.6317
+  type: 'test'
+  ...
+# Subtest: PLAY_CARD rejects illegal actor, ownership, range, and hidden-card targets without calling effects
+ok 17 - PLAY_CARD rejects illegal actor, ownership, range, and hidden-card targets without calling effects
+  ---
+  duration_ms: 2.0503
+  type: 'test'
+  ...
+# Subtest: PLAY_CARD supports only Calamity Janet's documented Missed-to-BANG conversion
+ok 18 - PLAY_CARD supports only Calamity Janet's documented Missed-to-BANG conversion
+  ---
+  duration_ms: 1.9653
+  type: 'test'
+  ...
+# Subtest: USE_ABILITY validates Sid identity, phase, and two distinct owned cost cards
+ok 19 - USE_ABILITY validates Sid identity, phase, and two distinct owned cost cards
+  ---
+  duration_ms: 1.5818
+  type: 'test'
+  ...
+# Subtest: RESPOND delegates saved discard ordering to T12 and does not move cards itself
+ok 20 - RESPOND delegates saved discard ordering to T12 and does not move cards itself
+  ---
+  duration_ms: 1.9518
+  type: 'test'
+  ...
+# Subtest: RESPOND advances generic cursor and victim-only death rescue through T12
+ok 21 - RESPOND advances generic cursor and victim-only death rescue through T12
+  ---
+  duration_ms: 3.3164
+  type: 'test'
+  ...
+# Subtest: completed or paused matches reject commands before turn or interaction handlers
+ok 22 - completed or paused matches reject commands before turn or interaction handlers
+  ---
+  duration_ms: 1.7935
+  type: 'test'
+  ...
+# (node:7604) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the outcome union distinguishes missing targets from illegal targets
+ok 23 - the outcome union distinguishes missing targets from illegal targets
+  ---
+  duration_ms: 3.6371
+  type: 'test'
+  ...
+# Subtest: choice and response requests carry T12-compatible responders and resume context
+ok 24 - choice and response requests carry T12-compatible responders and resume context
+  ---
+  duration_ms: 0.3612
+  type: 'test'
+  ...
+# Subtest: applied effects return internal event drafts and resolver steps using injected randomness
+ok 25 - applied effects return internal event drafts and resolver steps using injected randomness
+  ---
+  duration_ms: 0.3949
+  type: 'test'
+  ...
+# Subtest: effect input exposes completed responses while the supplied game snapshot remains unchanged
+ok 26 - effect input exposes completed responses while the supplied game snapshot remains unchanged
+  ---
+  duration_ms: 0.2508
+  type: 'test'
+  ...
+# Subtest: a character ability can run without a physical source card
+ok 27 - a character ability can run without a physical source card
+  ---
+  duration_ms: 0.2571
+  type: 'test'
+  ...
+# (node:25208) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: BANG opens one target response with only that target's Missed cards
+ok 28 - BANG opens one target response with only that target's Missed cards
+  ---
+  duration_ms: 5.9386
+  type: 'test'
+  ...
+# Subtest: completed Missed response is connected to BANG cancellation without damage
+ok 29 - completed Missed response is connected to BANG cancellation without damage
+  ---
+  duration_ms: 5.0201
+  type: 'test'
+  ...
+# Subtest: a multi-card BANG response saves its remaining quota and excludes a submitted Missed
+ok 30 - a multi-card BANG response saves its remaining quota and excludes a submitted Missed
+  ---
+  duration_ms: 2.6508
+  type: 'test'
+  ...
+# Subtest: a BANG response that takes the hit emits exactly one damage step
+ok 31 - a BANG response that takes the hit emits exactly one damage step
+  ---
+  duration_ms: 1.3617
+  type: 'test'
+  ...
+# Subtest: BANG leaves quota, distance, and card movement to the command/rules boundaries
+ok 32 - BANG leaves quota, distance, and card movement to the command/rules boundaries
+  ---
+  duration_ms: 2.6899
+  type: 'test'
+  ...
+# Subtest: BANG rejects a missing, self, dead, or malformed target without mutation
+ok 33 - BANG rejects a missing, self, dead, or malformed target without mutation
+  ---
+  duration_ms: 1.0354
+  type: 'test'
+  ...
+# Subtest: Beer heals its user by at most one and never targets another player
+ok 34 - Beer heals its user by at most one and never targets another player
+  ---
+  duration_ms: 9.4439
+  type: 'test'
+  ...
+# Subtest: Beer at maximum HP or with two living players is used but does not heal
+ok 35 - Beer at maximum HP or with two living players is used but does not heal
+  ---
+  duration_ms: 1.6547
+  type: 'test'
+  ...
+# Subtest: Beer in a multi-player death rescue restores one HP through the saved response
+ok 36 - Beer in a multi-player death rescue restores one HP through the saved response
+  ---
+  duration_ms: 1.1395
+  type: 'test'
+  ...
+# Subtest: each Beer in a rescue advances HP by one until the victim is positive
+ok 37 - each Beer in a rescue advances HP by one until the victim is positive
+  ---
+  duration_ms: 8.9177
+  type: 'test'
+  ...
+# Subtest: Beer can be spent during a two-player rescue but does not heal or rescue
+ok 38 - Beer can be spent during a two-player rescue but does not heal or rescue
+  ---
+  duration_ms: 1.1749
+  type: 'test'
+  ...
+# Subtest: basic action outcomes are deterministic and do not consume RNG or mutate input
+ok 39 - basic action outcomes are deterministic and do not consume RNG or mutate input
+  ---
+  duration_ms: 1.1819
+  type: 'test'
+  ...
+# (node:11724) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the API fixture covers all sixteen character-specific hook allowlists
+ok 40 - the API fixture covers all sixteen character-specific hook allowlists
+  ---
+  duration_ms: 1.976
+  type: 'test'
+  ...
+# Subtest: query outputs are deterministic values and effect outcomes reuse T12 requests
+ok 41 - query outputs are deterministic values and effect outcomes reuse T12 requests
+  ---
+  duration_ms: 0.214
+  type: 'test'
+  ...
+# (node:11004) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: surviving Bart draws one top card for each HP lost, including source-less Dynamite damage
+ok 42 - surviving Bart draws one top card for each HP lost, including source-less Dynamite damage
+  ---
+  duration_ms: 4.8403
+  type: 'test'
+  ...
+# Subtest: Bart draws for actual HP lost rather than the incoming damage amount
+ok 43 - Bart draws for actual HP lost rather than the incoming damage amount
+  ---
+  duration_ms: 0.8109
+  type: 'test'
+  ...
+# Subtest: Bart waits until rescue ends and requires a matching live Bart with positive integral HP loss
+ok 44 - Bart waits until rescue ends and requires a matching live Bart with positive integral HP loss
+  ---
+  duration_ms: 5.0453
+  type: 'test'
+  ...
+# Subtest: D05 stops after partial R08 supply without inventing cards
+ok 45 - D05 stops after partial R08 supply without inventing cards
+  ---
+  duration_ms: 1.519
+  type: 'test'
+  ...
+# Subtest: a damage source owned by another player does not change draw recipient attribution
+ok 46 - a damage source owned by another player does not change draw recipient attribution
+  ---
+  duration_ms: 0.7361
+  type: 'test'
+  ...
+# Subtest: T66 calls Bart after a lethal hit is rescued with Beer
+ok 47 - T66 calls Bart after a lethal hit is rescued with Beer
+  ---
+  duration_ms: 11.7065
+  type: 'test'
+  ...
+# Subtest: T66 does not let Bart draw the top Beer during an unrescued death window
+ok 48 - T66 does not let Bart draw the top Beer during an unrescued death window
+  ---
+  duration_ms: 4.4917
+  type: 'test'
+  ...
+# (node:20052) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Heart and Diamond on the public second turn draw grant one private deck card
+ok 49 - Heart and Diamond on the public second turn draw grant one private deck card
+  ---
+  duration_ms: 5.2326
+  type: 'test'
+  ...
+# Subtest: Spade and Club on the public second turn draw do not grant a card
+ok 50 - Spade and Club on the public second turn draw do not grant a card
+  ---
+  duration_ms: 1.0509
+  type: 'test'
+  ...
+# Subtest: only a matching living Black Jack player can resolve the bonus
+ok 51 - only a matching living Black Jack player can resolve the bonus
+  ---
+  duration_ms: 0.7613
+  type: 'test'
+  ...
+# Subtest: an empty draw and discard supply pauses without inventing a bonus card
+ok 52 - an empty draw and discard supply pauses without inventing a bonus card
+  ---
+  duration_ms: 0.5256
+  type: 'test'
+  ...
+# Subtest: an empty draw pile uses T70 reshuffle and still keeps the bonus private
+ok 53 - an empty draw pile uses T70 reshuffle and still keeps the bonus private
+  ---
+  duration_ms: 0.7484
+  type: 'test'
+  ...
+# Subtest: malformed hook context cannot widen the second public draw trigger
+ok 54 - malformed hook context cannot widen the second public draw trigger
+  ---
+  duration_ms: 0.6104
+  type: 'test'
+  ...
+# (node:20792) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Calamity can play a physical Missed as BANG and its substitution counts toward quota
+ok 55 - Calamity can play a physical Missed as BANG and its substitution counts toward quota
+  ---
+  duration_ms: 16.4683
+  type: 'test'
+  ...
+# Subtest: Calamity privately receives and may use a physical BANG as Missed in a BANG response
+ok 56 - Calamity privately receives and may use a physical BANG as Missed in a BANG response
+  ---
+  duration_ms: 3.1597
+  type: 'test'
+  ...
+# Subtest: T66 preserves Calamity's BANG-as-Missed response across the saved BANG continuation
+ok 57 - T66 preserves Calamity's BANG-as-Missed response across the saved BANG continuation
+  ---
+  duration_ms: 2.5921
+  type: 'test'
+  ...
+# Subtest: a non-Calamity cannot submit a BANG as Missed
+ok 58 - a non-Calamity cannot submit a BANG as Missed
+  ---
+  duration_ms: 1.3162
+  type: 'test'
+  ...
+# Subtest: Calamity may answer Indians and Duel with Missed as BANG without spending turn quota
+ok 59 - Calamity may answer Indians and Duel with Missed as BANG without spending turn quota
+  ---
+  duration_ms: 2.151
+  type: 'test'
+  ...
+# Subtest: Calamity converts Missed for Indians, but a forged physical/effect pair or wrong character is denied
+ok 60 - Calamity converts Missed for Indians, but a forged physical/effect pair or wrong character is denied
+  ---
+  duration_ms: 1.1341
+  type: 'test'
+  ...
+# (node:18404) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: El Gringo takes one fixed-RNG hand card for each HP actually lost
+ok 61 - El Gringo takes one fixed-RNG hand card for each HP actually lost
+  ---
+  duration_ms: 5.5689
+  type: 'test'
+  ...
+# Subtest: El Gringo stops taking cards when the source hand runs out
+ok 62 - El Gringo stops taking cards when the source hand runs out
+  ---
+  duration_ms: 0.8617
+  type: 'test'
+  ...
+# Subtest: El Gringo does not trigger before post-rescue survival or without actual HP loss
+ok 63 - El Gringo does not trigger before post-rescue survival or without actual HP loss
+  ---
+  duration_ms: 1.8077
+  type: 'test'
+  ...
+# Subtest: El Gringo ignores Dynamite, self-caused damage, and a Duel he initiated
+ok 64 - El Gringo ignores Dynamite, self-caused damage, and a Duel he initiated
+  ---
+  duration_ms: 2.0273
+  type: 'test'
+  ...
+# Subtest: El Gringo may take a card after losing another player's Duel and gets nothing from an empty hand
+ok 65 - El Gringo may take a card after losing another player's Duel and gets nothing from an empty hand
+  ---
+  duration_ms: 1.3454
+  type: 'test'
+  ...
+# Subtest: El Gringo validates every injected random sample before selecting a card
+ok 66 - El Gringo validates every injected random sample before selecting a card
+  ---
+  duration_ms: 2.8517
+  type: 'test'
+  ...
+# (node:18928) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the first slot offers only living nonempty hands and keeps the source options Jesse-only
+ok 67 - the first slot offers only living nonempty hands and keeps the source options Jesse-only
+  ---
+  duration_ms: 5.5217
+  type: 'test'
+  ...
+# Subtest: taking from a selected hand uses injected RNG once and transfers one current physical card
+ok 68 - taking from a selected hand uses injected RNG once and transfers one current physical card
+  ---
+  duration_ms: 2.8181
+  type: 'test'
+  ...
+# Subtest: the selected source is rechecked against the current hand before random selection
+ok 69 - the selected source is rechecked against the current hand before random selection
+  ---
+  duration_ms: 1.0472
+  type: 'test'
+  ...
+# Subtest: empty opponent hands are not offered, and the ordinary deck draw remains the fallback
+ok 70 - empty opponent hands are not offered, and the ordinary deck draw remains the fallback
+  ---
+  duration_ms: 0.9737
+  type: 'test'
+  ...
+# Subtest: choosing the draw pile leaves R08 and resource exhaustion to the draw caller
+ok 71 - choosing the draw pile leaves R08 and resource exhaustion to the draw caller
+  ---
+  duration_ms: 2.037
+  type: 'test'
+  ...
+# Subtest: a second draw slot cannot activate Jesse's first-slot substitution
+ok 72 - a second draw slot cannot activate Jesse's first-slot substitution
+  ---
+  duration_ms: 1.0531
+  type: 'test'
+  ...
+# (node:932) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: offers one virtual Barrel source for BANG and Gatling attacks
+ok 73 - offers one virtual Barrel source for BANG and Gatling attacks
+  ---
+  duration_ms: 4.702
+  type: 'test'
+  ...
+# Subtest: does not offer the virtual source after it was attempted or for another defender
+ok 74 - does not offer the virtual source after it was attempted or for another defender
+  ---
+  duration_ms: 0.834
+  type: 'test'
+  ...
+# Subtest: only a living Jourdonnais can offer the ability, and only for matching BANG-symbol cards
+ok 75 - only a living Jourdonnais can offer the ability, and only for matching BANG-symbol cards
+  ---
+  duration_ms: 0.7527
+  type: 'test'
+  ...
+# Subtest: a Heart judgment contributes one Missed and a non-Heart contributes none
+ok 76 - a Heart judgment contributes one Missed and a non-Heart contributes none
+  ---
+  duration_ms: 1.6284
+  type: 'test'
+  ...
+# Subtest: ignores a judgment for another defender, dead character, or unregistered candidate
+ok 77 - ignores a judgment for another defender, dead character, or unregistered candidate
+  ---
+  duration_ms: 0.7178
+  type: 'test'
+  ...
+# (node:20584) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Kit offers all 2-of-3 choices only to its owner and leaves the snapshot unchanged
+ok 78 - Kit offers all 2-of-3 choices only to its owner and leaves the snapshot unchanged
+  ---
+  duration_ms: 5.4719
+  type: 'test'
+  ...
+# Subtest: choosing two of the top three draws them and leaves the unselected candidate on top
+ok 79 - choosing two of the top three draws them and leaves the unselected candidate on top
+  ---
+  duration_ms: 6.9186
+  type: 'test'
+  ...
+# Subtest: a caller-provided private reveal pool returns the unselected card to draw-pile top
+ok 80 - a caller-provided private reveal pool returns the unselected card to draw-pile top
+  ---
+  duration_ms: 1.4803
+  type: 'test'
+  ...
+# Subtest: other viewer projections do not expose any of the private candidate cards
+ok 81 - other viewer projections do not expose any of the private candidate cards
+  ---
+  duration_ms: 3.3014
+  type: 'test'
+  ...
+# Subtest: Kit does not draw, reshuffle, or consume RNG when the draw caller has not supplied three current candidates
+ok 82 - Kit does not draw, reshuffle, or consume RNG when the draw caller has not supplied three current candidates
+  ---
+  duration_ms: 1.0482
+  type: 'test'
+  ...
+# (node:22128) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Lucky prompts only itself to select one of two public candidates and choose their discard order
+ok 83 - Lucky prompts only itself to select one of two public candidates and choose their discard order
+  ---
+  duration_ms: 10.3962
+  type: 'test'
+  ...
+# Subtest: already supplied candidates are resolved without repeating reveal or consuming RNG
+ok 84 - already supplied candidates are resolved without repeating reveal or consuming RNG
+  ---
+  duration_ms: 2.1307
+  type: 'test'
+  ...
+# Subtest: stale candidates, forged choices, dead actors, and non-Lucky draw hooks are ignored
+ok 85 - stale candidates, forged choices, dead actors, and non-Lucky draw hooks are ignored
+  ---
+  duration_ms: 1.3172
+  type: 'test'
+  ...
+# (node:21048) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: only the opponent-to-Paul query gains one and stacks with Rose, Scope, and Mustang per R10
+ok 86 - only the opponent-to-Paul query gains one and stacks with Rose, Scope, and Mustang per R10
+  ---
+  duration_ms: 5.527
+  type: 'test'
+  ...
+# Subtest: the living seat ring ignores eliminated seats while Paul and Mustang penalties accumulate
+ok 87 - the living seat ring ignores eliminated seats while Paul and Mustang penalties accumulate
+  ---
+  duration_ms: 2.2117
+  type: 'test'
+  ...
+# Subtest: self, dead Paul, non-Paul target, and malformed or duplicate seat data safely contribute zero
+ok 88 - self, dead Paul, non-Paul target, and malformed or duplicate seat data safely contribute zero
+  ---
+  duration_ms: 1.4519
+  type: 'test'
+  ...
+# (node:4532) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: first ordinary draw prompts Pedro alone to choose the public discard top or normal draw pile
+ok 89 - first ordinary draw prompts Pedro alone to choose the public discard top or normal draw pile
+  ---
+  duration_ms: 6.8156
+  type: 'test'
+  ...
+# Subtest: choosing discard top transfers only the current last discard card without mutating state
+ok 90 - choosing discard top transfers only the current last discard card without mutating state
+  ---
+  duration_ms: 1.6102
+  type: 'test'
+  ...
+# Subtest: choosing the draw pile leaves normal draw and R08 handling to the caller
+ok 91 - choosing the draw pile leaves normal draw and R08 handling to the caller
+  ---
+  duration_ms: 1.3041
+  type: 'test'
+  ...
+# Subtest: an empty draw pile still offers the current discard top before R08 is needed
+ok 92 - an empty draw pile still offers the current discard top before R08 is needed
+  ---
+  duration_ms: 1.8652
+  type: 'test'
+  ...
+# Subtest: an empty discard pile has no replacement choice and the draw caller owns the fallback
+ok 93 - an empty discard pile has no replacement choice and the draw caller owns the fallback
+  ---
+  duration_ms: 2.0363
+  type: 'test'
+  ...
+# Subtest: only the first ordinary draw slot can open Pedro's replacement choice
+ok 94 - only the first ordinary draw slot can open Pedro's replacement choice
+  ---
+  duration_ms: 0.6489
+  type: 'test'
+  ...
+# Subtest: a stale or forged top source and mismatched resumed top do not move a card
+ok 95 - a stale or forged top source and mismatched resumed top do not move a card
+  ---
+  duration_ms: 1.0629
+  type: 'test'
+  ...
+# (node:24248) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Rose reduces only her own directed query and stacks with Scope, Paul, and Mustang per R10
+ok 96 - Rose reduces only her own directed query and stacks with Scope, Paul, and Mustang per R10
+  ---
+  duration_ms: 5.6998
+  type: 'test'
+  ...
+# Subtest: R10 uses the surviving circle and keeps Rose plus Scope at a minimum distance of one
+ok 97 - R10 uses the surviving circle and keeps Rose plus Scope at a minimum distance of one
+  ---
+  duration_ms: 2.041
+  type: 'test'
+  ...
+# Subtest: Rose at zero HP still reduces distance while the death-rescue decision is pending
+ok 98 - Rose at zero HP still reduces distance while the death-rescue decision is pending
+  ---
+  duration_ms: 0.5992
+  type: 'test'
+  ...
+# Subtest: self queries, dead or mismatched Rose, and malformed or duplicate seat data contribute zero
+ok 99 - self queries, dead or mismatched Rose, and malformed or duplicate seat data contribute zero
+  ---
+  duration_ms: 1.4973
+  type: 'test'
+  ...
+# (node:21588) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Sid direct module returns only a capped heal step for a valid play-phase hook
+ok 100 - Sid direct module returns only a capped heal step for a valid play-phase hook
+  ---
+  duration_ms: 17.7269
+  type: 'test'
+  ...
+# Subtest: Sid can spend two exact hand cards repeatedly and never exceed max HP
+ok 101 - Sid can spend two exact hand cards repeatedly and never exceed max HP
+  ---
+  duration_ms: 6.3968
+  type: 'test'
+  ...
+# Subtest: T14 refuses Sid use while another card resolution is awaiting a response
+ok 102 - T14 refuses Sid use while another card resolution is awaiting a response
+  ---
+  duration_ms: 4.311
+  type: 'test'
+  ...
+# Subtest: Sid is the only death-rescue responder and can rescue at two living players
+ok 103 - Sid is the only death-rescue responder and can rescue at two living players
+  ---
+  duration_ms: 6.2534
+  type: 'test'
+  ...
+# (node:14076) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Slab's own physical BANG adds one Missed while a resumed query retains that requirement
+ok 104 - Slab's own physical BANG adds one Missed while a resumed query retains that requirement
+  ---
+  duration_ms: 7.148
+  type: 'test'
+  ...
+# Subtest: Gatling, another attacker's BANG, and Calamity's physical Missed conversion receive no Slab addition
+ok 105 - Gatling, another attacker's BANG, and Calamity's physical Missed conversion receive no Slab addition
+  ---
+  duration_ms: 0.7372
+  type: 'test'
+  ...
+# Subtest: rejects invalid character, attacker/defender identity, liveness, phase, and card references
+ok 106 - rejects invalid character, attacker/defender identity, liveness, phase, and card references
+  ---
+  duration_ms: 1.9142
+  type: 'test'
+  ...
+# Subtest: validates saved Missed and judgment progress before applying the query
+ok 107 - validates saved Missed and judgment progress before applying the query
+  ---
+  duration_ms: 4.8361
+  type: 'test'
+  ...
+# Subtest: the same valid input always returns the same result and never consumes the injected RNG
+ok 108 - the same valid input always returns the same result and never consumes the injected RNG
+  ---
+  duration_ms: 1.3227
+  type: 'test'
+  ...
+# (node:6708) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Suzy draws immediately after a continuing Slab response leaves her empty-handed
+ok 109 - Suzy draws immediately after a continuing Slab response leaves her empty-handed
+  ---
+  duration_ms: 5.7038
+  type: 'test'
+  ...
+# Subtest: Suzy waits for a last Duel to finish, then draws once if the hand is still empty
+ok 110 - Suzy waits for a last Duel to finish, then draws once if the hand is still empty
+  ---
+  duration_ms: 1.1512
+  type: 'test'
+  ...
+# Subtest: Suzy's surviving El Gringo boundary draws before the reward only when her hand is empty
+ok 111 - Suzy's surviving El Gringo boundary draws before the reward only when her hand is empty
+  ---
+  duration_ms: 1.0203
+  type: 'test'
+  ...
+# Subtest: completed General Store, Stagecoach, and Wells Fargo do not trigger an extra Suzy draw
+ok 112 - completed General Store, Stagecoach, and Wells Fargo do not trigger an extra Suzy draw
+  ---
+  duration_ms: 3.5162
+  type: 'test'
+  ...
+# Subtest: Suzy ignores non-empty, stale-count, unsupported-actor, and wrong-boundary hooks
+ok 113 - Suzy ignores non-empty, stale-count, unsupported-actor, and wrong-boundary hooks
+  ---
+  duration_ms: 1.0715
+  type: 'test'
+  ...
+# (node:24960) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Vulture Sam transfers eliminated player's hand and equipment to hand without mutating state
+ok 114 - Vulture Sam transfers eliminated player's hand and equipment to hand without mutating state
+  ---
+  duration_ms: 6.6527
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cannot recover a Dynamite already discarded by its explosion
+ok 115 - Vulture Sam cannot recover a Dynamite already discarded by its explosion
+  ---
+  duration_ms: 1.2527
+  type: 'test'
+  ...
+# Subtest: Vulture Sam ignores malformed or stale cleanup snapshots
+ok 116 - Vulture Sam ignores malformed or stale cleanup snapshots
+  ---
+  duration_ms: 2.0087
+  type: 'test'
+  ...
+# (node:22940) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Willy has an unlimited own-turn BANG quota and preserves the accumulated count
+ok 117 - Willy has an unlimited own-turn BANG quota and preserves the accumulated count
+  ---
+  duration_ms: 7.8027
+  type: 'test'
+  ...
+# Subtest: Willy's unlimited quota applies only to a valid own-turn BANG quota query
+ok 118 - Willy's unlimited quota applies only to a valid own-turn BANG quota query
+  ---
+  duration_ms: 1.0749
+  type: 'test'
+  ...
+# Subtest: Willy keeps ordinary target and range restrictions, and other characters keep the one-BANG limit
+ok 119 - Willy keeps ordinary target and range restrictions, and other characters keep the one-BANG limit
+  ---
+  duration_ms: 2.6171
+  type: 'test'
+  ...
+# (node:20876) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: draw-pile supply uses deck top first and returns hand movement drafts without mutation
+ok 120 - draw-pile supply uses deck top first and returns hand movement drafts without mutation
+  ---
+  duration_ms: 2.6862
+  type: 'test'
+  ...
+# Subtest: R08 reshuffles the whole discard pile only when the deck becomes empty
+ok 121 - R08 reshuffles the whole discard pile only when the deck becomes empty
+  ---
+  duration_ms: 0.7774
+  type: 'test'
+  ...
+# Subtest: a played Stagecoach is included in a later reshuffle after runtime consumes it
+ok 122 - a played Stagecoach is included in a later reshuffle after runtime consumes it
+  ---
+  duration_ms: 3.6788
+  type: 'test'
+  ...
+# Subtest: D05 records a partial fulfillment and pauses after the last available card
+ok 123 - D05 records a partial fulfillment and pauses after the last available card
+  ---
+  duration_ms: 0.3223
+  type: 'test'
+  ...
+# Subtest: D05 with both piles empty pauses without creating a card
+ok 124 - D05 with both piles empty pauses without creating a card
+  ---
+  duration_ms: 0.222
+  type: 'test'
+  ...
+# Subtest: revealed-pool destination preserves General Store reveal event semantics
+ok 125 - revealed-pool destination preserves General Store reveal event semantics
+  ---
+  duration_ms: 0.2846
+  type: 'test'
+  ...
+# Subtest: peek returns private candidates without emitting card-movement events
+ok 126 - peek returns private candidates without emitting card-movement events
+  ---
+  duration_ms: 0.1889
+  type: 'test'
+  ...
+# Subtest: peek returns only shuffle/exhaustion events when the deck needs replenishment
+ok 127 - peek returns only shuffle/exhaustion events when the deck needs replenishment
+  ---
+  duration_ms: 0.2244
+  type: 'test'
+  ...
+# Subtest: the same piles and injected RNG produce the same plan
+ok 128 - the same piles and injected RNG produce the same plan
+  ---
+  duration_ms: 0.5476
+  type: 'test'
+  ...
+# Subtest: rejects negative or fractional requested counts
+ok 129 - rejects negative or fractional requested counts
+  ---
+  duration_ms: 1.0022
+  type: 'test'
+  ...
+# (node:22240) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Stagecoach draws exactly two and Wells Fargo exactly three to the user hand
+ok 130 - Stagecoach draws exactly two and Wells Fargo exactly three to the user hand
+  ---
+  duration_ms: 19.3853
+  type: 'test'
+  ...
+# Subtest: R08 reshuffles the entire discard pile, including the played Stagecoach, when the deck runs out
+ok 131 - R08 reshuffles the entire discard pile, including the played Stagecoach, when the deck runs out
+  ---
+  duration_ms: 2.4979
+  type: 'test'
+  ...
+# Subtest: D05 pauses after partial draws when both draw and discard piles are exhausted
+ok 132 - D05 pauses after partial draws when both draw and discard piles are exhausted
+  ---
+  duration_ms: 1.2874
+  type: 'test'
+  ...
+# Subtest: General Store pauses on a partial reveal when R08 cannot refill enough cards
+ok 133 - General Store pauses on a partial reveal when R08 cannot refill enough cards
+  ---
+  duration_ms: 1.8145
+  type: 'test'
+  ...
+# Subtest: General Store reveals one card per living player and prompts them clockwise one at a time
+ok 134 - General Store reveals one card per living player and prompts them clockwise one at a time
+  ---
+  duration_ms: 2.8633
+  type: 'test'
+  ...
+# Subtest: General Store reshuffles the used source card before revealing the full living-player count
+ok 135 - General Store reshuffles the used source card before revealing the full living-player count
+  ---
+  duration_ms: 2.6058
+  type: 'test'
+  ...
+# Subtest: effects reject mismatched sources, explicit targets, and invalid General Store choices
+ok 136 - effects reject mismatched sources, explicit targets, and invalid General Store choices
+  ---
+  duration_ms: 1.0341
+  type: 'test'
+  ...
+# (node:16476) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Duel requires one other living player and starts with a distant target
+ok 137 - Duel requires one other living player and starts with a distant target
+  ---
+  duration_ms: 6.7371
+  type: 'test'
+  ...
+# Subtest: players alternate from the target; yielded initiator takes Duel damage without changing BANG quota
+ok 138 - players alternate from the target; yielded initiator takes Duel damage without changing BANG quota
+  ---
+  duration_ms: 2.4862
+  type: 'test'
+  ...
+# Subtest: a responder with no BANG immediately takes one damage and the Duel ends
+ok 139 - a responder with no BANG immediately takes one damage and the Duel ends
+  ---
+  duration_ms: 0.825
+  type: 'test'
+  ...
+# Subtest: Calamity Janet may answer Duel with Missed as BANG
+ok 140 - Calamity Janet may answer Duel with Missed as BANG
+  ---
+  duration_ms: 0.9655
+  type: 'test'
+  ...
+# Subtest: Duel damage retains the initiator so R28 gives them no reward for their own elimination
+ok 141 - Duel damage retains the initiator so R28 gives them no reward for their own elimination
+  ---
+  duration_ms: 4.2631
+  type: 'test'
+  ...
+# (node:12256) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Dynamite installs from its owner's hand without judging or consuming RNG
+ok 142 - Dynamite installs from its owner's hand without judging or consuming RNG
+  ---
+  duration_ms: 10.1447
+  type: 'test'
+  ...
+# Subtest: Dynamite installation rejects wrong source, owner, target, and nonliving or ambiguous actors
+ok 143 - Dynamite installation rejects wrong source, owner, target, and nonliving or ambiguous actors
+  ---
+  duration_ms: 1.3667
+  type: 'test'
+  ...
+# Subtest: Dynamite explodes on Spade 2 and 9, discards before damage, and has no responsible attacker
+ok 144 - Dynamite explodes on Spade 2 and 9, discards before damage, and has no responsible attacker
+  ---
+  duration_ms: 3.7621
+  type: 'test'
+  ...
+# Subtest: Spade 10 and Ace pass Dynamite to the next living seat without damage
+ok 145 - Spade 10 and Ace pass Dynamite to the next living seat without damage
+  ---
+  duration_ms: 2.0778
+  type: 'test'
+  ...
+# Subtest: Dynamite judgment reshuffles the discard deterministically without mutating input
+ok 146 - Dynamite judgment reshuffles the discard deterministically without mutating input
+  ---
+  duration_ms: 1.426
+  type: 'test'
+  ...
+# Subtest: empty draw and discard piles pause under D05 without consuming Dynamite
+ok 147 - empty draw and discard piles pause under D05 without consuming Dynamite
+  ---
+  duration_ms: 2.2247
+  type: 'test'
+  ...
+# Subtest: Dynamite only resolves in the current player's start phase
+ok 148 - Dynamite only resolves in the current player's start phase
+  ---
+  duration_ms: 1.1211
+  type: 'test'
+  ...
+# Subtest: Barrel Heart cancels the serialized T18 Gatling step without Slab strengthening
+ok 149 - Barrel Heart cancels the serialized T18 Gatling step without Slab strengthening
+  ---
+  duration_ms: 2.8767
+  type: 'test'
+  ...
+# Subtest: Barrel step rejects a forged response from a player other than the target
+ok 150 - Barrel step rejects a forged response from a player other than the target
+  ---
+  duration_ms: 1.3369
+  type: 'test'
+  ...
+# Subtest: failed Gatling Barrel check permits Missed or hit and cannot retry that Barrel
+ok 151 - failed Gatling Barrel check permits Missed or hit and cannot retry that Barrel
+  ---
+  duration_ms: 4.6222
+  type: 'test'
+  ...
+# Subtest: Slab BANG needs a second Missed after a successful Barrel check
+ok 152 - Slab BANG needs a second Missed after a successful Barrel check
+  ---
+  duration_ms: 0.8571
+  type: 'test'
+  ...
+# Subtest: Barrel and Jourdonnais may each test once against Slab and together satisfy two defenses
+ok 153 - Barrel and Jourdonnais may each test once against Slab and together satisfy two defenses
+  ---
+  duration_ms: 0.924
+  type: 'test'
+  ...
+# Subtest: Barrel does not prevent Dynamite damage
+ok 154 - Barrel does not prevent Dynamite damage
+  ---
+  duration_ms: 0.5429
+  type: 'test'
+  ...
+# (node:8584) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the virtual Colt and each weapon expose their R11 maximum range
+ok 155 - the virtual Colt and each weapon expose their R11 maximum range
+  ---
+  duration_ms: 12.4134
+  type: 'test'
+  ...
+# Subtest: playing a different weapon discards the old one before equipping the new one
+ok 156 - playing a different weapon discards the old one before equipping the new one
+  ---
+  duration_ms: 2.5458
+  type: 'test'
+  ...
+# Subtest: Barrel installs without replacing a weapon and rejects a duplicate Barrel
+ok 157 - Barrel installs without replacing a weapon and rejects a duplicate Barrel
+  ---
+  duration_ms: 1.7929
+  type: 'test'
+  ...
+# Subtest: losing Volcanic preserves the turn BANG count and removes its unlimited-use exception
+ok 158 - losing Volcanic preserves the turn BANG count and removes its unlimited-use exception
+  ---
+  duration_ms: 2.0476
+  type: 'test'
+  ...
+# Subtest: Mustang, Paul, Scope, and Rose apply direction-specific R10 corrections
+ok 159 - Mustang, Paul, Scope, and Rose apply direction-specific R10 corrections
+  ---
+  duration_ms: 0.7536
+  type: 'test'
+  ...
+# Subtest: the module rejects unsupported, duplicate, and targeted equipment plays
+ok 160 - the module rejects unsupported, duplicate, and targeted equipment plays
+  ---
+  duration_ms: 1.1598
+  type: 'test'
+  ...
+# (node:2556) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: over-limit hand asks its owner to order exactly the current-HP excess
+ok 161 - over-limit hand asks its owner to order exactly the current-HP excess
+  ---
+  duration_ms: 4.6824
+  type: 'test'
+  ...
+# Subtest: hand at or below current HP needs no discard, even when max HP is higher
+ok 162 - hand at or below current HP needs no discard, even when max HP is higher
+  ---
+  duration_ms: 2.1604
+  type: 'test'
+  ...
+# Subtest: saved T12 discard order survives JSON round-trip and becomes ordered discard events
+ok 163 - saved T12 discard order survives JSON round-trip and becomes ordered discard events
+  ---
+  duration_ms: 4.6993
+  type: 'test'
+  ...
+# Subtest: a completed order is rejected if HP changes before the selection is applied
+ok 164 - a completed order is rejected if HP changes before the selection is applied
+  ---
+  duration_ms: 1.9635
+  type: 'test'
+  ...
+# Subtest: turn hand limit rejects equipment IDs and does not reuse elimination cleanup choices
+ok 165 - turn hand limit rejects equipment IDs and does not reuse elimination cleanup choices
+  ---
+  duration_ms: 2.1238
+  type: 'test'
+  ...
+# Subtest: a limit request is based on the current HP after an HP reduction
+ok 166 - a limit request is based on the current HP after an HP reduction
+  ---
+  duration_ms: 0.6617
+  type: 'test'
+  ...
+# (node:21436) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Jail may be installed on a distant living non-Sheriff and drafts the correct zone transfer
+ok 167 - Jail may be installed on a distant living non-Sheriff and drafts the correct zone transfer
+  ---
+  duration_ms: 6.5486
+  type: 'test'
+  ...
+# Subtest: Jail installation rejects missing, self, Sheriff, and eliminated targets
+ok 168 - Jail installation rejects missing, self, Sheriff, and eliminated targets
+  ---
+  duration_ms: 2.0123
+  type: 'test'
+  ...
+# Subtest: Jail Heart judgment always discards Jail after the judgment card
+ok 169 - Jail Heart judgment always discards Jail after the judgment card
+  ---
+  duration_ms: 2.0607
+  type: 'test'
+  ...
+# Subtest: Jail non-Heart judgment always discards Jail after the judgment card
+ok 170 - Jail non-Heart judgment always discards Jail after the judgment card
+  ---
+  duration_ms: 1.4474
+  type: 'test'
+  ...
+# Subtest: Jail uses R08 discard recycling before a judgment and keeps Jail on top
+ok 171 - Jail uses R08 discard recycling before a judgment and keeps Jail on top
+  ---
+  duration_ms: 1.9522
+  type: 'test'
+  ...
+# Subtest: Lucky Jail exposes only two candidates, saves their chosen order, and discards Jail last
+ok 172 - Lucky Jail exposes only two candidates, saves their chosen order, and discards Jail last
+  ---
+  duration_ms: 10.1608
+  type: 'test'
+  ...
+# Subtest: Lucky Jail pauses on partial D05 supply without exposing or moving one remaining card
+ok 173 - Lucky Jail pauses on partial D05 supply without exposing or moving one remaining card
+  ---
+  duration_ms: 1.6084
+  type: 'test'
+  ...
+# Subtest: Lucky Jail gets the deterministic R08 discard reshuffle before its two candidate choice
+ok 174 - Lucky Jail gets the deterministic R08 discard reshuffle before its two candidate choice
+  ---
+  duration_ms: 2.2903
+  type: 'test'
+  ...
+# Subtest: Jail pauses without consuming the installed card when both piles are empty
+ok 175 - Jail pauses without consuming the installed card when both piles are empty
+  ---
+  duration_ms: 1.594
+  type: 'test'
+  ...
+# Subtest: Jail start resolution requires its owner's start phase after Dynamite
+ok 176 - Jail start resolution requires its owner's start phase after Dynamite
+  ---
+  duration_ms: 5.0675
+  type: 'test'
+  ...
+# (node:2032) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: registers every base card and character once with their matching modules
+ok 177 - registers every base card and character once with their matching modules
+  ---
+  duration_ms: 3.5929
+  type: 'test'
+  ...
+# Subtest: builds a registry whose types fit the T66 runtime injection API
+ok 178 - builds a registry whose types fit the T66 runtime injection API
+  ---
+  duration_ms: 0.6121
+  type: 'test'
+  ...
+# Subtest: rejects duplicate card and character identifiers
+ok 179 - rejects duplicate card and character identifiers
+  ---
+  duration_ms: 1.1374
+  type: 'test'
+  ...
+# Subtest: rejects missing card and character identifiers
+ok 180 - rejects missing card and character identifiers
+  ---
+  duration_ms: 0.515
+  type: 'test'
+  ...
+# Subtest: rejects unknown card and character identifiers
+ok 181 - rejects unknown card and character identifiers
+  ---
+  duration_ms: 3.3958
+  type: 'test'
+  ...
+# Subtest: rejects malformed entries and non-module registrations
+ok 182 - rejects malformed entries and non-module registrations
+  ---
+  duration_ms: 0.3937
+  type: 'test'
+  ...
+# (node:23152) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: BANG response persists as JSON, applies the hit, and closes its continuation
+ok 183 - BANG response persists as JSON, applies the hit, and closes its continuation
+  ---
+  duration_ms: 13.7216
+  type: 'test'
+  ...
+# Subtest: Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+ok 184 - Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+  ---
+  duration_ms: 5.1276
+  type: 'test'
+  ...
+# Subtest: Suzy draws after the first Slab Missed before the second defense prompt opens
+ok 185 - Suzy draws after the first Slab Missed before the second defense prompt opens
+  ---
+  duration_ms: 5.3029
+  type: 'test'
+  ...
+# Subtest: Suzy waits until an initiated Duel fully resolves before drawing
+ok 186 - Suzy waits until an initiated Duel fully resolves before drawing
+  ---
+  duration_ms: 4.5247
+  type: 'test'
+  ...
+# Subtest: Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+ok 187 - Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+  ---
+  duration_ms: 7.9438
+  type: 'test'
+  ...
+# Subtest: a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+ok 188 - a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+  ---
+  duration_ms: 3.8036
+  type: 'test'
+  ...
+# Subtest: a non-Slab physical BANG does not dispatch the Slab query
+ok 189 - a non-Slab physical BANG does not dispatch the Slab query
+  ---
+  duration_ms: 1.1346
+  type: 'test'
+  ...
+# Subtest: Beer rescue resumes after JSON persistence and records damage only after recovery
+ok 190 - Beer rescue resumes after JSON persistence and records damage only after recovery
+  ---
+  duration_ms: 3.8555
+  type: 'test'
+  ...
+# Subtest: Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+ok 191 - Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+  ---
+  duration_ms: 3.5018
+  type: 'test'
+  ...
+# Subtest: after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+ok 192 - after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+  ---
+  duration_ms: 10.0313
+  type: 'test'
+  ...
+# Subtest: Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+ok 193 - Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+  ---
+  duration_ms: 8.9469
+  type: 'test'
+  ...
+# Subtest: a single Beer rescues damage that leaves HP exactly zero
+ok 194 - a single Beer rescues damage that leaves HP exactly zero
+  ---
+  duration_ms: 1.92
+  type: 'test'
+  ...
+# Subtest: Sid rescue spends the saved two-card pair before recovery continues
+ok 195 - Sid rescue spends the saved two-card pair before recovery continues
+  ---
+  duration_ms: 3.1392
+  type: 'test'
+  ...
+# Subtest: Stagecoach and equipment modules produce candidate card-zone changes through runtime
+ok 196 - Stagecoach and equipment modules produce candidate card-zone changes through runtime
+  ---
+  duration_ms: 3.0121
+  type: 'test'
+  ...
+# Subtest: Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+ok 197 - Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+  ---
+  duration_ms: 5.9732
+  type: 'test'
+  ...
+# Subtest: Duel prompt and sequential target resolution use the serialized module result
+ok 198 - Duel prompt and sequential target resolution use the serialized module result
+  ---
+  duration_ms: 3.1436
+  type: 'test'
+  ...
+# Subtest: Gatling resumes its clockwise queue after a public Barrel judgment
+ok 199 - Gatling resumes its clockwise queue after a public Barrel judgment
+  ---
+  duration_ms: 2.8799
+  type: 'test'
+  ...
+# Subtest: Jail and Panic results apply their declared zone movements
+ok 200 - Jail and Panic results apply their declared zone movements
+  ---
+  duration_ms: 3.8534
+  type: 'test'
+  ...
+# Subtest: direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+ok 201 - direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+  ---
+  duration_ms: 1.4148
+  type: 'test'
+  ...
+# Subtest: Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+ok 202 - Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+  ---
+  duration_ms: 5.624
+  type: 'test'
+  ...
+# Subtest: Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+ok 203 - Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+  ---
+  duration_ms: 3.3057
+  type: 'test'
+  ...
+# Subtest: Elimination rescue accept resumes R28 cleanup before the saved damage hook
+ok 204 - Elimination rescue accept resumes R28 cleanup before the saved damage hook
+  ---
+  duration_ms: 12.4897
+  type: 'test'
+  ...
+# Subtest: Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+ok 205 - Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+  ---
+  duration_ms: 2.2274
+  type: 'test'
+  ...
+# Subtest: Suzy does not make a completion draw when El Gringo leaves her with a card
+ok 206 - Suzy does not make a completion draw when El Gringo leaves her with a card
+  ---
+  duration_ms: 1.239
+  type: 'test'
+  ...
+# Subtest: Sid ability module receives the caller-selected two-card cost and runtime applies it once
+ok 207 - Sid ability module receives the caller-selected two-card cost and runtime applies it once
+  ---
+  duration_ms: 1.2868
+  type: 'test'
+  ...
+# (node:9956) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: missing, ambiguous, or incomplete target zones are distinguished
+ok 208 - missing, ambiguous, or incomplete target zones are distinguished
+  ---
+  duration_ms: 5.814
+  type: 'test'
+  ...
+# Subtest: Panic! randomly drafts one adjacent opponent hand card transfer without mutating state
+ok 209 - Panic! randomly drafts one adjacent opponent hand card transfer without mutating state
+  ---
+  duration_ms: 16.8671
+  type: 'test'
+  ...
+# Subtest: Cat Balou discards a random hand card at any distance
+ok 210 - Cat Balou discards a random hand card at any distance
+  ---
+  duration_ms: 3.3743
+  type: 'test'
+  ...
+# Subtest: a selected public physical card is the only card moved, without consuming randomness
+ok 211 - a selected public physical card is the only card moved, without consuming randomness
+  ---
+  duration_ms: 1.72
+  type: 'test'
+  ...
+# Subtest: Panic! moves a selected public card into hand and enforces its adjacency rule
+ok 212 - Panic! moves a selected public card into hand and enforces its adjacency rule
+  ---
+  duration_ms: 3.8192
+  type: 'test'
+  ...
+# Subtest: D03 permits either effect on own public equipment and rejects own hand
+ok 213 - D03 permits either effect on own public equipment and rejects own hand
+  ---
+  duration_ms: 1.3134
+  type: 'test'
+  ...
+# Subtest: dead, missing, empty, and nonphysical targets are rejected
+ok 214 - dead, missing, empty, and nonphysical targets are rejected
+  ---
+  duration_ms: 1.1189
+  type: 'test'
+  ...
+# Subtest: wrong physical source is rejected and random selection is deterministic
+ok 215 - wrong physical source is rejected and random selection is deterministic
+  ---
+  duration_ms: 0.9528
+  type: 'test'
+  ...
+# (node:21988) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Gatling and Indians queue all living opponents clockwise after the user
+ok 216 - Gatling and Indians queue all living opponents clockwise after the user
+  ---
+  duration_ms: 5.561
+  type: 'test'
+  ...
+# Subtest: Gatling offers one Missed plus available Barrel and Jourdonnais responses
+ok 217 - Gatling offers one Missed plus available Barrel and Jourdonnais responses
+  ---
+  duration_ms: 2.4919
+  type: 'test'
+  ...
+# Subtest: one Missed defeats Gatling even for Slab and the effect emits no damage
+ok 218 - one Missed defeats Gatling even for Slab and the effect emits no damage
+  ---
+  duration_ms: 1.3242
+  type: 'test'
+  ...
+# Subtest: Gatling delegates Barrel and Jourdonnais checks to a serialized check step
+ok 219 - Gatling delegates Barrel and Jourdonnais checks to a serialized check step
+  ---
+  duration_ms: 1.2021
+  type: 'test'
+  ...
+# Subtest: Indians permits only a BANG discard or taking one damage
+ok 220 - Indians permits only a BANG discard or taking one damage
+  ---
+  duration_ms: 1.7415
+  type: 'test'
+  ...
+# Subtest: Calamity Janet may use Missed as the BANG response to Indians
+ok 221 - Calamity Janet may use Missed as the BANG response to Indians
+  ---
+  duration_ms: 1.7792
+  type: 'test'
+  ...
+# Subtest: Saloon heals both living players in a two-player game, caps HP, and never revives
+ok 222 - Saloon heals both living players in a two-player game, caps HP, and never revives
+  ---
+  duration_ms: 1.7504
+  type: 'test'
+  ...
+# Subtest: Saloon cannot be used to rescue a player already in a death flow
+ok 223 - Saloon cannot be used to rescue a player already in a death flow
+  ---
+  duration_ms: 1.0892
+  type: 'test'
+  ...
+# Subtest: target steps remain serialized through cleanup and victory waits until the full queue ends
+ok 224 - target steps remain serialized through cleanup and victory waits until the full queue ends
+  ---
+  duration_ms: 3.8706
+  type: 'test'
+  ...
+# (node:21076) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: living Vulture Sam receives an outlaw's hand and equipment before the responsible player draws three
+ok 225 - living Vulture Sam receives an outlaw's hand and equipment before the responsible player draws three
+  ---
+  duration_ms: 10.2402
+  type: 'test'
+  ...
+# Subtest: Sheriff Sam first recovers the Deputy's cards, then orders all of their cards into the discard pile
+ok 226 - Sheriff Sam first recovers the Deputy's cards, then orders all of their cards into the discard pile
+  ---
+  duration_ms: 3.8718
+  type: 'test'
+  ...
+# Subtest: without Vulture Sam, the eliminated owner chooses discard top order and the killer gets the Outlaw reward
+ok 227 - without Vulture Sam, the eliminated owner chooses discard top order and the killer gets the Outlaw reward
+  ---
+  duration_ms: 2.1977
+  type: 'test'
+  ...
+# Subtest: Dynamite has no responsible killer and is discarded before the eliminated owner's remaining cards
+ok 228 - Dynamite has no responsible killer and is discarded before the eliminated owner's remaining cards
+  ---
+  duration_ms: 1.9238
+  type: 'test'
+  ...
+# Subtest: a Duel initiator who dies receives no Outlaw kill reward
+ok 229 - a Duel initiator who dies receives no Outlaw kill reward
+  ---
+  duration_ms: 1.6413
+  type: 'test'
+  ...
+# Subtest: victory follows R30 and reveals all roles once an allowed boundary is reached
+ok 230 - victory follows R30 and reveals all roles once an allowed boundary is reached
+  ---
+  duration_ms: 29.4703
+  type: 'test'
+  ...
+# Subtest: multi-target elimination defers victory until the saved effect frame is finished
+ok 231 - multi-target elimination defers victory until the saved effect frame is finished
+  ---
+  duration_ms: 3.861
+  type: 'test'
+  ...
+# (node:14228) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: same deck and injected random sequence produce the same order
+ok 232 - same deck and injected random sequence produce the same order
+  ---
+  duration_ms: 2.3515
+  type: 'test'
+  ...
+# Subtest: shuffle preserves card count and every unique card instance ID
+ok 233 - shuffle preserves card count and every unique card instance ID
+  ---
+  duration_ms: 0.6734
+  type: 'test'
+  ...
+# Subtest: empty and one-card inputs need no random draws
+ok 234 - empty and one-card inputs need no random draws
+  ---
+  duration_ms: 0.1974
+  type: 'test'
+  ...
+# Subtest: rejects values outside the injected random source contract
+ok 235 - rejects values outside the injected random source contract
+  ---
+  duration_ms: 0.7572
+  type: 'test'
+  ...
+# (node:1916) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: multi-target queue snapshots living seats clockwise and preserves its cursor after restart
+ok 236 - multi-target queue snapshots living seats clockwise and preserves its cursor after restart
+  ---
+  duration_ms: 5.925
+  type: 'test'
+  ...
+# Subtest: Duel responders advance one cursor at a time and restore the same actor and resume frame
+ok 237 - Duel responders advance one cursor at a time and restore the same actor and resume frame
+  ---
+  duration_ms: 10.9541
+  type: 'test'
+  ...
+# Subtest: death rescue is victim-only, survives reload, and proceeds through cleanup order
+ok 238 - death rescue is victim-only, survives reload, and proceeds through cleanup order
+  ---
+  duration_ms: 5.831
+  type: 'test'
+  ...
+# Subtest: turn-end discard order must contain exactly the hand excess and rejects invalid IDs/order without mutation
+ok 239 - turn-end discard order must contain exactly the hand excess and rejects invalid IDs/order without mutation
+  ---
+  duration_ms: 19.0454
+  type: 'test'
+  ...
+# Subtest: a missing resume frame cannot open an interaction and rejected input preserves the saved state
+ok 240 - a missing resume frame cannot open an interaction and rejected input preserves the saved state
+  ---
+  duration_ms: 1.8539
+  type: 'test'
+  ...
+# (node:6920) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: base distance uses the living seat ring and ignores eliminated seats
+ok 241 - base distance uses the living seat ring and ignores eliminated seats
+  ---
+  duration_ms: 7.1898
+  type: 'test'
+  ...
+# Subtest: R10 applies direction-specific Rose, Scope, Paul, and Mustang adjustments with a floor of one
+ok 242 - R10 applies direction-specific Rose, Scope, Paul, and Mustang adjustments with a floor of one
+  ---
+  duration_ms: 3.4335
+  type: 'test'
+  ...
+# Subtest: R11 keeps weapon range separate from directional distance
+ok 243 - R11 keeps weapon range separate from directional distance
+  ---
+  duration_ms: 5.4167
+  type: 'test'
+  ...
+# Subtest: A10 rejects distant Panic! while a Winchester BANG! reaches distance five
+ok 244 - A10 rejects distant Panic! while a Winchester BANG! reaches distance five
+  ---
+  duration_ms: 13.6845
+  type: 'test'
+  ...
+# Subtest: B04 rejects BANG! against self, a dead seat, or a target beyond range
+ok 245 - B04 rejects BANG! against self, a dead seat, or a target beyond range
+  ---
+  duration_ms: 2.1526
+  type: 'test'
+  ...
+# Subtest: B23 rejects duplicate blue equipment and permits a different weapon replacement
+ok 246 - B23 rejects duplicate blue equipment and permits a different weapon replacement
+  ---
+  duration_ms: 2.6618
+  type: 'test'
+  ...
+# Subtest: B30 cannot select a virtual Colt .45 as a public in-play target
+ok 247 - B30 cannot select a virtual Colt .45 as a public in-play target
+  ---
+  duration_ms: 0.9409
+  type: 'test'
+  ...
+# Subtest: B21 allows Panic! and Cat Balou on own public equipment, but rejects own hand
+ok 248 - B21 allows Panic! and Cat Balou on own public equipment, but rejects own hand
+  ---
+  duration_ms: 1.1768
+  type: 'test'
+  ...
+# Subtest: C23 allows Willy three BANG! cards but continues to enforce range
+ok 249 - C23 allows Willy three BANG! cards but continues to enforce range
+  ---
+  duration_ms: 2.1294
+  type: 'test'
+  ...
+# Subtest: R12 limits ordinary BANG! to one unless Volcanic or Willy is present
+ok 250 - R12 limits ordinary BANG! to one unless Volcanic or Willy is present
+  ---
+  duration_ms: 1.6609
+  type: 'test'
+  ...
+# Subtest: Jail excludes the Sheriff while Duel and Jail may target a distant living player
+ok 251 - Jail excludes the Sheriff while Duel and Jail may target a distant living player
+  ---
+  duration_ms: 0.9189
+  type: 'test'
+  ...
+# Subtest: R06 blocks starting a normal card while a resolution or interaction is pending
+ok 252 - R06 blocks starting a normal card while a resolution or interaction is pending
+  ---
+  duration_ms: 4.892
+  type: 'test'
+  ...
+# (node:24972) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: AT-A01 4–7 player setup role composition, private roles, and distinct characters
+ok 253 - AT-A01 4–7 player setup role composition, private roles, and distinct characters
+  ---
+  duration_ms: 31.8913
+  type: 'test'
+  ...
+# Subtest: AT-A02 Paul Regret has 4 HP as Sheriff and 3 HP otherwise at setup
+ok 254 - AT-A02 Paul Regret has 4 HP as Sheriff and 3 HP otherwise at setup
+  ---
+  duration_ms: 26.0016
+  type: 'test'
+  ...
+# Subtest: AT-A03 deterministic engine acceptance scenario
+ok 255 - AT-A03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 18.8607
+  type: 'test'
+  ...
+# Subtest: AT-A04 deterministic engine acceptance scenario
+ok 256 - AT-A04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 7.1695
+  type: 'test'
+  ...
+# Subtest: AT-A05 deterministic engine acceptance scenario
+ok 257 - AT-A05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 44.8248
+  type: 'test'
+  ...
+# Subtest: AT-A06 deterministic engine acceptance scenario
+ok 258 - AT-A06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 35.9922
+  type: 'test'
+  ...
+# Subtest: AT-A07 deterministic engine acceptance scenario
+ok 259 - AT-A07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 7.9913
+  type: 'test'
+  ...
+# Subtest: AT-A08 deterministic engine acceptance scenario
+ok 260 - AT-A08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 5.5807
+  type: 'test'
+  ...
+# Subtest: AT-A09 deterministic engine acceptance scenario
+ok 261 - AT-A09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 3.7523
+  type: 'test'
+  ...
+# Subtest: AT-A10 deterministic engine acceptance scenario
+ok 262 - AT-A10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 35.6976
+  type: 'test'
+  ...
+# Subtest: AT-A11 deterministic engine acceptance scenario
+ok 263 - AT-A11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 10.8948
+  type: 'test'
+  ...
+# Subtest: AT-A12 deterministic engine acceptance scenario
+ok 264 - AT-A12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 47.647
+  type: 'test'
+  ...
+# Subtest: AT-A13 deterministic engine acceptance scenario
+ok 265 - AT-A13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.3869
+  type: 'test'
+  ...
+# Subtest: AT-A14 deterministic engine acceptance scenario
+ok 266 - AT-A14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.2007
+  type: 'test'
+  ...
+# Subtest: AT-A15 deterministic engine acceptance scenario
+ok 267 - AT-A15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.7481
+  type: 'test'
+  ...
+# Subtest: AT-B01 deterministic engine acceptance scenario
+ok 268 - AT-B01 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.3127
+  type: 'test'
+  ...
+# Subtest: AT-B02 deterministic engine acceptance scenario
+ok 269 - AT-B02 deterministic engine acceptance scenario
+  ---
+  duration_ms: 20.2941
+  type: 'test'
+  ...
+# Subtest: AT-B03 deterministic engine acceptance scenario
+ok 270 - AT-B03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 55.3763
+  type: 'test'
+  ...
+# Subtest: AT-B04 deterministic engine acceptance scenario
+ok 271 - AT-B04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 26.2474
+  type: 'test'
+  ...
+# Subtest: AT-B05 deterministic engine acceptance scenario
+ok 272 - AT-B05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 50.1347
+  type: 'test'
+  ...
+# Subtest: AT-B06 deterministic engine acceptance scenario
+ok 273 - AT-B06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 44.7943
+  type: 'test'
+  ...
+# Subtest: AT-B07 deterministic engine acceptance scenario
+ok 274 - AT-B07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.3079
+  type: 'test'
+  ...
+# Subtest: AT-B08 deterministic engine acceptance scenario
+ok 275 - AT-B08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 32.1854
+  type: 'test'
+  ...
+# Subtest: AT-B09 deterministic engine acceptance scenario
+ok 276 - AT-B09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.2624
+  type: 'test'
+  ...
+# Subtest: AT-B10 deterministic engine acceptance scenario
+ok 277 - AT-B10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 27.6706
+  type: 'test'
+  ...
+# Subtest: AT-B11 deterministic engine acceptance scenario
+ok 278 - AT-B11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 40.8342
+  type: 'test'
+  ...
+# Subtest: AT-B12 deterministic engine acceptance scenario
+ok 279 - AT-B12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 67.4332
+  type: 'test'
+  ...
+# Subtest: AT-B13 deterministic engine acceptance scenario
+ok 280 - AT-B13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.8386
+  type: 'test'
+  ...
+# Subtest: AT-B14 deterministic engine acceptance scenario
+ok 281 - AT-B14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 22.4383
+  type: 'test'
+  ...
+# Subtest: AT-B15 deterministic engine acceptance scenario
+ok 282 - AT-B15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 10.4563
+  type: 'test'
+  ...
+# Subtest: AT-B16 deterministic engine acceptance scenario
+ok 283 - AT-B16 deterministic engine acceptance scenario
+  ---
+  duration_ms: 9.0176
+  type: 'test'
+  ...
+# Subtest: AT-B17 deterministic engine acceptance scenario
+ok 284 - AT-B17 deterministic engine acceptance scenario
+  ---
+  duration_ms: 39.9206
+  type: 'test'
+  ...
+# Subtest: AT-B18 deterministic engine acceptance scenario
+ok 285 - AT-B18 deterministic engine acceptance scenario
+  ---
+  duration_ms: 79.7901
+  type: 'test'
+  ...
+# Subtest: AT-B19 deterministic engine acceptance scenario
+ok 286 - AT-B19 deterministic engine acceptance scenario
+  ---
+  duration_ms: 12.8805
+  type: 'test'
+  ...
+# Subtest: AT-B20 deterministic engine acceptance scenario
+ok 287 - AT-B20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 18.0609
+  type: 'test'
+  ...
+# Subtest: AT-B21 deterministic engine acceptance scenario
+ok 288 - AT-B21 deterministic engine acceptance scenario
+  ---
+  duration_ms: 41.1428
+  type: 'test'
+  ...
+# Subtest: AT-B22 deterministic engine acceptance scenario
+ok 289 - AT-B22 deterministic engine acceptance scenario
+  ---
+  duration_ms: 30.6574
+  type: 'test'
+  ...
+# Subtest: AT-B23 deterministic engine acceptance scenario
+ok 290 - AT-B23 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.2558
+  type: 'test'
+  ...
+# Subtest: AT-B24 deterministic engine acceptance scenario
+ok 291 - AT-B24 deterministic engine acceptance scenario
+  ---
+  duration_ms: 35.709
+  type: 'test'
+  ...
+# Subtest: AT-B25 deterministic engine acceptance scenario
+ok 292 - AT-B25 deterministic engine acceptance scenario
+  ---
+  duration_ms: 29.651
+  type: 'test'
+  ...
+# Subtest: AT-B26 deterministic engine acceptance scenario
+ok 293 - AT-B26 deterministic engine acceptance scenario
+  ---
+  duration_ms: 38.2914
+  type: 'test'
+  ...
+# Subtest: AT-B27 deterministic engine acceptance scenario
+ok 294 - AT-B27 deterministic engine acceptance scenario
+  ---
+  duration_ms: 42.5692
+  type: 'test'
+  ...
+# Subtest: AT-B28 deterministic engine acceptance scenario
+ok 295 - AT-B28 deterministic engine acceptance scenario
+  ---
+  duration_ms: 24.221
+  type: 'test'
+  ...
+# Subtest: AT-B29 deterministic engine acceptance scenario
+ok 296 - AT-B29 deterministic engine acceptance scenario
+  ---
+  duration_ms: 14.3111
+  type: 'test'
+  ...
+# Subtest: AT-B30 deterministic engine acceptance scenario
+ok 297 - AT-B30 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.7158
+  type: 'test'
+  ...
+# Subtest: AT-C01 deterministic engine acceptance scenario
+ok 298 - AT-C01 deterministic engine acceptance scenario
+  ---
+  duration_ms: 7.7887
+  type: 'test'
+  ...
+# Subtest: AT-C02 deterministic engine acceptance scenario
+ok 299 - AT-C02 deterministic engine acceptance scenario
+  ---
+  duration_ms: 36.0034
+  type: 'test'
+  ...
+# Subtest: AT-C03 deterministic engine acceptance scenario
+ok 300 - AT-C03 deterministic engine acceptance scenario
+  ---
+  duration_ms: 38.2717
+  type: 'test'
+  ...
+# Subtest: AT-C04 deterministic engine acceptance scenario
+ok 301 - AT-C04 deterministic engine acceptance scenario
+  ---
+  duration_ms: 25.5968
+  type: 'test'
+  ...
+# Subtest: AT-C05 deterministic engine acceptance scenario
+ok 302 - AT-C05 deterministic engine acceptance scenario
+  ---
+  duration_ms: 44.1467
+  type: 'test'
+  ...
+# Subtest: AT-C06 deterministic engine acceptance scenario
+ok 303 - AT-C06 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.015
+  type: 'test'
+  ...
+# Subtest: AT-C07 deterministic engine acceptance scenario
+ok 304 - AT-C07 deterministic engine acceptance scenario
+  ---
+  duration_ms: 26.8155
+  type: 'test'
+  ...
+# Subtest: AT-C08 deterministic engine acceptance scenario
+ok 305 - AT-C08 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.3418
+  type: 'test'
+  ...
+# Subtest: AT-C09 deterministic engine acceptance scenario
+ok 306 - AT-C09 deterministic engine acceptance scenario
+  ---
+  duration_ms: 22.1311
+  type: 'test'
+  ...
+# Subtest: AT-C10 deterministic engine acceptance scenario
+not ok 307 - AT-C10 deterministic engine acceptance scenario
+  ---
+  duration_ms: 6.6863
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\scenarios\\engine-acceptance.test.ts:33:3'
+  failureType: 'testCodeFailure'
+  error: 'projection leaked hidden card ci_8e292024ef9353723a57600c1c87efc7_w'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    assertEngineProjectionPrivacy (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:197:14)
+    assertStage (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:209:3)
+    runPhase (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:401:5)
+    Object.startTurn (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:404:27)
+    file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/engine/test/scenarios/engine-acceptance.test.ts:1008:20
+    runOnce (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:482:5)
+    runEngineAcceptanceScenario (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/test-fixtures/engine/index.ts:485:17)
+    TestContext.<anonymous> (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/engine/test/scenarios/engine-acceptance.test.ts:34:5)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+  ...
+# Subtest: AT-C11 deterministic engine acceptance scenario
+ok 308 - AT-C11 deterministic engine acceptance scenario
+  ---
+  duration_ms: 5.4103
+  type: 'test'
+  ...
+# Subtest: AT-C12 deterministic engine acceptance scenario
+ok 309 - AT-C12 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.5969
+  type: 'test'
+  ...
+# Subtest: AT-C13 deterministic engine acceptance scenario
+ok 310 - AT-C13 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.1353
+  type: 'test'
+  ...
+# Subtest: AT-C14 deterministic engine acceptance scenario
+ok 311 - AT-C14 deterministic engine acceptance scenario
+  ---
+  duration_ms: 19.2084
+  type: 'test'
+  ...
+# Subtest: AT-C15 deterministic engine acceptance scenario
+ok 312 - AT-C15 deterministic engine acceptance scenario
+  ---
+  duration_ms: 22.1954
+  type: 'test'
+  ...
+# Subtest: AT-C16 deterministic engine acceptance scenario
+ok 313 - AT-C16 deterministic engine acceptance scenario
+  ---
+  duration_ms: 50.3335
+  type: 'test'
+  ...
+# Subtest: AT-C17 deterministic engine acceptance scenario
+ok 314 - AT-C17 deterministic engine acceptance scenario
+  ---
+  duration_ms: 11.5651
+  type: 'test'
+  ...
+# Subtest: AT-C18 deterministic engine acceptance scenario
+ok 315 - AT-C18 deterministic engine acceptance scenario
+  ---
+  duration_ms: 16.858
+  type: 'test'
+  ...
+# Subtest: AT-C19 deterministic engine acceptance scenario
+ok 316 - AT-C19 deterministic engine acceptance scenario
+  ---
+  duration_ms: 13.9758
+  type: 'test'
+  ...
+# Subtest: AT-C20 deterministic engine acceptance scenario
+ok 317 - AT-C20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 20.6518
+  type: 'test'
+  ...
+# Subtest: AT-C21 deterministic engine acceptance scenario
+ok 318 - AT-C21 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.1534
+  type: 'test'
+  ...
+# Subtest: AT-C22 deterministic engine acceptance scenario
+ok 319 - AT-C22 deterministic engine acceptance scenario
+  ---
+  duration_ms: 36.0548
+  type: 'test'
+  ...
+# Subtest: AT-C23 deterministic engine acceptance scenario
+ok 320 - AT-C23 deterministic engine acceptance scenario
+  ---
+  duration_ms: 24.692
+  type: 'test'
+  ...
+# Subtest: AT-C24 deterministic engine acceptance scenario
+ok 321 - AT-C24 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.0979
+  type: 'test'
+  ...
+# Subtest: AT-C25 deterministic engine acceptance scenario
+ok 322 - AT-C25 deterministic engine acceptance scenario
+  ---
+  duration_ms: 22.7157
+  type: 'test'
+  ...
+# Subtest: AT-C26 deterministic engine acceptance scenario
+ok 323 - AT-C26 deterministic engine acceptance scenario
+  ---
+  duration_ms: 15.1226
+  type: 'test'
+  ...
+# Subtest: AT-C27 deterministic engine acceptance scenario
+ok 324 - AT-C27 deterministic engine acceptance scenario
+  ---
+  duration_ms: 10.3986
+  type: 'test'
+  ...
+# Subtest: AT-C28 deterministic engine acceptance scenario
+ok 325 - AT-C28 deterministic engine acceptance scenario
+  ---
+  duration_ms: 29.1435
+  type: 'test'
+  ...
+# Subtest: AT-C29 deterministic engine acceptance scenario
+ok 326 - AT-C29 deterministic engine acceptance scenario
+  ---
+  duration_ms: 39.2962
+  type: 'test'
+  ...
+# Subtest: AT-C30 deterministic engine acceptance scenario
+ok 327 - AT-C30 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.3731
+  type: 'test'
+  ...
+# Subtest: AT-C31 deterministic engine acceptance scenario
+ok 328 - AT-C31 deterministic engine acceptance scenario
+  ---
+  duration_ms: 17.5407
+  type: 'test'
+  ...
+# Subtest: AT-C32 deterministic engine acceptance scenario
+ok 329 - AT-C32 deterministic engine acceptance scenario
+  ---
+  duration_ms: 8.2492
+  type: 'test'
+  ...
+# Subtest: AT-D20 deterministic engine acceptance scenario
+ok 330 - AT-D20 deterministic engine acceptance scenario
+  ---
+  duration_ms: 30.9868
+  type: 'test'
+  ...
+# (node:25112) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: initializes correct role counts and sheriff-first clockwise seats for 4–7 players
+ok 331 - initializes correct role counts and sheriff-first clockwise seats for 4–7 players
+  ---
+  duration_ms: 36.9703
+  type: 'test'
+  ...
+# Subtest: starts the Sheriff at character health plus one and deals each player that many cards
+ok 332 - starts the Sheriff at character health plus one and deals each player that many cards
+  ---
+  duration_ms: 7.9849
+  type: 'test'
+  ...
+# Subtest: repeats the same complete setup with the same fixed RNG sequence
+ok 333 - repeats the same complete setup with the same fixed RNG sequence
+  ---
+  duration_ms: 13.985
+  type: 'test'
+  ...
+# Subtest: rejects unsupported player counts and duplicate player IDs
+ok 334 - rejects unsupported player counts and duplicate player IDs
+  ---
+  duration_ms: 1.0471
+  type: 'test'
+  ...
+# (node:19760) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: General Store exposes remaining public faces to all seats without exposing private hands
+ok 335 - General Store exposes remaining public faces to all seats without exposing private hands
+  ---
+  duration_ms: 5.503
+  type: 'test'
+  ...
+# Subtest: revealed pool is not exported outside General Store, including private draw selections
+not ok 336 - revealed pool is not exported outside General Store, including private draw selections
+  ---
+  duration_ms: 2.4359
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\state\\projection.test.ts:38:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/engine/test/state/projection.test.ts:44:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: two viewers receive only their own hand and role while public state agrees
+ok 337 - two viewers receive only their own hand and role while public state agrees
+  ---
+  duration_ms: 2.632
+  type: 'test'
+  ...
+# Subtest: public discard exposes only its top card and total count
+ok 338 - public discard exposes only its top card and total count
+  ---
+  duration_ms: 0.3666
+  type: 'test'
+  ...
+# Subtest: only a pending interaction actor receives its exact response option; others receive progress only
+ok 339 - only a pending interaction actor receives its exact response option; others receive progress only
+  ---
+  duration_ms: 1.0661
+  type: 'test'
+  ...
+# Subtest: projection rejects malformed saved discard-order candidate context
+ok 340 - projection rejects malformed saved discard-order candidate context
+  ---
+  duration_ms: 1.5587
+  type: 'test'
+  ...
+# Subtest: responder receives a stored private option payload while other viewers never see it
+ok 341 - responder receives a stored private option payload while other viewers never see it
+  ---
+  duration_ms: 0.6678
+  type: 'test'
+  ...
+# Subtest: projected runtime response payloads pass T14 against the same saved pending state
+ok 342 - projected runtime response payloads pass T14 against the same saved pending state
+  ---
+  duration_ms: 2.7392
+  type: 'test'
+  ...
+# Subtest: eliminated actor sees final cleanup pending but receives no private hand
+ok 343 - eliminated actor sees final cleanup pending but receives no private hand
+  ---
+  duration_ms: 0.6298
+  type: 'test'
+  ...
+# Subtest: completed game reveals every role while keeping other hands private
+ok 344 - completed game reveals every role while keeping other hands private
+  ---
+  duration_ms: 1.0678
+  type: 'test'
+  ...
+# Subtest: outcome projection preserves the other R30 winning factions and includes dead teammates
+ok 345 - outcome projection preserves the other R30 winning factions and includes dead teammates
+  ---
+  duration_ms: 0.4253
+  type: 'test'
+  ...
+# Subtest: outcome is projected only for completed matches and a completed snapshot needs an engine result
+ok 346 - outcome is projected only for completed matches and a completed snapshot needs an engine result
+  ---
+  duration_ms: 0.3045
+  type: 'test'
+  ...
+# Subtest: projection does not mutate the internal match state
+ok 347 - projection does not mutate the internal match state
+  ---
+  duration_ms: 0.4656
+  type: 'test'
+  ...
+# Subtest: rejects a viewer who does not own a seat in the match
+ok 348 - rejects a viewer who does not own a seat in the match
+  ---
+  duration_ms: 0.1901
+  type: 'test'
+  ...
+# (node:16896) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: normal turn draw takes the first two deck cards and leaves its input unchanged
+ok 349 - normal turn draw takes the first two deck cards and leaves its input unchanged
+  ---
+  duration_ms: 23.3302
+  type: 'test'
+  ...
+# Subtest: Jesse keeps the first-slot source private and resumes to one hand steal plus the second deck slot
+ok 350 - Jesse keeps the first-slot source private and resumes to one hand steal plus the second deck slot
+  ---
+  duration_ms: 7.9193
+  type: 'test'
+  ...
+# Subtest: Lucky does not replace either ordinary turn draw slot with a judgment
+ok 351 - Lucky does not replace either ordinary turn draw slot with a judgment
+  ---
+  duration_ms: 1.7456
+  type: 'test'
+  ...
+# Subtest: Jesse has no source prompt when every other hand is empty
+ok 352 - Jesse has no source prompt when every other hand is empty
+  ---
+  duration_ms: 1.7691
+  type: 'test'
+  ...
+# Subtest: Pedro may replace only the first slot with the discard top
+ok 353 - Pedro may replace only the first slot with the discard top
+  ---
+  duration_ms: 4.7468
+  type: 'test'
+  ...
+# Subtest: Kit's candidate choice is actor-only and returns the unchosen third card to the deck top
+ok 354 - Kit's candidate choice is actor-only and returns the unchosen third card to the deck top
+  ---
+  duration_ms: 3.2667
+  type: 'test'
+  ...
+# Subtest: Kit pauses cleanly when fewer than three candidates exist and returns every peeked card
+ok 355 - Kit pauses cleanly when fewer than three candidates exist and returns every peeked card
+  ---
+  duration_ms: 1.2008
+  type: 'test'
+  ...
+# Subtest: R08 reshuffle uses the injected RNG and preserves all cards
+ok 356 - R08 reshuffle uses the injected RNG and preserves all cards
+  ---
+  duration_ms: 2.1419
+  type: 'test'
+  ...
+# Subtest: Black Jack exposes only the second ordinary card and performs one private red-card bonus draw
+ok 357 - Black Jack exposes only the second ordinary card and performs one private red-card bonus draw
+  ---
+  duration_ms: 3.1029
+  type: 'test'
+  ...
+# Subtest: turn start resolves Dynamite before Jail and enters draw only after both finish
+ok 358 - turn start resolves Dynamite before Jail and enters draw only after both finish
+  ---
+  duration_ms: 8.1976
+  type: 'test'
+  ...
+# Subtest: Lucky Jail opens a saved top-two judgment choice and resumes before the draw phase
+ok 359 - Lucky Jail opens a saved top-two judgment choice and resumes before the draw phase
+  ---
+  duration_ms: 6.2395
+  type: 'test'
+  ...
+# (node:2916) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: advances start effects to draw and draw completion to play as separate pure transitions
+ok 360 - advances start effects to draw and draw completion to play as separate pure transitions
+  ---
+  duration_ms: 5.9534
+  type: 'test'
+  ...
+# Subtest: END_TURN advances from the last seat to the first living seat and increments once
+ok 361 - END_TURN advances from the last seat to the first living seat and increments once
+  ---
+  duration_ms: 1.7288
+  type: 'test'
+  ...
+# Subtest: END_TURN skips eliminated seats when choosing the next player
+ok 362 - END_TURN skips eliminated seats when choosing the next player
+  ---
+  duration_ms: 2.1736
+  type: 'test'
+  ...
+# Subtest: END_TURN enters discard when the hand exceeds HP, then finishes after hand is reduced
+ok 363 - END_TURN enters discard when the hand exceeds HP, then finishes after hand is reduced
+  ---
+  duration_ms: 2.1607
+  type: 'test'
+  ...
+# Subtest: a start-effect resolver can skip a turn without this reducer resolving Dynamite or Jail
+ok 364 - a start-effect resolver can skip a turn without this reducer resolving Dynamite or Jail
+  ---
+  duration_ms: 1.4316
+  type: 'test'
+  ...
+# Subtest: rejects wrong actor and wrong phase without changing state
+ok 365 - rejects wrong actor and wrong phase without changing state
+  ---
+  duration_ms: 1.6731
+  type: 'test'
+  ...
+# Subtest: blocks every turn progression helper while resolution state remains pending
+ok 366 - blocks every turn progression helper while resolution state remains pending
+  ---
+  duration_ms: 70.4269
+  type: 'test'
+  ...
+# Subtest: same state and turn action produce the same next state
+ok 367 - same state and turn action produce the same next state
+  ---
+  duration_ms: 1.1682
+  type: 'test'
+  ...
+1..367
+# tests 367
+# suites 0
+# pass 365
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9989.7055

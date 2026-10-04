@@ -1,0 +1,61 @@
+TAP version 13
+# (node:17860) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: P03 compact Sid projection represents every allowed pair with one cost set
+ok 1 - P03 compact Sid projection represents every allowed pair with one cost set
+  ---
+  duration_ms: 26.7663
+  type: 'test'
+  ...
+# Subtest: R01 a Duel initiator's elimination advances exactly one seat and permits the next draw
+ok 2 - R01 a Duel initiator's elimination advances exactly one seat and permits the next draw
+  ---
+  duration_ms: 72.182
+  type: 'test'
+  ...
+# Subtest: R02 Lucky's failed Jail judgment skips the turn, with public faces and a valid DTO
+ok 3 - R02 Lucky's failed Jail judgment skips the turn, with public faces and a valid DTO
+  ---
+  duration_ms: 33.5151
+  type: 'test'
+  ...
+# Subtest: R03 Kit's three choice faces appear only in Kit's private responder DTO
+ok 4 - R03 Kit's three choice faces appear only in Kit's private responder DTO
+  ---
+  duration_ms: 23.5863
+  type: 'test'
+  ...
+# Subtest: R04 Suzy draws after panic removes her last hand card
+ok 5 - R04 Suzy draws after panic removes her last hand card
+  ---
+  duration_ms: 12.5028
+  type: 'test'
+  ...
+# Subtest: R04 Suzy draws after cat_balou removes her last hand card
+ok 6 - R04 Suzy draws after cat_balou removes her last hand card
+  ---
+  duration_ms: 10.5642
+  type: 'test'
+  ...
+# Subtest: R04 opposing Suzy waits until Duel ends before replenishing her empty hand
+ok 7 - R04 opposing Suzy waits until Duel ends before replenishing her empty hand
+  ---
+  duration_ms: 20.2188
+  type: 'test'
+  ...
+# Subtest: R04 Suzy replenishes after Jesse steals her last card during draw
+ok 8 - R04 Suzy replenishes after Jesse steals her last card during draw
+  ---
+  duration_ms: 19.1752
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 709.2051

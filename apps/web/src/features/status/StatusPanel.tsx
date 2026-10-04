@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   PROTOCOL_VERSION,
@@ -179,23 +179,14 @@ export function StatusPanel({
   transport,
   createCommandId = defaultCommandId,
 }: StatusPanelProps) {
-  const [acceptedProjection, setAcceptedProjection] = useState(
-    () => mergeMatchStatusProjection(null, sync),
-  );
   const [returnBusy, setReturnBusy] = useState(false);
   const [returnFeedback, setReturnFeedback] = useState("");
   const [logOpen, setLogOpen] = useState(false);
   const singleFlight = useRef(createSingleFlightRunner()).current;
 
-  useEffect(() => {
-    setAcceptedProjection((current) => mergeMatchStatusProjection(current, sync));
-  }, [sync.version, sync.snapshot, sync.visibleEvents]);
-
   const projection = useMemo(
-    () => sync.version >= acceptedProjection.version
-      ? mergeMatchStatusProjection(acceptedProjection, sync)
-      : acceptedProjection,
-    [acceptedProjection, sync.version, sync.snapshot, sync.visibleEvents],
+    () => mergeMatchStatusProjection(null, sync),
+    [sync.version, sync.snapshot, sync.visibleEvents],
   );
   const view = useMemo(() => buildMatchStatusViewModel(projection), [projection]);
   const canReturn = canReturnToLobbyFromResult(

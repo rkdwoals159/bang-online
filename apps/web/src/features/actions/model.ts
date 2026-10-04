@@ -89,9 +89,17 @@ export function findSidAbilityProposalIndex(
   if (!firstCardInstanceId || !secondCardInstanceId || firstCardInstanceId === secondCardInstanceId) return null;
   const index = actions.findIndex((action) => action.type === "USE_ABILITY" &&
     action.payload.cardInstanceIds.length === 2 &&
-    action.payload.cardInstanceIds.includes(firstCardInstanceId) &&
-    action.payload.cardInstanceIds.includes(secondCardInstanceId));
+    (action.costSelection?.allowedCardInstanceIds ?? action.payload.cardInstanceIds).includes(firstCardInstanceId) &&
+    (action.costSelection?.allowedCardInstanceIds ?? action.payload.cardInstanceIds).includes(secondCardInstanceId));
   return index < 0 ? null : index;
+}
+
+/** Expands only a pair explicitly authorized by the server's compact Sid cost set. */
+export function resolveSidAbilityProposal(proposal: LegalActionProposal, first: string | null, second: string | null): LegalActionProposal | null {
+  if (proposal.type !== "USE_ABILITY" || !proposal.costSelection) return proposal;
+  if (!first || !second || first === second || !proposal.costSelection.allowedCardInstanceIds.includes(first) ||
+      !proposal.costSelection.allowedCardInstanceIds.includes(second)) return null;
+  return { type: "USE_ABILITY", payload: { abilityId: proposal.payload.abilityId, cardInstanceIds: [first, second] } };
 }
 
 /** Creates the v1 command envelope from one exact proposal and current version. */
@@ -126,6 +134,10 @@ export async function sendAndRefreshAction(
 ): Promise<{ acknowledgement: CommandAck; projection: ActionsProjection | null }> {
   const acknowledgement = await transport.sendMatchCommand(command);
   onAcknowledgement?.(acknowledgement);
+  if (acknowledgement.status === "accepted" && acknowledgement.matchProjection) {
+    return { acknowledgement, projection: { version: acknowledgement.aggregateVersion,
+      snapshot: acknowledgement.matchProjection.snapshot } };
+  }
   try {
     const response = await transport.syncMatch(command.matchId);
     return {

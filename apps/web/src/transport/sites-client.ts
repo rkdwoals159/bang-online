@@ -51,6 +51,8 @@ export interface SitesGameTransportOptions {
   eventSourceFactory?: (url: string, init: EventSourceInit) => SitesEventSource;
   createId?: () => string;
   acknowledgementTimeoutMs?: number;
+  readTimeoutMs?: number;
+  fallbackPollIntervalMs?: number;
   visibilityTarget?: Pick<Document, "visibilityState" | "addEventListener" | "removeEventListener">;
 }
 
@@ -137,6 +139,9 @@ export class SitesGameTransport implements GameTransport {
   private readonly eventSourceFactory: (url: string, init: EventSourceInit) => SitesEventSource;
   private readonly createId: () => string;
   private readonly acknowledgementTimeoutMs: number;
+  private readonly readTimeoutMs: number;
+  private readonly fallbackPollIntervalMs: number;
+  private fallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly visibilityTarget?: SitesGameTransportOptions["visibilityTarget"];
   private readonly roomIds = new Set<string>();
   private readonly matchIds = new Set<string>();
@@ -156,6 +161,7 @@ export class SitesGameTransport implements GameTransport {
   private restoreSessionRequest?: Promise<GuestSessionResponse | null>;
   private assignedSeatsRequest?: Promise<readonly RoomView[]>;
   private source: SitesEventSource | null = null;
+  private sourceResources = "";
   private visibilityListener?: () => void;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectDelayMs = 250;
@@ -170,6 +176,11 @@ export class SitesGameTransport implements GameTransport {
     this.eventSourceFactory = options.eventSourceFactory ?? defaultEventSourceFactory;
     this.createId = options.createId ?? defaultId;
     this.acknowledgementTimeoutMs = options.acknowledgementTimeoutMs ?? 5_000;
+    this.readTimeoutMs = options.readTimeoutMs ?? 5_000;
+    this.fallbackPollIntervalMs = options.fallbackPollIntervalMs ?? 2_000;
+    if (![this.readTimeoutMs, this.fallbackPollIntervalMs].every(value => Number.isSafeInteger(value) && value > 0)) {
+      throw new RangeError("Transport timing must be a positive integer.");
+    }
     this.visibilityTarget = options.visibilityTarget ?? (typeof document === "undefined" ? undefined : document);
   }
 
@@ -189,6 +200,7 @@ export class SitesGameTransport implements GameTransport {
 
   disconnect(): void {
     this.started = false;
+    this.clearFallbackPoll();
     this.connectionGeneration += 1;
     this.removeVisibilityListener();
     this.clearReconnectTimer();
@@ -366,9 +378,9 @@ export class SitesGameTransport implements GameTransport {
     this.confirmedMatchIds.clear();
     this.roomMatchIds.clear();
     for (const room of rooms) {
-      this.recoveredRoomIds.add(room.roomId);
-      if (room.activeMatchId) {
-        this.recoveredMatchIds.add(room.activeMatchId);
+      if (room.status === "closed") continue;
+      this.store.applyRoomCommand(room);
+      if (room.activeMatchId && this.roomWatchCounts.has(room.roomId)) {
         this.roomMatchIds.set(room.roomId, room.activeMatchId);
       }
     }
@@ -376,8 +388,10 @@ export class SitesGameTransport implements GameTransport {
     for (const matchId of new Set([...priorMatchIds, ...rooms.flatMap((room) => room.activeMatchId ? [room.activeMatchId] : [])])) this.reconcileMatchResource(matchId);
     this.ensureEventStream();
 
-    await Promise.all(rooms.map((room) => this.syncRoom(room.roomId)));
-    const activeMatchIds = new Set(rooms.flatMap((room) => {
+    const liveRooms = rooms.filter(room => room.status !== "closed");
+    await Promise.all(liveRooms.filter(room => room.version === undefined || this.roomWatchCounts.has(room.roomId))
+      .map((room) => this.syncRoom(room.roomId)));
+    const activeMatchIds = new Set(liveRooms.filter(room => this.roomWatchCounts.has(room.roomId)).flatMap((room) => {
       const id = this.getSnapshot().rooms[room.roomId]?.room.activeMatchId ?? room.activeMatchId;
       return id ? [id] : [];
     }));
@@ -521,6 +535,11 @@ export class SitesGameTransport implements GameTransport {
     if (ack.ok && ack.value.status === "rejected" && ack.value.error.code === "UNAUTHENTICATED") {
       this.markSessionExpired();
     }
+    if (pending.matchId && ack.ok && ack.value.status === "accepted" && ack.value.matchProjection &&
+        this.restoredPlayerId !== undefined && ack.value.matchProjection.snapshot.viewer.playerId !== this.restoredPlayerId) {
+      this.store.setError("INVALID_RESPONSE");
+      throw new BrowserTransportError("INVALID_RESPONSE");
+    }
     this.pending.delete(pending.commandId);
     this.updatePendingIds();
     const accepted = !ack.ok || ack.value.status === "accepted";
@@ -558,7 +577,11 @@ export class SitesGameTransport implements GameTransport {
       if (ack.ok && ack.value.status === "accepted" && isVersion(ack.value.aggregateVersion) && isVersion(ack.value.eventSeq)) {
         this.recordMatchHint(pending.matchId, { version: ack.value.aggregateVersion, eventSeq: ack.value.eventSeq });
       }
-      void this.syncMatch(pending.matchId).catch(() => undefined);
+      if (ack.ok && ack.value.status === "accepted" && ack.value.matchProjection && this.getSnapshot().matches[pending.matchId]) {
+        this.store.applyMatchSync({ protocolVersion: 1, requestId: pending.commandId, matchId: pending.matchId,
+          version: ack.value.aggregateVersion, eventSeq: ack.value.eventSeq, requiresFullSnapshot: false,
+          snapshot: ack.value.matchProjection.snapshot, visibleEvents: ack.value.matchProjection.visibleEvents });
+      } else void this.syncMatch(pending.matchId).catch(() => undefined);
     }
     return response;
   }
@@ -743,21 +766,31 @@ export class SitesGameTransport implements GameTransport {
   }
 
   private openEventStream(): void {
-    if (!this.started || this.sessionExpired || !this.isVisible() || this.source !== null ||
+    if (!this.started || this.sessionExpired || !this.isVisible() ||
         this.getSnapshot().authenticated !== true || this.roomIds.size + this.matchIds.size === 0) return;
+    const resources = [...new Set([...this.roomIds, ...this.matchIds])].sort().slice(0, 32);
+    const resourceKey = JSON.stringify(resources);
+    if (this.source !== null && this.sourceResources === resourceKey) return;
+    if (this.source !== null) { this.closeEventStream(); this.connectionGeneration++; }
     this.clearReconnectTimer();
     let source: SitesEventSource;
     try {
-      source = this.eventSourceFactory(`/api/notifications/events?after=${this.lastCursor}`, { withCredentials: true });
+      const query = new URLSearchParams({ after: String(this.lastCursor) });
+      resources.forEach(id => query.append("resource", id));
+      source = this.eventSourceFactory(`/api/notifications/events?${query}`, { withCredentials: true });
     } catch {
       this.store.setConnection("disconnected", this.getSnapshot().authenticated);
+      this.scheduleFallbackPoll();
+      this.scheduleReconnect();
       return;
     }
     this.source = source;
+    this.sourceResources = resourceKey;
     source.addEventListener("invalidation", (event) => this.handleInvalidation(source, event));
     source.addEventListener("presence", (event) => this.handlePresence(source, event));
     source.onopen = () => {
       if (source !== this.source || !this.started) return;
+      this.clearFallbackPoll();
       this.reconnectDelayMs = 250;
       const generation = ++this.connectionGeneration;
       this.store.setConnection("connected", true);
@@ -767,14 +800,36 @@ export class SitesGameTransport implements GameTransport {
       if (source !== this.source) return;
       if (source.readyState === EVENT_SOURCE_CONNECTING) {
         this.store.setConnection("disconnected", this.getSnapshot().authenticated);
+        this.scheduleFallbackPoll();
         return;
       }
       if (source.readyState === EVENT_SOURCE_CLOSED) {
         this.closeEventStream();
         this.store.setConnection("disconnected", this.getSnapshot().authenticated);
+        this.scheduleFallbackPoll();
         this.scheduleReconnect();
       }
     };
+  }
+
+  private clearFallbackPoll(): void {
+    if (this.fallbackTimer !== null) clearTimeout(this.fallbackTimer);
+    this.fallbackTimer = null;
+  }
+
+  private scheduleFallbackPoll(): void {
+    if (this.fallbackTimer !== null || !this.started || !this.isVisible() || this.sessionExpired ||
+        this.getSnapshot().authenticated !== true || this.roomIds.size + this.matchIds.size === 0) return;
+    this.fallbackTimer = setTimeout(() => {
+      this.fallbackTimer = null;
+      if (!this.started || !this.isVisible() || this.sessionExpired) return;
+      void Promise.allSettled([
+        ...[...this.roomIds].map(id => this.syncRoom(id)),
+        ...[...this.matchIds].map(id => this.syncMatch(id)),
+      ]).then(() => {
+        if (this.getSnapshot().connection !== "connected") this.scheduleFallbackPoll();
+      });
+    }, this.fallbackPollIntervalMs);
   }
 
   private scheduleReconnect(): void {
@@ -791,6 +846,7 @@ export class SitesGameTransport implements GameTransport {
   private closeEventStream(): void {
     const source = this.source;
     this.source = null;
+    this.sourceResources = "";
     source?.close();
   }
 
@@ -799,6 +855,7 @@ export class SitesGameTransport implements GameTransport {
     if (!this.started || this.sessionExpired || !this.isVisible() ||
         this.getSnapshot().authenticated !== true || !hasResources) {
       this.clearReconnectTimer();
+      this.clearFallbackPoll();
       if (!hasResources || this.getSnapshot().authenticated !== true || this.sessionExpired) this.closeEventStream();
       return;
     }
@@ -895,6 +952,7 @@ export class SitesGameTransport implements GameTransport {
         this.ensureEventStream();
       } else {
         this.clearReconnectTimer();
+        this.clearFallbackPoll();
         this.closeEventStream();
         this.connectionGeneration += 1;
         this.store.setConnection("disconnected", this.getSnapshot().authenticated);
@@ -921,33 +979,38 @@ export class SitesGameTransport implements GameTransport {
   }
 
   private async requestJson(path: string, method: "GET" | "POST", body?: unknown, signal?: AbortSignal): Promise<HttpReply> {
-    const init: RequestInit = {
-      method,
-      credentials: "include",
-      cache: "no-store",
-      ...(method === "POST" ? {
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      } : {}),
-      ...(signal ? { signal } : {}),
+    const controller = new AbortController();
+    let rejectAbort: (error: unknown) => void = () => {};
+    const aborted = new Promise<never>((_resolve, reject) => { rejectAbort = reject; });
+    const abort = () => {
+      controller.abort();
+      rejectAbort(new BrowserTransportError("HTTP_REQUEST_FAILED"));
     };
-    let response: Response;
+    signal?.addEventListener("abort", abort, { once: true });
+    const timer = setTimeout(abort, signal ? this.acknowledgementTimeoutMs : this.readTimeoutMs);
+    if (signal?.aborted) abort();
+    const init: RequestInit = {
+      method, credentials: "include", cache: "no-store", signal: controller.signal,
+      ...(method === "POST" ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
+    };
     try {
-      response = await this.fetcher(path, init);
-    } catch {
-      this.store.setError("CONNECTION");
-      throw new BrowserTransportError("HTTP_REQUEST_FAILED");
+      return await Promise.race([aborted, (async (): Promise<HttpReply> => {
+        const response = await this.fetcher(path, init);
+        if (response.status === 204) return { status: response.status, body: null };
+        let responseBody: unknown;
+        try { responseBody = await response.json() as unknown; }
+        catch { throw new BrowserTransportError("INVALID_RESPONSE"); }
+        return { status: response.status, body: responseBody };
+      })()]);
+    } catch (error) {
+      this.store.setError(error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE" : "CONNECTION");
+      throw error instanceof BrowserTransportError ? error : new BrowserTransportError("HTTP_REQUEST_FAILED");
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
     }
-    if (response.status === 204) return { status: response.status, body: null };
-    let responseBody: unknown;
-    try {
-      responseBody = await response.json() as unknown;
-    } catch {
-      this.store.setError("INVALID_RESPONSE");
-      throw new BrowserTransportError("INVALID_RESPONSE");
-    }
-    return { status: response.status, body: responseBody };
   }
+
 
   private isRejectedCommand(input: unknown, commandId: string): input is Extract<CommandAck, { status: "rejected" }> {
     const parsed = parseCommandAck(input);
@@ -971,6 +1034,7 @@ export class SitesGameTransport implements GameTransport {
 
   private markSessionExpired(): void {
     this.sessionExpired = true;
+    this.clearFallbackPoll();
     this.clearReconnectTimer();
     this.closeEventStream();
     this.connectionGeneration += 1;

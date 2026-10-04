@@ -5,9 +5,9 @@ import { AppStateProvider, useAppState } from "./app-state";
 import { RoutePage } from "./pages";
 import { AppLink, resolveRoute, usePathname } from "./router";
 
-export function App() {
+export function App({ transportAdapter }: { transportAdapter?: "sites-http-sse" | "socket-io" } = {}) {
   return (
-    <AppStateProvider>
+    <AppStateProvider adapter={transportAdapter}>
       <AccessibilityStyles />
       <AppShell>
         <AppErrorBoundary>

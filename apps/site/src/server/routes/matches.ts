@@ -109,7 +109,7 @@ export async function handleMatchesRoute(
   try {
     const playerId = await authenticatedPlayer(request, env, options);
     if (!playerId) return parsedAck(commandRejected(parsed.value.commandId, "UNAUTHENTICATED"));
-    const ack = await new D1MatchService(env.DB, options).execute(playerId, parsed.value);
+    const ack = await new D1MatchService(env.DB, { ...options, includeMatchProjection: true }).execute(playerId, parsed.value);
     if (!ack) return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
     return parsedAck(ack);
   } catch {

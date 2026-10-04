@@ -34,6 +34,8 @@ import type {
   SuzyAfterCardEffectHookInput,
   SuzyAfterResponseHookInput,
 } from "../character-api.js";
+import { advanceAfterCurrentPlayerElimination, skipTurnAfterStartResolution } from "../../turn/reducer.js";
+import { emptySuzyDrawEvents } from "../characters/suzy-lafayette.js";
 import { checkVictoryAtBoundary, beginElimination, advanceElimination } from "../../endgame/index.js";
 import {
   beginDeathRescue,
@@ -627,23 +629,11 @@ function dispatchSuzyAfterCardEffect(
   random: RandomSource,
   registry: EffectRuntimeRegistry,
 ): Internal<{ state: GameState; events: EffectEventDraft[] }> {
-  if (context.mode !== "card" || context.sourceCardInstanceId === null) {
-    return { ok: true, value: { state, events: [] } };
-  }
-  const actor = uniqueSeat(state, context.actorPlayerId);
-  if (!actor || actor.public.characterId !== "suzy_lafayette") {
-    return { ok: true, value: { state, events: [] } };
-  }
-  const card = characterCardReference(state, context.sourceCardInstanceId);
-  if (!card) return { ok: true, value: { state, events: [] } };
-  const hook: SuzyAfterCardEffectHookInput = {
-    kind: "after_card_effect",
-    card,
-    boundary: "resolution_complete",
-    handCardCountAfterEffect: actor.private.handCardInstanceIds.length,
-    pendingInteractionKind: null,
-  };
-  return applySuzyHook(state, frame, actor.public.playerId, random, registry, hook);
+  if (!characterInvoker(registry, "suzy_lafayette")) return { ok: true, value: { state, events: [] } };
+  // C14 belongs to every affected living Suzy, including the other Duel participant.
+  const drafts = emptySuzyDrawEvents(state, random, context.sourceCardInstanceId);
+  const applied = applyEvents(state, drafts);
+  return applied.ok ? { ok: true, value: applied.value } : applied;
 }
 
 function moduleCardInput(
@@ -1150,7 +1140,15 @@ export function createEffectCommandHandlers(options: EffectRuntimeOptions): Comm
 
     const run = runQueue(state, resolvedFrameId, input.random, options.registry, options.nextInteractionIdentity);
     if (!run.ok) return commandFailure(run.code, run.message);
-    return safeResult(run.value.state, [...events, ...run.value.events], run.value.value);
+    let resumedState = run.value.state;
+    if (pendingInteractionKind === "LUCKY_DRAW" && runtimeContext(contextFrame)?.effectTypeId === "__turn_start_jail" &&
+        resumedState.status === "playing" && resumedState.resolution.continuations.length === 0 &&
+        run.value.events.some((event) => event.type === "JAIL_JUDGMENT_RESOLVED" && event.payload.turnSkipped === true)) {
+      const skipped = skipTurnAfterStartResolution(resumedState);
+      if (!skipped.ok) return commandFailure(skipped.error.code, skipped.error.message);
+      resumedState = skipped.state;
+    }
+    return safeResult(resumedState, [...events, ...run.value.events], run.value.value);
   };
 
   return {
@@ -1575,6 +1573,11 @@ function runQueue(
         } else if (checked.error.code !== "NO_VICTORY_BOUNDARY") {
           return fail(checked.error.code, checked.error.message);
         }
+      }
+      if (state.status === "playing" && state.turn.phase !== "start") {
+        const advanced = advanceAfterCurrentPlayerElimination(state);
+        if (!advanced.ok) return fail(advanced.error.code, advanced.error.message);
+        state = advanced.state;
       }
       return { ok: true, value: { state, events, value: { kind: "resolved", effectTypeId: context.effectTypeId, abilityId: context.abilityId } } };
     }

@@ -432,7 +432,10 @@ export class RoomService {
       outboxEventId: opaqueId("evt_room"),
       matchId,
       matchOutboxEventId: opaqueId("evt_match"),
-      state: initialDraw.output.state,
+      state: { ...initialDraw.output.state, eventSeq: initialDraw.output.events.length },
+      events: initialDraw.output.events.map((event, index) => ({ ...event,
+        eventId: opaqueId("evt"), eventSeq: index + 1, version: initialDraw.output.state.version,
+        createdAt: cloneDate(this.now()) })),
       startedAt: cloneDate(this.now()),
     });
     const room = await this.roomViewForMember(input.roomId, authenticatedPlayerId);

@@ -1,3 +1,4 @@
+import { cardName } from "../actions/model.js";
 import type {
   MatchOutcomeView,
   MatchSnapshotView,
@@ -106,6 +107,7 @@ const publicEventMessages: Readonly<Record<string, string>> = Object.freeze({
   JAIL_JUDGMENT_REVEALED: "감옥 판정 카드가 공개됐어요.",
   BARREL_CHECK_RESOLVED: "술통 판정이 끝났어요.",
   JAIL_JUDGMENT_RESOLVED: "감옥 판정이 끝났어요.",
+  BLACK_JACK_CARD_REVEALED: "블랙 잭의 두 번째 카드가 공개됐어요.",
   GENERAL_STORE_CARD_REVEALED: "잡화점 카드가 공개됐어요.",
 });
 
@@ -231,6 +233,11 @@ export function formatPublicEvent(
       const from = publicName(payload, "fromPlayerId", players);
       const to = publicName(payload, "toPlayerId", players);
       return from && to ? `${from} 님이 ${to} 님에게 다이너마이트를 넘겼어요.` : fallback;
+    }
+    case "BLACK_JACK_CARD_REVEALED": {
+      const card = payload.card as { typeId?: string; rank?: string; suit?: string } | undefined;
+      const suits: Record<string, string> = { HEARTS: "하트", DIAMONDS: "다이아몬드", SPADES: "스페이드", CLUBS: "클럽" };
+      return actor && card ? `${actor} 님의 두 번째 카드: ${cardName(card.typeId ?? "")} ${card.rank ?? ""} ${suits[card.suit ?? ""] ?? ""}` : fallback;
     }
     case "BARREL_CHECK_REQUESTED": return target ? `${target} 님의 술통 판정이 시작됐어요.` : fallback;
     case "BARREL_CHECK_RESOLVED": {

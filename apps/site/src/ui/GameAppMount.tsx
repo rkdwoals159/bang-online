@@ -15,7 +15,7 @@ export function GameAppMount() {
       .then(({ App }) => {
         if (cancelled || !mountPoint.current) return;
         root = createRoot(mountPoint.current);
-        root.render(<App />);
+        root.render(<App transportAdapter="sites-http-sse" />);
       })
       .catch(() => {
         if (cancelled || !mountPoint.current) return;
