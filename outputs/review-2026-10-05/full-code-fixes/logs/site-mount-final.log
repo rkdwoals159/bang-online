@@ -1,0 +1,16 @@
+TAP version 13
+# Subtest: browser root cleanup runs after the parent lifecycle and tolerates cancelled loading
+ok 1 - browser root cleanup runs after the parent lifecycle and tolerates cancelled loading
+  ---
+  duration_ms: 2.3367
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 723.8117

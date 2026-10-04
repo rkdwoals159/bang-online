@@ -3,6 +3,11 @@
 import { createRoot, type Root } from "react-dom/client";
 import { useEffect, useRef } from "react";
 
+/** React must finish the parent cleanup before disposing its separate child root. */
+export function scheduleRootUnmount(root: Pick<Root, "unmount"> | undefined) {
+  if (root) queueMicrotask(() => root.unmount());
+}
+
 /** Mount the existing browser-only game app after hydration. */
 export function GameAppMount() {
   const mountPoint = useRef<HTMLDivElement>(null);
@@ -25,7 +30,7 @@ export function GameAppMount() {
 
     return () => {
       cancelled = true;
-      root?.unmount();
+      scheduleRootUnmount(root);
     };
   }, []);
 
