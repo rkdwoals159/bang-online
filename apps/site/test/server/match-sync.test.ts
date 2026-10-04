@@ -20,6 +20,57 @@ import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 const ORIGIN = "https://site.test";
 let sequence = 1;
 
+test("General Store HTTP sync includes public remaining faces and removes each selected card", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    let match = await repository.getMatch(fixture.matchId);
+    assert.ok(match);
+    const actor = fixture.guests.find(guest => guest.playerId === match!.state.turn.currentPlayerId)!;
+    await giveCardFromDeckToHand(db, match.id, actor.playerId, "general_store");
+    match = await repository.getMatch(match.id);
+    assert.ok(match);
+    const proposal = buildLegalActionCandidates(match.state, actor.playerId).find(candidate =>
+      candidate.type === "PLAY_CARD" && BASE_PHYSICAL_CARDS.some(card => card.typeId === "general_store" &&
+        card.definitionId === match!.state.zones.cardsByInstanceId[candidate.payload.cardInstanceId]?.cardDefinitionId));
+    assert.ok(proposal?.type === "PLAY_CARD");
+    assert.equal((await matchCommand(db, actor, match.id, "PLAY_CARD", match.version, { ...proposal.payload })).ack.status, "accepted");
+    for (let remaining = 4; remaining > 0; remaining--) {
+      const current = await repository.getMatch(match.id);
+      assert.ok(current?.state.resolution.pendingInteraction?.kind === "GENERAL_STORE_PICK");
+      const responder = fixture.guests.find(guest => guest.playerId === current.state.resolution.pendingInteraction!.actorPlayerIds[0])!;
+      let chosen;
+      for (const viewer of fixture.guests) {
+        const response = await routeApiRequest(request(`/api/matches/${match.id}/sync`, { cookie: viewer.cookie,
+          body: { protocolVersion: 1, requestId: `store-${remaining}-${viewer.playerId}`, matchId: match.id, knownVersion: 0, afterEventSeq: 0 } }), { DB: db });
+        const parsed = parseMatchSyncResponse(await json(response));
+        assert.equal(parsed.ok, true);
+        if (!parsed.ok) throw new Error("Invalid General Store sync");
+        const faces = parsed.value.snapshot.publicTable.generalStoreCards!;
+        assert.equal(faces.length, remaining);
+        assert.deepEqual(faces.map(card => card.cardInstanceId), current.state.zones.revealedPoolCardInstanceIds);
+        assert.ok(faces.every(card => card.typeId && card.rank && card.suit));
+        for (const other of current.state.seats.filter(seat => seat.public.playerId !== viewer.playerId)) {
+          for (const id of other.private.handCardInstanceIds) assert.equal(JSON.stringify(parsed.value.snapshot).includes(id), false);
+        }
+        const pending = parsed.value.snapshot.pendingInteraction!;
+        if (viewer.playerId === responder.playerId) {
+          assert.ok("responseOptions" in pending);
+          if ("responseOptions" in pending) chosen = pending.responseOptions[0];
+        } else assert.equal("responseOptions" in pending, false);
+      }
+      assert.ok(chosen);
+      const picked = await matchCommand(db, responder, match.id, "RESPOND", current.version, chosen);
+      assert.equal(picked.ack.status, "accepted");
+      const after = await repository.getMatch(match.id);
+      assert.equal(after!.state.zones.revealedPoolCardInstanceIds.length, remaining - 1);
+    }
+    const final = await repository.getMatch(match.id);
+    assert.notEqual(final!.state.resolution.pendingInteraction?.kind, "GENERAL_STORE_PICK");
+  } finally { await runtime.dispose(); }
+});
+
 interface Guest {
   playerId: string;
   displayName: string;

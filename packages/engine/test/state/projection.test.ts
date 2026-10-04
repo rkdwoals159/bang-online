@@ -20,6 +20,31 @@ const physicalCards: PhysicalCard[] = [
   { definitionId: "indians_01", typeId: "indians", rank: "K", suit: "DIAMONDS", copyIndex: 1 },
 ];
 
+test("General Store exposes remaining public faces to all seats without exposing private hands", () => {
+  const state = makeState();
+  addPendingInteraction(state, { choice: "CHOOSE_CARD", payload: { selectedCardInstanceId: "revealed-pool-card" } }, "GENERAL_STORE_PICK");
+  for (const playerId of ["player-a", "player-b", "player-c"]) {
+    const view = projectMatchSnapshot(state, playerId, physicalCards);
+    assert.deepEqual(view.publicTable.generalStoreCards, [
+      { cardInstanceId: "revealed-pool-card", typeId: "indians", rank: "K", suit: "DIAMONDS" },
+    ]);
+    if (playerId !== "player-b") assert.equal("responseOptions" in view.pendingInteraction!, false);
+    for (const seat of state.seats.filter(seat => seat.public.playerId !== playerId)) {
+      for (const id of seat.private.handCardInstanceIds) assert.equal(JSON.stringify(view).includes(id), false);
+    }
+  }
+});
+
+test("revealed pool is not exported outside General Store, including private draw selections", () => {
+  for (const kind of [null, "KIT_CARLSON_PICK", "LUCKY_DRAW"]) {
+    const state = makeState();
+    if (kind) addPendingInteraction(state, { choice: "SELECT_JUDGMENT", payload: { selectedCardInstanceId: "revealed-pool-card" } }, kind);
+    const observer = projectMatchSnapshot(state, "player-a", physicalCards);
+    assert.equal("generalStoreCards" in observer.publicTable, false);
+    assert.equal(JSON.stringify(observer).includes("revealed-pool-card"), false);
+  }
+});
+
 function card(
   cardInstanceId: string,
   cardDefinitionId: string,

@@ -1,0 +1,148 @@
+{
+  "observedAt": "2026-10-04T12:13:33.554Z",
+  "status": "FAIL",
+  "inputFingerprint": "2244486673b7e472dc86d186aaef3984c3b2f37308d00529e49808d4d7672736",
+  "records": [
+    {
+      "label": "contracts-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/contracts/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 462
+    },
+    {
+      "label": "engine-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/engine/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 836
+    },
+    {
+      "label": "server-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/server/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 776
+    },
+    {
+      "label": "web-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/web/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 996
+    },
+    {
+      "label": "site-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/site/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 1202
+    },
+    {
+      "label": "contracts-tests",
+      "args": [
+        "--import",
+        "file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/node_modules/tsx/dist/loader.mjs",
+        "--test",
+        "packages/contracts/test/performance-presence.test.mjs",
+        "packages/contracts/test/protocol.test.mjs",
+        "packages/contracts/test/protocol.type-test.ts",
+        "packages/contracts/test/room-version-presence.test.mjs"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 998,
+      "tests": 21,
+      "passed": 21
+    },
+    {
+      "label": "engine-tests",
+      "args": [
+        "--import",
+        "file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/node_modules/tsx/dist/loader.mjs",
+        "--test",
+        "--test-concurrency=1",
+        "packages/engine/test/actions/candidates.test.ts",
+        "packages/engine/test/commands/bang-quota.test.ts",
+        "packages/engine/test/commands/commands.test.ts",
+        "packages/engine/test/effects/api.test.ts",
+        "packages/engine/test/effects/basic-actions.test.ts",
+        "packages/engine/test/effects/character-api.test.ts",
+        "packages/engine/test/effects/characters/bart-cassidy.test.ts",
+        "packages/engine/test/effects/characters/black-jack.test.ts",
+        "packages/engine/test/effects/characters/calamity-janet.test.ts",
+        "packages/engine/test/effects/characters/el-gringo.test.ts",
+        "packages/engine/test/effects/characters/jesse-jones.test.ts",
+        "packages/engine/test/effects/characters/jourdonnais.test.ts",
+        "packages/engine/test/effects/characters/kit-carlson.test.ts",
+        "packages/engine/test/effects/characters/lucky-duke.test.ts",
+        "packages/engine/test/effects/characters/paul-regret.test.ts",
+        "packages/engine/test/effects/characters/pedro-ramirez.test.ts",
+        "packages/engine/test/effects/characters/rose-doolan.test.ts",
+        "packages/engine/test/effects/characters/sid-ketchum.test.ts",
+        "packages/engine/test/effects/characters/slab.test.ts",
+        "packages/engine/test/effects/characters/suzy-lafayette.test.ts",
+        "packages/engine/test/effects/characters/vulture-sam.test.ts",
+        "packages/engine/test/effects/characters/willy-the-kid.test.ts",
+        "packages/engine/test/effects/draw-pile.test.ts",
+        "packages/engine/test/effects/draw-select.test.ts",
+        "packages/engine/test/effects/duel.test.ts",
+        "packages/engine/test/effects/dynamite-barrel.test.ts",
+        "packages/engine/test/effects/equipment.test.ts",
+        "packages/engine/test/effects/hand-limit.test.ts",
+        "packages/engine/test/effects/jail.test.ts",
+        "packages/engine/test/effects/registry.test.ts",
+        "packages/engine/test/effects/runtime/runtime.test.ts",
+        "packages/engine/test/effects/steal-discard.test.ts",
+        "packages/engine/test/effects/tablewide.test.ts",
+        "packages/engine/test/endgame/endgame.test.ts",
+        "packages/engine/test/random/shuffle.test.ts",
+        "packages/engine/test/resolution/resolution.test.ts",
+        "packages/engine/test/rules/distance-legality.test.ts",
+        "packages/engine/test/scenarios/engine-acceptance.test.ts",
+        "packages/engine/test/setup/initialize.test.ts",
+        "packages/engine/test/state/projection.test.ts",
+        "packages/engine/test/turn/draw.test.ts",
+        "packages/engine/test/turn/reducer.test.ts"
+      ],
+      "cwd": ".",
+      "exitCode": 1,
+      "status": "FAIL",
+      "elapsedMs": 16776,
+      "tests": 367,
+      "passed": 365
+    }
+  ],
+  "scope": "General Store fix: full contracts/engine/web regressions, Site match HTTP suite, type checks and build. Full Node/D1 suites were not rerun; original D06/D18 and production S09 remain NOT RUN."
+}

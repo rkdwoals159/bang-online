@@ -1,0 +1,90 @@
+{
+  "observedAt": "2026-10-04T12:12:30.561Z",
+  "status": "FAIL",
+  "inputFingerprint": "e3cfb0a7b4cb9aa8b03ba53e91513f1244ff5593d22ac8a5eb1c4f02c2f48307",
+  "records": [
+    {
+      "label": "contracts-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/contracts/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 292
+    },
+    {
+      "label": "engine-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/engine/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 418
+    },
+    {
+      "label": "server-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/server/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 745
+    },
+    {
+      "label": "web-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/web/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 1044
+    },
+    {
+      "label": "site-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/site/tsconfig.json"
+      ],
+      "cwd": ".",
+      "exitCode": 0,
+      "status": "PASS",
+      "elapsedMs": 1122
+    },
+    {
+      "label": "contracts-tests",
+      "args": [
+        "--import",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\site\\node_modules\\tsx\\dist\\loader.mjs",
+        "--test",
+        "packages/contracts/test/performance-presence.test.mjs",
+        "packages/contracts/test/protocol.test.mjs",
+        "packages/contracts/test/room-version-presence.test.mjs"
+      ],
+      "cwd": ".",
+      "exitCode": 1,
+      "status": "FAIL",
+      "elapsedMs": 331,
+      "tests": 3,
+      "passed": 0
+    }
+  ],
+  "scope": "General Store fix: full contracts/engine/web regressions, Site match HTTP suite, type checks and build. Full Node/D1 suites were not rerun; original D06/D18 and production S09 remain NOT RUN."
+}

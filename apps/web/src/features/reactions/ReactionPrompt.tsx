@@ -17,6 +17,7 @@ import {
   projectionFromSync,
   responderName,
   responderPromptFor,
+  responseVisibleCards,
   sendAndRefreshResponse,
   type ReactionProjection,
 } from "./model.js";
@@ -89,7 +90,7 @@ export function ReactionPrompt({
   const isResponder = responderPrompt !== null;
   const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
   const canRespond = isResponder && !busy && activePendingCommand === null;
-  const responderHand = currentSnapshot.selfPrivate?.hand ?? [];
+  const responderHand = responseVisibleCards(currentSnapshot);
   const responderPlayerId = "currentResponderPlayerId" in pending
     ? pending.currentResponderPlayerId
     : null;
@@ -286,6 +287,7 @@ export function ReactionPrompt({
             <ul className="reaction-prompt__options" aria-label="응답 선택지">
               {responderPrompt.responseOptions.map((option, index) => {
                 const presentation = presentOption(option, currentSnapshot, index, responderPrompt.responseOptions.length);
+                const cardFaces = responseCardFaces(option, responderHand);
                 const isOrderTemplate = option.choice === "ORDER_CARDS" && !("orderedCardInstanceIds" in option);
                 return (
                   <li key={`${option.choice}-${index}`}>
@@ -297,9 +299,11 @@ export function ReactionPrompt({
                         onClick={() => submitOption(option)}
                       >
                         <strong>{presentation.label}</strong>
+                        {pending.kind === "GENERAL_STORE_PICK" && cardFaces[0]
+                          ? <PlayingCardFace card={cardFaces[0]} /> : null}
                         {presentation.detail ? <span>{presentation.detail}</span> : null}
                       </button>
-                      {responseCardFaces(option, responderHand).map((card) => (
+                      {cardFaces.map((card) => (
                         <PlayingCardZoomButton
                           key={card.cardInstanceId}
                           card={card}
@@ -326,11 +330,26 @@ export function ReactionPrompt({
           ) : null}
         </>
       ) : (
-        <p className="reaction-prompt__progress" role="status" aria-live="polite">
+        <>
+          {pending.kind === "GENERAL_STORE_PICK" && currentSnapshot.publicTable.generalStoreCards ? (
+            <ul className="reaction-prompt__store-pool" aria-label="잡화점에 남은 공개 카드">
+              {currentSnapshot.publicTable.generalStoreCards.map(card => (
+                <li key={card.cardInstanceId}>
+                  <PlayingCardFace card={card} />
+                  <span>{cardFaceLabel(card)}</span>
+                  <PlayingCardZoomButton card={card} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="reaction-prompt__progress" role="status" aria-live="polite">
           {currentResponderName
-            ? `${currentResponderName} 님이 응답 중이에요. 응답 내용은 다른 참가자에게 공개되지 않아요.`
+            ? pending.kind === "GENERAL_STORE_PICK"
+              ? `${currentResponderName} 님이 잡화점 카드를 고르고 있어요.`
+              : `${currentResponderName} 님이 응답 중이에요. 응답 내용은 다른 참가자에게 공개되지 않아요.`
             : "다른 좌석의 응답을 기다리고 있습니다. 진행 상황만 표시합니다."}
-        </p>
+          </p>
+        </>
       )}
     </section>
   );

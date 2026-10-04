@@ -1,0 +1,718 @@
+TAP version 13
+# Subtest: HTTP readiness does not wait for a failed notification stream
+ok 1 - HTTP readiness does not wait for a failed notification stream
+  ---
+  duration_ms: 1028.1623
+  type: 'test'
+  ...
+# Subtest: expired sessions remain rejected even for independent HTTP writes
+ok 2 - expired sessions remain rejected even for independent HTTP writes
+  ---
+  duration_ms: 0.8366
+  type: 'test'
+  ...
+# Subtest: Socket.IO readiness still awaits connection
+ok 3 - Socket.IO readiness still awaits connection
+  ---
+  duration_ms: 0.6669
+  type: 'test'
+  ...
+# Subtest: direct room, role, game, result and invite URLs resolve to the expected path state
+ok 4 - direct room, role, game, result and invite URLs resolve to the expected path state
+  ---
+  duration_ms: 2255.0369
+  type: 'test'
+  ...
+# Subtest: popstate refreshes the route key for back/forward and invite query changes
+ok 5 - popstate refreshes the route key for back/forward and invite query changes
+  ---
+  duration_ms: 0.668
+  type: 'test'
+  ...
+# Subtest: RoomView activeMatchId drives lobby, sync, game and result projections
+ok 6 - RoomView activeMatchId drives lobby, sync, game and result projections
+  ---
+  duration_ms: 0.5188
+  type: 'test'
+  ...
+# Subtest: room connection notice is accessible and stays until authoritative route sync succeeds
+ok 7 - room connection notice is accessible and stays until authoritative route sync succeeds
+  ---
+  duration_ms: 9.7573
+  type: 'test'
+  ...
+# Subtest: connected CONNECTION errors trigger one route resync attempt without an effect loop
+ok 8 - connected CONNECTION errors trigger one route resync attempt without an effect loop
+  ---
+  duration_ms: 0.248
+  type: 'test'
+  ...
+# Subtest: reconnect sync waits for the current RoomView and then its active match projection
+ok 9 - reconnect sync waits for the current RoomView and then its active match projection
+  ---
+  duration_ms: 2.9967
+  type: 'test'
+  ...
+# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+ok 10 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+  ---
+  duration_ms: 0.3548
+  type: 'test'
+  ...
+# Subtest: post-start role reveal redirects to the registered canonical role route
+ok 11 - post-start role reveal redirects to the registered canonical role route
+  ---
+  duration_ms: 0.642
+  type: 'test'
+  ...
+# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately
+ok 12 - role confirmation stays in one tab session and a fresh tab must confirm separately
+  ---
+  duration_ms: 0.6466
+  type: 'test'
+  ...
+# Subtest: role and character face copy is supplied for every canonical base-game entry
+ok 13 - role and character face copy is supplied for every canonical base-game entry
+  ---
+  duration_ms: 2.6189
+  type: 'test'
+  ...
+# Subtest: role reveal renders only the viewer's role and character with canonical rule copy
+ok 14 - role reveal renders only the viewer's role and character with canonical rule copy
+  ---
+  duration_ms: 5.5501
+  type: 'test'
+  ...
+# Subtest: match route composition passes private hand, legalActions, pending and result projection to features
+ok 15 - match route composition passes private hand, legalActions, pending and result projection to features
+  ---
+  duration_ms: 62.0049
+  type: 'test'
+  ...
+# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection
+ok 16 - result return uses one exact empty command then waits for a newer lobby sync projection
+  ---
+  duration_ms: 1.1012
+  type: 'test'
+  ...
+# Subtest: rejected or thrown return transport keeps the result operation retryable
+ok 17 - rejected or thrown return transport keeps the result operation retryable
+  ---
+  duration_ms: 1.4091
+  type: 'test'
+  ...
+# Subtest: room operations can wait for the new cookie-authenticated socket connection
+ok 18 - room operations can wait for the new cookie-authenticated socket connection
+  ---
+  duration_ms: 1.6408
+  type: 'test'
+  ...
+# Subtest: keyboard controls receive a visible focus indicator
+ok 19 - keyboard controls receive a visible focus indicator
+  ---
+  duration_ms: 1.0643
+  type: 'test'
+  ...
+# Subtest: narrow hand and response rows can scroll horizontally
+ok 20 - narrow hand and response rows can scroll horizontally
+  ---
+  duration_ms: 0.2493
+  type: 'test'
+  ...
+# Subtest: AccessibleButton renders a named native keyboard control
+ok 21 - AccessibleButton renders a named native keyboard control
+  ---
+  duration_ms: 580.9602
+  type: 'test'
+  ...
+# Subtest: offers only card and target candidates from legalActions
+ok 22 - offers only card and target candidates from legalActions
+  ---
+  duration_ms: 689.6566
+  type: 'test'
+  ...
+# Subtest: explains only the two public no-recovery Beer conditions
+ok 23 - explains only the two public no-recovery Beer conditions
+  ---
+  duration_ms: 0.5225
+  type: 'test'
+  ...
+# Subtest: maps a distinct Sid cost pair only to its exact projected ability proposal
+ok 24 - maps a distinct Sid cost pair only to its exact projected ability proposal
+  ---
+  duration_ms: 0.3134
+  type: 'test'
+  ...
+# Subtest: keeps server-approved self table targets and never exposes a target hand card ID
+ok 25 - keeps server-approved self table targets and never exposes a target hand card ID
+  ---
+  duration_ms: 0.7794
+  type: 'test'
+  ...
+# Subtest: wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+ok 26 - wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+  ---
+  duration_ms: 0.1801
+  type: 'test'
+  ...
+# Subtest: syncs the latest projection after server rejection so selection can be rebuilt
+ok 27 - syncs the latest projection after server rejection so selection can be rebuilt
+  ---
+  duration_ms: 0.4364
+  type: 'test'
+  ...
+# Subtest: shows the acknowledgement phase before awaiting the authoritative projection
+ok 28 - shows the acknowledgement phase before awaiting the authoritative projection
+  ---
+  duration_ms: 0.3972
+  type: 'test'
+  ...
+# Subtest: keeps a timed-out retry on the same command ID and payload
+ok 29 - keeps a timed-out retry on the same command ID and payload
+  ---
+  duration_ms: 0.4781
+  type: 'test'
+  ...
+# Subtest: renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+ok 30 - renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+  ---
+  duration_ms: 21.2877
+  type: 'test'
+  ...
+# Subtest: shows turn ownership and pending response without making card actions available
+ok 31 - shows turn ownership and pending response without making card actions available
+  ---
+  duration_ms: 7.8806
+  type: 'test'
+  ...
+# Subtest: renders two linear Sid cost selectors instead of one button per card pair
+ok 32 - renders two linear Sid cost selectors instead of one button per card pair
+  ---
+  duration_ms: 140.2839
+  type: 'test'
+  ...
+# Subtest: prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+ok 33 - prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+  ---
+  duration_ms: 75.932
+  type: 'test'
+  ...
+# Subtest: all 80 physical card records keep their own rank and suit over one type image
+ok 34 - all 80 physical card records keep their own rank and suit over one type image
+  ---
+  duration_ms: 1.0993
+  type: 'test'
+  ...
+# Subtest: missing images have visible fallback labels and nonempty alternative text
+ok 35 - missing images have visible fallback labels and nonempty alternative text
+  ---
+  duration_ms: 0.4167
+  type: 'test'
+  ...
+# Subtest: opponent hand back accessibility text exposes no rank, suit, or card identity
+ok 36 - opponent hand back accessibility text exposes no rank, suit, or card identity
+  ---
+  duration_ms: 0.2892
+  type: 'test'
+  ...
+# Subtest: every base playing card has Korean detail text from the ruleset summaries
+ok 37 - every base playing card has Korean detail text from the ruleset summaries
+  ---
+  duration_ms: 763.6758
+  type: 'test'
+  ...
+# Subtest: hand zoom has a named dialog and stays separate from action selection
+ok 38 - hand zoom has a named dialog and stays separate from action selection
+  ---
+  duration_ms: 21.6588
+  type: 'test'
+  ...
+# Subtest: response zoom is limited to card faces named by the current responder options
+ok 39 - response zoom is limited to card faces named by the current responder options
+  ---
+  duration_ms: 3.9004
+  type: 'test'
+  ...
+# Subtest: discard-order zoom uses only the responder's projected allowedCards
+ok 40 - discard-order zoom uses only the responder's projected allowedCards
+  ---
+  duration_ms: 6.0294
+  type: 'test'
+  ...
+# Subtest: renders HTML-like server guest names as text with readiness and explicit room status
+ok 41 - renders HTML-like server guest names as text with readiness and explicit room status
+  ---
+  duration_ms: 629.1049
+  type: 'test'
+  ...
+# Subtest: renders disabled start and locked seat actions once the server room has started
+ok 42 - renders disabled start and locked seat actions once the server room has started
+  ---
+  duration_ms: 2.627
+  type: 'test'
+  ...
+# Subtest: shows owner controls only to the owner and keeps full rooms closed to invites
+ok 43 - shows owner controls only to the owner and keeps full rooms closed to invites
+  ---
+  duration_ms: 6.5354
+  type: 'test'
+  ...
+# Subtest: shows explicit presence and never treats a missing status as connected
+ok 44 - shows explicit presence and never treats a missing status as connected
+  ---
+  duration_ms: 10.888
+  type: 'test'
+  ...
+# Subtest: shows server seats and readiness in seat order and blocks start until everyone is ready
+ok 45 - shows server seats and readiness in seat order and blocks start until everyone is ready
+  ---
+  duration_ms: 2.519
+  type: 'test'
+  ...
+# Subtest: leaves unoccupied room seats visible and blocks starting before four guests
+ok 46 - leaves unoccupied room seats visible and blocks starting before four guests
+  ---
+  duration_ms: 0.2656
+  type: 'test'
+  ...
+# Subtest: only the server-designated owner can start or remove another waiting guest
+ok 47 - only the server-designated owner can start or remove another waiting guest
+  ---
+  duration_ms: 0.3146
+  type: 'test'
+  ...
+# Subtest: a full seven-seat room has no invitation capacity for an eighth guest
+ok 48 - a full seven-seat room has no invitation capacity for an eighth guest
+  ---
+  duration_ms: 0.165
+  type: 'test'
+  ...
+# Subtest: started rooms disable readiness, start, invitations and kick actions
+ok 49 - started rooms disable readiness, start, invitations and kick actions
+  ---
+  duration_ms: 0.5806
+  type: 'test'
+  ...
+# Subtest: builds only the shared room command envelopes with the current version
+ok 50 - builds only the shared room command envelopes with the current version
+  ---
+  duration_ms: 0.3493
+  type: 'test'
+  ...
+# Subtest: General Store selection shows public card names, suits, images and zoom while keeping exact commands
+ok 51 - General Store selection shows public card names, suits, images and zoom while keeping exact commands
+  ---
+  duration_ms: 737.6092
+  type: 'test'
+  ...
+# Subtest: only the current responder's pending options are offered, with the server step
+ok 52 - only the current responder's pending options are offered, with the server step
+  ---
+  duration_ms: 3.7926
+  type: 'test'
+  ...
+# Subtest: a non-responder sees progress only and no response options or card IDs
+ok 53 - a non-responder sees progress only and no response options or card IDs
+  ---
+  duration_ms: 1.0882
+  type: 'test'
+  ...
+# Subtest: death rescue presents only saved Beer and elimination choices
+ok 54 - death rescue presents only saved Beer and elimination choices
+  ---
+  duration_ms: 2.3239
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+ok 55 - Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+  ---
+  duration_ms: 5.9045
+  type: 'test'
+  ...
+# Subtest: creates a canonical RESPOND envelope from the exact saved option fields
+ok 56 - creates a canonical RESPOND envelope from the exact saved option fields
+  ---
+  duration_ms: 0.1852
+  type: 'test'
+  ...
+# Subtest: does not turn an ORDER_CARDS option template into a command without user-entered order
+ok 57 - does not turn an ORDER_CARDS option template into a command without user-entered order
+  ---
+  duration_ms: 0.3168
+  type: 'test'
+  ...
+# Subtest: validates discard order against the server candidate IDs and required count
+ok 58 - validates discard order against the server candidate IDs and required count
+  ---
+  duration_ms: 0.4176
+  type: 'test'
+  ...
+# Subtest: sync projection restores the same pending prompt and response choices
+ok 59 - sync projection restores the same pending prompt and response choices
+  ---
+  duration_ms: 0.7179
+  type: 'test'
+  ...
+# Subtest: reports a response acknowledgement before waiting for the authoritative projection
+ok 60 - reports a response acknowledgement before waiting for the authoritative projection
+  ---
+  duration_ms: 0.4934
+  type: 'test'
+  ...
+# Subtest: a multi-target response sync opens only the next responder's new prompt
+ok 61 - a multi-target response sync opens only the next responder's new prompt
+  ---
+  duration_ms: 0.365
+  type: 'test'
+  ...
+# Subtest: normalizes a guest name and uses the 1–20 Unicode code point rule
+ok 62 - normalizes a guest name and uses the 1–20 Unicode code point rule
+  ---
+  duration_ms: 2.1211
+  type: 'test'
+  ...
+# Subtest: builds guest and room commands from public DTOs without a credential field
+ok 63 - builds guest and room commands from public DTOs without a credential field
+  ---
+  duration_ms: 1.5696
+  type: 'test'
+  ...
+# Subtest: previews before join and sends the exact preview version with JOIN
+ok 64 - previews before join and sends the exact preview version with JOIN
+  ---
+  duration_ms: 0.4967
+  type: 'test'
+  ...
+# Subtest: invalid code preview and JOIN errors share one safe message
+ok 65 - invalid code preview and JOIN errors share one safe message
+  ---
+  duration_ms: 0.6117
+  type: 'test'
+  ...
+# Subtest: invite links contain only the invite code and can be read without session data
+ok 66 - invite links contain only the invite code and can be read without session data
+  ---
+  duration_ms: 0.4987
+  type: 'test'
+  ...
+# Subtest: merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+ok 67 - merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+  ---
+  duration_ms: 640.6136
+  type: 'test'
+  ...
+# Subtest: keeps only the latest public event window when the feed grows
+ok 68 - keeps only the latest public event window when the feed grows
+  ---
+  duration_ms: 0.4857
+  type: 'test'
+  ...
+# Subtest: ignores stale sync versions and preserves the newer turn, status, and event feed
+ok 69 - ignores stale sync versions and preserves the newer turn, status, and event feed
+  ---
+  duration_ms: 0.4136
+  type: 'test'
+  ...
+# Subtest: builds current turn text from the projection and closes input for every non-playing status
+ok 70 - builds current turn text from the projection and closes input for every non-playing status
+  ---
+  duration_ms: 0.3837
+  type: 'test'
+  ...
+# Subtest: keeps public log closed by default and formats only allowlisted events without payloads
+ok 71 - keeps public log closed by default and formats only allowlisted events without payloads
+  ---
+  duration_ms: 13.1025
+  type: 'test'
+  ...
+# Subtest: completed status renders a read-only result state and no action control
+ok 72 - completed status renders a read-only result state and no action control
+  ---
+  duration_ms: 3.1574
+  type: 'test'
+  ...
+# Subtest: non-owner result view explains that the host returns everyone to the lobby
+ok 73 - non-owner result view explains that the host returns everyone to the lobby
+  ---
+  duration_ms: 2.196
+  type: 'test'
+  ...
+# Subtest: result return action is visible only for the matching completed match in its in-game owner room
+ok 74 - result return action is visible only for the matching completed match in its in-game owner room
+  ---
+  duration_ms: 15.1203
+  type: 'test'
+  ...
+# Subtest: return action single-flight guard ignores a second click while busy and accepts a later retry
+ok 75 - return action single-flight guard ignores a second click while busy and accepts a later retry
+  ---
+  duration_ms: 0.6988
+  type: 'test'
+  ...
+# Subtest: rejected commands and thrown transport errors produce retryable Korean guidance
+ok 76 - rejected commands and thrown transport errors produce retryable Korean guidance
+  ---
+  duration_ms: 0.5067
+  type: 'test'
+  ...
+# Subtest: uses a newer confirmed room command response and syncs only for older acknowledgements
+ok 77 - uses a newer confirmed room command response and syncs only for older acknowledgements
+  ---
+  duration_ms: 0.8739
+  type: 'test'
+  ...
+# Subtest: does not infer an outcome before completion or expose winner IDs when a name is missing
+ok 78 - does not infer an outcome before completion or expose winner IDs when a name is missing
+  ---
+  duration_ms: 0.3888
+  type: 'test'
+  ...
+# Subtest: server status gate removes action controls after play has ended
+ok 79 - server status gate removes action controls after play has ended
+  ---
+  duration_ms: 0.6993
+  type: 'test'
+  ...
+# Subtest: same guest restoration preserves cached projections
+ok 80 - same guest restoration preserves cached projections
+  ---
+  duration_ms: 2.1324
+  type: 'test'
+  ...
+# Subtest: expired session clears private projections and ignores late guest responses
+ok 81 - expired session clears private projections and ignores late guest responses
+  ---
+  duration_ms: 1.3057
+  type: 'test'
+  ...
+# Subtest: changed guest identity cannot reuse previous viewer snapshots
+ok 82 - changed guest identity cannot reuse previous viewer snapshots
+  ---
+  duration_ms: 0.3483
+  type: 'test'
+  ...
+# Subtest: outbox notifications trigger sync and duplicate or older hints do not update projections
+ok 83 - outbox notifications trigger sync and duplicate or older hints do not update projections
+  ---
+  duration_ms: 41.1558
+  type: 'test'
+  ...
+# Subtest: projection store rejects duplicate and out-of-order sync responses
+ok 84 - projection store rejects duplicate and out-of-order sync responses
+  ---
+  duration_ms: 0.6236
+  type: 'test'
+  ...
+# Subtest: match projections retain only the newest 100 public events without moving the cursor backward
+ok 85 - match projections retain only the newest 100 public events without moving the cursor backward
+  ---
+  duration_ms: 0.5435
+  type: 'test'
+  ...
+# Subtest: ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+ok 86 - ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+  ---
+  duration_ms: 45.241
+  type: 'test'
+  ...
+# Subtest: a versioned room command projection is applied and only a newly active match is fetched
+ok 87 - a versioned room command projection is applied and only a newly active match is fetched
+  ---
+  duration_ms: 1.4628
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and assigned-seat recovery calls share their HTTP reads
+ok 88 - parallel guest restore and assigned-seat recovery calls share their HTTP reads
+  ---
+  duration_ms: 7.2219
+  type: 'test'
+  ...
+# Subtest: a legacy room ACK during an older sync forces one fresh projection
+ok 89 - a legacy room ACK during an older sync forces one fresh projection
+  ---
+  duration_ms: 2.6459
+  type: 'test'
+  ...
+# Subtest: room-derived match watches release together and old resources are not synced after reconnect
+ok 90 - room-derived match watches release together and old resources are not synced after reconnect
+  ---
+  duration_ms: 18.5465
+  type: 'test'
+  ...
+# Subtest: cookie restore uses the T81 endpoints and schedules authoritative sync
+ok 91 - cookie restore uses the T81 endpoints and schedules authoritative sync
+  ---
+  duration_ms: 4.1195
+  type: 'test'
+  ...
+# Subtest: default fetch keeps the global receiver for all guest session HTTP operations
+ok 92 - default fetch keeps the global receiver for all guest session HTTP operations
+  ---
+  duration_ms: 1.7786
+  type: 'test'
+  ...
+# Subtest: 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+ok 93 - 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+  ---
+  duration_ms: 1.375
+  type: 'test'
+  ...
+# Subtest: reconnect performs a fresh match sync before retrying the same pending command
+ok 94 - reconnect performs a fresh match sync before retrying the same pending command
+  ---
+  duration_ms: 22.6312
+  type: 'test'
+  ...
+# Subtest: Sites imports the same app stylesheet as the local browser entry
+ok 95 - Sites imports the same app stylesheet as the local browser entry
+  ---
+  duration_ms: 7.516
+  type: 'test'
+  ...
+# Subtest: a late match sync from a previous guest is rejected after identity changes
+ok 96 - a late match sync from a previous guest is rejected after identity changes
+  ---
+  duration_ms: 33.0374
+  type: 'test'
+  ...
+# Subtest: accepted ACK and concurrent passive sync callers share one match request
+ok 97 - accepted ACK and concurrent passive sync callers share one match request
+  ---
+  duration_ms: 13.0121
+  type: 'test'
+  ...
+# Subtest: a newer SSE match hint during sync triggers exactly one fresh follow-up
+ok 98 - a newer SSE match hint during sync triggers exactly one fresh follow-up
+  ---
+  duration_ms: 4.6881
+  type: 'test'
+  ...
+# Subtest: mismatched unchanged replies fall back to a strict full sync without opt-in
+ok 99 - mismatched unchanged replies fall back to a strict full sync without opt-in
+  ---
+  duration_ms: 1.4268
+  type: 'test'
+  ...
+# Subtest: a second unchanged response cannot recurse, and successful syncs clear stale errors
+ok 100 - a second unchanged response cannot recurse, and successful syncs clear stale errors
+  ---
+  duration_ms: 3.3119
+  type: 'test'
+  ...
+# Subtest: presence is timestamped separately, filters foreign members, and survives room sync
+ok 101 - presence is timestamped separately, filters foreign members, and survives room sync
+  ---
+  duration_ms: 5.3426
+  type: 'test'
+  ...
+# Subtest: new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+ok 102 - new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+  ---
+  duration_ms: 2.3769
+  type: 'test'
+  ...
+# Subtest: a versioned room ACK fetches a newly active match without repeating the room sync
+ok 103 - a versioned room ACK fetches a newly active match without repeating the room sync
+  ---
+  duration_ms: 13.0235
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+ok 104 - parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+  ---
+  duration_ms: 2.5178
+  type: 'test'
+  ...
+# Subtest: closing the last transient room watch releases its SSE reconnect resource
+ok 105 - closing the last transient room watch releases its SSE reconnect resource
+  ---
+  duration_ms: 1.2116
+  type: 'test'
+  ...
+# Subtest: HTTP room commands remain writable while the membership SSE channel is closed
+ok 106 - HTTP room commands remain writable while the membership SSE channel is closed
+  ---
+  duration_ms: 5.2315
+  type: 'test'
+  ...
+# Subtest: legacy unversioned room ACK forces one follow-up after an older sync already in flight
+ok 107 - legacy unversioned room ACK forces one follow-up after an older sync already in flight
+  ---
+  duration_ms: 6.28
+  type: 'test'
+  ...
+# Subtest: production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+ok 108 - production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+  ---
+  duration_ms: 1.1178
+  type: 'test'
+  ...
+# Subtest: Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+ok 109 - Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+  ---
+  duration_ms: 39.5847
+  type: 'test'
+  ...
+# Subtest: room preview, create and join use the existing HTTP DTO mapping
+ok 110 - room preview, create and join use the existing HTTP DTO mapping
+  ---
+  duration_ms: 9.1822
+  type: 'test'
+  ...
+# Subtest: SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+ok 111 - SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+  ---
+  duration_ms: 60.1136
+  type: 'test'
+  ...
+# Subtest: malformed API responses do not become transport state
+ok 112 - malformed API responses do not become transport state
+  ---
+  duration_ms: 1.0607
+  type: 'test'
+  ...
+# Subtest: WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+ok 113 - WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+  ---
+  duration_ms: 3.301
+  type: 'test'
+  ...
+# Subtest: unsupported and failing ModelContext registrations leave the game UI usable
+ok 114 - unsupported and failing ModelContext registrations leave the game UI usable
+  ---
+  duration_ms: 1.3322
+  type: 'test'
+  ...
+# Subtest: tool input validation rejects unknown keys and only sends server-projected legal actions
+ok 115 - tool input validation rejects unknown keys and only sends server-projected legal actions
+  ---
+  duration_ms: 4.507
+  type: 'test'
+  ...
+# Subtest: guest and room entry tools reuse the existing normalized transport flow
+ok 116 - guest and room entry tools reuse the existing normalized transport flow
+  ---
+  duration_ms: 1.1796
+  type: 'test'
+  ...
+# Subtest: current state is viewer-scoped and room lobby tools use current versioned commands
+ok 117 - current state is viewer-scoped and room lobby tools use current versioned commands
+  ---
+  duration_ms: 1.0317
+  type: 'test'
+  ...
+# Subtest: tool discards follow the responder's exact private candidate set and count
+ok 118 - tool discards follow the responder's exact private candidate set and count
+  ---
+  duration_ms: 0.7843
+  type: 'test'
+  ...
+1..118
+# tests 118
+# suites 0
+# pass 118
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 22265.1054

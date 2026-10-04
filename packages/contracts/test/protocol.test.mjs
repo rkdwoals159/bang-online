@@ -21,6 +21,25 @@ import {
 const base = { protocolVersion: 1, commandId: "018f8e3d-1234-4123-8123-123456789abc", expectedVersion: 0 };
 const readFixture = (name) => JSON.parse(readFileSync(new URL(`../../test-fixtures/protocol/${name}`, import.meta.url), "utf8"));
 
+test("public General Store faces are validated only in the matching interaction", () => {
+  const response = readFixture("match-sync.response.valid.json");
+  response.snapshot.pendingInteraction = { interactionId: "store-1", kind: "GENERAL_STORE_PICK",
+    allowedChoices: ["CHOOSE_CARD"], currentResponderPlayerId: response.snapshot.viewer.playerId,
+    step: { current: 1, total: 4 }, responseOptions: [
+      { interactionId: "store-1", choice: "CHOOSE_CARD", selectedCardInstanceId: "public-beer" },
+    ] };
+  response.snapshot.publicTable.generalStoreCards = [{ cardInstanceId: "public-beer", typeId: "beer", rank: "6", suit: "HEARTS" }];
+  assert.equal(parseMatchSyncResponse(response).ok, true);
+  const invalid = structuredClone(response);
+  invalid.snapshot.publicTable.generalStoreCards[0].privatePayload = "hidden";
+  assert.equal(parseMatchSyncResponse(invalid).ok, false);
+  const duplicates = structuredClone(response);
+  duplicates.snapshot.publicTable.generalStoreCards.push(duplicates.snapshot.publicTable.generalStoreCards[0]);
+  assert.equal(parseMatchSyncResponse(duplicates).ok, false);
+  response.snapshot.pendingInteraction.kind = "KIT_CARLSON_PICK";
+  assert.equal(parseMatchSyncResponse(response).ok, false);
+});
+
 test("parses the documented match command and rejects a missing protocol version", () => {
   const valid = { ...base, matchId: "m1", type: "PLAY_CARD", payload: { cardInstanceId: "opaque-1", targetPlayerId: "p2" } };
   assert.equal(parseMatchCommand(valid).ok, true);

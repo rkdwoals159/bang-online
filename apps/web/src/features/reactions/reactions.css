@@ -235,7 +235,34 @@
   align-self: stretch;
 }
 
-.reaction-prompt__option span {
+.reaction-prompt__option .playing-card {
+  width: 90px;
+  justify-self: center;
+}
+
+.reaction-prompt__store-pool {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 4px;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.reaction-prompt__store-pool li {
+  display: grid;
+  flex: 0 0 110px;
+  justify-items: center;
+  gap: 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.reaction-prompt__store-pool .playing-card {
+  width: 100px;
+}
+
+.reaction-prompt__option > span {
   color: #647366;
   font-size: 12px;
 }

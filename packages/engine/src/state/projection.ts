@@ -190,6 +190,9 @@ export function projectMatchSnapshot(
         topCard: discardTopId === undefined ? null : toCardFace(discardTopId),
         count: discardPile.length,
       },
+      ...(pending?.kind === "GENERAL_STORE_PICK"
+        ? { generalStoreCards: state.zones.revealedPoolCardInstanceIds.map(toCardFace) }
+        : {}),
     },
     selfPrivate: viewerEliminated
       ? null

@@ -109,7 +109,7 @@ export function presentOption(
 ): ReactionOptionPresentation {
   const label = choiceLabels[option.choice] ?? "선택";
   const detail: string[] = [];
-  const ownHandById = new Map((snapshot.selfPrivate?.hand ?? []).map((card) => [card.cardInstanceId, card]));
+  const ownHandById = new Map(responseVisibleCards(snapshot).map((card) => [card.cardInstanceId, card]));
 
   if ("cardInstanceId" in option) {
     const card = ownHandById.get(option.cardInstanceId);
@@ -145,6 +145,11 @@ export function presentOption(
 
   const ordinal = total > 1 ? `선택 ${position + 1}` : null;
   return { label: ordinal ? `${label} · ${ordinal}` : label, detail: detail.length > 0 ? detail.join(" · ") : null };
+}
+
+/** Only explicit face DTOs: own hand and the public General Store pool. */
+export function responseVisibleCards(snapshot: MatchSnapshotView): readonly CardFaceView[] {
+  return [...(snapshot.selfPrivate?.hand ?? []), ...(snapshot.publicTable.generalStoreCards ?? [])];
 }
 
 export function interactionLabel(kind: string): string {

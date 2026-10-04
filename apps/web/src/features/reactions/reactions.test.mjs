@@ -68,6 +68,36 @@ const responseOptions = [
   { interactionId: "interaction-1", choice: "TAKE_HIT" },
 ];
 
+test("General Store selection shows public card names, suits, images and zoom while keeping exact commands", () => {
+  const options = [
+    { interactionId: "interaction-1", choice: "CHOOSE_CARD", selectedCardInstanceId: "store-beer" },
+    { interactionId: "interaction-1", choice: "CHOOSE_CARD", selectedCardInstanceId: "store-bang" },
+  ];
+  const view = snapshot({ pendingInteraction: responderPending({ kind: "GENERAL_STORE_PICK", options }) });
+  view.publicTable.generalStoreCards = [
+    { cardInstanceId: "store-beer", typeId: "beer", rank: "6", suit: "HEARTS" },
+    { cardInstanceId: "store-bang", typeId: "bang", rank: "A", suit: "SPADES" },
+  ];
+  const markup = renderToStaticMarkup(createElement(ReactionPrompt, { matchId: "match-a", version: 22, snapshot: view,
+    transport: { sendMatchCommand: async () => {}, syncMatch: async () => {} } }));
+  assert.match(markup, /맥주 6 하트/);
+  assert.match(markup, /뱅! A 스페이드/);
+  assert.match(markup, /01_birra\.png/);
+  assert.match(markup, /01_bang\.png/);
+  assert.match(markup, /카드 상세/);
+  assert.doesNotMatch(markup, /store-beer|store-bang/);
+  assert.deepEqual(createRespondCommand("match-a", 22, "command-1", options[0]).payload, options[0]);
+  const waiting = structuredClone(view);
+  waiting.viewer.playerId = "player-b";
+  delete waiting.pendingInteraction.responseOptions;
+  waiting.pendingInteraction.allowedChoices = [];
+  const waitingMarkup = renderToStaticMarkup(createElement(ReactionPrompt, { matchId: "match-a", version: 22, snapshot: waiting,
+    transport: { sendMatchCommand: async () => {}, syncMatch: async () => {} } }));
+  assert.match(waitingMarkup, /잡화점에 남은 공개 카드/);
+  assert.match(waitingMarkup, /맥주 6 하트/);
+  assert.doesNotMatch(waitingMarkup, /응답 선택지|응답 내용은 다른 참가자에게 공개되지/);
+});
+
 function syncResponse(matchSnapshot, version = 21) {
   return {
     protocolVersion: 1,

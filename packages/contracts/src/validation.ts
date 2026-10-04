@@ -278,13 +278,17 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
       !isVersion(input.viewer.seatIndex) || (input.viewer.mode !== "active" && input.viewer.mode !== "eliminated_observer")) return false;
 
   const table = input.publicTable;
-  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"]) ||
+  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"], ["generalStoreCards"]) ||
       !Array.isArray(table.players) || !table.players.every(validPublicPlayer) || !isRecord(table.turn) ||
       !exactShape(table.turn, ["currentPlayerId", "phase"]) || !isText(table.turn.currentPlayerId) ||
       !isText(table.turn.phase) || !isVersion(table.deckCount) || !isRecord(table.publicDiscard) ||
       !exactShape(table.publicDiscard, ["topCard", "count"]) ||
       (table.publicDiscard.topCard !== null && !validPendingCardFace(table.publicDiscard.topCard)) ||
       !isVersion(table.publicDiscard.count)) return false;
+  if (Object.hasOwn(table, "generalStoreCards") &&
+      (!Array.isArray(table.generalStoreCards) || !table.generalStoreCards.every(validPendingCardFace) ||
+       new Set(table.generalStoreCards.map(card => card.cardInstanceId)).size !== table.generalStoreCards.length ||
+       !isRecord(input.pendingInteraction) || input.pendingInteraction.kind !== "GENERAL_STORE_PICK")) return false;
 
   if (input.selfPrivate !== null) {
     if (!isRecord(input.selfPrivate) || !exactShape(input.selfPrivate, ["role", "hand"]) ||

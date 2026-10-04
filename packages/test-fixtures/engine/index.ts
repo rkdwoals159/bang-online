@@ -180,10 +180,17 @@ export function assertEngineProjectionPrivacy(state: GameState): void {
     }
     const ownHand = allHands.get(viewerId) ?? new Set<string>();
     const ownsPrivateReveal = state.resolution.pendingInteraction?.actorPlayerIds.includes(viewerId) ?? false;
+    const isGeneralStore = state.resolution.pendingInteraction?.kind === "GENERAL_STORE_PICK";
+    if (isGeneralStore) {
+      assert.deepEqual(view.publicTable.generalStoreCards, state.zones.revealedPoolCardInstanceIds.map(id => {
+        const card = state.zones.cardsByInstanceId[id]!;
+        return { cardInstanceId: id, typeId: cardTypeId(state, id), rank: String(card.rank), suit: card.suit };
+      }), "R17 remaining General Store pool faces are public to every seat");
+    } else assert.equal("generalStoreCards" in view.publicTable, false, "private selections must not become a public pool");
     const hiddenIds = [
       ...state.zones.drawPileCardInstanceIds,
       ...state.zones.discardPileCardInstanceIds.filter((id) => id !== visibleDiscardTop),
-      ...(ownsPrivateReveal ? [] : state.zones.revealedPoolCardInstanceIds),
+      ...(ownsPrivateReveal || isGeneralStore ? [] : state.zones.revealedPoolCardInstanceIds),
       ...[...allHands.entries()].flatMap(([owner, ids]) => owner === viewerId ? [] : [...ids]),
     ].filter((id) => !ownHand.has(id) && !publiclyVisibleInPlay.has(id) && id !== visibleDiscardTop);
     for (const hiddenCardId of hiddenIds) {

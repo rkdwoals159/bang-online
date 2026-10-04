@@ -230,6 +230,8 @@ export interface MatchSnapshotView {
     /** Remaining draw-pile size only; card identities and order stay private. */
     deckCount: number;
     publicDiscard: { topCard: CardFaceView | null; count: number };
+    /** Remaining public pool only while GENERAL_STORE_PICK is pending. Never Kit/Lucky private candidates. */
+    generalStoreCards?: readonly CardFaceView[];
   };
   /** Present only to the authenticated active viewer; their own hand stays private even when their role is public. */
   selfPrivate: { role: RoleId; hand: readonly CardFaceView[] } | null;
