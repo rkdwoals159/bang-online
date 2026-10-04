@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-10-04T10:30:39.590Z",
+  "status": "SUCCEEDED",
+  "version": {
+    "id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_cc995bea63fc8191a2e38765410eb134",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "version_number": 3,
+    "source": {
+      "commit_sha": "c6587af110ef5394f92a92cd7e4d621ffb5fbce6"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000004ee08209acce43962944204e",
+      "content_hash": "sha256:9482a0ce0b0c6e607e3a84651c131dded1b7a6ea09cb8c9605295883660ba8a8",
+      "size_bytes": 6707200,
+      "file_count": 111
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ac22aa9cfc0819193803497b445a5bd",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "title": "뱅! 온라인",
+    "version_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_cc995bea63fc8191a2e38765410eb134",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://bang-online-ko.rkdwoals159.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6abacbd5c54c8191abdbb8c55b15de64",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-04T10:30:19.286624+00:00"
+  },
+  "recovery": "Corrected only failed platform baseline CREATE statements with IF NOT EXISTS; preserved exact legacy applied SQL/checksum and existing ledger; runtime schema check is read-only.",
+  "localVerification": "239/239 automatic tests, typecheck/build, Drizzle check PASS; production S09 remains NOT RUN"
+}

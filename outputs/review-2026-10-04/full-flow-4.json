@@ -1,18 +1,18 @@
 {
-  "observedAt": "2026-10-04T09:53:36.012Z",
+  "observedAt": "2026-10-04T10:29:51.057Z",
   "mode": "local real Worker HTTP, simulated players; NOT full browser or production S09",
   "capacity": 4,
   "result": {
     "phase": "completed",
-    "accepted": 53,
-    "responses": 20,
-    "version": 56,
-    "eventSeq": 115,
+    "accepted": 35,
+    "responses": 13,
+    "version": 40,
+    "eventSeq": 77,
     "outcome": {
       "winningFaction": "outlaws",
       "winningPlayerIds": [
-        "p_EbNtSVnsm2poSFd_raUDjFjc",
-        "p_uUZxRrP-ewGwvvXPHg80JkjR"
+        "p_IVQ7EE2xWJjM4JwvegzQ-o_l",
+        "p_RViDZsOjsOGtklNraYrYhJFt"
       ]
     },
     "rolesRevealed": true

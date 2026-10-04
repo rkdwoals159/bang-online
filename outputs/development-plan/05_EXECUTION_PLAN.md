@@ -1368,3 +1368,8 @@
 T112/T113/T114/T115/T117/T118 DONE: 공용 계약 20/20, 엔진 78/78, Sites 39/39, 웹 98/98; check/build 및 local 4P/7P HTTP 전체 게임 PASS. T117 파일 소유는 root 단독 db/schema.ts, drizzle/**이며 최초 migration 변경 없이 생성된 0001과 sparse outbox query-plan을 검증했다. T118은 root 단독 app-state.tsx 및 HTTP readiness 테스트이며 신규 게스트 복구 조회 제거를 검증했다.
 
 T116 IN_PROGRESS: 로컬 통합 검증은 완료했으나 같은 Site 버전 2 publish FAILED (existing command_receipts). 기존 SQL/DB 데이터 보존. 플랫폼 적용 기록 정리 없이 초기 migration 재작성 또는 같은 archive 반복 배포를 진행하지 않는다. 상세 결과는 outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md 및 deployment-result.json. 기존 D06/D18 및 운영 S09 NOT RUN은 그대로다.
+
+
+### 배포 복구 최종 상태 (2026-10-04)
+
+T116 DONE. Failed platform baseline의 CREATE idempotence를 보완하고 applied legacy SQL 원본/체크섬과 운영 ledger는 그대로 보존했다. 요청 runtime은 읽기 전용 스키마 준비 검사로 전환했다. 자동 테스트 239/239 및 Drizzle/check/build PASS; 로컬 4P/7P HTTP 전체 게임 재실행 PASS. 동일 공개 Site **버전 3 SUCCEEDED**, 소스 c6587af110ef5394f92a92cd7e4d621ffb5fbce6, https://bang-online-ko.rkdwoals159.chatgpt.site . 최종 receipt: outputs/review-2026-10-04/deployment-recovery-result.json. 이전 실패 상태는 과거 기록이며 최종 성공이 현재 상태다. 기존 95/97 및 D06/D18 NOT RUN, 운영 S09 NOT RUN은 유지한다.

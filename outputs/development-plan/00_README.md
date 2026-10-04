@@ -148,3 +148,8 @@ T106의 로컬 Sites S01–S08 실행 증거를 2026-09-29에 기록하고 루�
 T112/T113/T114/T115/T117/T118 코드 수정 및 로컬 검증 완료. 계약 20, 엔진 78, Sites 39, 웹 98개로 자동 테스트 235/235 PASS, 타입 검사와 Sites 빌드 PASS. 로컬 실제 Worker HTTP의 4인/7인 게임 종료·역할 공개·복귀 및 실제 브라우저의 시작·게임판·확대·새로고침·모바일/데스크톱 화면을 확인했다. 측정값과 범위는 [개선 결과 보고서](../review-2026-10-04/IMPLEMENTATION_REPORT.md)에 있다. 기존 97-case 95/97, D06/D18 NOT RUN과 운영 S09 NOT RUN을 유지한다.
 
 T116은 IN_PROGRESS: 동일 공개 Site 버전 2 게시가 기존 command_receipts 테이블 생성 충돌로 실패했다. 새 소스는 푸시/저장됐지만 운영 반영은 확인되지 않았다. 기존 SQL과 데이터는 보존했다. Sites 스킬의 적용 이력 불확실 시 중단 지시에 따라 플랫폼 마이그레이션 기록 정리가 선행되어야 한다. [배포 실패 근거](../review-2026-10-04/deployment-result.json)를 확인한다.
+
+
+### 배포 복구 최종 상태 (2026-10-04)
+
+T116 DONE. Failed platform baseline의 CREATE idempotence를 보완하고 applied legacy SQL 원본/체크섬과 운영 ledger는 그대로 보존했다. 요청 runtime은 읽기 전용 스키마 준비 검사로 전환했다. 자동 테스트 239/239 및 Drizzle/check/build PASS; 로컬 4P/7P HTTP 전체 게임 재실행 PASS. 동일 공개 Site **버전 3 SUCCEEDED**, 소스 c6587af110ef5394f92a92cd7e4d621ffb5fbce6, https://bang-online-ko.rkdwoals159.chatgpt.site . 최종 receipt: outputs/review-2026-10-04/deployment-recovery-result.json. 이전 실패 상태는 과거 기록이며 최종 성공이 현재 상태다. 기존 95/97 및 D06/D18 NOT RUN, 운영 S09 NOT RUN은 유지한다.

@@ -71,3 +71,10 @@
 사용자 요청으로 같은 Site의 배포 경로를 보완했다. 첫 CREATE에서 실패한 플랫폼 baseline만 IF NOT EXISTS로 수정했고, 논리 스키마와 Drizzle metadata는 변경하지 않았다. 기존 앱에서 적용한 SQL 원본은 db/legacy/0000_long_iron_man.sql에 정확한 바이트와 SHA-256을 보존했다. 기존 schema_migrations 행은 그대로 두며, Worker는 더 이상 스키마나 ledger를 변경하지 않고 준비 상태만 읽는다. 성공 배포 이후 이 baseline도 불변으로 취급한다.
 
 기존 데이터·checksum 유지, fresh platform DB, 읽기 전용 runtime, 누락 migration 뒤 retry를 검증한 추가 테스트 4/4 PASS. 전체 자동 검증은 계약 20 + 엔진 78 + Sites 43 + 웹 98 = 239/239 PASS, check/build 및 Drizzle metadata 검사 PASS. 재현 명령은 node scripts/verify-improvements.mjs. 게시 결과는 별도 최종 receipt로 확정한다.
+
+
+## 최종 운영 반영 — 성공
+
+2026-10-04 10:30:19 UTC, 동일 공개 Site의 버전 3 배포가 SUCCEEDED로 확정됐다. URL: https://bang-online-ko.rkdwoals159.chatgpt.site . 배포 소스 c6587af110ef5394f92a92cd7e4d621ffb5fbce6. 최종 native receipt는 deployment-recovery-result.json에 있다. 배포 후 읽기 전용 확인에서 기존 schema_migrations의 version 1/name/checksum/applied_at은 모두 기존 값 그대로였다. T116 DONE. 이전 배포 실패 기록은 감사 이력으로 보존한다.
+
+DB 준비 경로를 바꾼 뒤 로컬 실제 Worker HTTP 전체 대국을 다시 실행했다. 최신 full-flow-4.json은 35개 명령/13개 응답, full-flow-7.json은 77개 명령/39개 응답이며 둘 다 게임 종료·역할 공개·방장 복귀 PASS. 이 수치는 임의 셔플의 새 대국이며 이전 53/20 및 64/32 실행과 별도다. 운영 전체 브라우저 대국 S09 및 D06/D18은 여전히 NOT RUN이다.

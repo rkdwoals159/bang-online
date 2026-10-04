@@ -42,3 +42,8 @@ The same public Site version 2 was saved from pushed source 5e21250692e825e58cc0
 ## Platform baseline recovery
 
 The specifically failed initial platform CREATE SQL uses IF NOT EXISTS to adopt the legacy schema. The exact applied application SQL is preserved in db/legacy with its original SHA-256. Request-time initialization now checks schema readiness only. No production table or existing application ledger is dropped or overwritten. Local preparation is explicit: build, then pnpm --filter @bang/site db:local before start. The local migration command always uses --local. Full regression: 239/239 PASS, including 4 new preservation/readiness tests; check/build and Drizzle check PASS. Final publish outcome is recorded separately.
+
+
+## Recovery publication — succeeded
+
+Version 3 deployed successfully on 2026-10-04T10:30:19Z from source c6587af110ef5394f92a92cd7e4d621ffb5fbce6 to https://bang-online-ko.rkdwoals159.chatgpt.site . The existing application ledger version/name/checksum/applied_at is unchanged after deployment. T116 DONE. See [final receipt](../../outputs/review-2026-10-04/deployment-recovery-result.json). Local 4P/7P HTTP complete games were rerun successfully after the read-only readiness change. Original D06/D18 and production full-browser S09 remain NOT RUN. Earlier failure notes document the superseded failed attempt.
