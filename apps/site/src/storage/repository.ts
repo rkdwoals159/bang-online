@@ -121,6 +121,7 @@ export interface CommandReceiptRecord extends CommandReceiptInput {
 export interface MatchCommitInput {
   matchId: string;
   expectedVersion: number;
+  expectedEventSeq: number;
   markerId: string;
   state: GameState;
   events: readonly MatchEventWrite[];
@@ -143,6 +144,11 @@ export type MatchRejectionReceiptResult =
 export type MatchCommitResult =
   | { status: "committed"; version: number; eventSeq: number; outboxEventId: string }
   | { status: "duplicate"; outcome: JsonValue };
+
+export type MatchCommandContext =
+  | { status: "not-member" }
+  | { status: "receipt"; receipt: CommandReceiptRecord }
+  | { status: "match"; match: MatchRecord };
 
 export interface OutboxRecord {
   cursor: number;
@@ -844,6 +850,47 @@ export class D1StorageRepository {
     return this.loadMatch(matchId, options, playerId);
   }
 
+  /**
+   * Load the command's authorization, idempotency receipt and current aggregate
+   * from one D1 snapshot. Receipt decoding intentionally precedes state decoding:
+   * a member's committed command remains replayable after a later snapshot needs
+   * recovery, while outsiders never get to inspect either result.
+   */
+  async loadMatchCommandContext(
+    matchId: string,
+    actorPlayerId: string,
+    commandId: string,
+    options: { supportedSchemaVersion?: number } = {},
+  ): Promise<MatchCommandContext> {
+    requiredText(matchId, "Match ID");
+    requiredText(actorPlayerId, "Match command actor");
+    requiredText(commandId, "Command ID");
+    const results = await this.db.batch([
+      this.db.prepare(`
+        SELECT id, room_id, status, version, event_seq, ruleset_version, state_schema_version, state_json,
+               created_at, started_at, updated_at, ended_at
+        FROM matches WHERE id = ?
+          AND EXISTS (SELECT 1 FROM match_players WHERE match_id = matches.id AND player_id = ?)
+      `).bind(matchId, actorPlayerId),
+      this.db.prepare(`
+        SELECT player_id, seat_index, alive, eliminated_at, connection_state
+        FROM match_players WHERE match_id = ?
+          AND EXISTS (SELECT 1 FROM match_players WHERE match_id = ? AND player_id = ?)
+        ORDER BY seat_index
+      `).bind(matchId, matchId, actorPlayerId),
+      this.db.prepare(`
+        SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at
+        FROM command_receipts WHERE actor_player_id = ? AND command_id = ?
+      `).bind(actorPlayerId, commandId),
+    ]);
+    const row = results[0]?.results?.[0] as MatchRow | undefined;
+    if (!row) return { status: "not-member" };
+    const receiptRow = results[2]?.results?.[0] as ReceiptRow | undefined;
+    if (receiptRow) return { status: "receipt", receipt: mapReceipt(receiptRow) };
+    const match = mapMatch(row, (results[1]?.results ?? []) as MatchPlayerRow[], options.supportedSchemaVersion);
+    return { status: "match", match };
+  }
+
   private async loadMatch(
     matchId: string,
     options: { supportedSchemaVersion?: number },
@@ -969,53 +1016,32 @@ export class D1StorageRepository {
     this.validateAggregateCommand(input.matchId, input.expectedVersion, input.markerId);
     requiredText(input.outboxEventId, "Outbox event ID");
     validateReceipt(input.receipt);
-    const existing = await this.findCommandReceipt(input.receipt.actorPlayerId, input.receipt.commandId);
-    if (existing) return receiptReplay(existing, input.receipt.actorPlayerId, input.receipt.commandId,
-      input.receipt.requestHash, { matchId: input.matchId, roomId: null });
-
-    const current = await this.db.prepare(`
-      SELECT version, event_seq, ruleset_version, state_schema_version
-      FROM matches WHERE id = ?
-    `).bind(input.matchId).first<MatchMetadataRow>();
-    if (!current) throw new MatchNotFoundError(input.matchId);
-    const currentVersion = safeInteger(current.version, "match version");
-    const currentEventSeq = safeInteger(current.event_seq, "match event sequence");
-    if (currentVersion !== input.expectedVersion) {
-      const late = await this.findCommandReceipt(input.receipt.actorPlayerId, input.receipt.commandId);
-      if (late) return receiptReplay(late, input.receipt.actorPlayerId, input.receipt.commandId,
-        input.receipt.requestHash, { matchId: input.matchId, roomId: null });
-      throw new StaleMatchVersionError(input.expectedVersion, currentVersion, input.state.version);
-    }
-
+    safeInteger(input.expectedEventSeq, "expected match event sequence");
     validateStateMetadata(input.state);
-    if (input.state.version !== input.expectedVersion + 1) {
-      throw new StaleMatchVersionError(input.expectedVersion, currentVersion, input.state.version);
+    if (!Number.isSafeInteger(input.expectedVersion + 1) || input.state.version !== input.expectedVersion + 1) {
+      throw new D1StorageInvariantError("A committed match state must advance its version exactly once.");
     }
-    if (input.state.rulesetVersion !== current.ruleset_version || input.state.schemaVersion !== current.state_schema_version) {
-      throw new D1StorageInvariantError("A match command cannot change its ruleset or state schema version.");
-    }
-    if (input.state.eventSeq < currentEventSeq) throw new D1StorageInvariantError("Match eventSeq cannot move backwards.");
-    if (input.events.length !== input.state.eventSeq - currentEventSeq) {
+    if (input.state.eventSeq < input.expectedEventSeq) throw new D1StorageInvariantError("Match eventSeq cannot move backwards.");
+    if (input.events.length !== input.state.eventSeq - input.expectedEventSeq) {
       throw new D1StorageInvariantError("Match event count must equal the eventSeq advance.");
     }
     input.events.forEach((event, index) => {
-      if (event.eventSeq !== currentEventSeq + index + 1 || event.version !== input.state.version) {
+      if (event.eventSeq !== input.expectedEventSeq + index + 1 || event.version !== input.state.version) {
         throw new D1StorageInvariantError(`Event '${event.eventId}' has a non-contiguous sequence or version.`);
       }
       requiredText(event.eventId, "Event ID");
       requiredText(event.type, "Event type");
       assertObjectJson(event.payload, "event payload");
     });
-    const member = await this.db.prepare(
-      "SELECT 1 AS found FROM match_players WHERE match_id = ? AND player_id = ?",
-    ).bind(input.matchId, input.receipt.actorPlayerId).first<{ found: number }>();
-    if (!member) throw new D1StorageInvariantError("Command actor is not a player in this match.");
 
     const stateJson = encodeJson(input.state, "match state");
     const statements: D1PreparedStatement[] = [this.db.prepare(`
       INSERT INTO commit_guards (marker_id, aggregate_id, expected_version)
-      SELECT ?, ?, ? FROM matches WHERE id = ? AND version = ?
-    `).bind(input.markerId, input.matchId, input.expectedVersion, input.matchId, input.expectedVersion),
+      SELECT ?, ?, ? FROM matches
+      WHERE id = ? AND version = ? AND event_seq = ? AND ruleset_version = ? AND state_schema_version = ?
+        AND EXISTS (SELECT 1 FROM match_players WHERE match_id = matches.id AND player_id = ?)
+    `).bind(input.markerId, input.matchId, input.expectedVersion, input.matchId, input.expectedVersion,
+      input.expectedEventSeq, input.state.rulesetVersion, input.state.schemaVersion, input.receipt.actorPlayerId),
     this.db.prepare(`
       UPDATE matches SET status = ?, version = ?, event_seq = ?, ruleset_version = ?,
         state_schema_version = ?, state_json = ?,
@@ -1054,10 +1080,24 @@ export class D1StorageRepository {
     const late = await this.findCommandReceipt(input.receipt.actorPlayerId, input.receipt.commandId);
     if (late) return receiptReplay(late, input.receipt.actorPlayerId, input.receipt.commandId,
       input.receipt.requestHash, { matchId: input.matchId, roomId: null });
-    const latest = await this.db.prepare("SELECT version FROM matches WHERE id = ?")
-      .bind(input.matchId).first<{ version: number | string }>();
+    const latest = await this.db.prepare(`
+      SELECT version, event_seq, ruleset_version, state_schema_version,
+        EXISTS (SELECT 1 FROM match_players WHERE match_id = matches.id AND player_id = ?) AS actor_is_member
+      FROM matches WHERE id = ?
+    `).bind(input.receipt.actorPlayerId, input.matchId).first<MatchMetadataRow & { actor_is_member: number | boolean }>();
     if (!latest) throw new MatchNotFoundError(input.matchId);
-    throw new StaleMatchVersionError(input.expectedVersion, safeInteger(latest.version, "match version"), input.state.version);
+    if (!bool(latest.actor_is_member)) throw new MatchNotFoundError(input.matchId);
+    const latestVersion = safeInteger(latest.version, "match version");
+    if (latestVersion !== input.expectedVersion) {
+      throw new StaleMatchVersionError(input.expectedVersion, latestVersion, input.state.version);
+    }
+    if (safeInteger(latest.event_seq, "match event sequence") !== input.expectedEventSeq) {
+      throw new D1StorageInvariantError("Match eventSeq changed without a version change.");
+    }
+    if (latest.ruleset_version !== input.state.rulesetVersion || latest.state_schema_version !== input.state.schemaVersion) {
+      throw new D1StorageInvariantError("A match command cannot change its ruleset or state schema version.");
+    }
+    throw new D1StorageInvariantError("Match commit guard failed although its version and metadata still match.");
   }
 
   async recordMatchRejection(input: MatchRejectionReceiptInput): Promise<MatchRejectionReceiptResult> {

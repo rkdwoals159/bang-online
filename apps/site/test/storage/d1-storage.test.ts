@@ -207,6 +207,7 @@ function makeCommit(matchId: string, state: GameState, options: {
   return {
     matchId,
     expectedVersion: state.version - 1,
+    expectedEventSeq: state.eventSeq - 1,
     markerId: options.markerId ?? `guard-${matchId}-${state.version}-${actorPlayerId}`,
     state,
     events: [{
@@ -338,6 +339,45 @@ test("stale expectedVersion performs no state, event, receipt, or outbox writes"
     assert.equal(await countRows(db, "commit_guards"), 0);
   } finally {
     await runtime.dispose();
+  }
+});
+
+test("match commit guards reject event-sequence, schema, and ruleset drift without writing", async () => {
+  for (const drift of ["event-sequence", "schema", "ruleset"] as const) {
+    const { runtime, db, repository } = await createIsolatedD1();
+    try {
+      await seedMatch(repository);
+      if (drift === "event-sequence") {
+        await db.prepare("UPDATE matches SET event_seq = 1 WHERE id = ?").bind("match-1").run();
+      } else if (drift === "schema") {
+        const unsupported = makeState({ schemaVersion: 2 });
+        await db.prepare("UPDATE matches SET state_schema_version = 2, state_json = ? WHERE id = ?")
+          .bind(JSON.stringify(unsupported), "match-1").run();
+      } else {
+        await db.prepare("UPDATE matches SET ruleset_version = ? WHERE id = ?")
+          .bind("rules-2026-02", "match-1").run();
+      }
+      const before = await db.prepare(`
+        SELECT status, version, event_seq, ruleset_version, state_schema_version, state_json, updated_at, ended_at
+        FROM matches WHERE id = ?
+      `).bind("match-1").first<Record<string, unknown>>();
+      const input = makeCommit("match-1", makeNextState(makeState()), {
+        commandId: `drift-${drift}`, requestHash: `drift-${drift}-hash`,
+        eventId: `drift-${drift}-event`, outboxEventId: `drift-${drift}-outbox`, markerId: `drift-${drift}-guard`,
+      });
+      await assert.rejects(repository.commitMatch(input), D1StorageInvariantError);
+      const after = await db.prepare(`
+        SELECT status, version, event_seq, ruleset_version, state_schema_version, state_json, updated_at, ended_at
+        FROM matches WHERE id = ?
+      `).bind("match-1").first<Record<string, unknown>>();
+      assert.deepEqual(after, before, `${drift} mismatch must not rewrite the authoritative row`);
+      assert.equal(await countRows(db, "match_events"), 0);
+      assert.equal(await countRows(db, "command_receipts"), 0);
+      assert.equal(await countRows(db, "outbox"), 0);
+      assert.equal(await countRows(db, "commit_guards"), 0);
+    } finally {
+      await runtime.dispose();
+    }
   }
 });
 

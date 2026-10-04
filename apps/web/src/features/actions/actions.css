@@ -157,7 +157,6 @@
 }
 
 .game-actions__card.is-selected,
-.game-actions__ability.is-selected,
 .game-actions__target.is-selected {
   border-color: #b28a36;
   background: #fff9e9;
@@ -187,8 +186,7 @@
   gap: 8px;
 }
 
-.game-actions__target,
-.game-actions__ability {
+.game-actions__target {
   min-height: 46px;
   padding: 10px 13px;
   border: 1px solid rgba(42, 76, 48, 0.18);
@@ -200,21 +198,49 @@
   text-align: left;
 }
 
-.game-actions__ability {
-  display: grid;
-  gap: 4px;
-  margin: 4px 0;
-}
-
-.game-actions__ability span {
-  color: #677469;
-  font-size: 12px;
-}
-
-.game-actions__target:disabled,
-.game-actions__ability:disabled {
+.game-actions__target:disabled {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+.game-actions__sid-hint,
+.game-actions__sid-feedback {
+  margin: 0;
+  color: #536455;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.game-actions__sid-costs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.game-actions__sid-costs label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: #2c4934;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.game-actions__sid-costs select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid rgba(42, 76, 48, 0.22);
+  border-radius: 9px;
+  background: #fffdf7;
+  color: #20382a;
+  font: inherit;
+  font-weight: 600;
+}
+
+.game-actions__sid-costs select:focus-visible {
+  outline: 3px solid #c69d43;
+  outline-offset: 2px;
 }
 
 .game-actions__selected-target {
@@ -232,6 +258,42 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 9px;
+}
+
+.game-actions__beer-confirmation {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(140, 104, 39, 0.3);
+  border-radius: 12px;
+  background: #fbf5e6;
+  color: #594b2c;
+  line-height: 1.5;
+}
+
+.game-actions__beer-confirmation p,
+.game-actions__beer-confirmation ul {
+  margin: 0;
+}
+
+.game-actions__beer-confirmation ul {
+  padding-inline-start: 1.25rem;
+}
+
+.game-actions__beer-confirmation label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #273d2e;
+  font-weight: 750;
+}
+
+.game-actions__beer-confirmation input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  margin: 0.15rem 0 0;
+  accent-color: #2b573b;
 }
 
 .game-actions__end-turn {
@@ -290,6 +352,10 @@
 
   .game-actions__controls {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .game-actions__sid-costs {
     grid-template-columns: 1fr;
   }
 

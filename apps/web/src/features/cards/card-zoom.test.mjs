@@ -106,6 +106,7 @@ test("hand zoom has a named dialog and stays separate from action selection", ()
   const markup = renderActions();
 
   assert.match(markup, /카드 상세 보기: 뱅!, A 스페이드/);
+  assert.match(markup, /loading="lazy" decoding="async"/);
   assert.match(markup, /카드 상세 보기: 맥주, 7 하트/);
   assert.match(markup, /<dialog[^>]+aria-modal="true"[^>]+aria-hidden="true"[^>]+aria-labelledby=/);
   assert.match(markup, /뱅! 카드 상세/);

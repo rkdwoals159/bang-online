@@ -1,0 +1,17 @@
+RUN contracts-check
+RESULT contracts-check: PASS
+RUN contracts-tests
+RESULT contracts-tests: PASS 20/20
+RUN catalog-check
+RESULT catalog-check: PASS
+RUN engine-check
+RESULT engine-check: PASS
+RUN catalog-tests
+RESULT catalog-tests: PASS 14/14
+RUN engine-all-tests
+RESULT engine-all-tests: PASS 365/365
+RUN server-check
+RESULT server-check: PASS
+RUN server-tests
+RESULT server-tests: PASS 91/91
+RUN site-tests

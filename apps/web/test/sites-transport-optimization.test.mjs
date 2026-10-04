@@ -4,6 +4,29 @@ import { sendAndRefreshAction } from "../src/features/actions/model.ts";
 import { sendAndRefreshResponse } from "../src/features/reactions/model.ts";
 import { SitesGameTransport } from "../src/transport/sites-client.ts";
 
+test("a late match sync from a previous guest is rejected after identity changes", async () => {
+  let currentGuest = guest;
+  let resolveOldSync;
+  const transport = new SitesGameTransport({
+    fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(currentGuest);
+      if (url.endsWith("/sync")) {
+        const request = JSON.parse(init.body);
+        return new Promise(resolve => { resolveOldSync = () => resolve(Response.json(matchSync(request))); });
+      }
+      return new Response(null, { status: 404 });
+    },
+  });
+  await transport.restoreGuestSession();
+  const oldRequest = transport.syncMatch("match-1");
+  await waitUntil(() => resolveOldSync, "old guest request did not start");
+  currentGuest = { ...guest, player: { ...guest.player, playerId: "player-2" } };
+  await transport.createGuestSession({ protocolVersion: 1, displayName: "New Guest" });
+  resolveOldSync();
+  await assert.rejects(oldRequest, { code: "INVALID_RESPONSE" });
+  assert.deepEqual(transport.getSnapshot().matches, {});
+});
+
 function roomView(roomId, { version = 1, activeMatchId = null, omitVersion = false } = {}) {
   return {
     roomId,
@@ -371,6 +394,92 @@ test("new guests use JSON create/join without an initial SSE dependency; version
   assert.equal(transport.getSnapshot().rooms["joined-room"].version, 5);
   assert.equal(syncRequests.length, 1, "create requires one full projection, while versioned JOIN ACK does not need a follow-up");
   assert.equal(sourceAttempts, 2, "unavailable SSE must not block either JSON write");
+  transport.disconnect();
+});
+
+test("a versioned room ACK fetches a newly active match without repeating the room sync", async () => {
+  const syncRequests = [];
+  const transport = new SitesGameTransport({
+    fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      if (url === "/api/rooms/room-1/commands") return Response.json(roomView("room-1", { version: 5, activeMatchId: "match-1" }));
+      if (url.endsWith("/sync")) {
+        const request = JSON.parse(init.body);
+        syncRequests.push({ url, request });
+        return url.startsWith("/api/matches/")
+          ? Response.json(matchSync(request, { version: 1, eventSeq: 1 }))
+          : Response.json(roomSync(request, { version: 5, activeMatchId: "match-1" }));
+      }
+      return new Response(null, { status: 404 });
+    },
+    eventSourceFactory: () => new FakeEventSource(),
+  });
+  transport.store.applyRoomSync(roomSync({ requestId: "prior", roomId: "room-1" }, { version: 4 }));
+  const result = await transport.sendRoomCommand({
+    protocolVersion: 1,
+    commandId: "00000000-0000-4000-8000-000000000107",
+    roomId: "room-1",
+    expectedVersion: 4,
+    type: "START_MATCH",
+    payload: {},
+  });
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.version === 1,
+    "new active match was not synced from the versioned room response");
+  assert.equal(result.activeMatchId, "match-1");
+  assert.deepEqual(syncRequests.map(({ url }) => url), ["/api/matches/match-1/sync"]);
+  transport.disconnect();
+});
+
+test("parallel guest restore and seat recovery share each Sites HTTP read and projection sync", async () => {
+  const calls = [];
+  const transport = new SitesGameTransport({
+    fetcher: async (url, init) => {
+      calls.push({ url, init });
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      if (url === "/api/guest-sessions/rooms") return Response.json([roomView("room-1")]);
+      if (url === "/api/rooms/room-1/sync") return Response.json(roomSync(JSON.parse(init.body)));
+      return new Response(null, { status: 404 });
+    },
+  });
+  const [guestA, guestB] = await Promise.all([transport.restoreGuestSession(), transport.restoreGuestSession()]);
+  assert.deepEqual(guestA, guest);
+  assert.deepEqual(guestB, guest);
+  const [roomsA, roomsB] = await Promise.all([transport.recoverAssignedSeats(), transport.recoverAssignedSeats()]);
+  assert.deepEqual(roomsA.map(({ roomId }) => roomId), ["room-1"]);
+  assert.deepEqual(roomsB.map(({ roomId }) => roomId), ["room-1"]);
+  assert.deepEqual(calls.map(({ url }) => url), [
+    "/api/guest-sessions", "/api/guest-sessions/rooms", "/api/rooms/room-1/sync",
+  ]);
+  transport.disconnect();
+});
+
+test("closing the last transient room watch releases its SSE reconnect resource", async () => {
+  const eventSources = [];
+  const transport = new SitesGameTransport({
+    fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      if (url.endsWith("/sync")) return Response.json(roomSync(JSON.parse(init.body)));
+      return new Response(null, { status: 404 });
+    },
+    eventSourceFactory: () => {
+      const source = new FakeEventSource();
+      eventSources.push(source);
+      return source;
+    },
+  });
+  await transport.restoreGuestSession();
+  const stopFirst = transport.watchRoom("transient-room");
+  const stopSecond = transport.watchRoom("transient-room");
+  transport.connect();
+  assert.equal(eventSources.length, 1);
+  stopFirst();
+  transport.disconnect();
+  transport.connect();
+  assert.equal(eventSources.length, 2, "the second watcher should keep the room subscribed");
+  stopSecond();
+  transport.disconnect();
+  transport.connect();
+  assert.equal(eventSources.length, 2, "no historical room ID should reopen SSE after its final watch ends");
   transport.disconnect();
 });
 

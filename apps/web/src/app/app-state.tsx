@@ -15,7 +15,7 @@ import type { GameTransport } from "../transport/types.js";
 import { useBrowserTransportState } from "../transport/use-transport.js";
 import type { BrowserTransportState } from "../transport/types.js";
 import type { RoomEntryCreateResult, RoomEntryTransport } from "../features/room-entry/model.js";
-import { navigateTo } from "./router.js";
+import { navigateTo, resolveRoute } from "./router.js";
 import { registerBangWebMcpTools, type BangWebMcpRuntime, type WebMcpDocument } from "./webmcp.js";
 
 export type AppStatus =
@@ -132,6 +132,28 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
       message: "접속 정보가 만료됐어요. 이름을 입력한 뒤 초대 코드로 다시 참가해 주세요.",
     }));
   }, [transportState.connection]);
+
+  const recoveredPlayerId = sessionRecovery.kind === "ready" ? sessionRecovery.guest?.player.playerId : undefined;
+  useEffect(() => {
+    if (!recoveredPlayerId) return;
+    let activeRoomId: string | null = null;
+    let stopWatching: (() => void) | null = null;
+    const updateRouteWatch = () => {
+      const route = resolveRoute(window.location.pathname);
+      const nextRoomId = "roomId" in route ? route.roomId : null;
+      if (nextRoomId === activeRoomId) return;
+      stopWatching?.();
+      stopWatching = null;
+      activeRoomId = nextRoomId;
+      if (nextRoomId) stopWatching = transport.watchRoom(nextRoomId);
+    };
+    updateRouteWatch();
+    window.addEventListener("popstate", updateRouteWatch);
+    return () => {
+      window.removeEventListener("popstate", updateRouteWatch);
+      stopWatching?.();
+    };
+  }, [recoveredPlayerId, transport]);
 
   const adoptGuestSession = useCallback(async (guest: GuestSessionResponse) => {
     // A newly issued identity has no assigned seats. Existing identities use

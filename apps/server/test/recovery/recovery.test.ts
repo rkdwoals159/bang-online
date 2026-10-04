@@ -59,8 +59,14 @@ function pendingState(
     interactionId: `interaction-${matchKind}`,
     kind,
     actorPlayerIds: [targetPlayerId],
-    options: [{ choice: matchKind === "discards" ? "ORDER_CARDS" : "PLAY_BANG", payload: { privateCard: `card-${matchKind}-private` } }],
-    context: { cursor: 1, marker: `private-${matchKind}-context` },
+    options: [{ choice: { duel: "YIELD", death: "ACCEPT_ELIMINATION", discards: "ORDER_CARDS", multi: "TAKE_HIT" }[matchKind], payload: {} }],
+    context: {
+      cursor: 1, marker: `private-${matchKind}-context`,
+      ...(matchKind === "discards" ? { discardOrder: {
+        allowedCardInstanceIds: [...state.seats.find((seat) => seat.public.playerId === targetPlayerId)!.private.handCardInstanceIds],
+        requiredCount: 1,
+      } } : {}),
+    },
     resumeFrameId: frameId,
     createdAt: FIXED_DATE.toISOString(),
   };

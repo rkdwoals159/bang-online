@@ -1,6 +1,6 @@
 import { BASE_PHYSICAL_CARDS } from "../../../catalog/src/cards/index.js";
 import type { LegalActionProposal } from "../../../contracts/src/protocol.js";
-import { applyMatchCommand, type ApplyMatchCommandContext, type EngineCommand } from "../commands/index.js";
+import { applyMatchCommand, validateAbility, validatePlayCard, type ApplyMatchCommandContext, type EngineCommand } from "../commands/index.js";
 import { createEffectCommandHandlers } from "../effects/runtime/index.js";
 import { createEffectRegistry } from "../effects/registry.js";
 import type { GameState } from "../state/types.js";
@@ -10,6 +10,14 @@ const CARD_TYPE_BY_DEFINITION_ID = new Map(
 );
 const TARGETED_CARD_TYPES = new Set(["bang", "duel", "jail", "panic", "cat_balou"]);
 const INTERACTION_TIMESTAMP = "2000-01-01T00:00:00.000Z";
+// Modules are pure. Reuse the immutable registrations; probe identities stay local.
+const PROBE_REGISTRY = createEffectRegistry();
+// These effects add no legality beyond T14's pure gate on an idle play turn.
+// Cards that draw, choose, or affect every player still use full effect probes.
+const PURE_GATE_CARD_TYPES = new Set([
+  "bang", "beer", "duel", "jail", "barrel", "dynamite", "mustang", "scope",
+  "volcanic", "schofield", "remington", "carabine", "winchester",
+]);
 
 type CandidateCommand = Extract<EngineCommand, { type: "PLAY_CARD" | "USE_ABILITY" | "END_TURN" }>;
 
@@ -25,7 +33,7 @@ function resolutionIsIdle(state: GameState): boolean {
 function makeProbeContext(): ApplyMatchCommandContext {
   let interactionIndex = 0;
   const handlers = createEffectCommandHandlers({
-    registry: createEffectRegistry(),
+    registry: PROBE_REGISTRY,
     nextInteractionIdentity: () => {
       interactionIndex += 1;
       return {
@@ -46,7 +54,9 @@ function makeProbeContext(): ApplyMatchCommandContext {
 
 /**
  * Builds complete normal-command proposals by submitting each deterministic
- * candidate to T14 with the base typed effect registry. Probe RNG and
+ * card candidate to T14 with the base typed effect registry. Sid costs use
+ * T14's pure validation: discarding two cards and capped healing require no
+ * speculative effect execution. Probe RNG and
  * interaction IDs are local throwaway inputs; they never alter the source
  * state or become part of a proposal.
  */
@@ -66,8 +76,12 @@ export function buildLegalActionCandidates(
   const proposals: LegalActionProposal[] = [];
 
   const proposeIfAccepted = (command: CandidateCommand): void => {
-    const result = applyMatchCommand(state, actorPlayerId, command, makeProbeContext());
-    if (!result.ok) return;
+    if (command.type === "PLAY_CARD") {
+      const legal = validatePlayCard(state, actorPlayerId, command);
+      if (!legal.ok) return;
+      if (!PURE_GATE_CARD_TYPES.has(legal.cardTypeId) &&
+          !applyMatchCommand(state, actorPlayerId, command, makeProbeContext()).ok) return;
+    } else if (!applyMatchCommand(state, actorPlayerId, command, makeProbeContext()).ok) return;
     switch (command.type) {
       case "PLAY_CARD":
         proposals.push({ type: "PLAY_CARD", payload: command.payload });
@@ -137,16 +151,33 @@ export function buildLegalActionCandidates(
   }
 
   if (actor.public.characterId === "sid_ketchum") {
-    const hand = actor.private.handCardInstanceIds;
+    // Validate each cost's ownership once instead of traversing all 80 card
+    // locations for every pair in a simulated effect. Malformed costs fail closed.
+    const locations = new Map<string, number>();
+    const record = (ids: readonly string[]) => ids.forEach((id) => locations.set(id, (locations.get(id) ?? 0) + 1));
+    record(state.zones.drawPileCardInstanceIds);
+    record(state.zones.discardPileCardInstanceIds);
+    record(state.zones.revealedPoolCardInstanceIds);
+    for (const seat of state.seats) {
+      record(seat.private.handCardInstanceIds);
+      record(seat.public.inPlayCardInstanceIds);
+    }
+    const hand = actor.private.handCardInstanceIds.filter((id) => {
+      const card = state.zones.cardsByInstanceId[id];
+      return locations.get(id) === 1 && card?.cardInstanceId === id && CARD_TYPE_BY_DEFINITION_ID.has(card.cardDefinitionId);
+    });
     for (let first = 0; first < hand.length; first += 1) {
       for (let second = first + 1; second < hand.length; second += 1) {
-        proposeIfAccepted({
+        const command: Extract<EngineCommand, { type: "USE_ABILITY" }> = {
           type: "USE_ABILITY",
           payload: {
             abilityId: "sid-ketchum",
             cardInstanceIds: [hand[first]!, hand[second]!],
           },
-        });
+        };
+        if (!validateAbility(state, actorPlayerId, command)) {
+          proposals.push({ type: command.type, payload: command.payload });
+        }
       }
     }
   }

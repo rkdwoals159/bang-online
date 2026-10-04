@@ -235,6 +235,32 @@ test("sync projection restores the same pending prompt and response choices", as
   assert.deepEqual(result.projection.snapshot.pendingInteraction.responseOptions, responseOptions);
 });
 
+test("reports a response acknowledgement before waiting for the authoritative projection", async () => {
+  const order = [];
+  let finishSync;
+  let markSyncStarted;
+  const syncStarted = new Promise((resolve) => { markSyncStarted = resolve; });
+  const pendingSync = new Promise((resolve) => { finishSync = resolve; });
+  const command = createRespondCommand("match-a", 31, "response-command-id", responseOptions[0]);
+  const operation = sendAndRefreshResponse({
+    async sendMatchCommand() {
+      order.push("send");
+      return { protocolVersion: 1, commandId: "response-command-id", status: "accepted", duplicate: false, aggregateVersion: 32, eventSeq: 46 };
+    },
+    syncMatch() {
+      order.push("sync");
+      markSyncStarted();
+      return pendingSync;
+    },
+  }, command, (acknowledgement) => order.push(`ack:${acknowledgement.status}`));
+
+  await syncStarted;
+  assert.deepEqual(order, ["send", "ack:accepted", "sync"]);
+  finishSync(syncResponse(snapshot(), 32));
+  const result = await operation;
+  assert.equal(result.projection.version, 32);
+});
+
 test("a multi-target response sync opens only the next responder's new prompt", async () => {
   const firstOption = { interactionId: "first-window", choice: "TAKE_HIT" };
   const firstSnapshot = snapshot({

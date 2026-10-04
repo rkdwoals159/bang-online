@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   PROTOCOL_VERSION,
@@ -12,6 +12,7 @@ import type { MatchStatusSync } from "./model.js";
 import {
   buildMatchStatusViewModel,
   isMatchActionInputEnabled,
+  MAX_PUBLIC_LOG_EVENTS,
   mergeMatchStatusProjection,
 } from "./model.js";
 import "./status.css";
@@ -183,16 +184,20 @@ export function StatusPanel({
   );
   const [returnBusy, setReturnBusy] = useState(false);
   const [returnFeedback, setReturnFeedback] = useState("");
+  const [logOpen, setLogOpen] = useState(false);
   const singleFlight = useRef(createSingleFlightRunner()).current;
 
   useEffect(() => {
     setAcceptedProjection((current) => mergeMatchStatusProjection(current, sync));
   }, [sync.version, sync.snapshot, sync.visibleEvents]);
 
-  const projection = sync.version >= acceptedProjection.version
-    ? mergeMatchStatusProjection(acceptedProjection, sync)
-    : acceptedProjection;
-  const view = buildMatchStatusViewModel(projection);
+  const projection = useMemo(
+    () => sync.version >= acceptedProjection.version
+      ? mergeMatchStatusProjection(acceptedProjection, sync)
+      : acceptedProjection,
+    [acceptedProjection, sync.version, sync.snapshot, sync.visibleEvents],
+  );
+  const view = useMemo(() => buildMatchStatusViewModel(projection), [projection]);
   const canReturn = canReturnToLobbyFromResult(
     matchId,
     projection.status,
@@ -318,11 +323,11 @@ export function StatusPanel({
         </section>
       ) : null}
 
-      <details className="match-status__log">
+      <details className="match-status__log" onToggle={(event) => setLogOpen(event.currentTarget.open)}>
         <summary className="match-status__log-summary" id="match-public-log-title">
-          공개 기록 <span>{view.publicLog.length}건</span>
+          최근 공개 기록 (최대 {MAX_PUBLIC_LOG_EVENTS}건) <span>{view.publicLog.length}건 표시</span>
         </summary>
-        {view.publicLog.length > 0 ? (
+        {logOpen && view.publicLog.length > 0 ? (
           <ol className="match-status__events" aria-label="공개 게임 이벤트">
             {view.publicLog.map((entry) => (
               <li key={entry.eventSeq} data-event-seq={entry.eventSeq}>
@@ -331,9 +336,9 @@ export function StatusPanel({
               </li>
             ))}
           </ol>
-        ) : (
+        ) : logOpen ? (
           <p className="match-status__empty-log">아직 표시할 공개 기록이 없어요.</p>
-        )}
+        ) : null}
       </details>
     </section>
   );

@@ -175,7 +175,8 @@ function cardLegalityInput(actorPlayerId: string, command: PlayCardCommand): Pla
   };
 }
 
-function validatePlayCard(
+/** Pure card legality/conversion validation shared with action projection. */
+export function validatePlayCard(
   state: GameState,
   actorPlayerId: string,
   command: PlayCardCommand,
@@ -229,7 +230,8 @@ function validatePlayCard(
   };
 }
 
-function validateAbility(
+/** Pure ability validation shared by execution and action projection. */
+export function validateAbility(
   state: GameState,
   actorPlayerId: string,
   command: UseAbilityCommand,

@@ -1,0 +1,117 @@
+{
+  "observedAt": "2026-10-04",
+  "scope": "Read-only pre-fix production Worker log sample, most recent 100 events within 180 minutes. Wall time excludes browser-to-edge latency; SSE duration is stream lifetime, not API action delay. Small sample, not P95.",
+  "routes": [
+    {
+      "route": "POST /api/matches/REDACTED/sync",
+      "samples": 41,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 2,
+      "medianWallMs": 223
+    },
+    {
+      "route": "POST /api/rooms/REDACTED/sync",
+      "samples": 31,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 1,
+      "medianWallMs": 201
+    },
+    {
+      "route": "GET /api/notifications/events",
+      "samples": 11,
+      "outcomes": [
+        "canceled"
+      ],
+      "medianCpuMs": 36,
+      "medianWallMs": 29893
+    },
+    {
+      "route": "POST /api/matches/REDACTED/commands",
+      "samples": 3,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 7,
+      "medianWallMs": 945
+    },
+    {
+      "route": "GET /api/guest-sessions/rooms",
+      "samples": 6,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 1,
+      "medianWallMs": 208
+    },
+    {
+      "route": "GET /api/guest-sessions",
+      "samples": 5,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 0,
+      "medianWallMs": 97
+    },
+    {
+      "route": "GET /rooms/REDACTED/role",
+      "samples": 1,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 6,
+      "medianWallMs": 8
+    },
+    {
+      "route": "GET /rooms/REDACTED/game",
+      "samples": 1,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 5,
+      "medianWallMs": 5
+    },
+    {
+      "route": "GET /rooms/REDACTED",
+      "samples": 1,
+      "outcomes": [
+        "ok"
+      ],
+      "medianCpuMs": 4,
+      "medianWallMs": 5
+    }
+  ],
+  "commands": [
+    {
+      "timestamp": 1791110247405,
+      "path": "/api/matches/REDACTED/commands",
+      "method": "POST",
+      "outcome": "ok",
+      "status": 200,
+      "cpuMs": 7,
+      "wallMs": 945
+    },
+    {
+      "timestamp": 1791110217641,
+      "path": "/api/matches/REDACTED/commands",
+      "method": "POST",
+      "outcome": "ok",
+      "status": 200,
+      "cpuMs": 5,
+      "wallMs": 955
+    },
+    {
+      "timestamp": 1791110164382,
+      "path": "/api/matches/REDACTED/commands",
+      "method": "POST",
+      "outcome": "ok",
+      "status": 200,
+      "cpuMs": 10,
+      "wallMs": 917
+    }
+  ],
+  "sensitiveFieldsExcluded": true
+}

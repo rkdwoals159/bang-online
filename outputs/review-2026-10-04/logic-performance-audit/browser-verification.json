@@ -1,0 +1,64 @@
+{
+  "observedAt": "2026-10-04",
+  "scope": "Local controlled D1 fixture and one in-app browser context; not production or independent multi-browser acceptance",
+  "checks": [
+    {
+      "name": "room readiness/start and role-to-game navigation",
+      "status": "PASS"
+    },
+    {
+      "name": "route change preserves mounted game root/tool registration",
+      "status": "PASS"
+    },
+    {
+      "name": "full-HP Beer unchecked confirmation disables submit",
+      "status": "PASS"
+    },
+    {
+      "name": "confirm enables; cancel and reselect clears confirmation",
+      "status": "PASS"
+    },
+    {
+      "name": "confirmed Beer discards one card without healing (HP 5/5)",
+      "status": "PASS"
+    },
+    {
+      "name": "Mustang hand-to-table use",
+      "status": "PASS"
+    },
+    {
+      "name": "Beer/Mustang use preserves screen root and tool registration; Worker logs show command and sync without session/document bootstrap",
+      "status": "PASS"
+    },
+    {
+      "name": "Sid two selectors show own rank/suit, disallow same card twice, select exact server proposal",
+      "status": "PASS"
+    },
+    {
+      "name": "390x844 viewport has no document overflow (clientWidth=scrollWidth=375)",
+      "status": "PASS"
+    },
+    {
+      "name": "closed public log has zero event DOM rows",
+      "status": "PASS"
+    },
+    {
+      "name": "browser error log",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "name": "Navigation Timing reload count",
+      "status": "NOT RUN",
+      "reason": "performance API unavailable in read-only browser evaluation scope"
+    },
+    {
+      "name": "full 4/7 independent browser game and production S09",
+      "status": "NOT RUN"
+    }
+  ],
+  "screenshots": [
+    "beer-confirmation.jpg",
+    "mobile-after.jpg"
+  ]
+}

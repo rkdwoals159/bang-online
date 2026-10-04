@@ -6,6 +6,7 @@ import { createServer } from "vite";
 import {
   buildMatchStatusViewModel,
   isMatchActionInputEnabled,
+  MAX_PUBLIC_LOG_EVENTS,
   mergeMatchStatusProjection,
   mergePublicEvents,
 } from "./model.ts";
@@ -107,6 +108,16 @@ test("merges public event batches in eventSeq order and deduplicates without fil
   assert.deepEqual(events.map(({ type }) => type), ["BANG_HIT", "BANG_ATTACKED", "BEER_USED", "DUEL_STARTED"]);
 });
 
+test("keeps only the latest public event window when the feed grows", () => {
+  const events = mergePublicEvents([], Array.from({ length: MAX_PUBLIC_LOG_EVENTS + 40 }, (_, index) =>
+    event(index + 1, "BANG_HIT"),
+  ));
+
+  assert.equal(events.length, MAX_PUBLIC_LOG_EVENTS);
+  assert.equal(events[0]?.eventSeq, 41);
+  assert.equal(events.at(-1)?.eventSeq, MAX_PUBLIC_LOG_EVENTS + 40);
+});
+
 test("ignores stale sync versions and preserves the newer turn, status, and event feed", () => {
   const current = mergeMatchStatusProjection(null, sync({ version: 12, currentPlayerId: "player-b", phase: "discard" }));
   const merged = mergeMatchStatusProjection(current, sync({
@@ -136,23 +147,25 @@ test("builds current turn text from the projection and closes input for every no
   }
 });
 
-test("renders public events in projected sequence, hides unknown events and never serializes payloads", () => {
+test("keeps public log closed by default and formats only allowlisted events without payloads", () => {
   const secret = "private-resolution-sentinel";
-  const html = renderToStaticMarkup(createElement(StatusPanel, {
-    sync: sync({ visibleEvents: [
-      event(9, "PRIVATE_HAND_DRAWN", { cardInstanceId: secret }),
-      event(6, "BANG_HIT", { targetPlayerId: "player-b", secret }),
-      event(4, "BANG_ATTACKED", { actorPlayerId: "player-a", targetPlayerId: "player-b" }),
-      event(6, "BANG_MISSED", { targetPlayerId: "player-b" }),
-    ] }),
-  }));
+  const syncProjection = sync({ visibleEvents: [
+    event(9, "PRIVATE_HAND_DRAWN", { cardInstanceId: secret }),
+    event(6, "BANG_HIT", { actorPlayerId: "player-a", targetPlayerId: "player-b", secret }),
+    event(4, "BANG_ATTACKED", { actorPlayerId: "player-a", targetPlayerId: "player-b" }),
+    event(6, "BANG_MISSED", { targetPlayerId: "player-b" }),
+  ] });
+  const view = buildMatchStatusViewModel(mergeMatchStatusProjection(null, syncProjection));
+  const html = renderToStaticMarkup(createElement(StatusPanel, { sync: syncProjection }));
 
-  assert.ok(html.indexOf('data-event-seq="4"') < html.indexOf('data-event-seq="6"'));
-  assert.equal((html.match(/data-event-seq="6"/g) ?? []).length, 1);
+  assert.deepEqual(view.publicLog.map(({ eventSeq }) => eventSeq), [4, 6]);
+  assert.match(view.publicLog[0].message, /초원 별 님이 바람 님을 뱅!으로 공격해요\./);
+  assert.equal(view.publicLog[1].message, "초원 별 님의 뱅!이 바람 님에게 적중했어요.");
+  assert.match(html, /최근 공개 기록 \(최대 100건\)/);
+  assert.doesNotMatch(html, /data-event-seq=|뱅!으로 공격해요\.|private-resolution-sentinel/);
   assert.match(html, /현재 차례/);
   assert.match(html, /초원 별/);
   assert.match(html, /카드 사용/);
-  assert.match(html, /초원 별 님이 바람 님을 뱅!으로 공격해요\./);
   assert.match(html, /<details class="match-status__log">/);
   assert.doesNotMatch(html, /<details class="match-status__log" open=/);
   assert.doesNotMatch(html, /PRIVATE_HAND_DRAWN|private-resolution-sentinel|player-a|cardInstanceId|secret/);

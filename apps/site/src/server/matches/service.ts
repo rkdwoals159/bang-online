@@ -195,13 +195,6 @@ async function loadSupportedMatch(repository: D1StorageRepository, matchId: stri
   return match;
 }
 
-async function isMatchMember(db: D1DatabaseLike, matchId: string, playerId: string): Promise<boolean> {
-  const row = await db.prepare(`
-    SELECT 1 AS found FROM match_players WHERE match_id = ? AND player_id = ?
-  `).bind(matchId, playerId).first<{ found: number }>();
-  return row !== null;
-}
-
 type PreparedEngineContext = ApplyMatchCommandContext & {
   continueTurnPhases: (state: GameState) => { state: GameState; events: readonly EffectEventDraft[] };
 };
@@ -309,29 +302,34 @@ export class D1MatchService {
     if (!parsed.ok) return commandId ? rejected(commandId, "BAD_REQUEST") : null;
     const command = parsed.value;
     const requestHash = await matchCommandRequestHash(command, this.options.crypto);
-
-    if (!await isMatchMember(this.db, command.matchId, actorPlayerId)) {
-      return rejected(command.commandId, "NOT_A_PLAYER");
-    }
-
-    const prior = await this.repository.findCommandReceipt(actorPlayerId, command.commandId);
-    if (prior) return receiptAckOrReused(prior, command, requestHash);
-
-    let match: MatchRecord | null;
+    let match: MatchRecord;
     try {
-      match = await loadSupportedMatch(this.repository, command.matchId);
+      const context = await this.repository.loadMatchCommandContext(
+        command.matchId,
+        actorPlayerId,
+        command.commandId,
+        { supportedSchemaVersion: SUPPORTED_MATCH_SCHEMA_VERSION },
+      );
+      if (context.status === "not-member") return rejected(command.commandId, "NOT_A_PLAYER");
+      if (context.status === "receipt") return receiptAckOrReused(context.receipt, command, requestHash);
+      match = context.match;
+      if (match.rulesetVersion !== BASE_DECK_RULESET_VERSION) {
+        throw new UnsupportedMatchStateError(match.state.schemaVersion, match.rulesetVersion);
+      }
     } catch (error) {
       if (error instanceof UnsupportedMatchStateError) return rejected(command.commandId, "RECOVERY_REQUIRED");
       throw error;
     }
-    if (!match || !actorHasSeat(match, actorPlayerId)) return rejected(command.commandId, "NOT_A_PLAYER");
+    if (!actorHasSeat(match, actorPlayerId)) return rejected(command.commandId, "NOT_A_PLAYER");
     if (match.state.version !== match.version || match.state.eventSeq !== match.eventSeq) {
       throw new D1StorageInvariantError("Stored match row metadata does not match its authoritative snapshot.");
     }
 
     for (let attempt = 0; attempt < MAX_REJECTION_REVALIDATIONS; attempt += 1) {
-      const prior = await this.repository.findCommandReceipt(actorPlayerId, command.commandId);
-      if (prior) return receiptAckOrReused(prior, command, requestHash);
+      if (attempt > 0) {
+        const prior = await this.repository.findCommandReceipt(actorPlayerId, command.commandId);
+        if (prior) return receiptAckOrReused(prior, command, requestHash);
+      }
 
       if (match.version !== command.expectedVersion) {
         const saved = await saveRejection(
@@ -387,6 +385,7 @@ export class D1MatchService {
         const commit: MatchCommitInput = {
           matchId: command.matchId,
           expectedVersion: command.expectedVersion,
+          expectedEventSeq: match.eventSeq,
           markerId: opaqueId("commit", this.options.crypto),
           state: nextState,
           events,

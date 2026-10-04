@@ -9,6 +9,8 @@ import { createEffectCommandHandlers } from "../../src/effects/runtime/index.ts"
 import { createEffectRegistry } from "../../src/effects/registry.ts";
 import { initializeGame, type SetupPlayer } from "../../src/setup/initialize.ts";
 import type { GameState } from "../../src/state/types.ts";
+import { buildReferenceActionCandidates } from "./reference-probe.ts";
+import { characters } from "../../../catalog/src/characters/index.ts";
 
 function fixedRandom() {
   return { nextFloat: () => 0.5 };
@@ -167,4 +169,81 @@ test("Sid card-pair actions are complete and no actions are proposed outside an 
     resolution: { ...state.resolution, continuations: [{ frameId: "f", kind: "pending", sourcePlayerId: null, sourceCardInstanceId: null, payload: {} }] },
   }, "player-1"), []);
   assertFullDeckInvariant(state);
+});
+
+test("optimized action projection exactly matches full effect probes across all characters and 4–7 seats", () => {
+  for (const capacity of [4, 5, 6, 7]) {
+    for (const character of characters) {
+      const state = initializeGame({
+        players: Array.from({ length: capacity }, (_, index) => ({ playerId: `p${index}`, displayName: `P${index}` })),
+        random: fixedRandom(),
+      });
+      const actor = state.seats[0]!;
+      actor.public.characterId = character.id;
+      state.turn.currentPlayerId = actor.public.playerId;
+      state.turn.phase = "play";
+      // Every physical type is represented. The other seats retain their hands.
+      const hand = new Set(actor.private.handCardInstanceIds);
+      for (const definition of BASE_PHYSICAL_CARDS) {
+        if ([...hand].some((id) => state.zones.cardsByInstanceId[id]?.cardDefinitionId === definition.definitionId)) continue;
+        const instance = Object.values(state.zones.cardsByInstanceId).find((card) => card.cardDefinitionId === definition.definitionId)!;
+        if (!state.zones.drawPileCardInstanceIds.includes(instance.cardInstanceId)) continue;
+        actor.private.handCardInstanceIds.push(instance.cardInstanceId);
+        state.zones.drawPileCardInstanceIds = state.zones.drawPileCardInstanceIds.filter((id) => id !== instance.cardInstanceId);
+        hand.add(instance.cardInstanceId);
+      }
+      const before = structuredClone(state);
+      assert.deepEqual(buildLegalActionCandidates(state, actor.public.playerId), buildReferenceActionCandidates(state, actor.public.playerId), `${capacity} players: ${character.id}`);
+      assert.deepEqual(state, before);
+    }
+  }
+});
+
+test("Sid projection never proposes a duplicate or multiply located cost card", () => {
+  const state = makeState();
+  state.seats[0]!.public.characterId = "sid_ketchum";
+  const first = state.seats[0]!.private.handCardInstanceIds[0]!;
+  state.zones.discardPileCardInstanceIds.push(first);
+  assert.ok(buildLegalActionCandidates(state, "player-1").filter((action) => action.type === "USE_ABILITY")
+    .every((action) => action.type === "USE_ABILITY" && !action.payload.cardInstanceIds.includes(first)));
+});
+
+test("pure gates match effect probes with equipment, BANG quota, healing and eliminated seats", () => {
+  for (const scenario of ["equipment", "quota", "volcanic", "willy", "conversion-quota", "two-survivors", "damaged"]) {
+    const state = makeState();
+    emptyActorHand(state);
+    for (const type of ["bang", "missed", "beer", "duel", "jail", "barrel", "dynamite", "scope", "mustang", "winchester"]) {
+      moveCardToHand(state, type, "player-1");
+    }
+    const equip = (type: string, player: string) => {
+      const id = moveCardToHand(state, type, player);
+      const seat = state.seats.find((seat) => seat.public.playerId === player)!;
+      seat.private.handCardInstanceIds = seat.private.handCardInstanceIds.filter((cardId) => cardId !== id);
+      seat.public.inPlayCardInstanceIds.push(id);
+    };
+    if (scenario === "equipment") {
+      for (const type of ["barrel", "dynamite", "scope", "mustang", "winchester"]) equip(type, "player-1");
+      equip("mustang", "player-2");
+      equip("jail", "player-3");
+    }
+    if (["quota", "volcanic", "willy", "conversion-quota"].includes(scenario)) state.turn.bangCardPlaysThisTurn = 1;
+    if (scenario === "volcanic") equip("volcanic", "player-1");
+    if (scenario === "willy") state.seats[0]!.public.characterId = "willy_the_kid";
+    if (scenario === "conversion-quota") state.seats[0]!.public.characterId = "calamity_janet";
+    if (scenario === "damaged") state.seats[0]!.public.hp -= 1;
+    if (scenario === "two-survivors") {
+      for (const seat of state.seats.slice(2)) {
+        seat.public.eliminated = true;
+        seat.public.hp = 0;
+        state.zones.discardPileCardInstanceIds.push(...seat.private.handCardInstanceIds);
+        seat.private.handCardInstanceIds = [];
+      }
+    }
+    const before = structuredClone(state);
+    const proposals = buildLegalActionCandidates(state, "player-1");
+    assert.deepEqual(proposals, buildReferenceActionCandidates(state, "player-1"), scenario);
+    assertEveryCandidatePassesT14(state, proposals);
+    assert.deepEqual(state, before);
+    assertFullDeckInvariant(state);
+  }
 });

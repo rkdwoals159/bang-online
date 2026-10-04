@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CommandAck,
   MatchCommand,
@@ -9,8 +9,10 @@ import { PlayingCardFace, PlayingCardZoomButton } from "../cards/CardFaces.js";
 import {
   cardName,
   createActionCommand,
+  findSidAbilityProposalIndex,
   getCardProposalIndexes,
   getTargetOptions,
+  noHealBeerReasons,
   projectionFromSync,
   sendAndRefreshAction,
   type ActionsProjection,
@@ -33,8 +35,19 @@ export interface ActionsPanelProps {
 }
 
 type ActionSelection =
-  | { readonly matchId: string; readonly version: number; readonly kind: "card"; readonly cardInstanceId: string; readonly proposalIndex: number | null }
-  | { readonly matchId: string; readonly version: number; readonly kind: "ability"; readonly proposalIndex: number };
+  | { readonly matchId: string; readonly version: number; readonly kind: "card"; readonly cardInstanceId: string; readonly proposalIndex: number | null };
+type NoHealBeerConfirmation = {
+  readonly matchId: string;
+  readonly version: number;
+  readonly cardInstanceId: string;
+  readonly proposalIndex: number;
+};
+type SidAbilitySelection = {
+  readonly matchId: string;
+  readonly version: number;
+  readonly firstCardInstanceId: string | null;
+  readonly secondCardInstanceId: string | null;
+};
 type CardSuit = MatchSnapshotView["publicTable"]["players"][number]["inPlay"][number]["suit"];
 
 const createDefaultCommandId = (): string => globalThis.crypto.randomUUID();
@@ -49,6 +62,8 @@ export function ActionsPanel({
 }: ActionsPanelProps) {
   const [syncedProjection, setSyncedProjection] = useState<(ActionsProjection & { readonly matchId: string }) | null>(null);
   const [selection, setSelection] = useState<ActionSelection | null>(null);
+  const [noHealBeerConfirmation, setNoHealBeerConfirmation] = useState<NoHealBeerConfirmation | null>(null);
+  const [sidAbilitySelection, setSidAbilitySelection] = useState<SidAbilitySelection | null>(null);
   const [pendingCommand, setPendingCommand] = useState<MatchCommand | null>(null);
   const [busy, setBusy] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(false);
@@ -60,6 +75,8 @@ export function ActionsPanel({
     currentMatchIdRef.current = matchId;
     setSyncedProjection(null);
     setSelection(null);
+    setNoHealBeerConfirmation(null);
+    setSidAbilitySelection(null);
     setPendingCommand(null);
     setBusy(false);
     setNeedsRefresh(false);
@@ -75,12 +92,39 @@ export function ActionsPanel({
   const visibleSelection = selection?.matchId === matchId && selection.version === projection.version ? selection : null;
   const selectionExpired = selection?.matchId === matchId && selection.version !== projection.version;
   const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
-  const selectedProposal = visibleSelection && visibleSelection.kind === "ability"
+  const selectedProposal = visibleSelection?.kind === "card" && visibleSelection.proposalIndex !== null
     ? actions[visibleSelection.proposalIndex]
-    : visibleSelection?.kind === "card" && visibleSelection.proposalIndex !== null
-      ? actions[visibleSelection.proposalIndex]
-      : undefined;
+    : undefined;
   const hand = currentSnapshot.selfPrivate?.hand ?? [];
+  const proposalIndexesByCardId = useMemo(
+    () => {
+      const indexesByCardId = new Map<string, number[]>();
+      actions.forEach((action, index) => {
+        if (action.type !== "PLAY_CARD") return;
+        const indexes = indexesByCardId.get(action.payload.cardInstanceId) ?? [];
+        indexes.push(index);
+        indexesByCardId.set(action.payload.cardInstanceId, indexes);
+      });
+      return indexesByCardId;
+    },
+    [actions],
+  );
+  const handById = useMemo(() => new Map(hand.map((card) => [card.cardInstanceId, card])), [hand]);
+  const handIndexById = useMemo(
+    () => new Map(hand.map((card, index) => [card.cardInstanceId, index])),
+    [hand],
+  );
+  const selectedBeerReasons = visibleSelection?.kind === "card" &&
+      selectedProposal?.type === "PLAY_CARD" &&
+      selectedProposal.payload.cardInstanceId === visibleSelection.cardInstanceId
+    ? noHealBeerReasons(currentSnapshot, visibleSelection.cardInstanceId)
+    : [];
+  const beerConfirmationMatches = visibleSelection?.kind === "card" &&
+    visibleSelection.proposalIndex !== null &&
+    noHealBeerConfirmation?.matchId === matchId &&
+    noHealBeerConfirmation?.version === projection.version &&
+    noHealBeerConfirmation?.cardInstanceId === visibleSelection.cardInstanceId &&
+    noHealBeerConfirmation?.proposalIndex === visibleSelection.proposalIndex;
   const activeViewer = currentSnapshot.viewer.mode === "active" && currentSnapshot.selfPrivate !== null;
   const turnOwner = currentSnapshot.publicTable.players.find(
     (player) => player.playerId === currentSnapshot.publicTable.turn.currentPlayerId,
@@ -114,9 +158,16 @@ export function ActionsPanel({
     setNotice("행동을 보내고 있어요.");
 
     try {
-      const result = await sendAndRefreshAction(transport, command);
+      const result = await sendAndRefreshAction(transport, command, (acknowledgement) => {
+        if (currentMatchIdRef.current !== command.matchId) return;
+        setNotice(acknowledgement.status === "rejected"
+          ? "요청을 확인했어요. 최신 게임 상태를 불러오고 있어요."
+          : "행동이 접수됐어요. 판을 업데이트하고 있어요.");
+      });
       if (currentMatchIdRef.current !== command.matchId) return;
       setSelection(null);
+      setNoHealBeerConfirmation(null);
+      setSidAbilitySelection(null);
       setPendingCommand(null);
 
       if (result.projection) {
@@ -159,6 +210,17 @@ export function ActionsPanel({
     if (!canAct) return;
     const proposal = actions[proposalIndex];
     if (!proposal) return;
+    if (proposal.type === "PLAY_CARD" &&
+        noHealBeerReasons(currentSnapshot, proposal.payload.cardInstanceId).length > 0) {
+      const confirmed = visibleSelection?.kind === "card" &&
+        visibleSelection.proposalIndex === proposalIndex &&
+        visibleSelection.cardInstanceId === proposal.payload.cardInstanceId &&
+        noHealBeerConfirmation?.matchId === matchId &&
+        noHealBeerConfirmation?.version === projection.version &&
+        noHealBeerConfirmation?.cardInstanceId === visibleSelection.cardInstanceId &&
+        noHealBeerConfirmation?.proposalIndex === proposalIndex;
+      if (!confirmed) return;
+    }
     const command = createActionCommand(
       matchId,
       projection.version,
@@ -170,6 +232,8 @@ export function ActionsPanel({
 
   function chooseCard(cardInstanceId: string): void {
     if (!canAct) return;
+    setNoHealBeerConfirmation(null);
+    setSidAbilitySelection(null);
     const indexes = getCardProposalIndexes(actions, cardInstanceId);
     setSelection({
       version: projection.version,
@@ -185,23 +249,59 @@ export function ActionsPanel({
     if (visibleSelection?.kind === "card") {
       const validIndexes = getCardProposalIndexes(actions, visibleSelection.cardInstanceId);
       if (!validIndexes.includes(proposalIndex)) return;
+      setNoHealBeerConfirmation(null);
       setSelection({ ...visibleSelection, proposalIndex });
-      return;
-    }
-    const proposal = actions[proposalIndex];
-    if (proposal?.type === "USE_ABILITY") {
-      setSelection({ matchId, version: projection.version, kind: "ability", proposalIndex });
     }
   }
 
+  function chooseSidAbilityCard(which: "first" | "second", cardInstanceId: string | null): void {
+    if (!canAct) return;
+    const current = visibleSidAbilitySelection ?? {
+      matchId,
+      version: projection.version,
+      firstCardInstanceId: null,
+      secondCardInstanceId: null,
+    };
+    let firstCardInstanceId = which === "first" ? cardInstanceId : current.firstCardInstanceId;
+    let secondCardInstanceId = which === "second" ? cardInstanceId : current.secondCardInstanceId;
+    if (firstCardInstanceId && firstCardInstanceId === secondCardInstanceId) {
+      if (which === "first") secondCardInstanceId = null;
+      else firstCardInstanceId = null;
+    }
+    setSelection(null);
+    setNoHealBeerConfirmation(null);
+    setSidAbilitySelection({ matchId, version: projection.version, firstCardInstanceId, secondCardInstanceId });
+  }
+
   const activeCardIndexes = visibleSelection?.kind === "card"
-    ? getCardProposalIndexes(actions, visibleSelection.cardInstanceId)
+    ? proposalIndexesByCardId.get(visibleSelection.cardInstanceId) ?? []
     : [];
-  const activeTargetOptions = visibleSelection?.kind === "card"
-    ? getTargetOptions(currentSnapshot, actions, activeCardIndexes)
-    : [];
-  const endTurnIndexes = actions.flatMap((action, index) => action.type === "END_TURN" ? [index] : []);
-  const abilityIndexes = actions.flatMap((action, index) => action.type === "USE_ABILITY" ? [index] : []);
+  const activeTargetOptions = useMemo(
+    () => visibleSelection?.kind === "card"
+      ? getTargetOptions(currentSnapshot, actions, activeCardIndexes)
+      : [],
+    [currentSnapshot, actions, activeCardIndexes, visibleSelection?.kind, visibleSelection?.kind === "card" ? visibleSelection.cardInstanceId : null],
+  );
+  const endTurnIndexes = useMemo(
+    () => actions.flatMap((action, index) => action.type === "END_TURN" ? [index] : []),
+    [actions],
+  );
+  const abilityIndexes = useMemo(
+    () => actions.flatMap((action, index) => action.type === "USE_ABILITY" ? [index] : []),
+    [actions],
+  );
+  const visibleSidAbilitySelection = sidAbilitySelection?.matchId === matchId &&
+      sidAbilitySelection?.version === projection.version
+    ? sidAbilitySelection
+    : null;
+  const selectedSidAbilityProposalIndex = useMemo(
+    () => findSidAbilityProposalIndex(
+      actions,
+      visibleSidAbilitySelection?.firstCardInstanceId ?? null,
+      visibleSidAbilitySelection?.secondCardInstanceId ?? null,
+    ),
+    [actions, visibleSidAbilitySelection?.firstCardInstanceId, visibleSidAbilitySelection?.secondCardInstanceId],
+  );
 
   return (
     <section className="game-actions" aria-labelledby="game-actions-title">
@@ -283,7 +383,7 @@ export function ActionsPanel({
             {hand.length > 0 ? (
               <ul className="game-actions__cards" aria-label="내 손패에서 카드 선택">
                 {hand.map((card) => {
-                  const indexes = getCardProposalIndexes(actions, card.cardInstanceId);
+                  const indexes = proposalIndexesByCardId.get(card.cardInstanceId) ?? [];
                   const selected = visibleSelection?.kind === "card" && visibleSelection.cardInstanceId === card.cardInstanceId;
                   const isLegal = indexes.length > 0;
                   const canUseCard = isLegal && viewerIsTurnOwner && !pendingInteraction;
@@ -356,19 +456,46 @@ export function ActionsPanel({
                   {activeTargetOptions[0]?.label ?? "지금은 선택할 수 있는 행동이 없어요."}
                 </p>
               )}
+              {selectedBeerReasons.length > 0 ? (
+                <div className="game-actions__beer-confirmation">
+                  <p>맥주를 사용해도 생명력은 회복되지 않아요.</p>
+                  <ul>
+                    {selectedBeerReasons.map((reason) => <li key={reason}>{reason}</li>)}
+                  </ul>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={beerConfirmationMatches}
+                      disabled={!canAct}
+                      onChange={(event) => {
+                        if (!visibleSelection || visibleSelection.kind !== "card" || visibleSelection.proposalIndex === null) return;
+                        setNoHealBeerConfirmation(event.currentTarget.checked
+                          ? {
+                              matchId,
+                              version: projection.version,
+                              cardInstanceId: visibleSelection.cardInstanceId,
+                              proposalIndex: visibleSelection.proposalIndex,
+                            }
+                          : null);
+                      }}
+                    />
+                    회복 0을 확인하고 맥주를 사용합니다.
+                  </label>
+                </div>
+              ) : null}
               <div className="game-actions__controls">
-                <button className="game-actions__button game-actions__button--secondary" type="button" disabled={!canAct} onClick={() => setSelection(null)}>
+                <button className="game-actions__button game-actions__button--secondary" type="button" disabled={!canAct} onClick={() => { setSelection(null); setNoHealBeerConfirmation(null); }}>
                   취소
                 </button>
                 <button
                   className="game-actions__button game-actions__button--primary"
                   type="button"
-                  disabled={!canAct || !selectedProposal}
+                  disabled={!canAct || !selectedProposal || (selectedBeerReasons.length > 0 && !beerConfirmationMatches)}
                   onClick={() => {
                     if (visibleSelection.proposalIndex !== null) submitProposal(visibleSelection.proposalIndex);
                   }}
                 >
-                  선택한 행동 제출
+                  {selectedBeerReasons.length > 0 ? "확인하고 맥주 사용" : "선택한 행동 제출"}
                 </button>
               </div>
             </section>
@@ -376,37 +503,87 @@ export function ActionsPanel({
 
           {abilityIndexes.length > 0 && viewerIsTurnOwner && !pendingInteraction ? (
             <fieldset className="game-actions__abilities" disabled={!canAct}>
-              <legend>인물 능력</legend>
-              {abilityIndexes.map((index) => {
-                const action = actions[index];
-                if (!action || action.type !== "USE_ABILITY") return null;
-                const cards = action.payload.cardInstanceIds.map((id) => hand.find((card) => card.cardInstanceId === id));
-                const canShowCost = cards.every((card) => card !== undefined);
-                const isSelected = visibleSelection?.kind === "ability" && visibleSelection.proposalIndex === index;
-                return (
-                  <button
-                    className={`game-actions__ability${isSelected ? " is-selected" : ""}`}
-                    type="button"
-                    key={index}
-                    aria-pressed={isSelected}
-                    disabled={!canAct || !canShowCost}
-                    onClick={() => chooseProposal(index)}
+              <legend>시드 케첨 · 손패 카드 2장 사용</legend>
+              <p className="game-actions__sid-hint" id="sid-ability-cost-help">
+                서로 다른 손패 카드 2장을 골라 능력을 사용하세요.
+              </p>
+              <div className="game-actions__sid-costs">
+                <label>
+                  <span>첫 번째 비용 카드</span>
+                  <select
+                    aria-label="첫 번째 능력 비용 카드"
+                    aria-describedby="sid-ability-cost-help"
+                    value={visibleSidAbilitySelection?.firstCardInstanceId
+                      ? String(handIndexById.get(visibleSidAbilitySelection.firstCardInstanceId) ?? "")
+                      : ""}
+                    onChange={(event) => {
+                      const selectedIndex = event.currentTarget.value === "" ? undefined : Number(event.currentTarget.value);
+                      chooseSidAbilityCard("first", selectedIndex === undefined ? null : hand[selectedIndex]?.cardInstanceId ?? null);
+                    }}
                   >
-                    <strong>시드 케첨 · 손패 2장 버리기</strong>
-                    <span>{canShowCost ? cards.map((card) => `${cardName(card!.typeId)} ${card!.rank}`).join(" + ") : "필요한 카드 정보를 확인할 수 없어요."}</span>
-                  </button>
-                );
-              })}
-              {visibleSelection?.kind === "ability" ? (
-                <button
-                  className="game-actions__button game-actions__button--primary"
-                  type="button"
-                  disabled={!canAct || !selectedProposal}
-                  onClick={() => submitProposal(visibleSelection.proposalIndex)}
-                >
-                  선택한 능력 제출
-                </button>
-              ) : null}
+                    <option value="">카드 선택</option>
+                    {hand.map((card, index) => (
+                      <option
+                        key={card.cardInstanceId}
+                        value={index}
+                        disabled={card.cardInstanceId === visibleSidAbilitySelection?.secondCardInstanceId}
+                      >
+                        {cardName(card.typeId)} {card.rank} {suitName(card.suit)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>두 번째 비용 카드</span>
+                  <select
+                    aria-label="두 번째 능력 비용 카드"
+                    aria-describedby="sid-ability-cost-help"
+                    value={visibleSidAbilitySelection?.secondCardInstanceId
+                      ? String(handIndexById.get(visibleSidAbilitySelection.secondCardInstanceId) ?? "")
+                      : ""}
+                    onChange={(event) => {
+                      const selectedIndex = event.currentTarget.value === "" ? undefined : Number(event.currentTarget.value);
+                      chooseSidAbilityCard("second", selectedIndex === undefined ? null : hand[selectedIndex]?.cardInstanceId ?? null);
+                    }}
+                  >
+                    <option value="">카드 선택</option>
+                    {hand.map((card, index) => (
+                      <option
+                        key={card.cardInstanceId}
+                        value={index}
+                        disabled={card.cardInstanceId === visibleSidAbilitySelection?.firstCardInstanceId}
+                      >
+                        {cardName(card.typeId)} {card.rank} {suitName(card.suit)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {visibleSidAbilitySelection?.firstCardInstanceId && visibleSidAbilitySelection.secondCardInstanceId
+                ? selectedSidAbilityProposalIndex === null
+                  ? <p className="game-actions__sid-feedback" role="status">지금 사용할 수 없는 조합이에요. 다른 카드를 골라 주세요.</p>
+                  : (() => {
+                      const proposal = actions[selectedSidAbilityProposalIndex];
+                      const costCards = proposal?.type === "USE_ABILITY"
+                        ? proposal.payload.cardInstanceIds.map((id) => handById.get(id))
+                        : [];
+                      return costCards.length === 2 && costCards.every((card) => card !== undefined) ? (
+                        <p className="game-actions__sid-feedback" role="status">
+                          선택한 비용: {costCards.map((card) => `${cardName(card!.typeId)} ${card!.rank} ${suitName(card!.suit)}`).join(" + ")}
+                        </p>
+                      ) : <p className="game-actions__sid-feedback" role="status">선택한 카드 정보를 확인할 수 없어요.</p>;
+                    })()
+                : <p className="game-actions__sid-feedback" role="status">능력 비용으로 사용할 서로 다른 카드 두 장을 선택하세요.</p>}
+              <button
+                className="game-actions__button game-actions__button--primary"
+                type="button"
+                disabled={!canAct || selectedSidAbilityProposalIndex === null}
+                onClick={() => {
+                  if (selectedSidAbilityProposalIndex !== null) submitProposal(selectedSidAbilityProposalIndex);
+                }}
+              >
+                선택한 능력 제출
+              </button>
             </fieldset>
           ) : null}
 

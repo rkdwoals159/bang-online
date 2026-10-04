@@ -2,6 +2,47 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { BrowserGameTransport, BrowserTransportError } from "./client.ts";
 import { BrowserTransportStore } from "./state.ts";
+import { sendAndRefreshAction } from "../features/actions/model.ts";
+
+test("same guest restoration preserves cached projections", () => {
+  const store = new BrowserTransportStore();
+  store.setViewerPlayerId("player-1");
+  store.applyRoomSync(roomSync({ requestId: "r", roomId: "room-1" }));
+  store.applyMatchSync(matchSync({ requestId: "m", matchId: "match-1" }));
+  const before = store.getSnapshot();
+  store.setViewerPlayerId("player-1");
+  assert.equal(store.getSnapshot(), before);
+});
+
+test("expired session clears private projections and ignores late guest responses", () => {
+  const store = new BrowserTransportStore();
+  store.setViewerPlayerId("player-1");
+  const room = roomSync({ requestId: "r", roomId: "room-1" });
+  const match = matchSync({ requestId: "m", matchId: "match-1" });
+  store.applyRoomSync(room);
+  store.applyMatchSync(match);
+  store.setPendingCommandIds(["old-command"]);
+  store.setConnection("expired", false);
+  assert.deepEqual(store.getSnapshot().rooms, {});
+  assert.deepEqual(store.getSnapshot().matches, {});
+  assert.deepEqual(store.getSnapshot().pendingCommandIds, []);
+  assert.equal(store.applyRoomSync(room), false);
+  assert.equal(store.applyRoomCommand(room.room), false);
+  assert.equal(store.applyMatchSync(match), false);
+});
+
+test("changed guest identity cannot reuse previous viewer snapshots", () => {
+  const store = new BrowserTransportStore();
+  store.setViewerPlayerId("player-1");
+  const match = matchSync({ requestId: "m", matchId: "match-1" });
+  store.applyMatchSync(match);
+  store.setViewerPlayerId("player-2");
+  assert.deepEqual(store.getSnapshot().matches, {});
+  assert.equal(store.applyMatchSync(match), false);
+  const next = structuredClone(match);
+  next.snapshot.viewer.playerId = "player-2";
+  assert.equal(store.applyMatchSync(next), true);
+});
 
 function roomView(roomId, { version = 1, displayName = "Player One", activeMatchId = null } = {}) {
   return {
@@ -179,6 +220,206 @@ test("projection store rejects duplicate and out-of-order sync responses", () =>
   assert.equal(store.applyMatchSync(matchSync({ requestId: "match-3", matchId: "match-1" }, { version: 8, eventSeq: 8 })), false);
   assert.equal(store.getSnapshot().matches["match-1"].version, 7);
   assert.equal(store.getSnapshot().matches["match-1"].eventSeq, 9);
+});
+
+test("match projections retain only the newest 100 public events without moving the cursor backward", () => {
+  const store = new BrowserTransportStore();
+  const events = (from, to) => Array.from({ length: to - from + 1 }, (_, index) => {
+    const eventSeq = from + index;
+    return { eventSeq, type: "TURN_ENDED", occurredAt: "2026-10-04T00:00:00.000Z", payload: {} };
+  });
+  const full = matchSync({ requestId: "full", matchId: "match-1" }, { version: 150, eventSeq: 150 });
+  full.visibleEvents = events(1, 150);
+  store.applyMatchSync(full);
+  let projection = store.getSnapshot().matches["match-1"];
+  assert.equal(projection.visibleEvents.length, 100);
+  assert.equal(projection.visibleEvents[0].eventSeq, 51);
+  assert.equal(projection.visibleEvents.at(-1).eventSeq, 150);
+  assert.equal(projection.eventSeq, 150);
+
+  const delta = matchSync({ requestId: "delta", matchId: "match-1" }, { version: 155, eventSeq: 155 });
+  delta.requiresFullSnapshot = false;
+  delta.visibleEvents = events(151, 155);
+  store.applyMatchSync(delta);
+  projection = store.getSnapshot().matches["match-1"];
+  assert.equal(projection.visibleEvents.length, 100);
+  assert.equal(projection.visibleEvents[0].eventSeq, 56);
+  assert.equal(projection.visibleEvents.at(-1).eventSeq, 155);
+  assert.equal(projection.eventSeq, 155);
+});
+
+test("ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch", async () => {
+  const socket = new FakeSocket();
+  const syncRequests = [];
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "match:command") acknowledgement({
+      protocolVersion: 1, commandId: payload.commandId, status: "accepted", duplicate: false,
+      aggregateVersion: 2, eventSeq: 2,
+    });
+    if (event === "match:sync") syncRequests.push({ payload, acknowledgement });
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.connect();
+  const command = {
+    protocolVersion: 1,
+    commandId: "00000000-0000-4000-8000-000000000151",
+    matchId: "match-1",
+    expectedVersion: 1,
+    type: "END_TURN",
+    payload: {},
+  };
+  const refresh = sendAndRefreshAction(transport, command);
+  await waitUntil(() => syncRequests.length === 1, "accepted command did not start its authoritative sync");
+  assert.equal(countEmits(socket, "match:sync"), 1);
+  syncRequests[0].acknowledgement(matchSync(syncRequests[0].payload, { version: 2, eventSeq: 2 }));
+  const result = await refresh;
+  assert.equal(result.projection?.version, 2);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(countEmits(socket, "match:sync"), 1, "joining the ACK sync must not mark a second request dirty");
+
+  let resolveCoveredHint;
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "match:sync") {
+      syncRequests.push({ payload, acknowledgement });
+      if (syncRequests.length === 2) resolveCoveredHint = acknowledgement;
+    }
+  };
+  const secondSync = transport.syncMatch("match-1");
+  await waitUntil(() => syncRequests.length === 2, "second match sync did not start");
+  socket.fire("match:changed", { matchId: "match-1", version: 3, eventSeq: 3 });
+  resolveCoveredHint(matchSync(syncRequests[1].payload, { version: 3, eventSeq: 3 }));
+  await secondSync;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(countEmits(socket, "match:sync"), 2, "the sync response already covering an in-flight hint needs no follow-up");
+
+  let resolveFirst;
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event !== "match:sync") return;
+    syncRequests.push({ payload, acknowledgement });
+    if (syncRequests.length === 3) resolveFirst = acknowledgement;
+    else acknowledgement(matchSync(payload, { version: 5, eventSeq: 5 }));
+  };
+  const olderSync = transport.syncMatch("match-1");
+  await waitUntil(() => resolveFirst !== undefined, "third match sync did not start");
+  socket.fire("match:changed", { matchId: "match-1", version: 5, eventSeq: 5 });
+  resolveFirst(matchSync(syncRequests[2].payload, { version: 4, eventSeq: 4 }));
+  await olderSync;
+  await waitUntil(() => countEmits(socket, "match:sync") === 4, "a newer uncovered hint did not trigger one follow-up");
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.eventSeq === 5,
+    "follow-up projection did not finish");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(countEmits(socket, "match:sync"), 4, "one newer hint should create only one follow-up");
+});
+
+test("a versioned room command projection is applied and only a newly active match is fetched", async () => {
+  const socket = new FakeSocket();
+  const roomSyncs = [];
+  const matchSyncs = [];
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "room:command") {
+      acknowledgement({ ...roomView("room-1", { version: 9, activeMatchId: "match-1" }), version: 9 });
+    }
+    if (event === "room:sync") roomSyncs.push(payload);
+    if (event === "match:sync") {
+      matchSyncs.push(payload);
+      acknowledgement(matchSync(payload, { version: 1, eventSeq: 1 }));
+    }
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.connect();
+  const response = await transport.sendRoomCommand({
+    protocolVersion: 1,
+    commandId: "00000000-0000-4000-8000-000000000152",
+    roomId: "room-1",
+    expectedVersion: 8,
+    type: "START_MATCH",
+    payload: {},
+  });
+  assert.equal(response.version, 9);
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.version === 1,
+    "the new active match was not synchronized from its versioned room ACK");
+  assert.equal(transport.getSnapshot().rooms["room-1"].version, 9);
+  assert.equal(roomSyncs.length, 0, "versioned room ACK should avoid a redundant room request");
+  assert.equal(matchSyncs.length, 1);
+});
+
+test("parallel guest restore and assigned-seat recovery calls share their HTTP reads", async () => {
+  const socket = new FakeSocket();
+  const calls = [];
+  const transport = new BrowserGameTransport({
+    socketFactory: () => socket,
+    fetcher: async (url) => {
+      calls.push(url);
+      if (url === "/api/guest-sessions") return Response.json({
+        protocolVersion: 1, player: { playerId: "player-1", displayName: "Player One" },
+        sessionExpiresAt: "2026-10-01T00:00:00Z",
+      });
+      if (url === "/api/guest-sessions/rooms") return Response.json([roomView("room-1")]);
+      return new Response(null, { status: 404 });
+    },
+  });
+  const restores = [transport.restoreGuestSession(), transport.restoreGuestSession()];
+  assert.deepEqual(await Promise.all(restores), [await restores[0], await restores[0]]);
+  const recoveries = [transport.recoverAssignedSeats(), transport.recoverAssignedSeats()];
+  assert.deepEqual(await Promise.all(recoveries), [[roomView("room-1")], [roomView("room-1")]]);
+  assert.deepEqual(calls, ["/api/guest-sessions", "/api/guest-sessions/rooms"]);
+});
+
+test("a legacy room ACK during an older sync forces one fresh projection", async () => {
+  const socket = new FakeSocket();
+  const syncs = [];
+  let resolveFirst;
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "room:command") acknowledgement(roomView("room-1"));
+    if (event === "room:sync") {
+      syncs.push({ payload, acknowledgement });
+      if (syncs.length === 1) resolveFirst = acknowledgement;
+      else acknowledgement(roomSync(payload, { version: 2 }));
+    }
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.connect();
+  const older = transport.syncRoom("room-1");
+  await waitUntil(() => resolveFirst !== undefined, "initial room sync did not start");
+  await transport.sendRoomCommand({
+    protocolVersion: 1,
+    commandId: "00000000-0000-4000-8000-000000000153",
+    roomId: "room-1",
+    expectedVersion: 1,
+    type: "SET_READY",
+    payload: { ready: true },
+  });
+  resolveFirst(roomSync(syncs[0].payload, { version: 1 }));
+  await older;
+  await waitUntil(() => transport.getSnapshot().rooms["room-1"]?.version === 2,
+    "the post-command projection did not supersede the older in-flight response");
+  assert.equal(syncs.length, 2, "legacy ACK mutation should cause one post-mutation sync");
+});
+
+test("room-derived match watches release together and old resources are not synced after reconnect", async () => {
+  const socket = new FakeSocket();
+  const syncCounts = { room: 0, match: 0 };
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "room:sync") {
+      syncCounts.room += 1;
+      acknowledgement(roomSync(payload, { version: 1, activeMatchId: "match-1" }));
+    }
+    if (event === "match:sync") {
+      syncCounts.match += 1;
+      acknowledgement(matchSync(payload, { version: 1, eventSeq: 1 }));
+    }
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  const stopWatching = transport.watchRoom("room-1");
+  transport.connect();
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.eventSeq === 1,
+    "active match was not tracked through its room projection");
+  const beforeRelease = { ...syncCounts };
+  stopWatching();
+  socket.disconnect();
+  socket.connect();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(syncCounts, beforeRelease, "a route that released its only watch must leave no reconnect targets");
 });
 
 test("cookie restore uses the T81 endpoints and schedules authoritative sync", async () => {

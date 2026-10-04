@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-04T11:32:52.804Z",
+  "scope": "Built local Wrangler Worker HTTP headers; no production request",
+  "status": "PASS",
+  "records": [
+    {
+      "path": "/assets/cards/playing/01_bang.png",
+      "status": 200,
+      "cacheControl": "public, max-age=3600, must-revalidate"
+    },
+    {
+      "path": "/_next/static/chunks/app-BCNZVsbv.js",
+      "status": 200,
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "path": "/api/guest-sessions",
+      "status": 204,
+      "cacheControl": "no-store"
+    }
+  ]
+}

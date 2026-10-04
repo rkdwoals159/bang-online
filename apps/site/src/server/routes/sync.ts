@@ -192,7 +192,9 @@ export async function handleSyncRoute(
     }
 
     const events = afterEventSeq <= match.eventSeq
-      ? await repository.listMatchEvents(match.id, afterEventSeq)
+      // Reconnecting clients need the recent tail, rather than the first page
+      // of old history. A truncated cursor is explicitly a full snapshot below.
+      ? await repository.listMatchEvents(match.id, Math.max(afterEventSeq, match.eventSeq - 100))
       : [];
     const replayable = syncProjectionInternals.cursorIsReplayable(afterEventSeq, match.eventSeq, events);
     const visibleEvents = events.flatMap((event) => {

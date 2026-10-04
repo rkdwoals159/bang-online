@@ -1,0 +1,187 @@
+{
+  "observedAt": "2026-10-04T10:58:43.980Z",
+  "status": "RUNNING",
+  "records": [
+    {
+      "label": "contracts-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/contracts/tsconfig.json"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 457,
+      "outputTail": ""
+    },
+    {
+      "label": "contracts-tests",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\test\\performance-presence.test.mjs",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\test\\protocol.test.mjs",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\test\\protocol.type-test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\test\\room-version-presence.test.mjs"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 627,
+      "tests": 20,
+      "passed": 20,
+      "failed": 0,
+      "outputTail": "---\n  duration_ms: 2.2289\n  type: 'test'\n  ...\n# Subtest: strictly parses room:preview requests and keeps preview replies free of invite/session secrets\nok 9 - strictly parses room:preview requests and keeps preview replies free of invite/session secrets\n  ---\n  duration_ms: 6.1234\n  type: 'test'\n  ...\n# Subtest: strictly parses room:sync requests with exact keys and non-negative versions\nok 10 - strictly parses room:sync requests with exact keys and non-negative versions\n  ---\n  duration_ms: 1.4098\n  type: 'test'\n  ...\n# Subtest: strictly parses RoomView and room:sync responses with active-match routing and consistent viewer\nok 11 - strictly parses RoomView and room:sync responses with active-match routing and consistent viewer\n  ---\n  duration_ms: 2.8485\n  type: 'test'\n  ...\n# Subtest: strictly parses match:sync requests and shares non-disclosing sync rejection DTOs\nok 12 - strictly parses match:sync requests and shares non-disclosing sync rejection DTOs\n  ---\n  duration_ms: 3.2047\n  type: 'test'\n  ...\n# Subtest: strictly parses accepted/rejected command acknowledgements and excludes extra fields\nok 13 - strictly parses accepted/rejected command acknowledgements and excludes extra fields\n  ---\n  duration_ms: 1.7103\n  type: 'test'\n  ...\n# Subtest: strictly parses viewer-scoped match:sync responses and ordered visible event cursors\nok 14 - strictly parses viewer-scoped match:sync responses and ordered visible event cursors\n  ---\n  duration_ms: 4.2256\n  type: 'test'\n  ...\n# Subtest: legal action proposals contain only canonical command types and payloads\nok 15 - legal action proposals contain only canonical command types and payloads\n  ---\n  duration_ms: 2.0188\n  type: 'test'\n  ...\n# Subtest: pending response options are exclusive to the current responder and progress contains no choices\nok 16 - pending response options are exclusive to the current responder and progress contains no choices\n  ---\n  duration_ms: 3.5275\n  type: 'test'\n  ...\n# Subtest: winner summary is public only for completed snapshots and rejects unrelated state\nok 17 - winner summary is public only for completed snapshots and rejects unrelated state\n  ---\n  duration_ms: 1.2751\n  type: 'test'\n  ...\n# Subtest: C:\\\\Users\\\\user\\\\Documents\\\\Codex\\\\2026-09-27\\\\new-chat-2\\\\packages\\\\contracts\\\\test\\\\protocol.type-test.ts\nok 3 - C:\\\\Users\\\\user\\\\Documents\\\\Codex\\\\2026-09-27\\\\new-chat-2\\\\packages\\\\contracts\\\\test\\\\protocol.type-test.ts\n  ---\n  duration_ms: 235.5409\n  type: 'test'\n  ...\n# Subtest: room commands can carry a canonical version and allowlisted member presence\nok 19 - room commands can carry a canonical version and allowlisted member presence\n  ---\n  duration_ms: 1.7507\n  type: 'test'\n  ...\n# Subtest: room envelope and nested canonical version cannot disagree\nok 20 - room envelope and nested canonical version cannot disagree\n  ---\n  duration_ms: 0.9458\n  type: 'test'\n  ...\n1..20\n# tests 20\n# suites 0\n# pass 20\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 484.1116\n"
+    },
+    {
+      "label": "catalog-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/catalog/tsconfig.json"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 254,
+      "outputTail": ""
+    },
+    {
+      "label": "engine-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "packages/engine/tsconfig.json"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 520,
+      "outputTail": ""
+    },
+    {
+      "label": "catalog-tests",
+      "args": [
+        "--import",
+        "file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/node_modules/tsx/dist/loader.mjs",
+        "--test",
+        "--test-concurrency=1",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\catalog\\test\\cards.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\catalog\\test\\roster-assets.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\catalog\\test\\schema.test.ts"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 1513,
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
+      "outputTail": "TAP version 13\n# Subtest: prepared JSON and CSV agree on all 80 physical card identifiers, ranks, and suits\nok 1 - prepared JSON and CSV agree on all 80 physical card identifiers, ranks, and suits\n  ---\n  duration_ms: 4.1298\n  type: 'test'\n  ...\n# Subtest: imports all 22 prepared card definitions and the exact 80-card JSON deck\nok 2 - imports all 22 prepared card definitions and the exact 80-card JSON deck\n  ---\n  duration_ms: 0.9423\n  type: 'test'\n  ...\n# Subtest: every card asset key maps to the matching inventory item, quantity, folder, and file\nok 3 - every card asset key maps to the matching inventory item, quantity, folder, and file\n  ---\n  duration_ms: 19.4745\n  type: 'test'\n  ...\n# Subtest: imported deck passes the shared catalog schema with manifest-backed asset keys\nok 4 - imported deck passes the shared catalog schema with manifest-backed asset keys\n  ---\n  duration_ms: 2.0089\n  type: 'test'\n  ...\n# Subtest: imports role IDs, asset paths, and counts for 4–7 players from the source JSON\nok 5 - imports role IDs, asset paths, and counts for 4–7 players from the source JSON\n  ---\n  duration_ms: 2.8567\n  type: 'test'\n  ...\n# Subtest: imports all 16 character IDs and static fields from the source JSON\nok 6 - imports all 16 character IDs and static fields from the source JSON\n  ---\n  duration_ms: 1.0099\n  type: 'test'\n  ...\n# Subtest: maps roster asset URLs and attribution to the extracted source inventory\nok 7 - maps roster asset URLs and attribution to the extracted source inventory\n  ---\n  duration_ms: 29.438\n  type: 'test'\n  ...\n# Subtest: accepts valid static catalog data and known asset paths\nok 8 - accepts valid static catalog data and known asset paths\n  ---\n  duration_ms: 2.9332\n  type: 'test'\n  ...\n# Subtest: rejects duplicate physical card identifiers\nok 9 - rejects duplicate physical card identifiers\n  ---\n  duration_ms: 0.4495\n  type: 'test'\n  ...\n# Subtest: rejects numeric card ranks outside 2 through 10\nok 10 - rejects numeric card ranks outside 2 through 10\n  ---\n  duration_ms: 0.8504\n  type: 'test'\n  ...\n# Subtest: rejects asset paths missing from the known asset set\nok 11 - rejects asset paths missing from the known asset set\n  ---\n  duration_ms: 0.3389\n  type: 'test'\n  ...\n# Subtest: rejects negative card and role counts\nok 12 - rejects negative card and role counts\n  ---\n  duration_ms: 0.3416\n  type: 'test'\n  ...\n# Subtest: rejects unknown fields and unresolved physical card type references\nok 13 - rejects unknown fields and unresolved physical card type references\n  ---\n  duration_ms: 0.4476\n  type: 'test'\n  ...\n# Subtest: rejects role distributions that do not total the player count\nok 14 - rejects role distributions that do not total the player count\n  ---\n  duration_ms: 0.3508\n  type: 'test'\n  ...\n1..14\n# tests 14\n# suites 0\n# pass 14\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 1371.521\n"
+    },
+    {
+      "label": "engine-all-tests",
+      "args": [
+        "--import",
+        "file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/node_modules/tsx/dist/loader.mjs",
+        "--test",
+        "--test-concurrency=1",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\actions\\candidates.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\commands\\bang-quota.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\commands\\commands.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\api.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\basic-actions.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\character-api.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\bart-cassidy.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\black-jack.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\calamity-janet.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\el-gringo.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\jesse-jones.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\jourdonnais.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\kit-carlson.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\lucky-duke.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\paul-regret.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\pedro-ramirez.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\rose-doolan.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\sid-ketchum.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\slab.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\suzy-lafayette.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\vulture-sam.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\characters\\willy-the-kid.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\draw-pile.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\draw-select.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\duel.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\dynamite-barrel.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\equipment.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\hand-limit.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\jail.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\registry.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\runtime\\runtime.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\steal-discard.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\effects\\tablewide.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\endgame\\endgame.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\random\\shuffle.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\resolution\\resolution.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\rules\\distance-legality.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\scenarios\\engine-acceptance.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\setup\\initialize.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\state\\projection.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\turn\\draw.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\engine\\test\\turn\\reducer.test.ts"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 23313,
+      "tests": 365,
+      "passed": 365,
+      "failed": 0,
+      "outputTail": " Kit pauses cleanly when fewer than three candidates exist and returns every peeked card\nok 353 - Kit pauses cleanly when fewer than three candidates exist and returns every peeked card\n  ---\n  duration_ms: 1.2567\n  type: 'test'\n  ...\n# Subtest: R08 reshuffle uses the injected RNG and preserves all cards\nok 354 - R08 reshuffle uses the injected RNG and preserves all cards\n  ---\n  duration_ms: 2.1237\n  type: 'test'\n  ...\n# Subtest: Black Jack exposes only the second ordinary card and performs one private red-card bonus draw\nok 355 - Black Jack exposes only the second ordinary card and performs one private red-card bonus draw\n  ---\n  duration_ms: 1.3647\n  type: 'test'\n  ...\n# Subtest: turn start resolves Dynamite before Jail and enters draw only after both finish\nok 356 - turn start resolves Dynamite before Jail and enters draw only after both finish\n  ---\n  duration_ms: 8.4387\n  type: 'test'\n  ...\n# Subtest: Lucky Jail opens a saved top-two judgment choice and resumes before the draw phase\nok 357 - Lucky Jail opens a saved top-two judgment choice and resumes before the draw phase\n  ---\n  duration_ms: 6.0723\n  type: 'test'\n  ...\n# Subtest: advances start effects to draw and draw completion to play as separate pure transitions\nok 358 - advances start effects to draw and draw completion to play as separate pure transitions\n  ---\n  duration_ms: 4.4522\n  type: 'test'\n  ...\n# Subtest: END_TURN advances from the last seat to the first living seat and increments once\nok 359 - END_TURN advances from the last seat to the first living seat and increments once\n  ---\n  duration_ms: 1.4548\n  type: 'test'\n  ...\n# Subtest: END_TURN skips eliminated seats when choosing the next player\nok 360 - END_TURN skips eliminated seats when choosing the next player\n  ---\n  duration_ms: 1.2356\n  type: 'test'\n  ...\n# Subtest: END_TURN enters discard when the hand exceeds HP, then finishes after hand is reduced\nok 361 - END_TURN enters discard when the hand exceeds HP, then finishes after hand is reduced\n  ---\n  duration_ms: 1.8177\n  type: 'test'\n  ...\n# Subtest: a start-effect resolver can skip a turn without this reducer resolving Dynamite or Jail\nok 362 - a start-effect resolver can skip a turn without this reducer resolving Dynamite or Jail\n  ---\n  duration_ms: 1.1774\n  type: 'test'\n  ...\n# Subtest: rejects wrong actor and wrong phase without changing state\nok 363 - rejects wrong actor and wrong phase without changing state\n  ---\n  duration_ms: 2.3172\n  type: 'test'\n  ...\n# Subtest: blocks every turn progression helper while resolution state remains pending\nok 364 - blocks every turn progression helper while resolution state remains pending\n  ---\n  duration_ms: 39.8183\n  type: 'test'\n  ...\n# Subtest: same state and turn action produce the same next state\nok 365 - same state and turn action produce the same next state\n  ---\n  duration_ms: 0.8992\n  type: 'test'\n  ...\n1..365\n# tests 365\n# suites 0\n# pass 365\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 23188.7312\n"
+    },
+    {
+      "label": "server-check",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "apps/server/tsconfig.json"
+      ],
+      "cwd": ".",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedMs": 816,
+      "outputTail": ""
+    },
+    {
+      "label": "server-tests",
+      "args": [
+        "--import",
+        "file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/node_modules/tsx/dist/loader.mjs",
+        "--test",
+        "--test-concurrency=1",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\commands\\command-relay.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\projections\\outbox.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\projections\\sync.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\recovery\\recovery.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\rooms\\service.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\runtime\\runtime.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\socket\\gateway.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\socket\\invite-rate-limiter.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\storage\\repository.test.ts",
+        "C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\storage\\room-lifecycle.test.ts"
+      ],
+      "cwd": ".",
+      "status": "FAIL",
+      "exitCode": 1,
+      "elapsedMs": 391397,
+      "tests": 91,
+      "passed": 90,
+      "failed": 1,
+      "outputTail": "alizes concurrent direct restarts so only one new match becomes active\nok 80 - serializes concurrent direct restarts so only one new match becomes active\n  ---\n  duration_ms: 4915.1059\n  type: 'test'\n  ...\n# Subtest: direct restart rechecks unchanged membership and readiness before writing\nok 81 - direct restart rechecks unchanged membership and readiness before writing\n  ---\n  duration_ms: 15569.5687\n  type: 'test'\n  ...\n# Subtest: start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects\nok 82 - start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects\n  ---\n  duration_ms: 26358.1685\n  type: 'test'\n  ...\n# Subtest: outbox failure rolls back the room, match, players, receipt, and preceding signal\nok 83 - outbox failure rolls back the room, match, players, receipt, and preceding signal\n  ---\n  duration_ms: 3066.2995\n  type: 'test'\n  ...\n# Subtest: concurrent retries of one room-start command commit one match and return its original ID\nok 84 - concurrent retries of one room-start command commit one match and return its original ID\n  ---\n  duration_ms: 6090.1478\n  type: 'test'\n  ...\n# Subtest: serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals\nok 85 - serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals\n  ---\n  duration_ms: 6613.7119\n  type: 'test'\n  ...\n# Subtest: persists room status changes and locks lobby membership outside WAITING\nok 86 - persists room status changes and locks lobby membership outside WAITING\n  ---\n  duration_ms: 2770.8167\n  type: 'test'\n  ...\n# Subtest: rolls back member, room version, receipt, and outbox when an outbox ID conflicts\nok 87 - rolls back member, room version, receipt, and outbox when an outbox ID conflicts\n  ---\n  duration_ms: 4720.0146\n  type: 'test'\n  ...\n# Subtest: rejects leave by a non-member without changing the room\nok 88 - rejects leave by a non-member without changing the room\n  ---\n  duration_ms: 4073.1366\n  type: 'test'\n  ...\n# Subtest: returns a completed match room to the lobby atomically and replays the original receipt\nok 89 - returns a completed match room to the lobby atomically and replays the original receipt\n  ---\n  duration_ms: 3044.595\n  type: 'test'\n  ...\n# Subtest: rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes\nok 90 - rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes\n  ---\n  duration_ms: 29397.958\n  type: 'test'\n  ...\n# Subtest: rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails\nok 91 - rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails\n  ---\n  duration_ms: 5609.1148\n  type: 'test'\n  ...\n1..91\n# tests 91\n# suites 0\n# pass 90\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 391096.1125\n"
+    }
+  ]
+}

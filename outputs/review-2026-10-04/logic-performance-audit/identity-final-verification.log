@@ -1,0 +1,21 @@
+REUSE contracts-check: PASS
+REUSE contracts-tests: PASS
+REUSE catalog-check: PASS
+REUSE engine-check: PASS
+REUSE catalog-tests: PASS
+REUSE engine-all-tests: PASS
+REUSE server-check: PASS
+REUSE server-tests: PASS
+REUSE site-tests: PASS
+RUN web-tests
+RESULT web-tests: PASS 117/117
+RUN game-table-fixtures
+RESULT game-table-fixtures: PASS
+RUN web-check
+RESULT web-check: PASS
+RUN site-check
+RESULT site-check: PASS
+RUN site-build
+RESULT site-build: PASS
+RUN stage-site-build
+RESULT stage-site-build: PASS

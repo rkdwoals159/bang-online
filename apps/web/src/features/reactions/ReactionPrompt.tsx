@@ -120,7 +120,12 @@ export function ReactionPrompt({
     setNotice("응답을 보내고 있어요.");
 
     try {
-      const result = await sendAndRefreshResponse(transport, command);
+      const result = await sendAndRefreshResponse(transport, command, (acknowledgement) => {
+        if (currentMatchIdRef.current !== command.matchId) return;
+        setNotice(acknowledgement.status === "rejected"
+          ? "요청을 확인했어요. 최신 진행 상태를 불러오고 있어요."
+          : "응답이 접수됐어요. 진행 상태를 업데이트하고 있어요.");
+      });
       if (currentMatchIdRef.current !== command.matchId) return;
 
       if (result.projection) {

@@ -66,6 +66,34 @@ export function getTargetOptions(
   });
 }
 
+/** Describes publicly knowable cases where a legally proposed Beer play restores no HP. */
+export function noHealBeerReasons(snapshot: MatchSnapshotView, cardInstanceId: string): string[] {
+  const card = snapshot.selfPrivate?.hand.find(({ cardInstanceId: id }) => id === cardInstanceId);
+  if (card?.typeId !== "beer") return [];
+
+  const viewer = snapshot.publicTable.players.find(({ playerId }) => playerId === snapshot.viewer.playerId);
+  if (!viewer) return [];
+  const reasons: string[] = [];
+  if (viewer.hp >= viewer.maxHp) reasons.push("현재 생명력이 최대라 회복량은 0이에요.");
+  const livingPlayerCount = snapshot.publicTable.players.filter(({ eliminated }) => !eliminated).length;
+  if (livingPlayerCount === 2) reasons.push("생존자가 2명일 때는 맥주 회복량이 0이에요.");
+  return reasons;
+}
+
+/** Finds an exact server-projected two-card ability proposal; never synthesizes a payload. */
+export function findSidAbilityProposalIndex(
+  actions: readonly LegalActionProposal[],
+  firstCardInstanceId: string | null,
+  secondCardInstanceId: string | null,
+): number | null {
+  if (!firstCardInstanceId || !secondCardInstanceId || firstCardInstanceId === secondCardInstanceId) return null;
+  const index = actions.findIndex((action) => action.type === "USE_ABILITY" &&
+    action.payload.cardInstanceIds.length === 2 &&
+    action.payload.cardInstanceIds.includes(firstCardInstanceId) &&
+    action.payload.cardInstanceIds.includes(secondCardInstanceId));
+  return index < 0 ? null : index;
+}
+
 /** Creates the v1 command envelope from one exact proposal and current version. */
 export function createActionCommand(
   matchId: string,
@@ -94,8 +122,10 @@ export async function sendAndRefreshAction(
     syncMatch(matchId: string): Promise<MatchSyncResponse>;
   },
   command: MatchCommand,
+  onAcknowledgement?: (acknowledgement: CommandAck) => void,
 ): Promise<{ acknowledgement: CommandAck; projection: ActionsProjection | null }> {
   const acknowledgement = await transport.sendMatchCommand(command);
+  onAcknowledgement?.(acknowledgement);
   try {
     const response = await transport.syncMatch(command.matchId);
     return {

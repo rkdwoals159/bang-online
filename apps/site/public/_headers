@@ -1,0 +1,7 @@
+# Build URLs carry a content hash or a unique build ID.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Card paths are stable, so keep the cache short enough for asset replacements.
+/assets/cards/*
+  Cache-Control: public, max-age=3600, must-revalidate

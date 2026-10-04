@@ -223,13 +223,23 @@ export class BrowserGameTransport implements GameTransport {
   private readonly acknowledgementTimeoutMs: number;
   private readonly roomIds = new Set<string>();
   private readonly matchIds = new Set<string>();
+  private readonly roomWatchCounts = new Map<string, number>();
+  private readonly matchWatchCounts = new Map<string, number>();
+  private readonly recoveredRoomIds = new Set<string>();
+  private readonly recoveredMatchIds = new Set<string>();
+  private readonly confirmedRoomIds = new Set<string>();
+  private readonly confirmedMatchIds = new Set<string>();
+  private readonly roomMatchIds = new Map<string, string>();
   private readonly pending = new Map<string, PendingCommand>();
   private readonly roomSyncs = new Map<string, Promise<RoomSyncResponse>>();
   private readonly matchSyncs = new Map<string, Promise<MatchSyncResponse>>();
   private readonly roomHints = new Map<string, NotificationCursor>();
   private readonly matchHints = new Map<string, NotificationCursor>();
-  private readonly roomDirty = new Set<string>();
-  private readonly matchDirty = new Set<string>();
+  private readonly roomFollowupHints = new Map<string, NotificationCursor>();
+  private readonly matchFollowupHints = new Map<string, NotificationCursor>();
+  private readonly roomMutationGenerations = new Map<string, number>();
+  private restoreSessionRequest?: Promise<GuestSessionResponse | null>;
+  private assignedSeatsRequest?: Promise<readonly RoomView[]>;
   private sessionExpired = false;
   private restoredPlayerId?: string;
   private connectionGeneration = 0;
@@ -259,26 +269,44 @@ export class BrowserGameTransport implements GameTransport {
 
   watchRoom(roomId: string): () => void {
     this.assertResourceId(roomId);
-    this.roomIds.add(roomId);
+    this.roomWatchCounts.set(roomId, (this.roomWatchCounts.get(roomId) ?? 0) + 1);
+    this.confirmedRoomIds.delete(roomId);
+    this.reconcileRoomResource(roomId);
     if (this.socket.connected) void this.syncRoom(roomId).catch(() => undefined);
-    return () => this.roomIds.delete(roomId);
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      const count = (this.roomWatchCounts.get(roomId) ?? 1) - 1;
+      if (count > 0) this.roomWatchCounts.set(roomId, count);
+      else this.roomWatchCounts.delete(roomId);
+      this.reconcileRoomResource(roomId);
+    };
   }
 
   watchMatch(matchId: string): () => void {
     this.assertResourceId(matchId);
-    this.matchIds.add(matchId);
+    this.matchWatchCounts.set(matchId, (this.matchWatchCounts.get(matchId) ?? 0) + 1);
+    this.confirmedMatchIds.delete(matchId);
+    this.reconcileMatchResource(matchId);
     if (this.socket.connected) void this.syncMatch(matchId).catch(() => undefined);
-    return () => this.matchIds.delete(matchId);
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      const count = (this.matchWatchCounts.get(matchId) ?? 1) - 1;
+      if (count > 0) this.matchWatchCounts.set(matchId, count);
+      else this.matchWatchCounts.delete(matchId);
+      this.reconcileMatchResource(matchId);
+    };
   }
 
   async syncRoom(roomId: string): Promise<RoomSyncResponse> {
     this.assertResourceId(roomId);
-    if (!this.roomIds.has(roomId)) this.roomIds.add(roomId);
+    this.retainRoomForSync(roomId);
     const existing = this.roomSyncs.get(roomId);
-    if (existing) {
-      this.roomDirty.add(roomId);
-      return existing;
-    }
+    if (existing) return existing;
+    const mutationGeneration = this.roomMutationGenerations.get(roomId) ?? 0;
     const request = this.performRoomSync(roomId);
     this.roomSyncs.set(roomId, request);
     let response: RoomSyncResponse;
@@ -288,19 +316,22 @@ export class BrowserGameTransport implements GameTransport {
       this.roomSyncs.delete(roomId);
     }
     const hint = this.roomHints.get(roomId);
-    if (hint && hint.version > (this.store.getSnapshot().rooms[roomId]?.version ?? -1)) this.roomDirty.add(roomId);
-    if (this.roomDirty.delete(roomId)) void this.syncRoom(roomId).catch(() => undefined);
+    const currentVersion = this.store.getSnapshot().rooms[roomId]?.version ?? -1;
+    const previousFollowup = this.roomFollowupHints.get(roomId);
+    const needsHintFollowup = hint !== undefined && hint.version > currentVersion &&
+      (previousFollowup === undefined || hint.version > previousFollowup.version);
+    if ((this.roomMutationGenerations.get(roomId) ?? 0) > mutationGeneration || needsHintFollowup) {
+      if (needsHintFollowup) this.roomFollowupHints.set(roomId, hint);
+      void this.syncRoom(roomId).catch(() => undefined);
+    }
     return response;
   }
 
   async syncMatch(matchId: string): Promise<MatchSyncResponse> {
     this.assertResourceId(matchId);
-    if (!this.matchIds.has(matchId)) this.matchIds.add(matchId);
+    this.retainMatchForSync(matchId);
     const existing = this.matchSyncs.get(matchId);
-    if (existing) {
-      this.matchDirty.add(matchId);
-      return existing;
-    }
+    if (existing) return existing;
     const request = this.performMatchSync(matchId);
     this.matchSyncs.set(matchId, request);
     let response: MatchSyncResponse;
@@ -311,11 +342,16 @@ export class BrowserGameTransport implements GameTransport {
     }
     const hint = this.matchHints.get(matchId);
     const current = this.store.getSnapshot().matches[matchId];
+    const previousFollowup = this.matchFollowupHints.get(matchId);
+    const hintIsNewerThanCursor = (candidate: NotificationCursor, reference?: NotificationCursor) =>
+      reference === undefined || candidate.version > reference.version ||
+      (candidate.version === reference.version && (candidate.eventSeq ?? -1) > (reference.eventSeq ?? -1));
     if (hint && (hint.version > (current?.version ?? -1) ||
-        (hint.version === current?.version && (hint.eventSeq ?? 0) > (current?.eventSeq ?? -1)))) {
-      this.matchDirty.add(matchId);
+        (hint.version === current?.version && (hint.eventSeq ?? 0) > (current?.eventSeq ?? -1))) &&
+        hintIsNewerThanCursor(hint, previousFollowup)) {
+      this.matchFollowupHints.set(matchId, hint);
+      void this.syncMatch(matchId).catch(() => undefined);
     }
-    if (this.matchDirty.delete(matchId)) void this.syncMatch(matchId).catch(() => undefined);
     return response;
   }
 
@@ -344,11 +380,23 @@ export class BrowserGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     if (!isGuestSessionResponse(body)) throw new BrowserTransportError("INVALID_RESPONSE");
+    this.store.setViewerPlayerId(body.player.playerId);
+    this.restoredPlayerId = body.player.playerId;
     return body;
   }
 
   /** Restore the guest identity using the HttpOnly cookie; credentials never enter JS state. */
-  async restoreGuestSession(): Promise<GuestSessionResponse | null> {
+  restoreGuestSession(): Promise<GuestSessionResponse | null> {
+    if (this.restoreSessionRequest) return this.restoreSessionRequest;
+    let request: Promise<GuestSessionResponse | null>;
+    request = this.performRestoreGuestSession().finally(() => {
+      if (this.restoreSessionRequest === request) this.restoreSessionRequest = undefined;
+    });
+    this.restoreSessionRequest = request;
+    return request;
+  }
+
+  private async performRestoreGuestSession(): Promise<GuestSessionResponse | null> {
     let response: Response;
     try {
       response = await this.fetcher("/api/guest-sessions", {
@@ -374,6 +422,7 @@ export class BrowserGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     if (!isGuestSessionResponse(body)) throw new BrowserTransportError("INVALID_RESPONSE");
+    this.store.setViewerPlayerId(body.player.playerId);
     this.restoredPlayerId = body.player.playerId;
     this.store.setConnection(this.store.getSnapshot().connection, true);
     return body;
@@ -384,7 +433,17 @@ export class BrowserGameTransport implements GameTransport {
    * are a navigation hint only; each room is registered for authoritative
    * room:sync (and then match:sync) on the current or next socket connection.
    */
-  async recoverAssignedSeats(): Promise<readonly RoomView[]> {
+  recoverAssignedSeats(): Promise<readonly RoomView[]> {
+    if (this.assignedSeatsRequest) return this.assignedSeatsRequest;
+    let request: Promise<readonly RoomView[]>;
+    request = this.performRecoverAssignedSeats().finally(() => {
+      if (this.assignedSeatsRequest === request) this.assignedSeatsRequest = undefined;
+    });
+    this.assignedSeatsRequest = request;
+    return request;
+  }
+
+  private async performRecoverAssignedSeats(): Promise<readonly RoomView[]> {
     let response: Response;
     try {
       response = await this.fetcher("/api/guest-sessions/rooms", {
@@ -426,8 +485,27 @@ export class BrowserGameTransport implements GameTransport {
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
       rooms.push(parsed.value);
-      this.roomIds.add(parsed.value.roomId);
-      if (parsed.value.activeMatchId) this.matchIds.add(parsed.value.activeMatchId);
+    }
+
+    const priorRoomIds = [...this.roomIds];
+    const priorMatchIds = [...this.matchIds];
+    this.recoveredRoomIds.clear();
+    this.recoveredMatchIds.clear();
+    this.confirmedRoomIds.clear();
+    this.confirmedMatchIds.clear();
+    this.roomMatchIds.clear();
+    for (const room of rooms) {
+      this.recoveredRoomIds.add(room.roomId);
+      if (room.activeMatchId) {
+        this.recoveredMatchIds.add(room.activeMatchId);
+        this.roomMatchIds.set(room.roomId, room.activeMatchId);
+      }
+    }
+    for (const roomId of new Set([...priorRoomIds, ...rooms.map((room) => room.roomId)])) {
+      this.reconcileRoomResource(roomId);
+    }
+    for (const matchId of new Set([...priorMatchIds, ...rooms.flatMap((room) => room.activeMatchId ? [room.activeMatchId] : [])])) {
+      this.reconcileMatchResource(matchId);
     }
 
     if (this.socket.connected && rooms.length > 0) {
@@ -445,7 +523,8 @@ export class BrowserGameTransport implements GameTransport {
     const response = await this.sendRoomCommand(command);
     if (isCommandRejected(response, command.commandId)) throw requestError("REQUEST_REJECTED", response);
     if (!isRoomCreateResult(response)) throw new BrowserTransportError("INVALID_RESPONSE");
-    this.roomIds.add(response.roomId);
+    this.confirmedRoomIds.add(response.roomId);
+    this.reconcileRoomResource(response.roomId);
     void this.syncRoom(response.roomId).catch(() => undefined);
     return response;
   }
@@ -590,8 +669,7 @@ export class BrowserGameTransport implements GameTransport {
     const latestHint = this.roomHints.get(roomId);
     if (payload.version <= currentVersion || (latestHint && payload.version <= latestHint.version)) return;
     this.roomHints.set(roomId, { version: payload.version });
-    if (this.roomSyncs.has(roomId)) this.roomDirty.add(roomId);
-    else void this.syncRoom(roomId).catch(() => undefined);
+    if (!this.roomSyncs.has(roomId)) void this.syncRoom(roomId).catch(() => undefined);
   }
 
   private handleMatchChanged(payload: unknown): void {
@@ -609,8 +687,74 @@ export class BrowserGameTransport implements GameTransport {
         (payload.version === hint.version && payload.eventSeq <= (hint.eventSeq ?? -1))));
     if (isNotNewer) return;
     this.matchHints.set(matchId, { version: payload.version, eventSeq: payload.eventSeq });
-    if (this.matchSyncs.has(matchId)) this.matchDirty.add(matchId);
-    else void this.syncMatch(matchId).catch(() => undefined);
+    if (!this.matchSyncs.has(matchId)) void this.syncMatch(matchId).catch(() => undefined);
+  }
+
+  private recordMatchHint(matchId: string, hint: NotificationCursor): void {
+    const previous = this.matchHints.get(matchId);
+    if (!previous || hint.version > previous.version ||
+        (hint.version === previous.version && (hint.eventSeq ?? -1) > (previous.eventSeq ?? -1))) {
+      this.matchHints.set(matchId, hint);
+    }
+  }
+
+  private retainRoomForSync(roomId: string): void {
+    if (!this.roomWatchCounts.has(roomId) && !this.recoveredRoomIds.has(roomId)) {
+      this.confirmedRoomIds.add(roomId);
+    }
+    this.reconcileRoomResource(roomId);
+  }
+
+  private retainMatchForSync(matchId: string): void {
+    if (!this.matchWatchCounts.has(matchId) && !this.recoveredMatchIds.has(matchId) &&
+        ![...this.roomMatchIds].some(([roomId, id]) => id === matchId && this.roomIds.has(roomId))) {
+      this.confirmedMatchIds.add(matchId);
+    }
+    this.reconcileMatchResource(matchId);
+  }
+
+  private reconcileRoomResource(roomId: string): void {
+    const retained = this.roomWatchCounts.has(roomId) || this.recoveredRoomIds.has(roomId) ||
+      this.confirmedRoomIds.has(roomId);
+    if (retained) this.roomIds.add(roomId);
+    else {
+      this.roomIds.delete(roomId);
+      this.roomHints.delete(roomId);
+      this.roomFollowupHints.delete(roomId);
+      this.roomMutationGenerations.delete(roomId);
+      const matchId = this.roomMatchIds.get(roomId);
+      this.roomMatchIds.delete(roomId);
+      if (matchId) this.reconcileMatchResource(matchId);
+    }
+  }
+
+  private reconcileMatchResource(matchId: string): void {
+    const referencedByRoom = [...this.roomMatchIds].some(([roomId, roomMatchId]) =>
+      roomMatchId === matchId && this.roomIds.has(roomId));
+    const retained = this.matchWatchCounts.has(matchId) || this.recoveredMatchIds.has(matchId) ||
+      this.confirmedMatchIds.has(matchId) || referencedByRoom;
+    if (retained) this.matchIds.add(matchId);
+    else {
+      this.matchIds.delete(matchId);
+      this.matchHints.delete(matchId);
+      this.matchFollowupHints.delete(matchId);
+    }
+  }
+
+  private trackRoomMatch(roomId: string, matchId: string | null): void {
+    const previous = this.roomMatchIds.get(roomId);
+    if (!this.roomIds.has(roomId)) {
+      if (previous) {
+        this.roomMatchIds.delete(roomId);
+        this.reconcileMatchResource(previous);
+      }
+      return;
+    }
+    if (previous === (matchId ?? undefined)) return;
+    if (previous) this.roomMatchIds.delete(roomId);
+    if (matchId) this.roomMatchIds.set(roomId, matchId);
+    if (previous) this.reconcileMatchResource(previous);
+    if (matchId) this.reconcileMatchResource(matchId);
   }
 
   private async performRoomSync(roomId: string, syncActiveMatch = true): Promise<RoomSyncResponse> {
@@ -631,14 +775,15 @@ export class BrowserGameTransport implements GameTransport {
         throw requestError("REQUEST_REJECTED", rejected.value);
       }
       const parsed = parseRoomSyncResponse(raw);
-      if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.roomId !== roomId) {
+      if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.roomId !== roomId ||
+          !this.store.isCurrentViewer(parsed.value.room.viewer.playerId)) {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
       this.store.applyRoomSync(parsed.value);
-      if (parsed.value.room.activeMatchId) {
-        this.matchIds.add(parsed.value.room.activeMatchId);
-        if (syncActiveMatch && this.socket.connected) void this.syncMatch(parsed.value.room.activeMatchId).catch(() => undefined);
+      this.trackRoomMatch(roomId, parsed.value.room.activeMatchId);
+      if (parsed.value.room.activeMatchId && syncActiveMatch && this.socket.connected) {
+        void this.syncMatch(parsed.value.room.activeMatchId).catch(() => undefined);
       }
       return parsed.value;
     } catch (error) {
@@ -667,7 +812,8 @@ export class BrowserGameTransport implements GameTransport {
         this.store.setError("SYNC_REJECTED");
         throw requestError("REQUEST_REJECTED", rejected.value);
       }
-      if (!isMatchSyncResponse(raw) || raw.requestId !== request.requestId || raw.matchId !== matchId) {
+      if (!isMatchSyncResponse(raw) || raw.requestId !== request.requestId || raw.matchId !== matchId ||
+          !this.store.isCurrentViewer(raw.snapshot.viewer.playerId)) {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
@@ -701,8 +847,8 @@ export class BrowserGameTransport implements GameTransport {
       ...scope,
     };
     if (!existing) {
-      if (scope.roomId) this.roomIds.add(scope.roomId);
-      if (scope.matchId) this.matchIds.add(scope.matchId);
+      if (scope.roomId) this.retainRoomForSync(scope.roomId);
+      if (scope.matchId) this.retainMatchForSync(scope.matchId);
       this.pending.set(commandId, pending);
       this.updatePendingIds();
     }
@@ -743,9 +889,35 @@ export class BrowserGameTransport implements GameTransport {
       pending.active = undefined;
       this.pending.delete(pending.commandId);
       this.updatePendingIds();
+      const ack = isCommandAck(response, pending.commandId) ? response : null;
+      const accepted = ack === null || ack.status === "accepted";
+      if (accepted && pending.roomId) {
+        const room = parseRoomView(response);
+        let roomProjectionApplied = false;
+        if (room.ok && room.value.roomId === pending.roomId && room.value.version !== undefined) {
+          const previous = this.store.getSnapshot().rooms[pending.roomId];
+          this.store.applyRoomCommand(room.value);
+          const latestRoom = this.store.getSnapshot().rooms[pending.roomId]?.room ?? room.value;
+          this.trackRoomMatch(pending.roomId, latestRoom.activeMatchId);
+          if (latestRoom.activeMatchId) {
+            if (latestRoom.activeMatchId !== previous?.room.activeMatchId ||
+                !this.store.getSnapshot().matches[latestRoom.activeMatchId]) {
+              void this.syncMatch(latestRoom.activeMatchId).catch(() => undefined);
+            }
+          }
+          roomProjectionApplied = true;
+        } else {
+          this.roomMutationGenerations.set(pending.roomId, (this.roomMutationGenerations.get(pending.roomId) ?? 0) + 1);
+        }
+        if (!roomProjectionApplied) void this.syncRoom(pending.roomId).catch(() => undefined);
+      }
+      if (accepted && pending.matchId) {
+        if (ack?.status === "accepted") {
+          this.recordMatchHint(pending.matchId, { version: ack.aggregateVersion, eventSeq: ack.eventSeq });
+        }
+        void this.syncMatch(pending.matchId).catch(() => undefined);
+      }
       attempt.resolve(response);
-      if (pending.roomId) void this.syncRoom(pending.roomId).catch(() => undefined);
-      if (pending.matchId) void this.syncMatch(pending.matchId).catch(() => undefined);
     });
     return promise;
   }

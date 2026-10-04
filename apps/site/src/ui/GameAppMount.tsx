@@ -29,5 +29,11 @@ export function GameAppMount() {
     };
   }, []);
 
-  return <div ref={mountPoint} />;
+  return (
+    <div ref={mountPoint}>
+      <p className="site-app-loading" role="status" aria-live="polite">
+        게임 화면을 준비하고 있어요.
+      </p>
+    </div>
+  );
 }

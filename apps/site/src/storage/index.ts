@@ -9,6 +9,7 @@ export type {
   GuestSessionLookup,
   MatchCommitInput,
   MatchCommitResult,
+  MatchCommandContext,
   MatchEventRecord,
   MatchEventWrite,
   MatchRecord,

@@ -57,6 +57,7 @@ const stagedWorkerText = await readFile(stagedWorker, "utf8");
 await Promise.all([
   stat(stagedWorker),
   stat(path.join(outputDirectory, "client", "favicon.svg")),
+  stat(path.join(outputDirectory, "client", "_headers")),
   stat(path.join(outputDirectory, "client", "assets", "cards", "playing", "01_bang.png")),
 ]);
 

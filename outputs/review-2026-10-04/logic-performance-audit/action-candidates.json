@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-04T11:31:56.759Z",
+  "scope": "Isolated Node CPU benchmark, seven-player synthetic Sid fixtures; not network latency or production P95",
+  "samplesPerImplementation": 10,
+  "warmupIterations": 2,
+  "results": [
+    {
+      "handSize": 4,
+      "candidates": 9,
+      "jsonBytes": 1180,
+      "referenceMedianMs": 1.4196999999999775,
+      "optimizedMedianMs": 0.07439999999996871
+    },
+    {
+      "handSize": 12,
+      "candidates": 92,
+      "jsonBytes": 13350,
+      "referenceMedianMs": 9.018599999999992,
+      "optimizedMedianMs": 0.5081000000000131
+    },
+    {
+      "handSize": 40,
+      "candidates": 835,
+      "jsonBytes": 131378,
+      "referenceMedianMs": 38.93810000000008,
+      "optimizedMedianMs": 1.342800000000011
+    },
+    {
+      "handSize": 80,
+      "candidates": 3271,
+      "jsonBytes": 524204,
+      "referenceMedianMs": 128.80549999999994,
+      "optimizedMedianMs": 2.835099999999784
+    }
+  ]
+}

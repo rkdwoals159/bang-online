@@ -47,3 +47,9 @@ The specifically failed initial platform CREATE SQL uses IF NOT EXISTS to adopt 
 ## Recovery publication — succeeded
 
 Version 3 deployed successfully on 2026-10-04T10:30:19Z from source c6587af110ef5394f92a92cd7e4d621ffb5fbce6 to https://bang-online-ko.rkdwoals159.chatgpt.site . The existing application ledger version/name/checksum/applied_at is unchanged after deployment. T116 DONE. See [final receipt](../../outputs/review-2026-10-04/deployment-recovery-result.json). Local 4P/7P HTTP complete games were rerun successfully after the read-only readiness change. Original D06/D18 and production full-browser S09 remain NOT RUN. Earlier failure notes document the superseded failed attempt.
+
+## Logic and performance audit — 2026-10-04
+
+The new [audit report](../../outputs/review-2026-10-04/logic-performance-audit/REPORT.md) records full-HP Beer confirmation, a persistent game mount across routes, fewer D1 round trips, legal-action CPU optimization, transport lifetimes, bounded recent logs, Sid selectors, and static cache headers. Rules and applied migrations are preserved. Original D06/D18 and production S09 remain NOT RUN.
+
+From the repository root run `node scripts/verify-improvements.mjs --audit`. With the built local Worker running at 127.0.0.1:8806, run `node apps/site/e2e/audit-full-flow.mjs --capacity=4`, then `--capacity=7`, and `node apps/site/e2e/audit-static-headers.mjs`. These runners reject non-loopback origins and write evidence in the new audit directory. Deployment outcome is recorded there separately.

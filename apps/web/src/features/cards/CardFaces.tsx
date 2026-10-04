@@ -282,6 +282,7 @@ function CardArtwork({
         src={assetUrl}
         alt={imageAlt}
         loading="lazy"
+        decoding="async"
         onError={() => setFailedAssetUrl(assetUrl)}
       />
     </div>

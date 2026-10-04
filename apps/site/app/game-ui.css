@@ -1,2 +1,14 @@
 /* Share the browser app stylesheet so Sites receives UI updates automatically. */
 @import "../../web/src/app/app.css";
+
+.site-app-loading {
+  display: grid;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 24px;
+  place-items: center;
+  background: #f7f4e9;
+  color: #35533d;
+  font: 700 1rem/1.5 system-ui, sans-serif;
+  text-align: center;
+}

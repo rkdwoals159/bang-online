@@ -7,6 +7,7 @@
 - 실행·호스팅 안내: [Sites README](apps/site/README.md)
 - 규칙·구현 결정: [기능 계획서](outputs/development-plan/00_README.md)
 - UI/API 개선 및 검증 범위: [개선 결과](outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md)
+- 최신 로직·성능 재검토: [수정 목록과 증거](outputs/review-2026-10-04/logic-performance-audit/REPORT.md)
 
 ## 설치 및 빌드
 
@@ -17,6 +18,7 @@ pnpm install --frozen-lockfile
 pnpm run sites:db:check
 pnpm run sites:build
 node scripts/verify-improvements.mjs
+node scripts/verify-improvements.mjs --audit
 ```
 
 로컬 빌드 실행 전에는 로컬 DB를 준비합니다. 아래 명령은 `--local`로만

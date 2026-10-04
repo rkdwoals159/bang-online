@@ -21,6 +21,8 @@ const INITIAL_STATE: BrowserTransportState = Object.freeze({
   lastError: null,
 });
 
+const MAX_VISIBLE_EVENTS = 100;
+
 function sameIds(left: readonly string[], right: readonly string[]): boolean {
   return left.length === right.length && left.every((id, index) => id === right[index]);
 }
@@ -32,12 +34,15 @@ function mergeEvents(
   const bySequence = new Map<number, PublicMatchEvent>();
   for (const event of previous) bySequence.set(event.eventSeq, event);
   for (const event of received) bySequence.set(event.eventSeq, event);
-  return [...bySequence.values()].sort((left, right) => left.eventSeq - right.eventSeq);
+  return [...bySequence.values()]
+    .sort((left, right) => left.eventSeq - right.eventSeq)
+    .slice(-MAX_VISIBLE_EVENTS);
 }
 
 /** Small immutable store shared by the Socket.IO client and React hook. */
 export class BrowserTransportStore {
   private current = INITIAL_STATE;
+  private viewerPlayerId: string | null | undefined;
   private readonly listeners = new Set<() => void>();
 
   readonly getSnapshot = (): BrowserTransportState => this.current;
@@ -49,7 +54,19 @@ export class BrowserTransportStore {
   };
 
   setConnection(connection: TransportConnectionState, authenticated: boolean | null): void {
+    if (authenticated === false) this.setViewerPlayerId(null);
     this.update({ connection, authenticated, lastError: connection === "expired" ? "SESSION_EXPIRED" : null });
+  }
+
+  /** Cookie-derived projections must never survive a change of guest identity. */
+  setViewerPlayerId(playerId: string | null): void {
+    if (playerId === this.viewerPlayerId) return;
+    this.viewerPlayerId = playerId;
+    this.update({ rooms: Object.freeze({}), matches: Object.freeze({}), pendingCommandIds: Object.freeze([]) });
+  }
+
+  isCurrentViewer(playerId: string): boolean {
+    return this.viewerPlayerId === undefined || this.viewerPlayerId === playerId;
   }
 
   setError(error: BrowserTransportState["lastError"]): void {
@@ -64,6 +81,7 @@ export class BrowserTransportStore {
   }
 
   applyRoomSync(response: RoomSyncResponse): boolean {
+    if (!this.isCurrentViewer(response.room.viewer.playerId)) return false;
     const previous = this.current.rooms[response.roomId];
     if (previous && response.version < previous.version) {
       this.setError(null);
@@ -98,6 +116,7 @@ export class BrowserTransportStore {
 
   /** Apply a canonical room-command projection only when it carries its source version. */
   applyRoomCommand(room: RoomView): boolean {
+    if (!this.isCurrentViewer(room.viewer.playerId)) return false;
     if (room.version === undefined) return false;
     const previous = this.current.rooms[room.roomId];
     if (previous && room.version <= previous.version) return false;
@@ -142,6 +161,7 @@ export class BrowserTransportStore {
   }
 
   applyMatchSync(response: MatchSyncResponse): boolean {
+    if (!this.isCurrentViewer(response.snapshot.viewer.playerId)) return false;
     const previous = this.current.matches[response.matchId];
     if (previous && (response.version < previous.version || response.eventSeq < previous.eventSeq)) {
       this.setError(null);
@@ -163,7 +183,7 @@ export class BrowserTransportStore {
     }
 
     const visibleEvents = response.requiresFullSnapshot || !previous
-      ? [...response.visibleEvents]
+      ? response.visibleEvents.slice(-MAX_VISIBLE_EVENTS)
       : mergeEvents(previous.visibleEvents, response.visibleEvents);
     const next: MatchProjectionState = Object.freeze({
       version: response.version,

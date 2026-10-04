@@ -1,0 +1,304 @@
+TAP version 13
+# Subtest: Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+ok 1 - Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+  ---
+  duration_ms: 3662.241
+  type: 'test'
+  ...
+# Subtest: accepted match commands use one authorization context batch and one atomic commit batch
+ok 2 - accepted match commands use one authorization context batch and one atomic commit batch
+  ---
+  duration_ms: 2991.4044
+  type: 'test'
+  ...
+# Subtest: match membership revoked after command load prevents the atomic commit
+ok 3 - match membership revoked after command load prevents the atomic commit
+  ---
+  duration_ms: 3447.2306
+  type: 'test'
+  ...
+# Subtest: a command receipt cannot be reused across two authorized matches
+ok 4 - a command receipt cannot be reused across two authorized matches
+  ---
+  duration_ms: 3098.3698
+  type: 'test'
+  ...
+# Subtest: D1 expected-version CAS allows one writer for concurrent match commands
+ok 5 - D1 expected-version CAS allows one writer for concurrent match commands
+  ---
+  duration_ms: 3008.9501
+  type: 'test'
+  ...
+# Subtest: room and match sync use strict canonical parsers and viewer-scoped private projections
+ok 6 - room and match sync use strict canonical parsers and viewer-scoped private projections
+  ---
+  duration_ms: 3010.6696
+  type: 'test'
+  ...
+# Subtest: unsupported match schema and ruleset disclose recovery only to members and never mutate state
+ok 7 - unsupported match schema and ruleset disclose recovery only to members and never mutate state
+  ---
+  duration_ms: 6887.4281
+  type: 'test'
+  ...
+# Subtest: existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+ok 8 - existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+  ---
+  duration_ms: 3888.6963
+  type: 'test'
+  ...
+# Subtest: receipt replay survives malformed match snapshots, while fresh commands fail without writes
+ok 9 - receipt replay survives malformed match snapshots, while fresh commands fail without writes
+  ---
+  duration_ms: 3838.1735
+  type: 'test'
+  ...
+# Subtest: SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+ok 10 - SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+  ---
+  duration_ms: 3551.2109
+  type: 'test'
+  ...
+# Subtest: SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+ok 11 - SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+  ---
+  duration_ms: 3299.1749
+  type: 'test'
+  ...
+# Subtest: SSE keeps active matches on the fast poll after the activity warm window expires
+ok 12 - SSE keeps active matches on the fast poll after the activity warm window expires
+  ---
+  duration_ms: 3232.1179
+  type: 'test'
+  ...
+# Subtest: guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped
+ok 13 - guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped
+  ---
+  duration_ms: 1539.9618
+  type: 'test'
+  ...
+# Subtest: invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset
+ok 14 - invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset
+  ---
+  duration_ms: 3453.5996
+  type: 'test'
+  ...
+# Subtest: concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected
+ok 15 - concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected
+  ---
+  duration_ms: 2143.6428
+  type: 'test'
+  ...
+# Subtest: room ready/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once
+ok 16 - room ready/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once
+  ---
+  duration_ms: 3853.9532
+  type: 'test'
+  ...
+# Subtest: completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and reset readiness
+ok 17 - completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and reset readiness
+  ---
+  duration_ms: 4832.6851
+  type: 'test'
+  ...
+# Subtest: HTTP origin/content-type/body limits, strict command parsing, and closed-room lifecycle are enforced
+ok 18 - HTTP origin/content-type/body limits, strict command parsing, and closed-room lifecycle are enforced
+  ---
+  duration_ms: 1661.7915
+  type: 'test'
+  ...
+# Subtest: room and match projections use consistent D1 batches and assigned-room recovery avoids N+1 reads
+ok 19 - room and match projections use consistent D1 batches and assigned-room recovery avoids N+1 reads
+  ---
+  duration_ms: 1184.5216
+  type: 'test'
+  ...
+# Subtest: D1 batch statement failure rolls back earlier writes
+ok 20 - D1 batch statement failure rolls back earlier writes
+  ---
+  duration_ms: 866.514
+  type: 'test'
+  ...
+# Subtest: same-version concurrent match commits admit one writer and leave no guard marker
+ok 21 - same-version concurrent match commits admit one writer and leave no guard marker
+  ---
+  duration_ms: 1128.5456
+  type: 'test'
+  ...
+# Subtest: stale expectedVersion performs no state, event, receipt, or outbox writes
+ok 22 - stale expectedVersion performs no state, event, receipt, or outbox writes
+  ---
+  duration_ms: 1079.5097
+  type: 'test'
+  ...
+# Subtest: match commit guards reject event-sequence, schema, and ruleset drift without writing
+ok 23 - match commit guards reject event-sequence, schema, and ruleset drift without writing
+  ---
+  duration_ms: 3560.1549
+  type: 'test'
+  ...
+# Subtest: receipt replay returns the original outcome and a changed hash is rejected without writes
+ok 24 - receipt replay returns the original outcome and a changed hash is rejected without writes
+  ---
+  duration_ms: 1589.8241
+  type: 'test'
+  ...
+# Subtest: event, state, receipt, and outbox writes roll back together on outbox conflict
+ok 25 - event, state, receipt, and outbox writes roll back together on outbox conflict
+  ---
+  duration_ms: 1301.154
+  type: 'test'
+  ...
+# Subtest: outbox cursor queries are monotonic and can be restricted to allowed aggregates
+ok 26 - outbox cursor queries are monotonic and can be restricted to allowed aggregates
+  ---
+  duration_ms: 1315.7361
+  type: 'test'
+  ...
+# Subtest: parallel START_MATCH replay writes room, match, receipt and both outbox signals once
+ok 27 - parallel START_MATCH replay writes room, match, receipt and both outbox signals once
+  ---
+  duration_ms: 1550.6178
+  type: 'test'
+  ...
+# Subtest: START_MATCH restarts the latest completed match, preserves history, and resolves equal timestamps by room version
+ok 28 - START_MATCH restarts the latest completed match, preserves history, and resolves equal timestamps by room version
+  ---
+  duration_ms: 1966.8901
+  type: 'test'
+  ...
+# Subtest: START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match
+ok 29 - START_MATCH persists the initialized turn-start/draw snapshot and restarts the completed match
+  ---
+  duration_ms: 1579.879
+  type: 'test'
+  ...
+# Subtest: START_MATCH rejects an in-progress latest match and stale completed-match restart without writes
+ok 30 - START_MATCH rejects an in-progress latest match and stale completed-match restart without writes
+  ---
+  duration_ms: 1616.8974
+  type: 'test'
+  ...
+# Subtest: concurrent completed-match restarts admit one writer and reject the stale contender without writes
+ok 31 - concurrent completed-match restarts admit one writer and reject the stale contender without writes
+  ---
+  duration_ms: 1598.9635
+  type: 'test'
+  ...
+# Subtest: completed-match restart rolls room, match, receipt, players, and outbox back together
+ok 32 - completed-match restart rolls room, match, receipt, players, and outbox back together
+  ---
+  duration_ms: 1602.7041
+  type: 'test'
+  ...
+# Subtest: fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation
+ok 33 - fresh Miniflare D1 runtimes are isolated and persisted receipts survive repository recreation
+  ---
+  duration_ms: 2264.4984
+  type: 'test'
+  ...
+# Subtest: unsupported state schema is returned as a safe recovery error
+ok 34 - unsupported state schema is returned as a safe recovery error
+  ---
+  duration_ms: 1165.5699
+  type: 'test'
+  ...
+# Subtest: D1 invite limiter persists reservations across limiter instances and admits at most five
+ok 35 - D1 invite limiter persists reservations across limiter instances and admits at most five
+  ---
+  duration_ms: 3123.8862
+  type: 'test'
+  ...
+# Subtest: D1 invite limiter success JOIN reset clears prior failures and retry backoff
+ok 36 - D1 invite limiter success JOIN reset clears prior failures and retry backoff
+  ---
+  duration_ms: 2736.3313
+  type: 'test'
+  ...
+# Subtest: same-version concurrent room mutations write one player row and one receipt
+ok 37 - same-version concurrent room mutations write one player row and one receipt
+  ---
+  duration_ms: 1184.0232
+  type: 'test'
+  ...
+# Subtest: room, player, receipt, and outbox writes roll back together on statement failure
+ok 38 - room, player, receipt, and outbox writes roll back together on statement failure
+  ---
+  duration_ms: 1250.5897
+  type: 'test'
+  ...
+# Subtest: malformed state JSON fails schema validation before it can be written
+ok 39 - malformed state JSON fails schema validation before it can be written
+  ---
+  duration_ms: 1221.6889
+  type: 'test'
+  ...
+# Subtest: stored snapshot validation checks catalog enums and every resolution record shape
+ok 40 - stored snapshot validation checks catalog enums and every resolution record shape
+  ---
+  duration_ms: 1.3102
+  type: 'test'
+  ...
+# Subtest: Drizzle SQL breakpoints split into idempotent D1 statements
+ok 41 - Drizzle SQL breakpoints split into idempotent D1 statements
+  ---
+  duration_ms: 4.9962
+  type: 'test'
+  ...
+# Subtest: fresh D1 bootstraps concurrently, records one checksummed migration and optimizes indexes
+ok 42 - fresh D1 bootstraps concurrently, records one checksummed migration and optimizes indexes
+  ---
+  duration_ms: 1250.9634
+  type: 'test'
+  ...
+# Subtest: Drizzle migration ledger rejects SQL edits after application
+ok 43 - Drizzle migration ledger rejects SQL edits after application
+  ---
+  duration_ms: 821.6447
+  type: 'test'
+  ...
+# Subtest: outbox aggregate cursor index applies as a separate versioned migration
+ok 44 - outbox aggregate cursor index applies as a separate versioned migration
+  ---
+  duration_ms: 849.0461
+  type: 'test'
+  ...
+# Subtest: failed platform baseline changes only CREATE idempotence; applied legacy bytes stay immutable
+ok 45 - failed platform baseline changes only CREATE idempotence; applied legacy bytes stay immutable
+  ---
+  duration_ms: 1.3655
+  type: 'test'
+  ...
+# Subtest: existing application database can acquire the platform baseline without changing data or its legacy ledger
+ok 46 - existing application database can acquire the platform baseline without changing data or its legacy ledger
+  ---
+  duration_ms: 1164.5576
+  type: 'test'
+  ...
+# Subtest: fresh platform migrations suffice and runtime readiness performs no schema or ledger writes
+ok 47 - fresh platform migrations suffice and runtime readiness performs no schema or ledger writes
+  ---
+  duration_ms: 916.8726
+  type: 'test'
+  ...
+# Subtest: missing platform migration fails safely; a later completed migration can retry readiness
+ok 48 - missing platform migration fails safely; a later completed migration can retry readiness
+  ---
+  duration_ms: 1028.8066
+  type: 'test'
+  ...
+# Subtest: game mount belongs to the persistent layout instead of route page segments
+ok 49 - game mount belongs to the persistent layout instead of route page segments
+  ---
+  duration_ms: 7.517
+  type: 'test'
+  ...
+1..49
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 109905.6075

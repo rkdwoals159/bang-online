@@ -251,6 +251,45 @@ function membershipOrderSpy(db: D1DatabaseLike): {
   return { db: wrapped, stats };
 }
 
+function bindingCountSpy(db: D1DatabaseLike): {
+  db: D1DatabaseLike;
+  stats: { directCalls: number; batchCalls: number; batchSizes: number[] };
+} {
+  const stats = { directCalls: 0, batchCalls: 0, batchSizes: [] as number[] };
+  const rawStatements = new WeakMap<object, ReturnType<D1DatabaseLike["prepare"]>>();
+  const wrap = (statement: ReturnType<D1DatabaseLike["prepare"]>) => {
+    const wrapped = {
+      bind(...values: Parameters<typeof statement.bind>) {
+        return wrap(statement.bind(...values));
+      },
+      first<T>(columnName?: string) {
+        stats.directCalls += 1;
+        return statement.first<T>(columnName);
+      },
+      all<T>() {
+        stats.directCalls += 1;
+        return statement.all<T>();
+      },
+      run<T>() {
+        stats.directCalls += 1;
+        return statement.run<T>();
+      },
+    };
+    rawStatements.set(wrapped, statement);
+    return wrapped;
+  };
+  const countedDb: D1DatabaseLike = {
+    prepare(query) { return wrap(db.prepare(query)); },
+    batch(statements) {
+      stats.batchCalls += 1;
+      stats.batchSizes.push(statements.length);
+      return db.batch(statements.map((statement) => rawStatements.get(statement) ?? statement));
+    },
+    exec(query) { return db.exec(query); },
+  };
+  return { db: countedDb, stats };
+}
+
 async function readChunkWithTimeout(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   timeoutMs = 1_500,
@@ -402,6 +441,142 @@ test("Worker match commands resolve effects and turn continuations with atomic r
   }
 });
 
+test("accepted match commands use one authorization context batch and one atomic commit batch", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    const match = await repository.getMatch(fixture.matchId);
+    assert.ok(match);
+    const actor = fixture.guests.find((guest) => guest.playerId === match.state.turn.currentPlayerId)!;
+    const commandBody = {
+      protocolVersion: 1,
+      commandId: nextCommandId(),
+      matchId: fixture.matchId,
+      expectedVersion: match.version,
+      type: "END_TURN",
+      payload: {},
+    };
+    const spy = bindingCountSpy(db);
+    const first = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/commands`, {
+      cookie: actor.cookie,
+      body: commandBody,
+    }), { DB: spy.db });
+    assert.equal(first.status, 200);
+    const firstAck = assertAck(await json(first));
+    assert.equal(firstAck.status, "accepted");
+    assert.deepEqual({ directCalls: spy.stats.directCalls, batchCalls: spy.stats.batchCalls },
+      { directCalls: 1, batchCalls: 2 }, "session auth + one 3-query auth/receipt/state snapshot + one atomic write batch");
+    assert.equal(spy.stats.batchSizes[0], 3);
+    assert.ok((spy.stats.batchSizes[1] ?? 0) >= 5, "commit batch contains guard, state, receipt, outbox and cleanup");
+
+    spy.stats.directCalls = 0;
+    spy.stats.batchCalls = 0;
+    spy.stats.batchSizes.length = 0;
+    const replay = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/commands`, {
+      cookie: actor.cookie,
+      body: commandBody,
+    }), { DB: spy.db });
+    assert.equal(replay.status, 200);
+    const replayAck = assertAck(await json(replay));
+    assert.equal(replayAck.status, "accepted");
+    if (replayAck.status === "accepted") assert.equal(replayAck.duplicate, true);
+    assert.deepEqual({ directCalls: spy.stats.directCalls, batchCalls: spy.stats.batchCalls },
+      { directCalls: 1, batchCalls: 1 }, "receipt replay still authenticates membership before decoding the receipt");
+    assert.deepEqual(spy.stats.batchSizes, [3]);
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("match membership revoked after command load prevents the atomic commit", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    const before = await repository.getMatch(fixture.matchId);
+    assert.ok(before);
+    const actor = fixture.guests.find((guest) => guest.playerId === before.state.turn.currentPlayerId)!;
+    const eventCount = await countRows(db, "match_events");
+    const receiptCount = await countRows(db, "command_receipts");
+    const outboxCount = await countRows(db, "outbox");
+    let batchCalls = 0;
+    const revokeBetweenReadAndCommit: D1DatabaseLike = {
+      prepare(query) { return db.prepare(query); },
+      async batch(statements) {
+        batchCalls += 1;
+        if (batchCalls === 2) {
+          await db.prepare("DELETE FROM match_players WHERE match_id = ? AND player_id = ?")
+            .bind(fixture.matchId, actor.playerId).run();
+        }
+        return db.batch(statements);
+      },
+      exec(query) { return db.exec(query); },
+    };
+    const response = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/commands`, {
+      cookie: actor.cookie,
+      body: {
+        protocolVersion: 1,
+        commandId: nextCommandId(),
+        matchId: fixture.matchId,
+        expectedVersion: before.version,
+        type: "END_TURN",
+        payload: {},
+      },
+    }), { DB: revokeBetweenReadAndCommit });
+    const ack = assertAck(await json(response));
+    assert.equal(ack.status, "rejected");
+    if (ack.status === "rejected") assert.equal(ack.error.code, "NOT_A_PLAYER");
+    assert.equal(batchCalls, 2, "the test revokes membership after the batched read and immediately before the commit CAS");
+    const after = await repository.getMatch(fixture.matchId);
+    assert.ok(after);
+    assert.equal(after.version, before.version);
+    assert.equal(after.eventSeq, before.eventSeq);
+    assert.equal(await countRows(db, "match_events"), eventCount);
+    assert.equal(await countRows(db, "command_receipts"), receiptCount);
+    assert.equal(await countRows(db, "outbox"), outboxCount);
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("a command receipt cannot be reused across two authorized matches", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    const original = await repository.getMatch(fixture.matchId);
+    assert.ok(original);
+    await repository.createMatch({
+      id: "match-receipt-reuse-target",
+      roomId: fixture.roomId,
+      state: original.state,
+      players: original.players.map(({ playerId, connectionState }) => ({ playerId, connectionState })),
+    });
+    const actor = fixture.guests.find((guest) => guest.playerId === original.state.turn.currentPlayerId)!;
+    const sharedCommandId = nextCommandId();
+    const first = await matchCommand(db, actor, fixture.matchId, "END_TURN", original.version, {}, sharedCommandId);
+    assert.equal(first.ack.status, "accepted");
+
+    const otherMatch = await repository.getMatch("match-receipt-reuse-target");
+    assert.ok(otherMatch);
+    const eventCount = await countRows(db, "match_events");
+    const receiptCount = await countRows(db, "command_receipts");
+    const outboxCount = await countRows(db, "outbox");
+    const reused = await matchCommand(db, actor, "match-receipt-reuse-target", "END_TURN", otherMatch.version, {}, sharedCommandId);
+    assert.equal(reused.ack.status, "rejected");
+    if (reused.ack.status === "rejected") assert.equal(reused.ack.error.code, "COMMAND_ID_REUSED");
+    const after = await repository.getMatch("match-receipt-reuse-target");
+    assert.ok(after);
+    assert.equal(after.version, otherMatch.version);
+    assert.equal(await countRows(db, "match_events"), eventCount);
+    assert.equal(await countRows(db, "command_receipts"), receiptCount);
+    assert.equal(await countRows(db, "outbox"), outboxCount);
+  } finally {
+    await runtime.dispose();
+  }
+});
+
 test("D1 expected-version CAS allows one writer for concurrent match commands", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {
@@ -429,6 +604,42 @@ test("D1 expected-version CAS allows one writer for concurrent match commands", 
     const matchOutboxAfter = await db.prepare("SELECT COUNT(*) AS count FROM outbox WHERE aggregate_id = ? AND kind = 'match:changed'")
       .bind(fixture.matchId).first<{ count: number | string }>();
     assert.equal(Number(matchOutboxAfter?.count) - Number(matchOutboxBefore?.count), 1);
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("stale match cursors receive the recent event tail and an explicit full snapshot", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const match = await new D1StorageRepository(db).getMatch(fixture.matchId);
+    assert.ok(match);
+    const end = match.eventSeq + 210;
+    const statements = Array.from({ length: 210 }, (_, index) => db.prepare(
+      "INSERT INTO match_events (event_id, match_id, event_seq, version, type, actor_player_id, payload_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).bind(`recent-tail-${index}`, match.id, match.eventSeq + index + 1, match.version,
+      "BEER_USED", fixture.guests[0]!.playerId, JSON.stringify({ mode: "normal", healed: 0, privateSecret: "omit-this" })));
+    await db.batch(statements);
+    await db.prepare("UPDATE matches SET event_seq = ?, state_json = ? WHERE id = ?")
+      .bind(end, JSON.stringify({ ...match.state, eventSeq: end }), match.id).run();
+    for (const cursor of [0, end - 150, end - 2, end + 1]) {
+      const response = await routeApiRequest(request(`/api/matches/${match.id}/sync`, {
+        cookie: fixture.guests[0]!.cookie,
+        body: { protocolVersion: 1, requestId: `tail-${cursor}`, matchId: match.id,
+          knownVersion: match.version, afterEventSeq: cursor },
+      }), { DB: db });
+      const value = await json(response);
+      const parsed = parseMatchSyncResponse(value);
+      assert.equal(parsed.ok, true);
+      if (!parsed.ok) throw new Error("Invalid recent-tail sync.");
+      assert.equal(parsed.value.eventSeq, end);
+      assert.equal(parsed.value.requiresFullSnapshot, cursor < end - 100 || cursor > end);
+      const expected = cursor > end ? [] : Array.from({ length: end - Math.max(cursor, end - 100) },
+        (_, i) => Math.max(cursor, end - 100) + i + 1);
+      assert.deepEqual(parsed.value.visibleEvents.map(event => event.eventSeq), expected);
+      assert.equal(JSON.stringify(value).includes("omit-this"), false);
+    }
   } finally {
     await runtime.dispose();
   }
@@ -661,6 +872,60 @@ test("existing successful receipts replay before unsupported snapshot decoding w
     assert.equal(newCommand.ack.status, "rejected");
     if (newCommand.ack.status === "rejected") assert.equal(newCommand.ack.error.code, "RECOVERY_REQUIRED");
     assert.deepEqual(await fingerprint(), beforeRetries, "retry/recovery checks must not mutate match, events, receipts, or outbox");
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("receipt replay survives malformed match snapshots, while fresh commands fail without writes", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const repository = new D1StorageRepository(db);
+    const match = await repository.getMatch(fixture.matchId);
+    assert.ok(match);
+    const actor = fixture.guests.find((guest) => guest.playerId === match.state.turn.currentPlayerId)!;
+    const outsider = await createGuest(db, "Outsider");
+    const committed = await matchCommand(db, actor, fixture.matchId, "END_TURN", match.version, {});
+    assert.equal(committed.ack.status, "accepted");
+    if (committed.ack.status !== "accepted") throw new Error("Initial command must be accepted before replay is tested.");
+    await db.prepare("UPDATE matches SET state_json = ? WHERE id = ? AND version = ?")
+      .bind("{}", fixture.matchId, committed.ack.aggregateVersion).run();
+
+    const fingerprint = async () => {
+      const row = await db.prepare(`
+        SELECT status, version, event_seq, state_schema_version, ruleset_version, state_json, updated_at
+        FROM matches WHERE id = ?
+      `).bind(fixture.matchId).first<Record<string, unknown>>();
+      return {
+        row,
+        events: await countRows(db, "match_events"),
+        outbox: await countRows(db, "outbox"),
+        receipts: await countRows(db, "command_receipts"),
+      };
+    };
+    const before = await fingerprint();
+
+    const replay = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/commands`, {
+      cookie: actor.cookie,
+      body: committed.requestBody,
+    }), { DB: db });
+    const replayAck = assertAck(await json(replay));
+    assert.equal(replayAck.status, "accepted");
+    if (replayAck.status === "accepted") assert.equal(replayAck.duplicate, true);
+
+    const outsiderReplay = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/commands`, {
+      cookie: outsider.cookie,
+      body: committed.requestBody,
+    }), { DB: db });
+    const outsiderAck = assertAck(await json(outsiderReplay));
+    assert.equal(outsiderAck.status, "rejected");
+    if (outsiderAck.status === "rejected") assert.equal(outsiderAck.error.code, "NOT_A_PLAYER");
+
+    const freshCommand = await matchCommand(db, actor, fixture.matchId, "END_TURN", committed.ack.aggregateVersion, {});
+    assert.equal(freshCommand.ack.status, "rejected");
+    if (freshCommand.ack.status === "rejected") assert.equal(freshCommand.ack.error.code, "INTERNAL_ERROR");
+    assert.deepEqual(await fingerprint(), before, "replay, denial and malformed-snapshot failure must not mutate stored data");
   } finally {
     await runtime.dispose();
   }

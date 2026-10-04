@@ -12,6 +12,9 @@ export type MatchStatusSync = Pick<
   "version" | "snapshot" | "visibleEvents"
 >;
 
+/** Keep the local public-history projection small enough for a stable DOM. */
+export const MAX_PUBLIC_LOG_EVENTS = 100;
+
 type StatusPlayer = Pick<
   MatchSnapshotView["publicTable"]["players"][number],
   "playerId" | "displayName" | "role"
@@ -130,7 +133,9 @@ export function mergePublicEvents(
     if (!eventsBySeq.has(event.eventSeq)) eventsBySeq.set(event.eventSeq, event);
   }
 
-  return [...eventsBySeq.values()].sort((left, right) => left.eventSeq - right.eventSeq);
+  return [...eventsBySeq.values()]
+    .sort((left, right) => left.eventSeq - right.eventSeq)
+    .slice(-MAX_PUBLIC_LOG_EVENTS);
 }
 
 /**

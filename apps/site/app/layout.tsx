@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GameAppMount } from "../src/ui/GameAppMount";
 
 export const metadata: Metadata = {
   title: "BANG! 온라인",
@@ -17,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased"><GameAppMount />{children}</body>
     </html>
   );
 }

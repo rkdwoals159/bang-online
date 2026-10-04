@@ -1,0 +1,556 @@
+TAP version 13
+# Subtest: D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+ok 1 - D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+  ---
+  duration_ms: 3655.3197
+  type: 'test'
+  ...
+# Subtest: D02: reusing a command ID with another payload fails before engine evaluation
+ok 2 - D02: reusing a command ID with another payload fails before engine evaluation
+  ---
+  duration_ms: 2399.4213
+  type: 'test'
+  ...
+# Subtest: D03: same-version concurrent valid commands commit once and save the losing stale outcome
+ok 3 - D03: same-version concurrent valid commands commit once and save the losing stale outcome
+  ---
+  duration_ms: 2144.2367
+  type: 'test'
+  ...
+# Subtest: D04: actor spoofing fails strict validation and another player's card fails ownership checks
+ok 4 - D04: actor spoofing fails strict validation and another player's card fails ownership checks
+  ---
+  duration_ms: 2169.0985
+  type: 'test'
+  ...
+# Subtest: known-match rule rejection is saved and replayed without another engine evaluation
+ok 5 - known-match rule rejection is saved and replayed without another engine evaluation
+  ---
+  duration_ms: 2117.209
+  type: 'test'
+  ...
+# Subtest: known-match stale version rejection is stored and replayed before engine evaluation
+ok 6 - known-match stale version rejection is stored and replayed before engine evaluation
+  ---
+  duration_ms: 2232.5929
+  type: 'test'
+  ...
+# Subtest: rejection receipt version race reloads state and records the revalidated stale result
+ok 7 - rejection receipt version race reloads state and records the revalidated stale result
+  ---
+  duration_ms: 2543.9037
+  type: 'test'
+  ...
+# Subtest: stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+ok 8 - stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+  ---
+  duration_ms: 2561.2117
+  type: 'test'
+  ...
+# Subtest: a non-member cannot obtain or persist a command receipt
+ok 9 - a non-member cannot obtain or persist a command receipt
+  ---
+  duration_ms: 2162.8227
+  type: 'test'
+  ...
+# Subtest: T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+ok 10 - T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+  ---
+  duration_ms: 1890.9448
+  type: 'test'
+  ...
+# Subtest: a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+ok 11 - a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+  ---
+  duration_ms: 2222.8037
+  type: 'test'
+  ...
+# Subtest: the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+ok 12 - the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+  ---
+  duration_ms: 4592.7279
+  type: 'test'
+  ...
+# Subtest: a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+ok 13 - a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+  ---
+  duration_ms: 2082.098
+  type: 'test'
+  ...
+# Subtest: match outbox projection emits only aggregate ID, version, and event sequence
+ok 14 - match outbox projection emits only aggregate ID, version, and event sequence
+  ---
+  duration_ms: 2.2213
+  type: 'test'
+  ...
+# Subtest: room outbox projection follows the protocol room:changed shape
+ok 15 - room outbox projection follows the protocol room:changed shape
+  ---
+  duration_ms: 0.2823
+  type: 'test'
+  ...
+# Subtest: outbox projection rejects malformed aggregate cursors
+ok 16 - outbox projection rejects malformed aggregate cursors
+  ---
+  duration_ms: 0.8652
+  type: 'test'
+  ...
+# Subtest: match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+ok 17 - match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+  ---
+  duration_ms: 6.3765
+  type: 'test'
+  ...
+# Subtest: match sync rejects an actor when membership is absent or the saved roster no longer contains them
+ok 18 - match sync rejects an actor when membership is absent or the saved roster no longer contains them
+  ---
+  duration_ms: 0.7797
+  type: 'test'
+  ...
+# Subtest: match sync flags a truncated or future event cursor for a full snapshot
+ok 19 - match sync flags a truncated or future event cursor for a full snapshot
+  ---
+  duration_ms: 1.2722
+  type: 'test'
+  ...
+# Subtest: room sync rechecks both authenticated view and persisted membership without returning invite material
+ok 20 - room sync rechecks both authenticated view and persisted membership without returning invite material
+  ---
+  duration_ms: 0.9497
+  type: 'test'
+  ...
+# Subtest: room sync carries the persisted active match route after START_MATCH
+ok 21 - room sync carries the persisted active match route after START_MATCH
+  ---
+  duration_ms: 0.5112
+  type: 'test'
+  ...
+# Subtest: room sync rejects a missing membership without disclosing the room ID
+ok 22 - room sync rejects a missing membership without disclosing the room ID
+  ---
+  duration_ms: 0.2964
+  type: 'test'
+  ...
+# Subtest: room sync rejects when persisted membership has expired after an earlier member view
+ok 23 - room sync rejects when persisted membership has expired after an earlier member view
+  ---
+  duration_ms: 0.5053
+  type: 'test'
+  ...
+# Subtest: restart recovery restores pending cursors, same credential seat, private sync, public history, and one command receipt
+ok 24 - restart recovery restores pending cursors, same credential seat, private sync, public history, and one command receipt
+  ---
+  duration_ms: 3583.4847
+  type: 'test'
+  ...
+# Subtest: unsupported active snapshots are quarantined without changing cursor, pending state, receipt, or history
+ok 25 - unsupported active snapshots are quarantined without changing cursor, pending state, receipt, or history
+  ---
+  duration_ms: 2653.1186
+  type: 'test'
+  ...
+# Subtest: trims display names and enforces 1–20 Unicode code points without controls
+ok 26 - trims display names and enforces 1–20 Unicode code points without controls
+  ---
+  duration_ms: 3412.5274
+  type: 'test'
+  ...
+# Subtest: issues hashed credentials, validates expiry and revocation, and disables expiry by default
+ok 27 - issues hashed credentials, validates expiry and revocation, and disables expiry by default
+  ---
+  duration_ms: 2343.6667
+  type: 'test'
+  ...
+# Subtest: injects guest TTL and room retention without enabling default cleanup
+ok 28 - injects guest TTL and room retention without enabling default cleanup
+  ---
+  duration_ms: 2690.8568
+  type: 'test'
+  ...
+# Subtest: creates private rooms with one-time invite secrets and public allowlisted outbox
+ok 29 - creates private rooms with one-time invite secrets and public allowlisted outbox
+  ---
+  duration_ms: 2419.865
+  type: 'test'
+  ...
+# Subtest: joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+ok 30 - joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+  ---
+  duration_ms: 3669.3658
+  type: 'test'
+  ...
+# Subtest: readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+ok 31 - readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+  ---
+  duration_ms: 5514.1795
+  type: 'test'
+  ...
+# Subtest: only the owner can voluntarily close a room through the service
+ok 32 - only the owner can voluntarily close a room through the service
+  ---
+  duration_ms: 4980.8556
+  type: 'test'
+  ...
+# Subtest: the service does not close a room after its lobby is locked
+ok 33 - the service does not close a room after its lobby is locked
+  ---
+  duration_ms: 6554.8855
+  type: 'test'
+  ...
+# Subtest: starts an all-ready room once, returns the same match on retry, and projects its route
+ok 34 - starts an all-ready room once, returns the same match on retry, and projects its route
+  ---
+  duration_ms: 5513.9744
+  type: 'test'
+  ...
+# Subtest: restarts a completed match with a fresh seeded setup and preserves the prior record
+ok 35 - restarts a completed match with a fresh seeded setup and preserves the prior record
+  ---
+  duration_ms: 5512.2582
+  type: 'test'
+  ...
+# Subtest: requires at least four ready members and starts a seven-member room
+ok 36 - requires at least four ready members and starts a seven-member room
+  ---
+  duration_ms: 10128.686
+  type: 'test'
+  ...
+# Subtest: returns a completed room to the same lobby and requires readiness before starting again
+ok 37 - returns a completed room to the same lobby and requires readiness before starting again
+  ---
+  duration_ms: 4421.1558
+  type: 'test'
+  ...
+# Subtest: startup config reports missing PostgreSQL settings before opening the listener
+ok 38 - startup config reports missing PostgreSQL settings before opening the listener
+  ---
+  duration_ms: 2.8811
+  type: 'test'
+  ...
+# Subtest: runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+ok 39 - runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+  ---
+  duration_ms: 7160.0386
+  type: 'test'
+  ...
+# Subtest: START_MATCH enforces the ready owner roster, persists once, and syncs the exact match route
+ok 40 - START_MATCH enforces the ready owner roster, persists once, and syncs the exact match route
+  ---
+  duration_ms: 3857.8854
+  type: 'test'
+  ...
+# Subtest: node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+ok 41 - node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+  ---
+  duration_ms: 7872.2683
+  type: 'test'
+  ...
+# Subtest: handshake authenticates the configured cookie and sets only the server-resolved identity
+ok 42 - handshake authenticates the configured cookie and sets only the server-resolved identity
+  ---
+  duration_ms: 13.031
+  type: 'test'
+  ...
+# Subtest: missing, invalid, expired, and duplicate session cookies fail the handshake
+ok 43 - missing, invalid, expired, and duplicate session cookies fail the handshake
+  ---
+  duration_ms: 53.1143
+  type: 'test'
+  ...
+# Subtest: room commands are strictly parsed and membership is rechecked before dispatch
+ok 44 - room commands are strictly parsed and membership is rechecked before dispatch
+  ---
+  duration_ms: 48.8811
+  type: 'test'
+  ...
+# Subtest: JOIN bypasses pre-membership but its handler can join only after T44 confirms membership
+ok 45 - JOIN bypasses pre-membership but its handler can join only after T44 confirms membership
+  ---
+  duration_ms: 29.6366
+  type: 'test'
+  ...
+# Subtest: authenticated room preview needs no membership and returns only the shared success DTO
+ok 46 - authenticated room preview needs no membership and returns only the shared success DTO
+  ---
+  duration_ms: 14.9415
+  type: 'test'
+  ...
+# Subtest: invalid and unknown preview invites share INVITE_INVALID; malformed preview ACKs BAD_REQUEST without echoing secrets
+ok 47 - invalid and unknown preview invites share INVITE_INVALID; malformed preview ACKs BAD_REQUEST without echoing secrets
+  ---
+  duration_ms: 15.5271
+  type: 'test'
+  ...
+# Subtest: preview failures and invalid JOIN failures share one bucket; the sixth lookup is blocked before dispatch
+ok 48 - preview failures and invalid JOIN failures share one bucket; the sixth lookup is blocked before dispatch
+  ---
+  duration_ms: 77.599
+  type: 'test'
+  ...
+# Subtest: malformed JOIN payloads do not consume failed-invite allowance
+ok 49 - malformed JOIN payloads do not consume failed-invite allowance
+  ---
+  duration_ms: 109.9237
+  type: 'test'
+  ...
+# Subtest: valid invite JOIN state errors never count as guessing failures
+ok 50 - valid invite JOIN state errors never count as guessing failures
+  ---
+  duration_ms: 468.6815
+  type: 'test'
+  ...
+# Subtest: a successful JOIN clears prior preview failures for its IP and player key
+ok 51 - a successful JOIN clears prior preview failures for its IP and player key
+  ---
+  duration_ms: 143.6503
+  type: 'test'
+  ...
+# Subtest: undefined and unknown JOIN ACKs do not clear prior invite failures
+ok 52 - undefined and unknown JOIN ACKs do not clear prior invite failures
+  ---
+  duration_ms: 216.7732
+  type: 'test'
+  ...
+# Subtest: limiter keys use raw peer address and authenticated player ID, ignoring forwarded headers
+ok 53 - limiter keys use raw peer address and authenticated player ID, ignoring forwarded headers
+  ---
+  duration_ms: 157.1983
+  type: 'test'
+  ...
+# Subtest: match commands fail closed without fresh membership; match channel joins recheck too
+ok 54 - match commands fail closed without fresh membership; match channel joins recheck too
+  ---
+  duration_ms: 48.0888
+  type: 'test'
+  ...
+# Subtest: sync envelopes are exact and room/match membership is checked before sync handlers
+ok 55 - sync envelopes are exact and room/match membership is checked before sync handlers
+  ---
+  duration_ms: 44.8776
+  type: 'test'
+  ...
+# Subtest: the accepted client event list is exact and unknown/server-only events are rejected
+ok 56 - the accepted client event list is exact and unknown/server-only events are rejected
+  ---
+  duration_ms: 46.1477
+  type: 'test'
+  ...
+# Subtest: disconnect maps only to presence callback and never invokes seat removal
+ok 57 - disconnect maps only to presence callback and never invokes seat removal
+  ---
+  duration_ms: 15.7324
+  type: 'test'
+  ...
+# Subtest: allows five failed lookups in a rolling minute and rejects the sixth before lookup
+ok 58 - allows five failed lookups in a rolling minute and rejects the sixth before lookup
+  ---
+  duration_ms: 2.5155
+  type: 'test'
+  ...
+# Subtest: reserves in-flight lookup slots so concurrent preview and JOIN work cannot exceed five lookups
+ok 59 - reserves in-flight lookup slots so concurrent preview and JOIN work cannot exceed five lookups
+  ---
+  duration_ms: 0.5154
+  type: 'test'
+  ...
+# Subtest: doubles early retry delay and caps it at fifteen minutes
+ok 60 - doubles early retry delay and caps it at fifteen minutes
+  ---
+  duration_ms: 0.4112
+  type: 'test'
+  ...
+# Subtest: continues to block after the initial retry delay until a rolling failure expires
+ok 61 - continues to block after the initial retry delay until a rolling failure expires
+  ---
+  duration_ms: 0.3347
+  type: 'test'
+  ...
+# Subtest: a successful preview releases its reservation without clearing prior failed lookups
+ok 62 - a successful preview releases its reservation without clearing prior failed lookups
+  ---
+  duration_ms: 0.2715
+  type: 'test'
+  ...
+# Subtest: successful JOIN clears failure history and backoff for that key
+ok 63 - successful JOIN clears failure history and backoff for that key
+  ---
+  duration_ms: 0.2684
+  type: 'test'
+  ...
+# Subtest: idle cleanup removes bucket state after fifteen minutes without invalid input
+ok 64 - idle cleanup removes bucket state after fifteen minutes without invalid input
+  ---
+  duration_ms: 0.3394
+  type: 'test'
+  ...
+# Subtest: raw peer and authenticated player ID form isolated bucket keys
+ok 65 - raw peer and authenticated player ID form isolated bucket keys
+  ---
+  duration_ms: 0.2794
+  type: 'test'
+  ...
+# Subtest: applies the initial schema to an empty database, skips an identical migration, and rejects checksum changes
+ok 66 - applies the initial schema to an empty database, skips an identical migration, and rejects checksum changes
+  ---
+  duration_ms: 3619.5362
+  type: 'test'
+  ...
+# Subtest: creates and reads rooms and the complete internal match snapshot
+ok 67 - creates and reads rooms and the complete internal match snapshot
+  ---
+  duration_ms: 3510.1314
+  type: 'test'
+  ...
+# Subtest: looks up the latest current-or-last match route for a room
+ok 68 - looks up the latest current-or-last match route for a room
+  ---
+  duration_ms: 3123.2159
+  type: 'test'
+  ...
+# Subtest: atomically commits snapshot, events, receipt, and a state-free outbox signal
+ok 69 - atomically commits snapshot, events, receipt, and a state-free outbox signal
+  ---
+  duration_ms: 2730.6544
+  type: 'test'
+  ...
+# Subtest: records a rejected command receipt without changing snapshot, version, events, or outbox
+ok 70 - records a rejected command receipt without changing snapshot, version, events, or outbox
+  ---
+  duration_ms: 2753.2906
+  type: 'test'
+  ...
+# Subtest: does not record a rejection receipt for an actor without a match seat
+ok 71 - does not record a rejection receipt for an actor without a match seat
+  ---
+  duration_ms: 2450.7413
+  type: 'test'
+  ...
+# Subtest: returns the current version without recording a rejection receipt after an observed-version race
+ok 72 - returns the current version without recording a rejection receipt after an observed-version race
+  ---
+  duration_ms: 2416.3325
+  type: 'test'
+  ...
+# Subtest: rejects stale and lower-version commits without writing any associated records
+ok 73 - rejects stale and lower-version commits without writing any associated records
+  ---
+  duration_ms: 2732.7687
+  type: 'test'
+  ...
+# Subtest: rolls back the snapshot, event, and receipt when the outbox insert fails
+ok 74 - rolls back the snapshot, event, and receipt when the outbox insert fails
+  ---
+  duration_ms: 2684.7057
+  type: 'test'
+  ...
+# Subtest: looks up only active hashed sessions and creates an idempotent room with a safe preview
+ok 75 - looks up only active hashed sessions and creates an idempotent room with a safe preview
+  ---
+  duration_ms: 3180.4464
+  type: 'test'
+  ...
+# Subtest: starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+ok 76 - starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+  ---
+  duration_ms: 2467.0902
+  type: 'test'
+  ...
+# Subtest: a duplicate room-start command returns the original match outcome without additional writes
+ok 77 - a duplicate room-start command returns the original match outcome without additional writes
+  ---
+  duration_ms: 2336.7594
+  type: 'test'
+  ...
+# Subtest: restarts directly from the latest completed match with atomic writes and preserved history
+ok 78 - restarts directly from the latest completed match with atomic writes and preserved history
+  ---
+  duration_ms: 2837.8135
+  type: 'test'
+  ...
+# Subtest: rejects in-game starts unless the latest same-room match is completed, with no writes
+ok 79 - rejects in-game starts unless the latest same-room match is completed, with no writes
+  ---
+  duration_ms: 12570.2544
+  type: 'test'
+  ...
+# Subtest: serializes concurrent direct restarts so only one new match becomes active
+ok 80 - serializes concurrent direct restarts so only one new match becomes active
+  ---
+  duration_ms: 3551.8122
+  type: 'test'
+  ...
+# Subtest: direct restart rechecks unchanged membership and readiness before writing
+ok 81 - direct restart rechecks unchanged membership and readiness before writing
+  ---
+  duration_ms: 7807.6908
+  type: 'test'
+  ...
+# Subtest: start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+ok 82 - start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+  ---
+  duration_ms: 15096.4656
+  type: 'test'
+  ...
+# Subtest: outbox failure rolls back the room, match, players, receipt, and preceding signal
+ok 83 - outbox failure rolls back the room, match, players, receipt, and preceding signal
+  ---
+  duration_ms: 2370.2034
+  type: 'test'
+  ...
+# Subtest: concurrent retries of one room-start command commit one match and return its original ID
+ok 84 - concurrent retries of one room-start command commit one match and return its original ID
+  ---
+  duration_ms: 2385.8088
+  type: 'test'
+  ...
+# Subtest: serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+ok 85 - serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+  ---
+  duration_ms: 2248.2847
+  type: 'test'
+  ...
+# Subtest: persists room status changes and locks lobby membership outside WAITING
+ok 86 - persists room status changes and locks lobby membership outside WAITING
+  ---
+  duration_ms: 2194.4556
+  type: 'test'
+  ...
+# Subtest: rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+ok 87 - rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+  ---
+  duration_ms: 1893.2248
+  type: 'test'
+  ...
+# Subtest: rejects leave by a non-member without changing the room
+ok 88 - rejects leave by a non-member without changing the room
+  ---
+  duration_ms: 1841.1579
+  type: 'test'
+  ...
+# Subtest: returns a completed match room to the lobby atomically and replays the original receipt
+ok 89 - returns a completed match room to the lobby atomically and replays the original receipt
+  ---
+  duration_ms: 2101.9744
+  type: 'test'
+  ...
+# Subtest: rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+ok 90 - rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+  ---
+  duration_ms: 12266.1564
+  type: 'test'
+  ...
+# Subtest: rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+ok 91 - rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+  ---
+  duration_ms: 2153.8928
+  type: 'test'
+  ...
+1..91
+# tests 91
+# suites 0
+# pass 91
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 229483.5116

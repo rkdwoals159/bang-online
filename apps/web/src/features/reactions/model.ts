@@ -86,8 +86,10 @@ export async function sendAndRefreshResponse(
     syncMatch(matchId: string): Promise<MatchSyncResponse>;
   },
   command: MatchCommand,
+  onAcknowledgement?: (acknowledgement: CommandAck) => void,
 ): Promise<{ acknowledgement: CommandAck; projection: ReactionProjection | null }> {
   const acknowledgement = await transport.sendMatchCommand(command);
+  onAcknowledgement?.(acknowledgement);
   try {
     const response = await transport.syncMatch(command.matchId);
     return {
