@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `command_receipts` (
+CREATE TABLE `command_receipts` (
 	`actor_player_id` text NOT NULL,
 	`command_id` text NOT NULL,
 	`match_id` text,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `command_receipts` (
 	CONSTRAINT "command_receipts_single_aggregate_check" CHECK("command_receipts"."match_id" IS NULL OR "command_receipts"."room_id" IS NULL)
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `commit_guards` (
+CREATE TABLE `commit_guards` (
 	`marker_id` text PRIMARY KEY NOT NULL,
 	`aggregate_id` text NOT NULL,
 	`expected_version` integer NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `commit_guards` (
 	CONSTRAINT "commit_guards_expected_version_check" CHECK("commit_guards"."expected_version" >= 0)
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `guest_sessions` (
+CREATE TABLE `guest_sessions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`token_hash` text NOT NULL,
 	`display_name` text NOT NULL,
@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS `guest_sessions` (
 	CONSTRAINT "guest_sessions_display_name_length_check" CHECK(length("guest_sessions"."display_name") BETWEEN 1 AND 256)
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `guest_sessions_token_hash_unique` ON `guest_sessions` (`token_hash`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `invite_attempts` (
+CREATE UNIQUE INDEX `guest_sessions_token_hash_unique` ON `guest_sessions` (`token_hash`);--> statement-breakpoint
+CREATE TABLE `invite_attempts` (
 	`bucket_hash` text PRIMARY KEY NOT NULL,
 	`failures_json` text DEFAULT '[]' NOT NULL,
 	`last_invalid_at` integer,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `invite_attempts` (
 	CONSTRAINT "invite_attempts_version_check" CHECK("invite_attempts"."version" >= 0)
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `invite_lookup_reservations` (
+CREATE TABLE `invite_lookup_reservations` (
 	`reservation_id` text PRIMARY KEY NOT NULL,
 	`bucket_hash` text NOT NULL,
 	`reserved_at` integer NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS `invite_lookup_reservations` (
 	CONSTRAINT "invite_reservations_expiry_check" CHECK("invite_lookup_reservations"."expires_at" > "invite_lookup_reservations"."reserved_at")
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `invite_reservations_expiry_idx` ON `invite_lookup_reservations` (`expires_at`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `match_events` (
+CREATE INDEX `invite_reservations_expiry_idx` ON `invite_lookup_reservations` (`expires_at`);--> statement-breakpoint
+CREATE TABLE `match_events` (
 	`match_id` text NOT NULL,
 	`event_seq` integer NOT NULL,
 	`event_id` text NOT NULL,
@@ -76,9 +76,9 @@ CREATE TABLE IF NOT EXISTS `match_events` (
 	CONSTRAINT "match_events_payload_json_check" CHECK(json_valid("match_events"."payload_json") AND json_type("match_events"."payload_json") = 'object')
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `match_events_event_id_unique` ON `match_events` (`event_id`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `match_events_match_version_idx` ON `match_events` (`match_id`,`version`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `match_players` (
+CREATE UNIQUE INDEX `match_events_event_id_unique` ON `match_events` (`event_id`);--> statement-breakpoint
+CREATE INDEX `match_events_match_version_idx` ON `match_events` (`match_id`,`version`);--> statement-breakpoint
+CREATE TABLE `match_players` (
 	`match_id` text NOT NULL,
 	`player_id` text NOT NULL,
 	`seat_index` integer NOT NULL,
@@ -94,9 +94,9 @@ CREATE TABLE IF NOT EXISTS `match_players` (
 	CONSTRAINT "match_players_eliminated_check" CHECK(("match_players"."alive" = 1 AND "match_players"."eliminated_at" IS NULL) OR ("match_players"."alive" = 0 AND "match_players"."eliminated_at" IS NOT NULL))
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `match_players_match_seat_unique` ON `match_players` (`match_id`,`seat_index`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `match_players_player_idx` ON `match_players` (`player_id`,`match_id`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `matches` (
+CREATE UNIQUE INDEX `match_players_match_seat_unique` ON `match_players` (`match_id`,`seat_index`);--> statement-breakpoint
+CREATE INDEX `match_players_player_idx` ON `match_players` (`player_id`,`match_id`);--> statement-breakpoint
+CREATE TABLE `matches` (
 	`id` text PRIMARY KEY NOT NULL,
 	`room_id` text NOT NULL,
 	`status` text NOT NULL,
@@ -120,9 +120,9 @@ CREATE TABLE IF NOT EXISTS `matches` (
 	CONSTRAINT "matches_room_version_check" CHECK("matches"."room_version" IS NULL OR "matches"."room_version" >= 0)
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `matches_status_updated_idx` ON `matches` (`status`,`updated_at`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `matches_room_latest_idx` ON `matches` (`room_id`,"room_version" desc,"created_at" desc,"started_at" desc,"id" desc);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `outbox` (
+CREATE INDEX `matches_status_updated_idx` ON `matches` (`status`,`updated_at`);--> statement-breakpoint
+CREATE INDEX `matches_room_latest_idx` ON `matches` (`room_id`,"room_version" desc,"created_at" desc,"started_at" desc,"id" desc);--> statement-breakpoint
+CREATE TABLE `outbox` (
 	`cursor` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`event_id` text NOT NULL,
 	`aggregate_id` text NOT NULL,
@@ -150,9 +150,9 @@ CREATE TABLE IF NOT EXISTS `outbox` (
   ))
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `outbox_event_id_unique` ON `outbox` (`event_id`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `outbox_unpublished_cursor_idx` ON `outbox` (`cursor`) WHERE "outbox"."published_at" IS NULL;--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `room_players` (
+CREATE UNIQUE INDEX `outbox_event_id_unique` ON `outbox` (`event_id`);--> statement-breakpoint
+CREATE INDEX `outbox_unpublished_cursor_idx` ON `outbox` (`cursor`) WHERE "outbox"."published_at" IS NULL;--> statement-breakpoint
+CREATE TABLE `room_players` (
 	`room_id` text NOT NULL,
 	`player_id` text NOT NULL,
 	`seat_index` integer NOT NULL,
@@ -166,9 +166,9 @@ CREATE TABLE IF NOT EXISTS `room_players` (
 	CONSTRAINT "room_players_ready_check" CHECK("room_players"."ready" IN (0, 1))
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `room_players_room_seat_unique` ON `room_players` (`room_id`,`seat_index`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `room_players_player_idx` ON `room_players` (`player_id`,`room_id`);--> statement-breakpoint
-CREATE TABLE IF NOT EXISTS `rooms` (
+CREATE UNIQUE INDEX `room_players_room_seat_unique` ON `room_players` (`room_id`,`seat_index`);--> statement-breakpoint
+CREATE INDEX `room_players_player_idx` ON `room_players` (`player_id`,`room_id`);--> statement-breakpoint
+CREATE TABLE `rooms` (
 	`id` text PRIMARY KEY NOT NULL,
 	`owner_player_id` text NOT NULL,
 	`invite_code_hash` text NOT NULL,
@@ -183,5 +183,5 @@ CREATE TABLE IF NOT EXISTS `rooms` (
 	CONSTRAINT "rooms_version_check" CHECK("rooms"."version" >= 0)
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS `rooms_invite_code_hash_unique` ON `rooms` (`invite_code_hash`);--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS `rooms_status_created_idx` ON `rooms` (`status`,`created_at`);
+CREATE UNIQUE INDEX `rooms_invite_code_hash_unique` ON `rooms` (`invite_code_hash`);--> statement-breakpoint
+CREATE INDEX `rooms_status_created_idx` ON `rooms` (`status`,`created_at`);

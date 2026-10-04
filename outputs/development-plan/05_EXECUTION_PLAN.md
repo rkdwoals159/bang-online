@@ -1361,3 +1361,10 @@
 - T114 Sites 전송 최적화 — DONE. 루트가 전송 회귀 테스트 13/13 및 중복 조회 2→1 측정 결과를 검토했다. 의존 T112 DONE. 단독 소유 apps/web/src/transport/**, apps/web/test/sites-transport*.mjs, apps/web/src/features/actions/model.ts, apps/web/src/features/reactions/model.ts. single flight/최신 힌트/조건부 sync/presence/버전 명령 응답 적용. 재접속·같은 명령 재시도 보존.
 - T115 화면 흐름 개선 — DONE. 루트 검토 및 UI 집중 테스트 56/56, 결과 보완 12/12, 웹 타입 검사/보드 fixture 통과. 의존 T112 DONE. 단독 소유 apps/web/src/app/pages.tsx, app CSS, features/game-table/**, features/actions/ActionsPanel.tsx 및 actions.css, features/reactions/ReactionPrompt.tsx 및 reactions.css, features/status/**, features/lobby/**, features/room-entry/**, 관련 web UI tests. 현재 요청 상단/손패 단일화/결과 우선/안전한 비활성 이유/공개 로그/접속 표시/사용자 문구.
 - T116 통합 검증·배포 — IN_PROGRESS. 의존 T113/T114/T115 DONE. 루트 소유 통합 fixture/검증 기록/배포 산출물, 필요한 기존 Node producer 호환 보완 및 공용 계약 수정. 변경 검증과 기존 미검증 수락 케이스를 구분한다.
+
+
+### T112–T118 루트 검증 기록 (2026-10-04)
+
+T112/T113/T114/T115/T117/T118 DONE: 공용 계약 20/20, 엔진 78/78, Sites 39/39, 웹 98/98; check/build 및 local 4P/7P HTTP 전체 게임 PASS. T117 파일 소유는 root 단독 db/schema.ts, drizzle/**이며 최초 migration 변경 없이 생성된 0001과 sparse outbox query-plan을 검증했다. T118은 root 단독 app-state.tsx 및 HTTP readiness 테스트이며 신규 게스트 복구 조회 제거를 검증했다.
+
+T116 IN_PROGRESS: 로컬 통합 검증은 완료했으나 같은 Site 버전 2 publish FAILED (existing command_receipts). 기존 SQL/DB 데이터 보존. 플랫폼 적용 기록 정리 없이 초기 migration 재작성 또는 같은 archive 반복 배포를 진행하지 않는다. 상세 결과는 outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md 및 deployment-result.json. 기존 D06/D18 및 운영 S09 NOT RUN은 그대로다.

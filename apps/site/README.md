@@ -30,3 +30,15 @@ The live Worker HTTP scenarios cover both 4P and 7P room/match fixtures, but the
 ## Latest recorded run
 
 The final T106 run completed **29 PASS / 0 FAIL / 6 NOT RUN** across 35 assertions: Site Miniflare tests **35/35**, web Sites transport/route tests **20/20**, Site typecheck/build, Worker startup, local HTTP smoke, and Worker shutdown all passed. S01 and S04 are fully PASS; S02, S03, S05, S06, S07, and S08 are PARTIAL because their explicitly listed unrun assertions were not promoted. The direct Worker smoke recorded `GET /assets/cards/playing/01_bang.png` as `200 image/png` (116,634 bytes), `GET /favicon.svg` as `200 image/svg+xml`, and an unknown API path as safe JSON 404. The process launched by the runner has stopped; `127.0.0.1:8799` is free. Full browser 4P/7P play and real Worker restart recovery remain NOT RUN. Existing 95/97, D06, and D18 are unchanged.
+
+
+## UI/API follow-up — 2026-10-04
+
+Local implementation and verification completed: 235 automated tests PASS, types/build PASS, complete local 4P/7P Worker HTTP games and mobile/desktop browser UI checks. See [implementation report](../../outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md). Original 95/97 and D06/D18 NOT RUN remain unchanged.
+
+The same public Site version 2 was saved from pushed source 5e21250692e825e58cc085074da85543f0d2b63a, but publication FAILED on initial table creation: command_receipts already exists. This update is not confirmed live. Existing application migration ledger has initial version 1 applied; platform migration history must be reconciled before retry. Applied initial SQL and production data were preserved. T116 remains IN_PROGRESS. See [deployment evidence](../../outputs/review-2026-10-04/deployment-result.json).
+
+
+## Platform baseline recovery
+
+The specifically failed initial platform CREATE SQL uses IF NOT EXISTS to adopt the legacy schema. The exact applied application SQL is preserved in db/legacy with its original SHA-256. Request-time initialization now checks schema readiness only. No production table or existing application ledger is dropped or overwritten. Local preparation is explicit: build, then pnpm --filter @bang/site db:local before start. The local migration command always uses --local. Full regression: 239/239 PASS, including 4 new preservation/readiness tests; check/build and Drizzle check PASS. Final publish outcome is recorded separately.

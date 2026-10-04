@@ -57,4 +57,17 @@
 
 기존 97개 통합 수락 기준은 **95/97**, D06/D18은 **NOT RUN**으로 유지한다. 이번 웹 테스트의 98개와 별개다. 운영 서버의 전체 4인·7인 브라우저 대국·결과·재접속 S09는 이번에도 NOT RUN이며 PASS로 올리지 않았다.
 
-기존 공개 Site 반영은 최종 Sites 배포 성공 응답으로 확정하며 배포 증거를 별도로 기록한다.
+## 운영 반영 상태: 배포 실패
+
+수정 소스 `5e21250692e825e58cc085074da85543f0d2b63a`를 푸시하고 동일 Site의 버전 2로 저장했으나, 배포는 `table command_receipts already exists ... SQLITE_ERROR`로 실패했다. 수정본의 운영 반영은 확인되지 않았다. 기존 공개 URL은 유지되며 최신 성공 배포는 버전 1이다.
+
+읽기 전용 DB 확인에서 기존 앱의 `schema_migrations`에는 최초 SQL의 버전 1/체크섬과 2026-09-28 적용 기록이 있었다. Sites 게시 과정은 이 최초 테이블 생성 SQL을 다시 실행하려 했다. 두 마이그레이션 기록의 적용 경계를 현재 도구로 확정하거나 정리할 수 없다. Sites persistence-and-storage 스킬의 지시에 따라 적용된 SQL/metadata를 수정하거나 불확실한 이력을 덮어쓰지 않았다. 테이블 삭제, DB 초기화, 운영 데이터 변경은 수행하지 않았다.
+
+남은 단계는 Sites 플랫폼의 마이그레이션 기록을 기존 적용 이력과 안전하게 일치시킨 뒤 동일 소스의 게시를 다시 진행하는 것이다. T116은 IN_PROGRESS로 유지한다. 실패 응답과 DB 확인 근거는 `deployment-result.json`에 보관했다.
+
+
+## 배포 이력 복구 작업 (2026-10-04 후속)
+
+사용자 요청으로 같은 Site의 배포 경로를 보완했다. 첫 CREATE에서 실패한 플랫폼 baseline만 IF NOT EXISTS로 수정했고, 논리 스키마와 Drizzle metadata는 변경하지 않았다. 기존 앱에서 적용한 SQL 원본은 db/legacy/0000_long_iron_man.sql에 정확한 바이트와 SHA-256을 보존했다. 기존 schema_migrations 행은 그대로 두며, Worker는 더 이상 스키마나 ledger를 변경하지 않고 준비 상태만 읽는다. 성공 배포 이후 이 baseline도 불변으로 취급한다.
+
+기존 데이터·checksum 유지, fresh platform DB, 읽기 전용 runtime, 누락 migration 뒤 retry를 검증한 추가 테스트 4/4 PASS. 전체 자동 검증은 계약 20 + 엔진 78 + Sites 43 + 웹 98 = 239/239 PASS, check/build 및 Drizzle metadata 검사 PASS. 재현 명령은 node scripts/verify-improvements.mjs. 게시 결과는 별도 최종 receipt로 확정한다.

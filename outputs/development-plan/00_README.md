@@ -141,3 +141,10 @@ T110은 Drizzle source schema, generated migration SQL과 metadata, D1 first-req
 T111은 guest/room/match 흐름용 WebMCP 도구 7개를 추가하고, exact input 검증과 기존 transport/server command 경로를 사용하도록 연결했다. WebMCP tests **6/6**, web check/build가 통과했다. 현재 사용할 수 있는 Codex in-app browser는 WebMCP native tool 발견·호출 인터페이스를 제공하지 않아 native context의 valid/invalid tool 실행과 read-back은 **NOT RUN**으로 남겼다. Mock context의 등록·실패 처리·signal 수명주기와 도구 실행 로직은 검증했다. 다음은 T106 S01–S08 local runtime/browser gate이며, 기존 97-case 결과와 D06/D18은 변경하지 않는다.
 
 T106의 로컬 Sites S01–S08 실행 증거를 2026-09-29에 기록하고 루트 검토해 DONE 처리했다. 실행은 35개 assertion 중 **29 PASS / 0 FAIL / 6 NOT RUN**, gate 기준 **2 PASS / 6 PARTIAL / 0 FAIL**이다. S01/S04는 전 assertion이 PASS이고, S02/S03/S05/S06/S07/S08의 미실행 조건은 NOT RUN을 유지한다. Site Miniflare tests **35/35**, web transport/route tests **20/20**, TypeScript check, Worker build, local Wrangler start/HTTP smoke/stop이 통과했다. HTTP smoke에서 4P와 7P의 방 생성·입장·준비·시작·viewer sync·legal `END_TURN`·정확한 receipt replay·SSE cursor reconnect를 각각 수행했다. Root의 in-app browser 한 context/profile에서는 `/` 및 `/rooms/new` route 표시만 봤으며, 전체 UI 4P/7P 게임, 독립 browser cookie contexts, Wrangler Worker restart recovery, secret log scans는 NOT RUN이다. Worker 프로세스는 종료됐고 port 8799는 비어 있다. 상세 assertion command/fixture/HTTP 근거는 [Sites 결과 JSON](../../apps/web/e2e/sites-results.json), [06 acceptance 기록](06_ACCEPTANCE_TESTS.md), [Sites README](../../apps/site/README.md)에 있다. 이는 통합 97-case 수락 결과가 아니며 기존 **95/97**, D06/D18 NOT RUN은 그대로다. T107에서 사용자 승인된 Codex Sites 공개 게시를 진행한다.
+
+
+## UI/API 개선 후속 상태 (2026-10-04)
+
+T112/T113/T114/T115/T117/T118 코드 수정 및 로컬 검증 완료. 계약 20, 엔진 78, Sites 39, 웹 98개로 자동 테스트 235/235 PASS, 타입 검사와 Sites 빌드 PASS. 로컬 실제 Worker HTTP의 4인/7인 게임 종료·역할 공개·복귀 및 실제 브라우저의 시작·게임판·확대·새로고침·모바일/데스크톱 화면을 확인했다. 측정값과 범위는 [개선 결과 보고서](../review-2026-10-04/IMPLEMENTATION_REPORT.md)에 있다. 기존 97-case 95/97, D06/D18 NOT RUN과 운영 S09 NOT RUN을 유지한다.
+
+T116은 IN_PROGRESS: 동일 공개 Site 버전 2 게시가 기존 command_receipts 테이블 생성 충돌로 실패했다. 새 소스는 푸시/저장됐지만 운영 반영은 확인되지 않았다. 기존 SQL과 데이터는 보존했다. Sites 스킬의 적용 이력 불확실 시 중단 지시에 따라 플랫폼 마이그레이션 기록 정리가 선행되어야 한다. [배포 실패 근거](../review-2026-10-04/deployment-result.json)를 확인한다.

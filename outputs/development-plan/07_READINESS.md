@@ -85,3 +85,10 @@ Known failure / reproduction:
 - 공개 URL smoke: `GET /` 및 `GET /rooms/new` → `200 text/html`; `GET /assets/cards/playing/01_bang.png` → `200 image/png`, 116,634 bytes; `GET /api/guest-sessions` → `204`. 이 확인을 위해 production room, guest identity, match 또는 게임 카드를 생성하지 않았다.
 - S09는 **PARTIAL**이다. 공개 access/version/deployment와 HTTP 경로는 확인했지만 4인·7인 전체 브라우저 대국, 승패 결과, 재접속·복귀는 **NOT RUN**이다. T106의 local Sites 결과와 기존 95/97 통합 수락 tally 및 D06/D18 NOT RUN은 변경하지 않는다.
 - 무료 운영량은 Cloudflare Workers Free의 100,000 requests/day 및 10 ms CPU/invocation, D1의 5,000,000 rows read/day·100,000 rows written/day·5 GB total 기준이다. 일일 한도를 넘으면 Worker 요청 또는 D1 query가 실패할 수 있다. 공식 문서: [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), [D1 free-tier enforcement](https://developers.cloudflare.com/changelog/post/2026-09-01-d1-free-tier-limit-enforcement/).
+
+
+## UI/API 개선 후속 상태 (2026-10-04)
+
+T112/T113/T114/T115/T117/T118 코드 수정 및 로컬 검증 완료. 계약 20, 엔진 78, Sites 39, 웹 98개로 자동 테스트 235/235 PASS, 타입 검사와 Sites 빌드 PASS. 로컬 실제 Worker HTTP의 4인/7인 게임 종료·역할 공개·복귀 및 실제 브라우저의 시작·게임판·확대·새로고침·모바일/데스크톱 화면을 확인했다. 측정값과 범위는 [개선 결과 보고서](../review-2026-10-04/IMPLEMENTATION_REPORT.md)에 있다. 기존 97-case 95/97, D06/D18 NOT RUN과 운영 S09 NOT RUN을 유지한다.
+
+T116은 IN_PROGRESS: 동일 공개 Site 버전 2 게시가 기존 command_receipts 테이블 생성 충돌로 실패했다. 새 소스는 푸시/저장됐지만 운영 반영은 확인되지 않았다. 기존 SQL과 데이터는 보존했다. Sites 스킬의 적용 이력 불확실 시 중단 지시에 따라 플랫폼 마이그레이션 기록 정리가 선행되어야 한다. [배포 실패 근거](../review-2026-10-04/deployment-result.json)를 확인한다.
