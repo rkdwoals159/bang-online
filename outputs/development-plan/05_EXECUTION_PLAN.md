@@ -1196,8 +1196,8 @@
 | T105 | 기존 React 경로가 transport abstraction을 쓰도록 Sites HTTP/SSE transport 구현 및 앱 조립 | apps/web/src/transport/**, apps/web/src/app/app-state.tsx, apps/web/test/** | DONE |
 | T110 | D1 Drizzle schema/migration metadata, first-request bootstrap, index optimize 준비 (root-only) | package.json, pnpm-lock.yaml, db/schema.ts, drizzle.config.ts, drizzle/**, apps/site/src/storage/**, apps/site/src/server/index.ts, apps/site/test/storage/**, apps/site/test/server/** | DONE |
 | T111 | 주요 방 생성/입장/게임 흐름의 WebMCP 도구 및 지원 브라우저 검증 (root-only) | apps/web/src/app/app-state.tsx, apps/web/src/app/webmcp.ts, apps/web/test/webmcp.test.mjs | DONE |
-| T106 | Cloudflare-compatible isolated D1 runtime에서 S01–S08과 브라우저 4P/7P 기본 흐름 실행, 결과 기록 | apps/site/e2e/**, apps/site/README.md, outputs/development-plan/06_ACCEPTANCE_TESTS.md, outputs/development-plan/00_README.md, apps/web/e2e/sites-results.json | IN_PROGRESS |
-| T107 | 완성한 Site를 한 번 등록하고 source push/version save/public deploy/status 확인 | .openai/hosting.json의 `project_id`, outputs/development-plan/07_READINESS.md, apps/site/README.md | TODO |
+| T106 | Cloudflare-compatible isolated D1 runtime에서 S01–S08과 브라우저 4P/7P 기본 흐름 실행, 결과 기록 | apps/site/e2e/**, apps/site/README.md, outputs/development-plan/06_ACCEPTANCE_TESTS.md, outputs/development-plan/00_README.md, apps/web/e2e/sites-results.json | DONE |
+| T107 | 완성한 Site를 한 번 등록하고 source push/version save/public deploy/status 확인 | .openai/hosting.json의 `project_id`, outputs/development-plan/07_READINESS.md, apps/site/README.md | REVIEW |
 
 각 작업은 한 번에 하나만 배정하며, 의존 작업 DONE과 루트 수락 전에는 후속 작업을 시작하지 않는다. 구현 중 공용 contract가 더 필요하면 루트가 DTO/document/parser/fixture 변경을 별도 단독 작업으로 계획해 DONE한 뒤 consumer를 재개한다. Worker에서 Node PostgreSQL/Socket.IO 모듈을 import하지 않는다. 무료 배포는 현재 공식 Workers/D1 Free quota를 적용받고 한도 초과 시 동작 중지 가능성을 사용자에게 알린다.
 
@@ -1345,7 +1345,7 @@
 
 #### T107 — Codex Sites public save/deploy
 
-- 상태: IN_PROGRESS
+- 상태: REVIEW
 - 의존: T99, T101, T102, T103, T104, T105, T106, T110, T111
 - 파일 소유: `.openai/hosting.json` `project_id` only, `outputs/development-plan/07_READINESS.md`, `apps/site/README.md`
 - 입력: user-authorized free/public Sites distribution, Sites hosting skill, completed S01–S08 evidence
@@ -1353,3 +1353,11 @@
 - 제외: any external provider, writing user production data, deployment before T106 review
 - 산출물: one succeeded public deployment and URL plus evidence in readiness/readme
 - 수락: native Sites result reports success with deployment URL and access public; visit-ready URL corresponds to exact checked source. State Workers/D1 free limits and report any S09 subconditions that could not be exercised live.
+- 루트 검토: source SHA `99c2c41ad639295fd83601995c4498a0516e46e7`를 push하고 같은 SHA에서 Sites version 1 archive를 저장했다. `public` access를 확인했으며 deployment `appgdep_6abace1e94f48191b386cc77d1f97309`가 **succeeded**로 끝났고 URL은 `https://bang-online-ko.rkdwoals159.chatgpt.site`다. 공개 home `200 text/html`, 카드 이미지 `200 image/png` (116,634 bytes), guest session GET `204`를 확인했다. S09의 전체 4P/7P 브라우저 대국·결과·재접속은 production game state를 만들지 않아 NOT RUN이며 PASS로 기록하지 않았다.
+## 2026-10-04 UI/UX 및 API 개선
+
+- T112 공용 계약 — DONE. 루트 단독 소유 packages/contracts/** 및 04_PROTOCOL.md. additive unchanged/presence/version 계약, strict parser, 20/20 tests 및 contracts check 통과.
+- T113 Sites 서버 조회·알림 최적화 — DONE. 의존 T112 DONE. 단독 소유 apps/site/src/server/**, apps/site/src/storage/**, apps/site/test/**. 중복 조회 제거, 회원 한정 unchanged, versioned RoomView, 빠른 활성 알림/유휴 주기, 안전한 presence. 규칙/원자성/receipt/CAS 보존. 루트가 39/39 Site tests 및 별도 격리 DB 측정 결과를 검토했다. 원래 97개 AT와 구분한다.
+- T114 Sites 전송 최적화 — DONE. 루트가 전송 회귀 테스트 13/13 및 중복 조회 2→1 측정 결과를 검토했다. 의존 T112 DONE. 단독 소유 apps/web/src/transport/**, apps/web/test/sites-transport*.mjs, apps/web/src/features/actions/model.ts, apps/web/src/features/reactions/model.ts. single flight/최신 힌트/조건부 sync/presence/버전 명령 응답 적용. 재접속·같은 명령 재시도 보존.
+- T115 화면 흐름 개선 — DONE. 루트 검토 및 UI 집중 테스트 56/56, 결과 보완 12/12, 웹 타입 검사/보드 fixture 통과. 의존 T112 DONE. 단독 소유 apps/web/src/app/pages.tsx, app CSS, features/game-table/**, features/actions/ActionsPanel.tsx 및 actions.css, features/reactions/ReactionPrompt.tsx 및 reactions.css, features/status/**, features/lobby/**, features/room-entry/**, 관련 web UI tests. 현재 요청 상단/손패 단일화/결과 우선/안전한 비활성 이유/공개 로그/접속 표시/사용자 문구.
+- T116 통합 검증·배포 — IN_PROGRESS. 의존 T113/T114/T115 DONE. 루트 소유 통합 fixture/검증 기록/배포 산출물, 필요한 기존 Node producer 호환 보완 및 공용 계약 수정. 변경 검증과 기존 미검증 수락 케이스를 구분한다.

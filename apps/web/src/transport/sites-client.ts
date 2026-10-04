@@ -19,9 +19,11 @@ import {
   parseRoomCommand,
   parseRoomPreviewRequest,
   parseRoomPreviewResponse,
+  parseRoomPresenceView,
   parseRoomSyncRequest,
   parseRoomSyncResponse,
   parseRoomView,
+  parseSyncUnchangedResponse,
   parseSyncRejectedResponse,
 } from "../../../../packages/contracts/src/validation.js";
 import type { RoomEntryCreateResult, RoomEntryPreview } from "../features/room-entry/model.js";
@@ -129,6 +131,7 @@ function defaultEventSourceFactory(url: string, init: EventSourceInit): SitesEve
  * the canonical room/match sync response.
  */
 export class SitesGameTransport implements GameTransport {
+  readonly writesAvailableWhileDisconnected = true;
   readonly store = new BrowserTransportStore();
   private readonly fetcher: Fetcher;
   private readonly eventSourceFactory: (url: string, init: EventSourceInit) => SitesEventSource;
@@ -137,13 +140,19 @@ export class SitesGameTransport implements GameTransport {
   private readonly visibilityTarget?: SitesGameTransportOptions["visibilityTarget"];
   private readonly roomIds = new Set<string>();
   private readonly matchIds = new Set<string>();
+  private readonly roomWatchCounts = new Map<string, number>();
+  private readonly matchWatchCounts = new Map<string, number>();
+  private readonly recoveredRoomIds = new Set<string>();
+  private readonly recoveredMatchIds = new Set<string>();
+  private readonly roomMatchIds = new Map<string, string>();
+  private readonly confirmedRoomIds = new Set<string>();
+  private readonly confirmedMatchIds = new Set<string>();
   private readonly pending = new Map<string, PendingCommand>();
   private readonly roomSyncs = new Map<string, Promise<RoomSyncResponse>>();
   private readonly matchSyncs = new Map<string, Promise<MatchSyncResponse>>();
   private readonly roomHints = new Map<string, HintCursor>();
   private readonly matchHints = new Map<string, HintCursor>();
-  private readonly roomDirty = new Set<string>();
-  private readonly matchDirty = new Set<string>();
+  private readonly roomMutationGenerations = new Map<string, number>();
   private source: SitesEventSource | null = null;
   private visibilityListener?: () => void;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -170,8 +179,10 @@ export class SitesGameTransport implements GameTransport {
     if (this.sessionExpired) return;
     this.installVisibilityListener();
     const authenticated = this.store.getSnapshot().authenticated;
-    this.store.setConnection(authenticated ? "connected" : "connecting", authenticated);
-    if (this.isVisible()) this.openEventStream();
+    // JSON remains usable without an EventSource (new guest, unsupported browser,
+    // or a temporarily unavailable SSE endpoint).
+    this.store.setConnection("connected", authenticated);
+    this.ensureEventStream();
   }
 
   disconnect(): void {
@@ -186,66 +197,79 @@ export class SitesGameTransport implements GameTransport {
 
   watchRoom(roomId: string): () => void {
     this.assertResourceId(roomId);
+    this.roomWatchCounts.set(roomId, (this.roomWatchCounts.get(roomId) ?? 0) + 1);
     this.roomIds.add(roomId);
-    if (this.started && this.source === null && this.isVisible()) this.openEventStream();
-    if (this.getSnapshot().connection === "connected") void this.syncRoom(roomId).catch(() => undefined);
-    return () => this.roomIds.delete(roomId);
+    this.ensureEventStream();
+    void this.syncRoom(roomId).catch(() => undefined);
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      const count = (this.roomWatchCounts.get(roomId) ?? 1) - 1;
+      if (count > 0) this.roomWatchCounts.set(roomId, count);
+      else this.roomWatchCounts.delete(roomId);
+      this.reconcileRoomResource(roomId);
+    };
   }
 
   watchMatch(matchId: string): () => void {
     this.assertResourceId(matchId);
+    this.matchWatchCounts.set(matchId, (this.matchWatchCounts.get(matchId) ?? 0) + 1);
     this.matchIds.add(matchId);
-    if (this.started && this.source === null && this.isVisible()) this.openEventStream();
-    if (this.getSnapshot().connection === "connected") void this.syncMatch(matchId).catch(() => undefined);
-    return () => this.matchIds.delete(matchId);
+    this.ensureEventStream();
+    void this.syncMatch(matchId).catch(() => undefined);
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      const count = (this.matchWatchCounts.get(matchId) ?? 1) - 1;
+      if (count > 0) this.matchWatchCounts.set(matchId, count);
+      else this.matchWatchCounts.delete(matchId);
+      this.reconcileMatchResource(matchId);
+    };
   }
 
   async syncRoom(roomId: string): Promise<RoomSyncResponse> {
     this.assertResourceId(roomId);
-    this.roomIds.add(roomId);
     const current = this.roomSyncs.get(roomId);
-    if (current) {
-      this.roomDirty.add(roomId);
-      return current;
-    }
-    const request = this.performRoomSync(roomId);
+    if (current) return current;
+    const mutationGeneration = this.roomMutationGenerations.get(roomId) ?? 0;
+    let request: Promise<RoomSyncResponse>;
+    request = this.performRoomSync(roomId).finally(() => {
+      if (this.roomSyncs.get(roomId) === request) this.roomSyncs.delete(roomId);
+    }).then((response) => {
+      if ((this.roomMutationGenerations.get(roomId) ?? 0) > mutationGeneration) {
+        void this.syncRoom(roomId).catch(() => undefined);
+        return response;
+      }
+      const hint = this.roomHints.get(roomId);
+      if (hint && hint.version > (this.getSnapshot().rooms[roomId]?.version ?? -1)) {
+        void this.syncRoom(roomId).catch(() => undefined);
+      }
+      return response;
+    });
     this.roomSyncs.set(roomId, request);
-    let response: RoomSyncResponse;
-    try {
-      response = await request;
-    } finally {
-      this.roomSyncs.delete(roomId);
-    }
-    const hint = this.roomHints.get(roomId);
-    if (hint && hint.version > (this.getSnapshot().rooms[roomId]?.version ?? -1)) this.roomDirty.add(roomId);
-    if (this.roomDirty.delete(roomId)) void this.syncRoom(roomId).catch(() => undefined);
-    return response;
+    return request;
   }
 
   async syncMatch(matchId: string): Promise<MatchSyncResponse> {
     this.assertResourceId(matchId);
-    this.matchIds.add(matchId);
     const current = this.matchSyncs.get(matchId);
-    if (current) {
-      this.matchDirty.add(matchId);
-      return current;
-    }
-    const request = this.performMatchSync(matchId);
+    if (current) return current;
+    let request: Promise<MatchSyncResponse>;
+    request = this.performMatchSync(matchId).finally(() => {
+      if (this.matchSyncs.get(matchId) === request) this.matchSyncs.delete(matchId);
+    }).then((response) => {
+      const hint = this.matchHints.get(matchId);
+      const projection = this.getSnapshot().matches[matchId];
+      if (hint && projection && (hint.version > projection.version ||
+          (hint.version === projection.version && (hint.eventSeq ?? 0) > projection.eventSeq))) {
+        void this.syncMatch(matchId).catch(() => undefined);
+      }
+      return response;
+    });
     this.matchSyncs.set(matchId, request);
-    let response: MatchSyncResponse;
-    try {
-      response = await request;
-    } finally {
-      this.matchSyncs.delete(matchId);
-    }
-    const hint = this.matchHints.get(matchId);
-    const projection = this.getSnapshot().matches[matchId];
-    if (hint && (hint.version > (projection?.version ?? -1) ||
-        (hint.version === projection?.version && (hint.eventSeq ?? 0) > (projection?.eventSeq ?? -1)))) {
-      this.matchDirty.add(matchId);
-    }
-    if (this.matchDirty.delete(matchId)) void this.syncMatch(matchId).catch(() => undefined);
-    return response;
+    return request;
   }
 
   async createGuestSession(input: GuestSessionRequest): Promise<GuestSessionResponse> {
@@ -261,6 +285,7 @@ export class SitesGameTransport implements GameTransport {
     this.sessionExpired = false;
     this.restoredPlayerId = reply.body.player.playerId;
     this.store.setConnection(this.getSnapshot().connection, true);
+    this.ensureEventStream();
     return reply.body;
   }
 
@@ -278,6 +303,7 @@ export class SitesGameTransport implements GameTransport {
     this.sessionExpired = false;
     this.restoredPlayerId = reply.body.player.playerId;
     this.store.setConnection(this.getSnapshot().connection, true);
+    this.ensureEventStream();
     return reply.body;
   }
 
@@ -304,28 +330,41 @@ export class SitesGameTransport implements GameTransport {
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
       rooms.push(parsed.value);
-      this.roomIds.add(parsed.value.roomId);
-      if (parsed.value.activeMatchId) this.matchIds.add(parsed.value.activeMatchId);
     }
 
-    if (this.getSnapshot().connection === "connected") {
-      await Promise.all(rooms.map((room) => this.syncRoom(room.roomId)));
-      const activeMatchIds = new Set(rooms.flatMap((room) => {
-        const id = this.getSnapshot().rooms[room.roomId]?.room.activeMatchId ?? room.activeMatchId;
-        return id ? [id] : [];
-      }));
-      await Promise.all([...activeMatchIds].map((matchId) => this.syncMatch(matchId)));
-      return rooms.map((room) => this.getSnapshot().rooms[room.roomId]?.room ?? room);
+    const priorRoomIds = [...this.roomIds];
+    const priorMatchIds = [...this.matchIds];
+    this.recoveredRoomIds.clear();
+    this.recoveredMatchIds.clear();
+    this.confirmedRoomIds.clear();
+    this.confirmedMatchIds.clear();
+    this.roomMatchIds.clear();
+    for (const room of rooms) {
+      this.recoveredRoomIds.add(room.roomId);
+      if (room.activeMatchId) {
+        this.recoveredMatchIds.add(room.activeMatchId);
+        this.roomMatchIds.set(room.roomId, room.activeMatchId);
+      }
     }
-    return rooms;
+    for (const roomId of new Set([...priorRoomIds, ...rooms.map((room) => room.roomId)])) this.reconcileRoomResource(roomId);
+    for (const matchId of new Set([...priorMatchIds, ...rooms.flatMap((room) => room.activeMatchId ? [room.activeMatchId] : [])])) this.reconcileMatchResource(matchId);
+    this.ensureEventStream();
+
+    await Promise.all(rooms.map((room) => this.syncRoom(room.roomId)));
+    const activeMatchIds = new Set(rooms.flatMap((room) => {
+      const id = this.getSnapshot().rooms[room.roomId]?.room.activeMatchId ?? room.activeMatchId;
+      return id ? [id] : [];
+    }));
+    await Promise.all([...activeMatchIds].map((matchId) => this.syncMatch(matchId)));
+    return rooms.map((room) => this.getSnapshot().rooms[room.roomId]?.room ?? room);
   }
 
   async createRoom(command: Extract<RoomCommand, { type: "CREATE_ROOM" }>): Promise<RoomEntryCreateResult> {
     const response = await this.sendRoomCommand(command);
     if (this.isRejectedCommand(response, command.commandId)) throw this.commandError(response);
     if (!isRoomCreateResult(response)) throw new BrowserTransportError("INVALID_RESPONSE");
-    this.roomIds.add(response.roomId);
-    if (this.started && this.source === null && this.isVisible()) this.openEventStream();
+    this.confirmedRoomIds.add(response.roomId);
+    this.reconcileRoomResource(response.roomId);
     void this.syncRoom(response.roomId).catch(() => undefined);
     return response;
   }
@@ -357,9 +396,6 @@ export class SitesGameTransport implements GameTransport {
       this.store.setError("INVALID_RESPONSE");
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
-    this.roomIds.add(command.roomId);
-    if (this.started && this.source === null && this.isVisible()) this.openEventStream();
-    void this.syncRoom(command.roomId).catch(() => undefined);
     return parsed.value;
   }
 
@@ -402,8 +438,6 @@ export class SitesGameTransport implements GameTransport {
     }
     const pending = current ?? { command: frozenCommand, event, commandId, serializedPayload, ...scope };
     if (!current) {
-      if (scope.roomId) this.roomIds.add(scope.roomId);
-      if (scope.matchId) this.matchIds.add(scope.matchId);
       this.pending.set(commandId, pending);
       this.updatePendingIds();
     }
@@ -412,9 +446,6 @@ export class SitesGameTransport implements GameTransport {
 
   private attemptPending(pending: PendingCommand): Promise<unknown> {
     if (pending.active) return pending.active;
-    if (this.getSnapshot().connection !== "connected") {
-      return Promise.reject(new BrowserTransportError("NOT_CONNECTED"));
-    }
     const attempt = this.performPending(pending);
     pending.active = attempt;
     return attempt.finally(() => {
@@ -467,18 +498,37 @@ export class SitesGameTransport implements GameTransport {
     this.pending.delete(pending.commandId);
     this.updatePendingIds();
     const accepted = !ack.ok || ack.value.status === "accepted";
-    if (accepted && pending.roomId) void this.syncRoom(pending.roomId).catch(() => undefined);
-    if (accepted && pending.matchId) void this.syncMatch(pending.matchId).catch(() => undefined);
+    if (accepted && pending.roomId) {
+      this.confirmedRoomIds.add(pending.roomId);
+      this.reconcileRoomResource(pending.roomId);
+      const room = parseRoomView(response);
+      if (room.ok && room.value.roomId === pending.roomId && room.value.version !== undefined) {
+        this.store.applyRoomCommand(room.value);
+        this.trackRoomMatch(pending.roomId, room.value.activeMatchId);
+      } else {
+        this.roomMutationGenerations.set(pending.roomId, (this.roomMutationGenerations.get(pending.roomId) ?? 0) + 1);
+        void this.syncRoom(pending.roomId).catch(() => undefined);
+      }
+    }
+    if (accepted && pending.matchId) {
+      this.confirmedMatchIds.add(pending.matchId);
+      this.reconcileMatchResource(pending.matchId);
+      if (ack.ok && ack.value.status === "accepted" && isVersion(ack.value.aggregateVersion) && isVersion(ack.value.eventSeq)) {
+        this.recordMatchHint(pending.matchId, { version: ack.value.aggregateVersion, eventSeq: ack.value.eventSeq });
+      }
+      void this.syncMatch(pending.matchId).catch(() => undefined);
+    }
     return response;
   }
 
-  private async performRoomSync(roomId: string, syncActiveMatch = true): Promise<RoomSyncResponse> {
+  private async performRoomSync(roomId: string, syncActiveMatch = true, allowUnchanged = true): Promise<RoomSyncResponse> {
     const current = this.getSnapshot().rooms[roomId];
     const request: RoomSyncRequest = {
       protocolVersion: 1,
       requestId: this.createId(),
       roomId,
       knownVersion: current?.version ?? 0,
+      ...(allowUnchanged && current ? { acceptUnchanged: true } : {}),
     };
     if (!parseRoomSyncRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
     const reply = await this.requestJson(`/api/rooms/${encodeURIComponent(roomId)}/sync`, "POST", request);
@@ -488,20 +538,40 @@ export class SitesGameTransport implements GameTransport {
       this.store.setError("SYNC_REJECTED");
       throw new BrowserTransportError("REQUEST_REJECTED", rejected.value.error.code);
     }
+    const unchanged = parseSyncUnchangedResponse(reply.body);
+    if (unchanged.ok) {
+      const cached = this.getSnapshot().rooms[roomId];
+      if (request.acceptUnchanged === true && unchanged.value.requestId === request.requestId &&
+          "roomId" in unchanged.value && unchanged.value.roomId === roomId && unchanged.value.version === request.knownVersion &&
+          cached?.version === request.knownVersion) {
+        this.store.setError(null);
+        const response = this.roomResponseFromCache(request.requestId, roomId, cached);
+        this.trackRoomMatch(roomId, response.room.activeMatchId);
+        if (response.room.activeMatchId && syncActiveMatch) void this.syncMatch(response.room.activeMatchId).catch(() => undefined);
+        return response;
+      }
+      if (!allowUnchanged) {
+        this.store.setError("INVALID_RESPONSE");
+        throw new BrowserTransportError("INVALID_RESPONSE");
+      }
+      return this.performRoomSync(roomId, syncActiveMatch, false);
+    }
     const parsed = parseRoomSyncResponse(reply.body);
     if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.roomId !== roomId) {
       this.store.setError("INVALID_RESPONSE");
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     this.store.applyRoomSync(parsed.value);
-    if (parsed.value.room.activeMatchId) {
-      this.matchIds.add(parsed.value.room.activeMatchId);
-      if (syncActiveMatch) void this.syncMatch(parsed.value.room.activeMatchId).catch(() => undefined);
-    }
-    return parsed.value;
+    const latest = this.getSnapshot().rooms[roomId];
+    const activeMatchId = latest?.room.activeMatchId ?? parsed.value.room.activeMatchId;
+    this.trackRoomMatch(roomId, activeMatchId);
+    if (activeMatchId && syncActiveMatch) void this.syncMatch(activeMatchId).catch(() => undefined);
+    return latest && latest.version > parsed.value.version
+      ? this.roomResponseFromCache(parsed.value.requestId, roomId, latest)
+      : parsed.value;
   }
 
-  private async performMatchSync(matchId: string): Promise<MatchSyncResponse> {
+  private async performMatchSync(matchId: string, allowUnchanged = true): Promise<MatchSyncResponse> {
     const current = this.getSnapshot().matches[matchId];
     const request: MatchSyncRequest = {
       protocolVersion: 1,
@@ -509,6 +579,7 @@ export class SitesGameTransport implements GameTransport {
       matchId,
       knownVersion: current?.version ?? 0,
       afterEventSeq: current?.eventSeq ?? 0,
+      ...(allowUnchanged && current ? { acceptUnchanged: true } : {}),
     };
     if (!parseMatchSyncRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
     const reply = await this.requestJson(`/api/matches/${encodeURIComponent(matchId)}/sync`, "POST", request);
@@ -518,13 +589,32 @@ export class SitesGameTransport implements GameTransport {
       this.store.setError("SYNC_REJECTED");
       throw new BrowserTransportError("REQUEST_REJECTED", rejected.value.error.code);
     }
+    const unchanged = parseSyncUnchangedResponse(reply.body);
+    if (unchanged.ok) {
+      const cached = this.getSnapshot().matches[matchId];
+      if (request.acceptUnchanged === true && unchanged.value.requestId === request.requestId &&
+          "matchId" in unchanged.value && unchanged.value.matchId === matchId && unchanged.value.version === request.knownVersion &&
+          unchanged.value.eventSeq === request.afterEventSeq && cached?.version === request.knownVersion &&
+          cached.eventSeq === request.afterEventSeq) {
+        this.store.setError(null);
+        return this.matchResponseFromCache(request.requestId, matchId, cached);
+      }
+      if (!allowUnchanged) {
+        this.store.setError("INVALID_RESPONSE");
+        throw new BrowserTransportError("INVALID_RESPONSE");
+      }
+      return this.performMatchSync(matchId, false);
+    }
     const parsed = parseMatchSyncResponse(reply.body);
     if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId) {
       this.store.setError("INVALID_RESPONSE");
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     this.store.applyMatchSync(parsed.value);
-    return parsed.value;
+    const latest = this.getSnapshot().matches[matchId];
+    return latest && (latest.version > parsed.value.version || latest.eventSeq > parsed.value.eventSeq)
+      ? this.matchResponseFromCache(parsed.value.requestId, matchId, latest)
+      : parsed.value;
   }
 
   private async syncAfterConnect(generation: number): Promise<void> {
@@ -539,7 +629,7 @@ export class SitesGameTransport implements GameTransport {
     const activeMatchIds = new Set<string>();
     await Promise.all([...roomTargets].map(async (roomId) => {
       try {
-        const response = await this.performRoomSync(roomId, false);
+        const response = await this.syncRoom(roomId);
         roomSyncSucceeded.add(roomId);
         if (response.room.activeMatchId) activeMatchIds.add(response.room.activeMatchId);
       } catch { /* Keep pending commands until an authoritative sync succeeds. */ }
@@ -551,13 +641,13 @@ export class SitesGameTransport implements GameTransport {
     const matchSyncSucceeded = new Set<string>();
     await Promise.all([...matchTargets].map(async (matchId) => {
       try {
-        await this.performMatchSync(matchId);
+        await this.syncMatch(matchId);
         matchSyncSucceeded.add(matchId);
       } catch { /* A later reconnect or invalidation will request another sync. */ }
     }));
     if (!this.started || generation !== this.connectionGeneration || this.getSnapshot().connection !== "connected") return;
     for (const entry of pendingCommands) {
-      if (entry.roomId && !roomSyncSucceeded.has(entry.roomId)) continue;
+      if (entry.roomId && !roomSyncSucceeded.has(entry.roomId) && entry.command.type !== "JOIN") continue;
       if (entry.matchId && !matchSyncSucceeded.has(entry.matchId)) continue;
       void this.attemptPending(entry).catch(() => undefined);
     }
@@ -578,8 +668,7 @@ export class SitesGameTransport implements GameTransport {
       const latest = this.roomHints.get(payload.aggregateId);
       if (payload.version <= currentVersion || (latest && payload.version <= latest.version)) return;
       this.roomHints.set(payload.aggregateId, { version: payload.version });
-      if (this.roomSyncs.has(payload.aggregateId)) this.roomDirty.add(payload.aggregateId);
-      else void this.syncRoom(payload.aggregateId).catch(() => undefined);
+      void this.syncRoom(payload.aggregateId).catch(() => undefined);
       return;
     }
     if (payload.kind === "match" && exactKeys(payload, ["kind", "aggregateId", "version", "eventSeq"]) &&
@@ -594,18 +683,35 @@ export class SitesGameTransport implements GameTransport {
           (payload.version === currentVersion && payload.eventSeq <= currentEventSeq) ||
           (latest !== undefined && (payload.version < latest.version ||
             (payload.version === latest.version && payload.eventSeq <= (latest.eventSeq ?? -1))))) return;
-      this.matchHints.set(payload.aggregateId, { version: payload.version, eventSeq: payload.eventSeq });
-      if (this.matchSyncs.has(payload.aggregateId)) this.matchDirty.add(payload.aggregateId);
-      else void this.syncMatch(payload.aggregateId).catch(() => undefined);
+      this.recordMatchHint(payload.aggregateId, { version: payload.version, eventSeq: payload.eventSeq });
+      void this.syncMatch(payload.aggregateId).catch(() => undefined);
     }
   }
 
+  private handlePresence(source: SitesEventSource, event: Event): void {
+    if (source !== this.source) return;
+    const message = event as EventSourceMessage;
+    let payload: unknown;
+    try { payload = JSON.parse(message.data) as unknown; } catch { return; }
+    const parsed = parseRoomPresenceView(payload);
+    if (!parsed.ok || !this.roomIds.has(parsed.value.roomId)) return;
+    this.store.applyRoomPresence(parsed.value);
+  }
+
   private openEventStream(): void {
-    if (!this.started || this.sessionExpired || !this.isVisible() || this.source !== null) return;
+    if (!this.started || this.sessionExpired || !this.isVisible() || this.source !== null ||
+        this.getSnapshot().authenticated !== true || this.roomIds.size + this.matchIds.size === 0) return;
     this.clearReconnectTimer();
-    const source = this.eventSourceFactory(`/api/notifications/events?after=${this.lastCursor}`, { withCredentials: true });
+    let source: SitesEventSource;
+    try {
+      source = this.eventSourceFactory(`/api/notifications/events?after=${this.lastCursor}`, { withCredentials: true });
+    } catch {
+      this.store.setConnection("disconnected", this.getSnapshot().authenticated);
+      return;
+    }
     this.source = source;
     source.addEventListener("invalidation", (event) => this.handleInvalidation(source, event));
+    source.addEventListener("presence", (event) => this.handlePresence(source, event));
     source.onopen = () => {
       if (source !== this.source || !this.started) return;
       this.reconnectDelayMs = 250;
@@ -628,7 +734,8 @@ export class SitesGameTransport implements GameTransport {
   }
 
   private scheduleReconnect(): void {
-    if (!this.started || !this.isVisible() || this.sessionExpired || this.reconnectTimer !== null) return;
+    if (!this.started || !this.isVisible() || this.sessionExpired || this.reconnectTimer !== null ||
+        this.getSnapshot().authenticated !== true || this.roomIds.size + this.matchIds.size === 0) return;
     const delay = this.reconnectDelayMs;
     this.reconnectDelayMs = Math.min(MAX_RECONNECT_DELAY_MS, this.reconnectDelayMs * 2);
     this.reconnectTimer = setTimeout(() => {
@@ -643,13 +750,105 @@ export class SitesGameTransport implements GameTransport {
     source?.close();
   }
 
+  private ensureEventStream(): void {
+    const hasResources = this.roomIds.size + this.matchIds.size > 0;
+    if (!this.started || this.sessionExpired || !this.isVisible() ||
+        this.getSnapshot().authenticated !== true || !hasResources) {
+      this.clearReconnectTimer();
+      if (!hasResources || this.getSnapshot().authenticated !== true || this.sessionExpired) this.closeEventStream();
+      return;
+    }
+    this.openEventStream();
+  }
+
+  private reconcileRoomResource(roomId: string): void {
+    const retained = this.roomWatchCounts.has(roomId) || this.recoveredRoomIds.has(roomId) || this.confirmedRoomIds.has(roomId);
+    if (retained) this.roomIds.add(roomId);
+    else {
+      this.roomIds.delete(roomId);
+      this.roomHints.delete(roomId);
+      this.roomMutationGenerations.delete(roomId);
+      const matchId = this.roomMatchIds.get(roomId);
+      this.roomMatchIds.delete(roomId);
+      if (matchId) this.reconcileMatchResource(matchId);
+    }
+    this.ensureEventStream();
+  }
+
+  private reconcileMatchResource(matchId: string): void {
+    const isReferencedByRoom = [...this.roomMatchIds].some(([roomId, roomMatchId]) =>
+      roomMatchId === matchId && this.roomIds.has(roomId));
+    const retained = this.matchWatchCounts.has(matchId) || this.recoveredMatchIds.has(matchId) ||
+      this.confirmedMatchIds.has(matchId) || isReferencedByRoom;
+    if (retained) this.matchIds.add(matchId);
+    else {
+      this.matchIds.delete(matchId);
+      this.matchHints.delete(matchId);
+    }
+    this.ensureEventStream();
+  }
+
+  private trackRoomMatch(roomId: string, matchId: string | null): void {
+    const previous = this.roomMatchIds.get(roomId);
+    if (!this.roomIds.has(roomId)) {
+      if (previous) {
+        this.roomMatchIds.delete(roomId);
+        this.reconcileMatchResource(previous);
+      }
+      return;
+    }
+    if (previous === (matchId ?? undefined)) return;
+    if (previous) this.roomMatchIds.delete(roomId);
+    if (matchId) this.roomMatchIds.set(roomId, matchId);
+    if (previous) {
+      const referencedElsewhere = [...this.roomMatchIds.values()].includes(previous);
+      if (!referencedElsewhere && !this.recoveredMatchIds.has(previous) && !this.matchWatchCounts.has(previous)) {
+        this.confirmedMatchIds.delete(previous);
+      }
+      this.reconcileMatchResource(previous);
+    }
+    if (matchId) this.reconcileMatchResource(matchId);
+  }
+
+  private recordMatchHint(matchId: string, hint: HintCursor): void {
+    const previous = this.matchHints.get(matchId);
+    if (!previous || hint.version > previous.version ||
+        (hint.version === previous.version && (hint.eventSeq ?? -1) > (previous.eventSeq ?? -1))) {
+      this.matchHints.set(matchId, hint);
+    }
+  }
+
+  private roomResponseFromCache(requestId: string, roomId: string, cached: BrowserTransportState["rooms"][string]): RoomSyncResponse {
+    return {
+      protocolVersion: 1,
+      requestId,
+      roomId,
+      version: cached.version,
+      requiresFullSnapshot: cached.requiresFullSnapshot,
+      room: cached.room,
+    };
+  }
+
+  private matchResponseFromCache(requestId: string, matchId: string, cached: BrowserTransportState["matches"][string]): MatchSyncResponse {
+    return {
+      protocolVersion: 1,
+      requestId,
+      matchId,
+      version: cached.version,
+      eventSeq: cached.eventSeq,
+      requiresFullSnapshot: cached.requiresFullSnapshot,
+      snapshot: cached.snapshot,
+      visibleEvents: cached.visibleEvents,
+    };
+  }
+
   private installVisibilityListener(): void {
     if (!this.visibilityTarget || this.visibilityListener) return;
     const listener = () => {
       if (!this.started) return;
       if (this.isVisible()) {
-        this.store.setConnection("connecting", this.getSnapshot().authenticated);
-        this.openEventStream();
+        this.store.setConnection("connected", this.getSnapshot().authenticated);
+        this.ensureEventStream();
       } else {
         this.clearReconnectTimer();
         this.closeEventStream();

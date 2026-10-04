@@ -39,7 +39,7 @@ const proposals = [
   { type: "END_TURN", payload: {} },
 ];
 
-function snapshot({ status = "playing", legalActions = proposals } = {}) {
+function snapshot({ status = "playing", legalActions = proposals, currentPlayerId = "player-a", pendingInteraction = null } = {}) {
   return {
     status,
     viewer: { playerId: "player-a", seatIndex: 0, mode: "active" },
@@ -50,13 +50,13 @@ function snapshot({ status = "playing", legalActions = proposals } = {}) {
         { playerId: "player-c", displayName: "노을", seatIndex: 2, characterId: "el_gringo", hp: 3, maxHp: 3, eliminated: false, handCount: 1, role: null, inPlay: [] },
         { playerId: "player-d", displayName: "먼지", seatIndex: 3, characterId: "willy_the_kid", hp: 4, maxHp: 4, eliminated: false, handCount: 1, role: null, inPlay: [] },
       ],
-      turn: { currentPlayerId: "player-a", phase: "play" },
+      turn: { currentPlayerId, phase: "play" },
       deckCount: 50,
       publicDiscard: { topCard: null, count: 0 },
     },
     selfPrivate: { role: "sheriff", hand },
     legalActions,
-    pendingInteraction: null,
+    pendingInteraction,
   };
 }
 
@@ -170,19 +170,44 @@ test("keeps a timed-out retry on the same command ID and payload", async () => {
   assert.deepEqual(sent[1].payload, proposals[0].payload);
 });
 
-test("renders legal cards as selectable, illegal cards as disabled, and hides all inputs outside active play", () => {
+test("renders available cards as selectable, explains unavailable cards, and hides inputs outside active play", () => {
   const transport = { sendMatchCommand: async () => { throw new Error("not submitted"); }, syncMatch: async () => syncResponse() };
   const active = renderToStaticMarkup(createElement(ActionsPanel, {
     matchId: "match-a", version: 18, snapshot: snapshot(), transport, createCommandId: () => "unused",
   }));
-  assert.match(active, /뱅! A 스페이드, 합법 행동 선택 가능/);
-  assert.match(active, /맥주 7 하트, 지금 선택할 수 없음/);
-  assert.match(active, /aria-label="맥주 7 하트, 지금 선택할 수 없음" disabled=""/);
+  assert.match(active, /뱅! A 스페이드, 사용 가능/);
+  assert.match(active, /맥주 7 하트, 지금 가능한 사용 방법이 없어요/);
+  assert.match(active, /aria-label="맥주 7 하트, 지금 가능한 사용 방법이 없어요" disabled=""/);
+  assert.equal((active.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
   assert.doesNotMatch(active, /<button[^>]+노을/);
 
   const ended = renderToStaticMarkup(createElement(ActionsPanel, {
     matchId: "match-a", version: 18, snapshot: snapshot({ status: "completed" }), transport,
   }));
-  assert.match(ended, /현재 게임 상태에서는 행동을 입력할 수 없습니다/);
+  assert.match(ended, /지금은 행동을 고를 수 없어요/);
   assert.doesNotMatch(ended, /<button/);
+});
+
+test("shows turn ownership and pending response without making card actions available", () => {
+  const transport = { sendMatchCommand: async () => { throw new Error("not submitted"); }, syncMatch: async () => syncResponse() };
+  const otherTurn = renderToStaticMarkup(createElement(ActionsPanel, {
+    matchId: "match-a", version: 18, snapshot: snapshot({ currentPlayerId: "player-b" }), transport,
+  }));
+  assert.match(otherTurn, /바람 님 차례예요/);
+  assert.match(otherTurn, /disabled=""/);
+  assert.doesNotMatch(otherTurn, /<button class="game-actions__button game-actions__button--secondary"[^>]*>턴 종료/);
+
+  const pending = renderToStaticMarkup(createElement(ActionsPanel, {
+    matchId: "match-a", version: 18,
+    snapshot: snapshot({ pendingInteraction: {
+      interactionId: "private-interaction-id", kind: "BANG_RESPONSE", allowedChoices: ["USE_MISSED"],
+      currentResponderPlayerId: "player-a", step: { current: 1, total: 1 },
+      responseOptions: [{ interactionId: "private-interaction-id", choice: "USE_MISSED", cardInstanceId: "own-beer" }],
+    } }),
+    transport,
+  }));
+  assert.match(pending, /내 응답 차례예요/);
+  assert.equal((pending.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
+  assert.match(pending, /응답이 끝나면 선택할 수 있어요/);
+  assert.doesNotMatch(pending, /private-interaction-id|own-beer/);
 });

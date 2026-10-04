@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-04T10:00:00Z",
+  "mode": "local real Worker and one actual in-app browser, synthetic players; not production S09",
+  "flow": ["guest form", "create room", "lobby", "ready", "start match", "private role reveal", "game table", "reload and recover same game"],
+  "cardZoom": { "escapeClosesDialog": true, "focusRestoredToTrigger": true, "disabledCardReasonVisible": true },
+  "gameLayout": { "singleOwnHandList": true, "publicLogInitiallyCollapsed": true },
+  "mobile": { "width": 390, "height": 844, "bodyScrollWidth": 375, "documentScrollWidth": 375, "requestPosition": "sticky", "pageHorizontalOverflow": false },
+  "desktop": { "width": 1440, "height": 900, "bodyScrollWidth": 1425, "documentScrollWidth": 1425, "singleOwnHandList": true, "pageHorizontalOverflow": false },
+  "finalFixes": ["constrained grid track and fieldset width", "Sites directly imports shared app CSS"],
+  "screenshots": ["mobile-game.jpg", "desktop-game.jpg"],
+  "unverified": ["four or seven simultaneous actual browsers playing a full match", "production full gameplay and reconnect S09", "original D06 and D18"],
+  "viewportReset": true
+}

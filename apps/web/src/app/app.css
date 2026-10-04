@@ -310,9 +310,94 @@ h1 {
 
 .match-page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   justify-items: center;
   gap: 20px;
+}
+
+.match-page--playing {
+  align-content: start;
+  gap: 14px;
+}
+
+.match-request {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  width: min(100%, 1180px);
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  align-items: center;
+  gap: 12px 24px;
+  padding: 14px 20px;
+  border: 1px solid rgba(35, 63, 46, 0.18);
+  border-left: 6px solid #b28a36;
+  border-radius: 16px;
+  background: #fffdf7;
+  color: #20382a;
+  box-shadow: 0 8px 24px rgba(33, 54, 40, 0.08);
+}
+
+.match-request__turn,
+.match-request__response {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px 12px;
+}
+
+.match-request__turn > span:first-child,
+.match-request__response > span:first-child {
+  color: #78612b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.match-request__turn strong,
+.match-request__response strong {
+  color: #1d3c2d;
+  font-size: 17px;
+}
+
+.match-request__turn > span:last-child,
+.match-request__response > span:last-of-type {
+  color: #5f6e62;
+  font-size: 13px;
+}
+
+.match-request__instruction,
+.match-request__response p {
+  margin: 0;
+  color: #46574c;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.match-request__response p {
+  flex-basis: 100%;
+}
+
+.match-page__history {
+  width: min(100%, 1180px);
+  padding: 14px 18px;
+  border: 1px solid rgba(35, 63, 46, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 254, 249, 0.9);
+}
+
+.match-page__history > summary {
+  color: #264331;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.match-page__history > .game-table {
+  margin-top: 16px;
+}
+
+.role-reveal-page__cards .roster-card p {
+  white-space: pre-line;
 }
 
 .role-reveal-page {
@@ -481,6 +566,31 @@ h1 {
   .role-reveal-page__cards {
     gap: 18px;
     padding: 18px;
+  }
+
+  .match-request {
+    position: sticky;
+    top: 8px;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 5px 18px rgba(33, 54, 40, 0.12);
+  }
+
+  .match-request__turn,
+  .match-request__response {
+    gap: 6px 9px;
+  }
+
+  .match-request__turn strong,
+  .match-request__response strong {
+    font-size: 15px;
+  }
+
+  .match-request__instruction,
+  .match-request__response p {
+    font-size: 13px;
   }
 }
 

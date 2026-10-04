@@ -117,7 +117,7 @@ export function ReactionPrompt({
     busyRef.current = true;
     setBusy(true);
     setPendingCommand(command);
-    setNotice("응답을 서버에 보내고 있어요.");
+    setNotice("응답을 보내고 있어요.");
 
     try {
       const result = await sendAndRefreshResponse(transport, command);
@@ -131,7 +131,7 @@ export function ReactionPrompt({
         setPendingCommand(null);
         setNotice(result.acknowledgement.status === "rejected"
           ? rejectionMessage(result.acknowledgement.error.code)
-          : "서버가 응답을 반영하고 최신 진행 상태를 불러왔어요.");
+          : "응답을 반영하고 진행 상황을 새로 불러왔어요.");
       } else {
         setNotice("응답은 전송했지만 최신 진행 상태를 확인하지 못했어요. 같은 명령 ID로 다시 확인할 수 있습니다.");
       }
@@ -195,7 +195,7 @@ export function ReactionPrompt({
     <section className="reaction-prompt" aria-labelledby="reaction-prompt-title">
       <header className="reaction-prompt__header">
         <div>
-          <p className="reaction-prompt__eyebrow">서버가 보낸 진행 상태</p>
+          <p className="reaction-prompt__eyebrow">현재 응답</p>
           <h2 id="reaction-prompt-title">{interactionLabel(pending.kind)}</h2>
         </div>
         {"step" in pending ? (
@@ -210,13 +210,13 @@ export function ReactionPrompt({
       {isResponder && responderPrompt ? (
         <>
           <p className="reaction-prompt__instruction">
-            {currentResponderName ?? "현재 좌석"}의 응답 차례입니다. 서버가 제공한 선택지만 제출할 수 있어요.
+            {currentResponderName ?? "현재 참가자"} 님 차례예요. 필요한 응답을 골라 주세요.
           </p>
           {orderTemplate ? (
             discardOrder ? (
               <fieldset className="reaction-prompt__discard-order">
                 <legend>버릴 순서 선택 · {visibleOrder.length}/{discardOrder.requiredCount}장</legend>
-                <p>선택한 순서대로 카드가 버려집니다. 필요한 장수와 후보는 서버가 보낸 값입니다.</p>
+                <p>선택한 순서대로 버려져요. 필요한 장수를 골라 주세요.</p>
                 <ul className="reaction-prompt__discard-candidates" aria-label="버릴 카드 후보">
                   {discardOrder.allowedCards.map((card) => {
                     const orderIndex = visibleOrder.indexOf(card.cardInstanceId);
@@ -273,12 +273,12 @@ export function ReactionPrompt({
               </fieldset>
             ) : (
               <p className="reaction-prompt__pending-order" role="status">
-                서버가 카드 정리 후보와 필요 수량을 보내지 않아 아직 선택할 수 없습니다.
+                카드 후보를 확인하지 못했어요. 잠시 후 다시 확인해 주세요.
               </p>
             )
           ) : null}
           {responderPrompt.responseOptions.length > 0 ? (
-            <ul className="reaction-prompt__options" aria-label="서버가 허용한 응답 선택지">
+            <ul className="reaction-prompt__options" aria-label="응답 선택지">
               {responderPrompt.responseOptions.map((option, index) => {
                 const presentation = presentOption(option, currentSnapshot, index, responderPrompt.responseOptions.length);
                 const isOrderTemplate = option.choice === "ORDER_CARDS" && !("orderedCardInstanceIds" in option);
@@ -299,7 +299,7 @@ export function ReactionPrompt({
                           key={card.cardInstanceId}
                           card={card}
                           details={[presentation.label, ...(presentation.detail ? [presentation.detail] : [])]}
-                          detailHeading="서버가 허용한 응답"
+                          detailHeading="카드 응답"
                           triggerClassName="reaction-prompt__option-zoom-trigger"
                         />
                       ))}
@@ -323,7 +323,7 @@ export function ReactionPrompt({
       ) : (
         <p className="reaction-prompt__progress" role="status" aria-live="polite">
           {currentResponderName
-            ? `${currentResponderName}가 현재 응답 중입니다. 내 선택지는 표시되지 않습니다.`
+            ? `${currentResponderName} 님이 응답 중이에요. 응답 내용은 다른 참가자에게 공개되지 않아요.`
             : "다른 좌석의 응답을 기다리고 있습니다. 진행 상황만 표시합니다."}
         </p>
       )}
@@ -333,8 +333,8 @@ export function ReactionPrompt({
 
 function rejectionMessage(code: string): string {
   if (code === "STALE_VERSION") return "판이 업데이트되어 최신 진행 상태를 불러왔어요.";
-  if (code === "INVALID_CHOICE" || code === "ILLEGAL_ACTION") return "서버가 응답을 거절했어요. 최신 선택지를 확인해 주세요.";
-  return "서버가 응답을 거절했어요. 최신 진행 상태를 확인해 주세요.";
+  if (code === "INVALID_CHOICE" || code === "ILLEGAL_ACTION") return "응답을 반영하지 못했어요. 최신 선택지를 다시 확인해 주세요.";
+  return "응답을 반영하지 못했어요. 최신 진행 상태를 다시 확인해 주세요.";
 }
 
 function responseCardFaces(

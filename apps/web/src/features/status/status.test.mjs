@@ -15,6 +15,7 @@ let StatusPanel;
 let MatchInputGate;
 let attemptReturnToLobby;
 let canReturnToLobbyFromResult;
+let returnToLobbyFromResult;
 let createSingleFlightRunner;
 
 before(async () => {
@@ -25,7 +26,7 @@ before(async () => {
     logLevel: "silent",
     server: { middlewareMode: true },
   });
-  ({ StatusPanel, MatchInputGate, attemptReturnToLobby, canReturnToLobbyFromResult, createSingleFlightRunner } =
+  ({ StatusPanel, MatchInputGate, attemptReturnToLobby, canReturnToLobbyFromResult, returnToLobbyFromResult, createSingleFlightRunner } =
     await vite.ssrLoadModule("/src/features/status/StatusPanel.tsx"));
 });
 
@@ -80,9 +81,11 @@ function roomView({
   viewerIsOwner = true,
   ownerPlayerId = "player-a",
   ready = true,
+  version = 18,
 } = {}) {
   return {
     roomId: "room-a",
+    version,
     status,
     activeMatchId,
     ownerPlayerId,
@@ -149,7 +152,9 @@ test("renders public events in projected sequence, hides unknown events and neve
   assert.match(html, /현재 차례/);
   assert.match(html, /초원 별/);
   assert.match(html, /카드 사용/);
-  assert.match(html, /뱅 공격이 시작됐어요\./);
+  assert.match(html, /초원 별 님이 바람 님을 뱅!으로 공격해요\./);
+  assert.match(html, /<details class="match-status__log">/);
+  assert.doesNotMatch(html, /<details class="match-status__log" open=/);
   assert.doesNotMatch(html, /PRIVATE_HAND_DRAWN|private-resolution-sentinel|player-a|cardInstanceId|secret/);
 });
 
@@ -168,7 +173,7 @@ test("completed status renders a read-only result state and no action control", 
 
   assert.match(html, /data-input-enabled="false"/);
   assert.match(html, /게임 결과/);
-  assert.match(html, /게임이 종료되어 더 이상 행동을 입력할 수 없습니다\./);
+  assert.match(html, /게임이 끝났어요\./);
   assert.match(html, /무법자 진영/);
   assert.match(html, /승리 플레이어/);
   assert.match(html, /바람/);
@@ -177,6 +182,22 @@ test("completed status renders a read-only result state and no action control", 
   assert.match(html, /보안관/);
   assert.match(html, /무법자/);
   assert.doesNotMatch(html, /<button|winningFaction|winningPlayerIds|player-b|MATCH_COMPLETED|private-terminal-reason/);
+});
+
+test("non-owner result view explains that the host returns everyone to the lobby", () => {
+  const html = renderToStaticMarkup(createElement(StatusPanel, {
+    sync: sync({
+      status: "completed",
+      outcome: { winningFaction: "outlaws", winningPlayerIds: ["player-b"] },
+    }),
+    room: roomView({ status: "in_game", viewerIsOwner: false }),
+    roomVersion: 18,
+    matchId: "match-a",
+    transport: { async sendRoomCommand() {}, async syncRoom() {} },
+  }));
+
+  assert.match(html, /대기실로 돌아가는 일은 방장이 진행해요/);
+  assert.doesNotMatch(html, /대기실로 돌아가기/);
 });
 
 test("result return action is visible only for the matching completed match in its in-game owner room", () => {
@@ -261,8 +282,57 @@ test("rejected commands and thrown transport errors produce retryable Korean gui
 
   assert.deepEqual(rejected, transportError);
   assert.equal(rejected.ok, false);
-  assert.match(rejected.message, /현재 결과는 유지됩니다/);
+  assert.match(rejected.message, /대기실로 돌아가지 못했어요/);
   assert.match(rejected.message, /다시 시도해 주세요/);
+});
+
+test("uses a newer confirmed room command response and syncs only for older acknowledgements", async () => {
+  const previousRoom = roomView({ status: "in_game", version: 18 });
+  const returnedRoom = {
+    ...previousRoom,
+    status: "waiting",
+    activeMatchId: null,
+    version: 19,
+    members: previousRoom.members.map((member) => ({ ...member, ready: false })),
+  };
+  let syncCalls = 0;
+  await returnToLobbyFromResult({
+    room: previousRoom,
+    roomVersion: 18,
+    matchId: "match-a",
+    matchStatus: "completed",
+    matchViewerPlayerId: "player-a",
+    commandId: "return-command",
+    transport: {
+      async sendRoomCommand() { return returnedRoom; },
+      async syncRoom() { syncCalls += 1; throw new Error("unexpected sync"); },
+    },
+  });
+  assert.equal(syncCalls, 0);
+
+  await returnToLobbyFromResult({
+    room: previousRoom,
+    roomVersion: 18,
+    matchId: "match-a",
+    matchStatus: "completed",
+    matchViewerPlayerId: "player-a",
+    commandId: "fallback-command",
+    transport: {
+      async sendRoomCommand() { const { version: _version, ...legacyRoom } = returnedRoom; return legacyRoom; },
+      async syncRoom() {
+        syncCalls += 1;
+        return {
+          protocolVersion: 1,
+          requestId: "sync-request",
+          roomId: "room-a",
+          version: 19,
+          requiresFullSnapshot: false,
+          room: returnedRoom,
+        };
+      },
+    },
+  });
+  assert.equal(syncCalls, 1);
 });
 
 test("does not infer an outcome before completion or expose winner IDs when a name is missing", () => {
@@ -292,7 +362,7 @@ test("server status gate removes action controls after play has ended", () => {
   }));
 
   assert.match(closed, /data-input-enabled="false"/);
-  assert.match(closed, /현재 게임 상태에서는 행동을 입력할 수 없습니다\./);
+  assert.match(closed, /지금은 행동을 고를 수 없어요\./);
   assert.doesNotMatch(closed, /<button/);
   assert.match(open, /data-input-enabled="true"/);
   assert.match(open, /<button[^>]*>Play card<\/button>/);

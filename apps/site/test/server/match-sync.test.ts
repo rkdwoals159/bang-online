@@ -6,6 +6,7 @@ import {
   parseCommandAck,
   parseMatchSyncResponse,
   parseRoomSyncResponse,
+  parseSyncUnchangedResponse,
   parseSyncRejectedResponse,
 } from "../../../../packages/contracts/src/validation.js";
 import type { GameState } from "../../../../packages/engine/src/state/types.js";
@@ -260,6 +261,20 @@ async function readChunkWithTimeout(
   });
 }
 
+async function readSseEventNamed(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  eventName: string,
+  timeoutMs = 1_500,
+): Promise<Uint8Array> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const chunk = (await readChunkWithTimeout(reader, timeoutMs)).value;
+    if (!chunk) throw new Error("SSE stream closed before the expected event.");
+    const raw = new TextDecoder().decode(chunk);
+    if (raw.includes(`event: ${eventName}\n`)) return chunk;
+  }
+  throw new Error(`SSE stream did not produce event '${eventName}'.`);
+}
+
 function parseSseEvent(chunk: Uint8Array): { id: number; data: Record<string, unknown>; raw: string } {
   const raw = new TextDecoder().decode(chunk);
   const idMatch = raw.match(/^id: (\d+)$/mu);
@@ -456,7 +471,42 @@ test("room and match sync use strict canonical parsers and viewer-scoped private
       cookie: viewer.cookie,
       body: { protocolVersion: 1, requestId: "room-view", roomId: fixture.roomId, knownVersion: 0 },
     }), { DB: db });
-    assert.equal(parseRoomSyncResponse(await json(roomSyncResponse)).ok, true);
+    const roomSync = await json(roomSyncResponse);
+    const roomSyncParsed = parseRoomSyncResponse(roomSync);
+    assert.equal(roomSyncParsed.ok, true);
+    if (roomSyncParsed.ok) assert.equal(roomSyncParsed.value.room.version, roomSyncParsed.value.version);
+
+    const roomUnchangedResponse = await routeApiRequest(request(`/api/rooms/${encodeURIComponent(fixture.roomId)}/sync`, {
+      cookie: viewer.cookie,
+      body: {
+        protocolVersion: 1, requestId: "room-unchanged", roomId: fixture.roomId,
+        knownVersion: roomSyncParsed.ok ? roomSyncParsed.value.version : 0, acceptUnchanged: true,
+      },
+    }), { DB: db });
+    const roomUnchanged = await json(roomUnchangedResponse);
+    assert.equal(parseSyncUnchangedResponse(roomUnchanged).ok, true);
+    assert.equal(Object.hasOwn(roomUnchanged as object, "room"), false);
+
+    const matchUnchangedResponse = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/sync`, {
+      cookie: viewer.cookie,
+      body: {
+        protocolVersion: 1, requestId: "match-unchanged", matchId: fixture.matchId,
+        knownVersion: match.version, afterEventSeq: match.eventSeq, acceptUnchanged: true,
+      },
+    }), { DB: db });
+    const matchUnchanged = await json(matchUnchangedResponse);
+    assert.equal(parseSyncUnchangedResponse(matchUnchanged).ok, true);
+    assert.equal(Object.hasOwn(matchUnchanged as object, "snapshot"), false);
+
+    const legacyFullResponse = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/sync`, {
+      cookie: viewer.cookie,
+      body: {
+        protocolVersion: 1, requestId: "match-legacy-full", matchId: fixture.matchId,
+        knownVersion: match.version, afterEventSeq: match.eventSeq,
+      },
+    }), { DB: db });
+    assert.equal(parseMatchSyncResponse(await json(legacyFullResponse)).ok, true,
+      "legacy callers still receive a complete canonical snapshot");
 
     const unauthorizedMatch = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/sync`, {
       cookie: outsider.cookie,
@@ -529,7 +579,7 @@ test("unsupported match schema and ruleset disclose recovery only to members and
 
       const memberSync = await routeApiRequest(request(`/api/matches/${encodeURIComponent(fixture.matchId)}/sync`, {
         cookie: member.cookie,
-        body: { protocolVersion: 1, requestId: `recovery-member-${unsupportedKind}`, matchId: fixture.matchId, knownVersion: match.version, afterEventSeq: match.eventSeq },
+        body: { protocolVersion: 1, requestId: `recovery-member-${unsupportedKind}`, matchId: fixture.matchId, knownVersion: match.version, afterEventSeq: match.eventSeq, acceptUnchanged: true },
       }), { DB: db });
       assert.equal(memberSync.status, 200);
       const memberSyncParsed = parseSyncRejectedResponse(await json(memberSync));
@@ -661,7 +711,18 @@ test("SSE refreshes membership before cursor reads, emits only allowlisted data,
     assert.equal(opened.headers.get("Content-Type"), "text/event-stream; charset=utf-8");
     assert.equal(opened.headers.get("Cache-Control"), "no-store");
     const reader = opened.body!.getReader();
-    const first = parseSseEvent((await readChunkWithTimeout(reader)).value!);
+    const presenceChunk = (await readChunkWithTimeout(reader)).value!;
+    const presenceRaw = new TextDecoder().decode(presenceChunk);
+    assert.match(presenceRaw, /^event: presence\n/u);
+    const presence = JSON.parse(presenceRaw.match(/^data: (.+)$/mu)![1]!) as {
+      protocolVersion: number; roomId: string; members: { playerId: string; connectionState: string }[];
+    };
+    assert.equal(presence.protocolVersion, 1);
+    assert.equal(presence.roomId, fixture.roomId);
+    assert.deepEqual(presence.members.map(({ connectionState }) => connectionState), [
+      "connected", "unknown", "unknown", "unknown",
+    ]);
+    const first = parseSseEvent(await readSseEventNamed(reader, "invalidation"));
     assert.equal(first.id, firstCursor);
     assert.deepEqual(Object.keys(first.data).sort(), ["aggregateId", "eventSeq", "kind", "version"]);
     assert.deepEqual(first.data, {
@@ -687,7 +748,7 @@ test("SSE refreshes membership before cursor reads, emits only allowlisted data,
     assert.ok(reconnected);
     assert.equal(reconnected.status, 200);
     const reconnectedReader = reconnected.body!.getReader();
-    const resumed = parseSseEvent((await readChunkWithTimeout(reconnectedReader)).value!);
+    const resumed = parseSseEvent(await readSseEventNamed(reconnectedReader, "invalidation"));
     assert.equal(resumed.id, secondCursor);
     assert.equal(resumed.data.aggregateId, fixture.matchId);
     await reconnectedReader.cancel();
@@ -706,6 +767,94 @@ test("SSE refreshes membership before cursor reads, emits only allowlisted data,
     assert.ok(revoked);
     assert.equal(revoked.status, 404);
     assert.equal(spy.stats.outboxQueries, queriesBeforeRevokedReconnect, "removed membership cannot use a saved cursor");
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("SSE renews only the viewer lease and reports presence lease expiry without disconnect writes", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    let observedAt = Date.now();
+    await db.batch([
+      db.prepare("UPDATE room_players SET last_presence_at = ? WHERE room_id = ? AND player_id = ?")
+        .bind(new Date(observedAt - 44_000).toISOString(), fixture.roomId, fixture.guests[1]!.playerId),
+      db.prepare("UPDATE room_players SET last_presence_at = ? WHERE room_id = ? AND player_id = ?")
+        .bind(new Date(observedAt - 46_000).toISOString(), fixture.roomId, fixture.guests[2]!.playerId),
+    ]);
+    const maxCursor = await db.prepare("SELECT COALESCE(MAX(cursor), 0) AS cursor FROM outbox")
+      .first<{ cursor: number | string }>();
+    const opened = await handleNotificationsRoute(request("/api/notifications/events", {
+      method: "GET",
+      cookie: fixture.guests[0]!.cookie,
+      headers: { "Last-Event-ID": String(maxCursor?.cursor ?? 0) },
+    }), { DB: db }, { now: () => new Date(observedAt), pollIntervalMs: 10, heartbeatIntervalMs: 20 });
+    assert.ok(opened);
+    assert.equal(opened.status, 200);
+    const reader = opened.body!.getReader();
+    const initialRaw = new TextDecoder().decode(await readSseEventNamed(reader, "presence"));
+    const initial = JSON.parse(initialRaw.match(/^data: (.+)$/mu)![1]!) as {
+      observedAt: string; members: { playerId: string; connectionState: string }[];
+    };
+    assert.equal(initial.observedAt, new Date(observedAt).toISOString());
+    assert.deepEqual(initial.members.map(({ connectionState }) => connectionState), [
+      "connected", "connected", "disconnected", "unknown",
+    ]);
+    assert.deepEqual(new Set(initial.members.map(({ playerId }) => playerId)), new Set(fixture.guests.map(({ playerId }) => playerId)));
+
+    const firstLease = await db.prepare("SELECT last_presence_at FROM room_players WHERE room_id = ? AND player_id = ?")
+      .bind(fixture.roomId, fixture.guests[0]!.playerId).first<{ last_presence_at: string | null }>();
+    assert.equal(firstLease?.last_presence_at, new Date(observedAt).toISOString());
+
+    observedAt += 2_000;
+    const updatedRaw = new TextDecoder().decode(await readSseEventNamed(reader, "presence"));
+    const updated = JSON.parse(updatedRaw.match(/^data: (.+)$/mu)![1]!) as {
+      members: { playerId: string; connectionState: string }[];
+    };
+    assert.equal(updated.members.find(({ playerId }) => playerId === fixture.guests[1]!.playerId)?.connectionState, "disconnected");
+    const renewedLease = await db.prepare("SELECT last_presence_at FROM room_players WHERE room_id = ? AND player_id = ?")
+      .bind(fixture.roomId, fixture.guests[0]!.playerId).first<{ last_presence_at: string | null }>();
+    assert.equal(renewedLease?.last_presence_at, firstLease?.last_presence_at, "short polls do not write the lease repeatedly");
+
+    await reader.cancel();
+    const leaseAfterCancel = await db.prepare("SELECT last_presence_at FROM room_players WHERE room_id = ? AND player_id = ?")
+      .bind(fixture.roomId, fixture.guests[0]!.playerId).first<{ last_presence_at: string | null }>();
+    assert.equal(leaseAfterCancel?.last_presence_at, firstLease?.last_presence_at, "closing a stream does not mark another tab disconnected");
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+test("SSE keeps active matches on the fast poll after the activity warm window expires", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    let observedAt = Date.now();
+    const maxCursor = await db.prepare("SELECT COALESCE(MAX(cursor), 0) AS cursor FROM outbox")
+      .first<{ cursor: number | string }>();
+    const opened = await handleNotificationsRoute(request("/api/notifications/events", {
+      method: "GET",
+      cookie: fixture.guests[0]!.cookie,
+      headers: { "Last-Event-ID": String(maxCursor?.cursor ?? 0) },
+    }), { DB: db }, {
+      now: () => new Date(observedAt), pollIntervalMs: 10, idlePollIntervalMs: 500, heartbeatIntervalMs: 2_000,
+    });
+    assert.ok(opened);
+    const reader = opened.body!.getReader();
+    await readSseEventNamed(reader, "presence");
+    await new Promise((resolve) => setTimeout(resolve, 30));
+
+    observedAt += 16_000;
+    const current = await new D1StorageRepository(db).getMatch(fixture.matchId);
+    assert.ok(current);
+    const cursor = await insertOutbox(db, fixture.matchId, current.version, current.eventSeq, "active-after-warm-window");
+    const startedAt = performance.now();
+    const invalidation = parseSseEvent(await readSseEventNamed(reader, "invalidation"));
+    const delayMs = performance.now() - startedAt;
+    assert.equal(invalidation.id, cursor);
+    assert.ok(delayMs < 300, `playing match should keep the 10ms test poll after 15s of inactivity; observed ${delayMs.toFixed(1)}ms`);
+    await reader.cancel();
   } finally {
     await runtime.dispose();
   }

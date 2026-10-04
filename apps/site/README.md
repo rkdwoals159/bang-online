@@ -1,6 +1,15 @@
-# BANG! Sites local acceptance
+# BANG! Codex Sites deployment and local acceptance
 
-This folder contains the portable Sites Worker app. T106's supplemental S01–S08 acceptance is local-only and is separate from the existing 97-case game baseline. It does not create, publish, or deploy a Site, and it does not use a remote D1 database. The existing baseline remains 95/97 with D06 and D18 NOT RUN.
+This folder contains the portable Sites Worker app. This document records the public T107 deployment and T106's local S01–S08 acceptance separately. The T106 run did not publish a Site or use remote D1; the public deployment below is a later step. The existing 97-case game baseline remains 95/97 with D06 and D18 NOT RUN.
+
+## Public deployment
+
+- Site: [뱅! 온라인 기본판](https://bang-online-ko.rkdwoals159.chatgpt.site/)
+- Published: 2026-09-29; access mode: **public**; Codex Sites Worker with its managed D1 binding.
+- Source: `99c2c41ad639295fd83601995c4498a0516e46e7`; saved Site version: **1**; Sites deployment: `appgdep_6abace1e94f48191b386cc77d1f97309`; status: **succeeded**.
+- Live HTTP smoke: `/` and `/rooms/new` returned `200 text/html`; `/assets/cards/playing/01_bang.png` returned `200 image/png` (116,634 bytes); `GET /api/guest-sessions` returned `204`.
+- No production room or match fixture was seeded. Full 4-player and 7-player browser games, result screens, reload/network recovery, and return-to-lobby are **NOT RUN**; S09 is partial and must not be read as a gameplay acceptance pass.
+- Free tier limits currently include 100,000 Worker requests per day and 10 ms CPU per invocation, plus D1 5 million rows read/day, 100,000 rows written/day, and 5 GB total storage. Daily Worker/D1 limits reset at 00:00 UTC; requests or D1 queries can fail after limits are reached. See [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), and [D1 free-tier enforcement](https://developers.cloudflare.com/changelog/post/2026-09-01-d1-free-tier-limit-enforcement/).
 
 ## Reproduce the local checks
 

@@ -312,63 +312,6 @@
   font-weight: 800;
 }
 
-.game-table__own-hand {
-  margin-top: 20px;
-  padding: 21px 23px;
-  border: 1px solid rgba(34, 53, 40, 0.12);
-  border-radius: 20px;
-  background: rgba(255, 254, 249, 0.94);
-  box-shadow: 0 8px 28px rgba(39, 47, 36, 0.06);
-}
-
-.game-table__own-hand-heading {
-  align-items: flex-end;
-}
-
-.game-table__own-hand-heading h2 {
-  font-size: 22px;
-}
-
-.game-table__own-hand-heading > span {
-  color: #657067;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.game-table__hand-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.game-table__hand-list li > span {
-  display: flex;
-  min-width: 130px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(47, 78, 54, 0.13);
-  border-radius: 12px;
-  background: #f4f5ec;
-  color: #2b4934;
-  font-size: 13px;
-}
-
-.game-table__hand-list li > span > span {
-  color: #6e766a;
-  white-space: nowrap;
-}
-
-.game-table__empty-hand {
-  margin: 15px 0 0;
-  color: #687267;
-  font-size: 14px;
-}
-
 @media (max-width: 900px) {
   .game-table__surface {
     min-height: 620px;
@@ -479,9 +422,6 @@
     order: 1;
   }
 
-  .game-table__own-hand {
-    padding: 18px;
-  }
 }
 
 @media (max-width: 380px) {
@@ -502,10 +442,6 @@
     min-height: 0;
   }
 
-  .game-table__hand-list li,
-  .game-table__hand-list li > span {
-    width: 100%;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -18,6 +18,8 @@ export interface RoomProjectionState {
   readonly version: number;
   readonly room: RoomView;
   readonly requiresFullSnapshot: boolean;
+  /** Wall-clock observation ordering for ephemeral SSE presence, not a game version. */
+  readonly presenceObservedAt?: string;
 }
 
 export interface MatchProjectionState {
@@ -39,6 +41,8 @@ export interface BrowserTransportState {
 
 /** Consumer contract shared by the local Socket.IO and Sites HTTP/SSE adapters. */
 export interface GameTransport {
+  /** Sites JSON commands remain writable while its optional SSE channel reconnects. */
+  readonly writesAvailableWhileDisconnected?: boolean;
   readonly store: {
     readonly getServerSnapshot: () => BrowserTransportState;
   };

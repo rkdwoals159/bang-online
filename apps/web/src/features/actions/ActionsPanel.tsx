@@ -82,7 +82,18 @@ export function ActionsPanel({
       : undefined;
   const hand = currentSnapshot.selfPrivate?.hand ?? [];
   const activeViewer = currentSnapshot.viewer.mode === "active" && currentSnapshot.selfPrivate !== null;
-  const canAct = currentSnapshot.status === "playing" && activeViewer && !busy && !activePendingCommand && !needsRefresh;
+  const turnOwner = currentSnapshot.publicTable.players.find(
+    (player) => player.playerId === currentSnapshot.publicTable.turn.currentPlayerId,
+  );
+  const viewerIsTurnOwner = turnOwner?.playerId === currentSnapshot.viewer.playerId;
+  const pendingInteraction = currentSnapshot.pendingInteraction;
+  const pendingResponderId = pendingInteraction && "currentResponderPlayerId" in pendingInteraction
+    ? pendingInteraction.currentResponderPlayerId
+    : null;
+  const viewerIsResponder = pendingResponderId === currentSnapshot.viewer.playerId &&
+    pendingInteraction?.kind !== "progress" && pendingInteraction !== null;
+  const canAct = currentSnapshot.status === "playing" && activeViewer && viewerIsTurnOwner &&
+    !pendingInteraction && !busy && !activePendingCommand && !needsRefresh;
 
   async function refreshProjection(forMatchId: string): Promise<void> {
     const response = await transport.syncMatch(forMatchId);
@@ -100,7 +111,7 @@ export function ActionsPanel({
     busyRef.current = true;
     setBusy(true);
     setPendingCommand(command);
-    setNotice("서버에 행동을 보내고 있어요.");
+    setNotice("행동을 보내고 있어요.");
 
     try {
       const result = await sendAndRefreshAction(transport, command);
@@ -121,20 +132,20 @@ export function ActionsPanel({
       if (result.acknowledgement.status === "rejected") {
         setNotice(result.projection
           ? rejectionMessage(result.acknowledgement.error.code)
-          : "서버가 행동을 거절했어요. 최신 판 정보를 불러오지 못해 입력을 잠갔습니다.");
+          : "행동을 반영하지 못했어요. 최신 게임 정보를 불러온 뒤 다시 선택해 주세요.");
       } else {
         setNotice(result.projection
-          ? "서버가 행동을 접수하고 최신 판 정보를 반영했어요."
-          : "행동은 접수됐어요. 최신 판 정보를 불러오지 못해 입력을 잠갔습니다.");
+          ? "행동을 반영했어요. 최신 게임 정보를 불러왔어요."
+          : "행동을 확인하고 있어요. 최신 게임 정보를 다시 불러와 주세요.");
       }
     } catch {
       if (currentMatchIdRef.current !== command.matchId) return;
       setNeedsRefresh(true);
-      setNotice("명령 응답을 확인하지 못했어요. 같은 명령으로 다시 확인할 수 있습니다.");
+      setNotice("행동 결과를 확인하지 못했어요. 아래에서 다시 확인할 수 있어요.");
       try {
         await refreshProjection(command.matchId);
       } catch {
-        setNotice("명령 응답과 최신 판 정보를 확인하지 못했어요. 같은 명령을 보관했습니다.");
+        setNotice("행동 결과와 최신 게임 정보를 확인하지 못했어요. 다시 시도해 주세요.");
       }
     } finally {
       if (currentMatchIdRef.current === command.matchId) {
@@ -196,10 +207,9 @@ export function ActionsPanel({
     <section className="game-actions" aria-labelledby="game-actions-title">
       <header className="game-actions__header">
         <div>
-          <p className="game-actions__eyebrow">서버가 허용한 행동</p>
-          <h2 id="game-actions-title">내 행동</h2>
+          <p className="game-actions__eyebrow">내 카드와 행동</p>
+          <h2 id="game-actions-title">행동 선택</h2>
         </div>
-        <span className="game-actions__version">판 버전 {projection.version}</span>
       </header>
 
       {notice ? <p className="game-actions__notice" role="status" aria-live="polite">{notice}</p> : null}
@@ -210,12 +220,12 @@ export function ActionsPanel({
       ) : null}
 
       {currentSnapshot.status !== "playing" ? (
-        <p className="game-actions__empty" role="status">현재 게임 상태에서는 행동을 입력할 수 없습니다.</p>
+        <p className="game-actions__empty" role="status">지금은 행동을 고를 수 없어요.</p>
       ) : !activeViewer ? (
         <p className="game-actions__empty" role="status">탈락한 플레이어는 공개 테이블만 볼 수 있습니다.</p>
       ) : needsRefresh ? (
         <div className="game-actions__recovery">
-          <p>최신 서버 상태를 확인한 뒤 행동을 다시 선택할 수 있어요.</p>
+          <p>최신 게임 정보를 확인한 뒤 행동을 다시 고를 수 있어요.</p>
           <button
             className="game-actions__button game-actions__button--secondary"
             type="button"
@@ -224,8 +234,8 @@ export function ActionsPanel({
               setBusy(true);
               busyRef.current = true;
               void refreshProjection(matchId)
-                .then(() => setNotice("최신 판 정보를 불러왔어요."))
-                .catch(() => setNotice("최신 판 정보를 불러오지 못했어요. 다시 시도해 주세요."))
+                .then(() => setNotice("최신 게임 정보를 불러왔어요."))
+                .catch(() => setNotice("최신 게임 정보를 불러오지 못했어요. 다시 시도해 주세요."))
                 .finally(() => {
                   if (currentMatchIdRef.current === matchId) {
                     busyRef.current = false;
@@ -234,23 +244,36 @@ export function ActionsPanel({
                 });
             }}
           >
-            최신 판 다시 불러오기
+            최신 게임 정보 다시 불러오기
           </button>
         </div>
       ) : null}
 
       {currentSnapshot.status === "playing" && activeViewer && !needsRefresh ? (
         <>
+          {pendingInteraction ? (
+            <p className="game-actions__turn-note" role="status" aria-live="polite">
+              {viewerIsResponder
+                ? "내 응답 차례예요. 위의 응답 선택을 확인해 주세요."
+                : pendingResponderId
+                  ? `${currentSnapshot.publicTable.players.find((player) => player.playerId === pendingResponderId)?.displayName ?? "다른 참가자"} 님이 응답 중이에요.`
+                  : "진행 중인 응답이 끝나면 다음 행동을 고를 수 있어요."}
+            </p>
+          ) : !viewerIsTurnOwner ? (
+            <p className="game-actions__turn-note" role="status" aria-live="polite">
+              {turnOwner ? `${turnOwner.displayName} 님 차례예요. 내 차례가 되면 행동을 고를 수 있어요.` : "다른 참가자의 차례예요."}
+            </p>
+          ) : null}
           {activePendingCommand ? (
             <div className="game-actions__pending" role="status">
-              <p>이전 명령의 결과를 기다리고 있어요. 같은 명령 ID로 확인하면 중복 실행되지 않습니다.</p>
+              <p>이전 행동 결과를 확인하고 있어요. 다시 확인해도 행동은 중복 적용되지 않아요.</p>
               <button
                 className="game-actions__button game-actions__button--primary"
                 type="button"
                 disabled={busy}
                 onClick={() => void send(activePendingCommand)}
               >
-                {busy ? "확인 중…" : "같은 명령 다시 확인"}
+                {busy ? "확인 중…" : "전송 결과 다시 확인"}
               </button>
             </div>
           ) : null}
@@ -263,9 +286,17 @@ export function ActionsPanel({
                   const indexes = getCardProposalIndexes(actions, card.cardInstanceId);
                   const selected = visibleSelection?.kind === "card" && visibleSelection.cardInstanceId === card.cardInstanceId;
                   const isLegal = indexes.length > 0;
-                  const actionDetails = isLegal
+                  const canUseCard = isLegal && viewerIsTurnOwner && !pendingInteraction;
+                  const disabledReason = pendingInteraction
+                    ? "응답이 끝나면 선택할 수 있어요"
+                    : !viewerIsTurnOwner
+                      ? `${turnOwner?.displayName ?? "다른 참가자"} 님 차례예요`
+                      : currentSnapshot.publicTable.turn.phase === "discard"
+                        ? "손패를 버리는 단계예요"
+                        : "지금 가능한 사용 방법이 없어요";
+                  const actionDetails = canUseCard
                     ? getTargetOptions(currentSnapshot, actions, indexes).map((option) => option.label)
-                    : ["지금은 사용 불가"];
+                    : [disabledReason];
                   return (
                     <li key={card.cardInstanceId}>
                       <div className="game-actions__card-entry">
@@ -273,18 +304,18 @@ export function ActionsPanel({
                           className={`game-actions__card${selected ? " is-selected" : ""}`}
                           type="button"
                           aria-pressed={selected}
-                          aria-label={`${cardName(card.typeId)} ${card.rank} ${suitName(card.suit)}, ${isLegal ? "합법 행동 선택 가능" : "지금 선택할 수 없음"}`}
+                          aria-label={`${cardName(card.typeId)} ${card.rank} ${suitName(card.suit)}, ${canUseCard ? "사용 가능" : disabledReason}`}
                           disabled={!canAct || !isLegal}
                           onClick={() => chooseCard(card.cardInstanceId)}
                         >
                           <PlayingCardFace card={card} />
                           <span className="game-actions__card-name">{cardName(card.typeId)}</span>
-                          <span className="game-actions__card-state">{isLegal ? "사용 가능" : "지금은 사용 불가"}</span>
+                          <span className="game-actions__card-state">{canUseCard ? "사용 가능" : disabledReason}</span>
                         </button>
                         <PlayingCardZoomButton
                           card={card}
                           details={actionDetails}
-                          detailHeading={isLegal ? "서버가 허용한 대상과 사용 방식" : "사용 상태"}
+                          detailHeading={canUseCard ? "사용 대상과 방식" : "카드 사용 상태"}
                           triggerClassName="game-actions__card-zoom-trigger"
                         />
                       </div>
@@ -307,7 +338,7 @@ export function ActionsPanel({
               </div>
               {activeTargetOptions.length > 1 ? (
                 <fieldset className="game-actions__targets" disabled={!canAct}>
-                  <legend>합법 대상과 사용 방식을 선택하세요</legend>
+                <legend>사용할 대상과 방식을 선택하세요</legend>
                   {activeTargetOptions.map((option) => (
                     <button
                       className={`game-actions__target${visibleSelection.proposalIndex === option.index ? " is-selected" : ""}`}
@@ -322,7 +353,7 @@ export function ActionsPanel({
                 </fieldset>
               ) : (
                 <p className="game-actions__selected-target">
-                  {activeTargetOptions[0]?.label ?? "합법 행동을 선택할 수 없습니다."}
+                  {activeTargetOptions[0]?.label ?? "지금은 선택할 수 있는 행동이 없어요."}
                 </p>
               )}
               <div className="game-actions__controls">
@@ -343,7 +374,7 @@ export function ActionsPanel({
             </section>
           ) : null}
 
-          {abilityIndexes.length > 0 ? (
+          {abilityIndexes.length > 0 && viewerIsTurnOwner && !pendingInteraction ? (
             <fieldset className="game-actions__abilities" disabled={!canAct}>
               <legend>인물 능력</legend>
               {abilityIndexes.map((index) => {
@@ -362,7 +393,7 @@ export function ActionsPanel({
                     onClick={() => chooseProposal(index)}
                   >
                     <strong>시드 케첨 · 손패 2장 버리기</strong>
-                    <span>{canShowCost ? cards.map((card) => `${cardName(card!.typeId)} ${card!.rank}`).join(" + ") : "선택할 손패 정보를 불러오지 못했어요."}</span>
+                    <span>{canShowCost ? cards.map((card) => `${cardName(card!.typeId)} ${card!.rank}`).join(" + ") : "필요한 카드 정보를 확인할 수 없어요."}</span>
                   </button>
                 );
               })}
@@ -379,7 +410,7 @@ export function ActionsPanel({
             </fieldset>
           ) : null}
 
-          {endTurnIndexes.length > 0 ? (
+          {endTurnIndexes.length > 0 && viewerIsTurnOwner && !pendingInteraction ? (
             <div className="game-actions__end-turn">
               {endTurnIndexes.map((index) => (
                 <button
@@ -395,8 +426,8 @@ export function ActionsPanel({
             </div>
           ) : null}
 
-          {actions.length === 0 ? (
-            <p className="game-actions__empty" role="status">서버가 허용한 행동을 아직 받지 못했습니다.</p>
+          {actions.length === 0 && viewerIsTurnOwner && !pendingInteraction ? (
+            <p className="game-actions__empty" role="status">선택을 불러오지 못했어요. 최신 게임 정보를 다시 불러와 주세요.</p>
           ) : null}
         </>
       ) : null}
@@ -405,9 +436,9 @@ export function ActionsPanel({
 }
 
 function rejectionMessage(code: string): string {
-  if (code === "STALE_VERSION") return "판이 업데이트되어 선택을 취소하고 최신 상태를 불러옵니다.";
-  if (code === "ILLEGAL_ACTION" || code === "INVALID_CHOICE") return "서버가 행동을 거절했어요. 최신 선택지를 불러옵니다.";
-  return "서버가 행동을 거절했어요. 최신 판 정보를 확인합니다.";
+  if (code === "STALE_VERSION") return "게임이 업데이트되어 선택을 지웠어요. 최신 선택지를 불러옵니다.";
+  if (code === "ILLEGAL_ACTION" || code === "INVALID_CHOICE") return "그 행동은 지금 할 수 없어요. 최신 선택지를 불러옵니다.";
+  return "행동을 반영하지 못했어요. 최신 게임 정보를 확인합니다.";
 }
 
 function suitName(suit: CardSuit): string {

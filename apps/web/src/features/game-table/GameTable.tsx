@@ -98,8 +98,7 @@ interface PositionedPlayer {
 /** A presentation-only table built from the authenticated seat's projection. */
 export function GameTable({ snapshot }: GameTableProps) {
   const players = orderPlayersForViewer(snapshot);
-  const activeSelfPrivate =
-    snapshot.viewer.mode === "active" ? snapshot.selfPrivate : null;
+  const activeSelfPrivate = snapshot.viewer.mode === "active" ? snapshot.selfPrivate : null;
   const currentPlayer = snapshot.publicTable.players.find(
     (player) => player.playerId === snapshot.publicTable.turn.currentPlayerId,
   );
@@ -174,28 +173,6 @@ export function GameTable({ snapshot }: GameTableProps) {
         </ol>
       </div>
 
-      {activeSelfPrivate ? (
-        <section className="game-table__own-hand" aria-labelledby="own-hand-title">
-          <div className="game-table__own-hand-heading">
-            <div>
-              <p className="game-table__eyebrow">나만 볼 수 있어요</p>
-              <h2 id="own-hand-title">내 손패</h2>
-            </div>
-            <span>{activeSelfPrivate.hand.length}장</span>
-          </div>
-          {activeSelfPrivate.hand.length > 0 ? (
-            <ul className="game-table__hand-list" aria-label="내 손패 카드">
-              {activeSelfPrivate.hand.map((card, index) => (
-                <li key={`${card.typeId}-${card.rank}-${card.suit}-${index}`}>
-                  <SafeCardText card={card} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="game-table__empty-hand">손패가 비어 있어요.</p>
-          )}
-        </section>
-      ) : null}
     </section>
   );
 }
@@ -283,16 +260,6 @@ function PlayerSeat({
         ) : null}
       </article>
     </li>
-  );
-}
-
-function SafeCardText({ card }: { card: CardFaceView }) {
-  const cardName = cardNames[card.typeId] ?? "카드";
-  return (
-    <span aria-label={`${cardName}, ${card.rank} ${suitNames[card.suit]}`}>
-      <strong>{cardName}</strong>
-      <span>{card.rank} {suitMarks[card.suit]}</span>
-    </span>
   );
 }
 

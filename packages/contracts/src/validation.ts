@@ -25,6 +25,8 @@ import type {
   RespondPayload,
   SyncRejectedErrorCode,
   SyncRejectedResponse,
+  SyncUnchangedResponse,
+  RoomPresenceView,
 } from "./protocol.js";
 
 export type ParseResult<T> = { ok: true; value: T } | { ok: false; code: "BAD_REQUEST"; path: string };
@@ -169,7 +171,8 @@ export function parseRoomPreviewRequest(input: unknown): ParseResult<RoomPreview
 /** Strict client payload parser for the room:sync event. */
 export function parseRoomSyncRequest(input: unknown): ParseResult<RoomSyncRequest> {
   if (!isRecord(input)) return bad();
-  if (!exactKeys(input, ["protocolVersion", "requestId", "roomId", "knownVersion"])) return bad();
+  if (!exactShape(input, ["protocolVersion", "requestId", "roomId", "knownVersion"], ["acceptUnchanged"])) return bad();
+  if (Object.hasOwn(input, "acceptUnchanged") && input.acceptUnchanged !== true) return bad("$.acceptUnchanged");
   if (input.protocolVersion !== 1) return bad("$.protocolVersion");
   if (!isText(input.requestId)) return bad("$.requestId");
   if (!isText(input.roomId)) return bad("$.roomId");
@@ -180,12 +183,13 @@ export function parseRoomSyncRequest(input: unknown): ParseResult<RoomSyncReques
 /** Strict parser for an authenticated room projection and its viewer identity. */
 export function parseRoomView(input: unknown): ParseResult<RoomView> {
   if (!isRecord(input) ||
-      !exactKeys(input, ["roomId", "status", "activeMatchId", "ownerPlayerId", "capacity", "rulesetVersion", "members", "viewer"]) ||
+      !exactShape(input, ["roomId", "status", "activeMatchId", "ownerPlayerId", "capacity", "rulesetVersion", "members", "viewer"], ["version"]) ||
       !isText(input.roomId) || !isRoomStatus(input.status) || !isText(input.ownerPlayerId) ||
       ![4, 5, 6, 7].includes(input.capacity as number) || !isText(input.rulesetVersion) ||
       !Array.isArray(input.members) || !isRecord(input.viewer) ||
       !exactKeys(input.viewer, ["playerId", "isOwner"]) || !isText(input.viewer.playerId) ||
       typeof input.viewer.isOwner !== "boolean") return bad("$.room");
+  if (Object.hasOwn(input, "version") && !isVersion(input.version)) return bad("$.room.version");
 
   const activeMatchExpected = input.status === "in_game" || input.status === "paused" || input.status === "completed";
   if (activeMatchExpected ? !isText(input.activeMatchId) : input.activeMatchId !== null) return bad("$.room.activeMatchId");
@@ -195,7 +199,8 @@ export function parseRoomView(input: unknown): ParseResult<RoomView> {
   const playerIds = new Set<string>();
   const seats = new Set<number>();
   for (const member of members) {
-    if (!isRecord(member) || !exactKeys(member, ["playerId", "displayName", "seatIndex", "ready"]) ||
+    if (!isRecord(member) || !exactShape(member, ["playerId", "displayName", "seatIndex", "ready"], ["connectionState"]) ||
+        (Object.hasOwn(member, "connectionState") && !["connected", "disconnected", "unknown"].includes(member.connectionState as string)) ||
         !isText(member.playerId) || !isText(member.displayName) || !Number.isSafeInteger(member.seatIndex) ||
         (member.seatIndex as number) < 0 || (member.seatIndex as number) >= (input.capacity as number) ||
         typeof member.ready !== "boolean" || playerIds.has(member.playerId) || seats.has(member.seatIndex as number)) {
@@ -219,19 +224,37 @@ export function parseRoomSyncResponse(input: unknown): ParseResult<RoomSyncRespo
   if (!isVersion(input.version)) return bad("$.version");
   if (typeof input.requiresFullSnapshot !== "boolean") return bad("$.requiresFullSnapshot");
   const room = parseRoomView(input.room);
-  if (!room.ok || room.value.roomId !== input.roomId) return bad("$.room");
+  if (!room.ok || room.value.roomId !== input.roomId || (room.value.version !== undefined && room.value.version !== input.version)) return bad("$.room");
   return good(input);
 }
 
 /** Strict client payload parser for the match:sync event. */
 export function parseMatchSyncRequest(input: unknown): ParseResult<MatchSyncRequest> {
   if (!isRecord(input)) return bad();
-  if (!exactKeys(input, ["protocolVersion", "requestId", "matchId", "knownVersion", "afterEventSeq"])) return bad();
+  if (!exactShape(input, ["protocolVersion", "requestId", "matchId", "knownVersion", "afterEventSeq"], ["acceptUnchanged"])) return bad();
+  if (Object.hasOwn(input, "acceptUnchanged") && input.acceptUnchanged !== true) return bad("$.acceptUnchanged");
   if (input.protocolVersion !== 1) return bad("$.protocolVersion");
   if (!isText(input.requestId)) return bad("$.requestId");
   if (!isText(input.matchId)) return bad("$.matchId");
   if (!isVersion(input.knownVersion)) return bad("$.knownVersion");
   if (!isVersion(input.afterEventSeq)) return bad("$.afterEventSeq");
+  return good(input);
+}
+
+export function parseSyncUnchangedResponse(input: unknown): ParseResult<SyncUnchangedResponse> {
+  if (!isRecord(input) || input.protocolVersion !== 1 || !isText(input.requestId) || input.status !== "unchanged" || !isVersion(input.version)) return bad();
+  if (exactShape(input, ["protocolVersion", "requestId", "status", "roomId", "version"]) && isText(input.roomId)) return good(input);
+  if (exactShape(input, ["protocolVersion", "requestId", "status", "matchId", "version", "eventSeq"]) && isText(input.matchId) && isVersion(input.eventSeq)) return good(input);
+  return bad();
+}
+
+export function parseRoomPresenceView(input: unknown): ParseResult<RoomPresenceView> {
+  if (!isRecord(input) || !exactShape(input, ["protocolVersion", "roomId", "observedAt", "members"]) || input.protocolVersion !== 1 || !isText(input.roomId) || typeof input.observedAt !== "string" || !Number.isFinite(Date.parse(input.observedAt)) || !Array.isArray(input.members) || input.members.length < 1 || input.members.length > 7) return bad();
+  const ids = new Set<string>();
+  for (const member of input.members) {
+    if (!isRecord(member) || !exactShape(member, ["playerId", "connectionState"]) || !isText(member.playerId) || !["connected", "disconnected", "unknown"].includes(member.connectionState as string) || ids.has(member.playerId)) return bad("$.members");
+    ids.add(member.playerId);
+  }
   return good(input);
 }
 

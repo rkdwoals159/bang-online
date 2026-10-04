@@ -78,18 +78,15 @@ const roleLabels: Readonly<Record<RoleId, string>> = Object.freeze({
   renegade: "배신자",
 });
 
-/**
- * Only deliberately public event kinds are turned into log copy. Payloads
- * are not inspected or serialized by this UI.
- */
+/** Only named public event kinds and explicitly allowlisted projected fields are shown. */
 const publicEventMessages: Readonly<Record<string, string>> = Object.freeze({
-  BANG_ATTACKED: "뱅 공격이 시작됐어요.",
-  BANG_HIT: "뱅 공격 피해가 적용됐어요.",
-  BANG_MISSED: "뱅 공격을 피했어요.",
-  GATLING_STARTED: "개틀링이 사용됐어요.",
-  GATLING_HIT: "개틀링 공격 피해가 적용됐어요.",
+  BANG_ATTACKED: "뱅! 공격이 시작됐어요.",
+  BANG_HIT: "뱅! 공격이 적중했어요.",
+  BANG_MISSED: "뱅! 공격을 피했어요.",
+  GATLING_STARTED: "개틀링 공격이 시작됐어요.",
+  GATLING_HIT: "개틀링 공격이 적중했어요.",
   GATLING_MISSED: "개틀링 공격을 피했어요.",
-  INDIANS_STARTED: "인디언!이 사용됐어요.",
+  INDIANS_STARTED: "인디언!이 시작됐어요.",
   INDIANS_HIT: "인디언!의 피해가 적용됐어요.",
   INDIANS_DEFENDED: "인디언!에 대응했어요.",
   DUEL_STARTED: "결투가 시작됐어요.",
@@ -169,8 +166,76 @@ export function isMatchActionInputEnabled(status: MatchStatus): boolean {
   return status === "playing";
 }
 
-export function formatPublicEvent(event: PublicMatchEvent): string | null {
-  return publicEventMessages[event.type] ?? null;
+function publicName(payload: Readonly<Record<string, unknown>>, key: string, players: ReadonlyMap<string, string>): string | null {
+  const id = payload[key];
+  return typeof id === "string" ? players.get(id) ?? null : null;
+}
+
+function publicNames(payload: Readonly<Record<string, unknown>>, key: string, players: ReadonlyMap<string, string>): string[] {
+  const ids = payload[key];
+  return Array.isArray(ids)
+    ? ids.flatMap((id) => typeof id === "string" && players.has(id) ? [players.get(id)!] : [])
+    : [];
+}
+
+function publicDamage(payload: Readonly<Record<string, unknown>>): string {
+  const damage = payload.damage;
+  return typeof damage === "number" && Number.isSafeInteger(damage) && damage > 0
+    ? ` · 피해 ${damage}`
+    : "";
+}
+
+export function formatPublicEvent(
+  event: PublicMatchEvent,
+  players: ReadonlyMap<string, string> = new Map(),
+): string | null {
+  const fallback = publicEventMessages[event.type];
+  if (!fallback) return null;
+  const payload = event.payload;
+  const actor = publicName(payload, "actorPlayerId", players);
+  const target = publicName(payload, "targetPlayerId", players);
+  const initiator = publicName(payload, "initiatorPlayerId", players);
+  const responder = publicName(payload, "responderPlayerId", players);
+  const damage = publicDamage(payload);
+
+  switch (event.type) {
+    case "BANG_ATTACKED": return actor && target ? `${actor} 님이 ${target} 님을 뱅!으로 공격해요.` : fallback;
+    case "BANG_HIT": return actor && target ? `${actor} 님의 뱅!이 ${target} 님에게 적중했어요${damage}.` : fallback;
+    case "BANG_MISSED": return target ? `${target} 님이 뱅!을 피했어요.` : fallback;
+    case "GATLING_STARTED": {
+      const targets = publicNames(payload, "targetPlayerIds", players);
+      return actor && targets.length ? `${actor} 님이 개틀링을 사용했어요 · 대상 ${targets.join(", ")}` : fallback;
+    }
+    case "GATLING_HIT": return actor && target ? `${actor} 님의 개틀링이 ${target} 님에게 적중했어요${damage}.` : fallback;
+    case "GATLING_MISSED": return target ? `${target} 님이 개틀링을 피했어요.` : fallback;
+    case "INDIANS_STARTED": {
+      const targets = publicNames(payload, "targetPlayerIds", players);
+      return actor && targets.length ? `${actor} 님이 인디언!을 사용했어요 · 대상 ${targets.join(", ")}` : fallback;
+    }
+    case "INDIANS_HIT": return actor && target ? `${actor} 님의 인디언!이 ${target} 님에게 적중했어요${damage}.` : fallback;
+    case "INDIANS_DEFENDED": return target ? `${target} 님이 인디언!에 대응했어요.` : fallback;
+    case "DUEL_STARTED": return initiator && target ? `${initiator} 님과 ${target} 님의 결투가 시작됐어요.` : fallback;
+    case "DUEL_YIELDED": return publicName(payload, "playerId", players)
+      ? `${publicName(payload, "playerId", players)} 님이 결투를 끝냈어요${damage}.` : fallback;
+    case "DUEL_BANG_PLAYED": return responder ? `${responder} 님이 결투에서 뱅!을 냈어요.` : fallback;
+    case "BEER_USED": return actor ? `${actor} 님이 맥주를 사용했어요.` : fallback;
+    case "SALOON_USED": return actor ? `${actor} 님이 술집을 사용했어요.` : fallback;
+    case "PLAYER_HEALED": return target ? `${target} 님의 생명력이 회복됐어요.` : fallback;
+    case "DYNAMITE_EXPLODED": return target ? `${target} 님에게 다이너마이트가 폭발했어요${damage}.` : fallback;
+    case "DYNAMITE_PASSED": {
+      const from = publicName(payload, "fromPlayerId", players);
+      const to = publicName(payload, "toPlayerId", players);
+      return from && to ? `${from} 님이 ${to} 님에게 다이너마이트를 넘겼어요.` : fallback;
+    }
+    case "BARREL_CHECK_REQUESTED": return target ? `${target} 님의 술통 판정이 시작됐어요.` : fallback;
+    case "BARREL_CHECK_RESOLVED": {
+      const succeeded = payload.succeeded;
+      return target && typeof succeeded === "boolean"
+        ? `${target} 님의 술통 판정 ${succeeded ? "성공" : "실패"}이에요.`
+        : fallback;
+    }
+    default: return fallback;
+  }
 }
 
 export function buildMatchStatusViewModel(
@@ -182,7 +247,7 @@ export function buildMatchStatusViewModel(
   const inputEnabled = isMatchActionInputEnabled(projection.status);
   const resultTitle = projection.status === "completed" ? "게임 결과" : null;
   const resultMessage = projection.status === "completed"
-    ? "게임이 종료되어 더 이상 행동을 입력할 수 없습니다."
+    ? "게임이 끝났어요."
     : null;
   const completedOutcome = projection.status === "completed" ? projection.outcome : null;
   const playersById = new Map(projection.players.map(({ playerId, displayName }) => [playerId, displayName]));
@@ -201,7 +266,7 @@ export function buildMatchStatusViewModel(
   let statusMessage: string;
   switch (projection.status) {
     case "playing":
-      statusMessage = "서버에서 확인한 현재 차례와 단계입니다.";
+      statusMessage = "현재 차례와 진행 단계예요.";
       break;
     case "paused":
       statusMessage = "게임이 일시 정지되어 행동을 입력할 수 없습니다.";
@@ -210,7 +275,7 @@ export function buildMatchStatusViewModel(
       statusMessage = "게임이 종료되었습니다.";
       break;
     case "recovery_required":
-      statusMessage = "서버 복구 확인이 필요해 행동을 입력할 수 없습니다.";
+      statusMessage = "게임 정보를 복구하고 있어요. 행동을 잠시 기다려 주세요.";
       break;
   }
 
@@ -229,7 +294,7 @@ export function buildMatchStatusViewModel(
     winningPlayerNames,
     revealedRoles,
     publicLog: projection.visibleEvents.flatMap((event) => {
-      const message = formatPublicEvent(event);
+      const message = formatPublicEvent(event, playersById);
       return message === null ? [] : [{ eventSeq: event.eventSeq, message }];
     }),
   };

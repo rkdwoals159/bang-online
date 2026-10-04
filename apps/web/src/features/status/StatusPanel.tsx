@@ -33,7 +33,7 @@ export interface ResultRoomTransport {
 }
 
 export const RETURN_TO_LOBBY_ERROR_MESSAGE =
-  "재대기실 요청을 반영하지 못했어요. 현재 결과는 유지됩니다. 방 연결을 확인한 뒤 다시 시도해 주세요.";
+  "대기실로 돌아가지 못했어요. 연결을 확인한 뒤 다시 시도해 주세요.";
 
 export function canReturnToLobbyFromResult(
   matchId: string | undefined,
@@ -100,6 +100,7 @@ export async function returnToLobbyFromResult({
   if (!ackRoom.ok || !preservesCompletedRoomSeats(room, ackRoom.value)) {
     throw new Error("The server did not confirm the room return.");
   }
+  if (typeof ackRoom.value.version === "number" && ackRoom.value.version > roomVersion) return;
 
   const sync = await transport.syncRoom(room.roomId);
   if (sync.roomId !== room.roomId || sync.version <= roomVersion ||
@@ -162,7 +163,7 @@ export function MatchInputGate({
       <legend>행동 입력</legend>
       {inputEnabled ? children : (
         <p role="status" aria-live="polite">
-          현재 게임 상태에서는 행동을 입력할 수 없습니다.
+          지금은 행동을 고를 수 없어요.
         </p>
       )}
     </fieldset>
@@ -198,6 +199,9 @@ export function StatusPanel({
     sync.snapshot.viewer.playerId,
     room,
   ) && roomVersion !== undefined && transport !== undefined;
+  const waitingForOwner = projection.status === "completed" && room?.status === "in_game" &&
+    room.activeMatchId === matchId && room.viewer.playerId === sync.snapshot.viewer.playerId &&
+    !room.viewer.isOwner && !canReturn;
 
   async function submitReturnToLobby() {
     if (!canReturn || !room || roomVersion === undefined || !matchId || !transport) return;
@@ -226,40 +230,44 @@ export function StatusPanel({
       data-match-version={projection.version}
       data-input-enabled={view.inputEnabled ? "true" : "false"}
     >
-      <header className="match-status__header">
-        <div>
-          <p className="match-status__eyebrow">현재 판</p>
-          <h2>게임 진행</h2>
-        </div>
-        <span className="match-status__badge">{view.statusLabel}</span>
-      </header>
+      {projection.status !== "completed" ? (
+        <>
+          <header className="match-status__header">
+            <div>
+              <p className="match-status__eyebrow">현재 판</p>
+              <h2>게임 진행</h2>
+            </div>
+            <span className="match-status__badge">{view.statusLabel}</span>
+          </header>
 
-      <section className="match-status__turn" aria-label="현재 차례와 단계">
-        <div>
-          <span className="match-status__label">현재 차례</span>
-          <strong>{view.currentPlayerName}</strong>
-        </div>
-        <div>
-          <span className="match-status__label">진행 단계</span>
-          <strong>{view.phaseLabel}</strong>
-        </div>
-      </section>
+          <section className="match-status__turn" aria-label="현재 차례와 단계">
+            <div>
+              <span className="match-status__label">현재 차례</span>
+              <strong>{view.currentPlayerName}</strong>
+            </div>
+            <div>
+              <span className="match-status__label">진행 단계</span>
+              <strong>{view.phaseLabel}</strong>
+            </div>
+          </section>
 
-      <p className="match-status__message" role="status" aria-live="polite">
-        {view.statusMessage}
-      </p>
+          <p className="match-status__message" role="status" aria-live="polite">
+            {view.statusMessage}
+          </p>
+        </>
+      ) : null}
 
       {view.resultTitle ? (
         <section className="match-status__result" aria-labelledby="match-result-title" aria-live="polite">
-          <p className="match-status__eyebrow">서버 확정 상태</p>
-          <h3 id="match-result-title">{view.resultTitle}</h3>
+          <p className="match-status__eyebrow">이번 판</p>
+          <h1 id="match-result-title">{view.resultTitle}</h1>
           {view.winningFactionLabel ? (
             <p className="match-status__result-faction">
               <span>승리 진영</span>
               <strong>{view.winningFactionLabel}</strong>
             </p>
           ) : (
-            <p>서버 결과 정보를 확인할 수 없습니다.</p>
+            <p>승리 정보를 확인할 수 없어요.</p>
           )}
           {view.winningPlayerNames.length > 0 ? (
             <div className="match-status__result-group">
@@ -302,17 +310,18 @@ export function StatusPanel({
               ) : null}
             </div>
           ) : null}
+          {waitingForOwner ? (
+            <p className="match-status__waiting-owner" role="status">
+              대기실로 돌아가는 일은 방장이 진행해요. 결과를 확인하며 잠시 기다려 주세요.
+            </p>
+          ) : null}
         </section>
       ) : null}
 
-      <section className="match-status__log" aria-labelledby="match-public-log-title">
-        <div className="match-status__log-heading">
-          <div>
-            <p className="match-status__eyebrow">공개 기록</p>
-            <h3 id="match-public-log-title">게임 로그</h3>
-          </div>
-          <span>{view.publicLog.length}건</span>
-        </div>
+      <details className="match-status__log">
+        <summary className="match-status__log-summary" id="match-public-log-title">
+          공개 기록 <span>{view.publicLog.length}건</span>
+        </summary>
         {view.publicLog.length > 0 ? (
           <ol className="match-status__events" aria-label="공개 게임 이벤트">
             {view.publicLog.map((entry) => (
@@ -325,7 +334,7 @@ export function StatusPanel({
         ) : (
           <p className="match-status__empty-log">아직 표시할 공개 기록이 없어요.</p>
         )}
-      </section>
+      </details>
     </section>
   );
 }

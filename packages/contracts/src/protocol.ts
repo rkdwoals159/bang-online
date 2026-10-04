@@ -101,12 +101,15 @@ export interface MatchSyncRequest {
   matchId: string;
   knownVersion: number;
   afterEventSeq: number;
+  /** Opt in only when the client retains the matching canonical projection. */
+  acceptUnchanged?: true;
 }
 export interface RoomSyncRequest {
   protocolVersion: typeof PROTOCOL_VERSION;
   requestId: string;
   roomId: string;
   knownVersion: number;
+  acceptUnchanged?: true;
 }
 export interface RoomPreviewRequest {
   protocolVersion: typeof PROTOCOL_VERSION;
@@ -252,7 +255,19 @@ export interface MatchSyncResponse {
   snapshot: MatchSnapshotView;
   visibleEvents: readonly PublicMatchEvent[];
 }
-export type MatchSyncReply = MatchSyncResponse | SyncRejectedResponse;
+export type MatchSyncReply = MatchSyncResponse | SyncRejectedResponse | SyncUnchangedResponse;
+/** A lightweight, authorized response; never usable without a matching local projection. */
+export type SyncUnchangedResponse =
+  | { protocolVersion: typeof PROTOCOL_VERSION; requestId: string; status: "unchanged"; roomId: string; version: number }
+  | { protocolVersion: typeof PROTOCOL_VERSION; requestId: string; status: "unchanged"; matchId: string; version: number; eventSeq: number };
+export type RoomConnectionState = "connected" | "disconnected" | "unknown";
+/** Membership-scoped SSE observation, separate from authoritative game versions. */
+export interface RoomPresenceView {
+  protocolVersion: typeof PROTOCOL_VERSION;
+  roomId: string;
+  observedAt: string;
+  members: readonly { playerId: string; connectionState: RoomConnectionState }[];
+}
 export interface RoomView {
   roomId: string;
   status: RoomStatus;
@@ -261,7 +276,9 @@ export interface RoomView {
   ownerPlayerId: string;
   capacity: 4 | 5 | 6 | 7;
   rulesetVersion: string;
-  members: readonly { playerId: string; displayName: string; seatIndex: number; ready: boolean }[];
+  /** Additive canonical projection version, including room-command responses. */
+  version?: number;
+  members: readonly { playerId: string; displayName: string; seatIndex: number; ready: boolean; connectionState?: RoomConnectionState }[];
   viewer: { playerId: string; isOwner: boolean };
 }
 export interface RoomSyncResponse {
@@ -272,7 +289,7 @@ export interface RoomSyncResponse {
   requiresFullSnapshot: boolean;
   room: RoomView;
 }
-export type RoomSyncReply = RoomSyncResponse | SyncRejectedResponse;
+export type RoomSyncReply = RoomSyncResponse | SyncRejectedResponse | SyncUnchangedResponse;
 
 export type ServerEvent =
   | { event: "room:changed"; payload: { roomId: string; version: number } }

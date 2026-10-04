@@ -1,0 +1,994 @@
+{
+  "observedAt": "2026-10-04T09:09:58.041Z",
+  "notes": [
+    "Production log subset: most recent 60 events in a seven-day lookup; not a representative percentile estimate.",
+    "Worker wall time for long-lived SSE is stream lifetime, not time to first byte.",
+    "HTTPS benchmark is unauthenticated, sequential from audit host, and includes network. First homepage request includes first connection effects; cause was not isolated.",
+    "Routes and timestamps only; no production headers, cookies, payloads, room or match identifiers."
+  ],
+  "httpsBenchmark": {
+    "observedAt": "2026-10-04T09:09:58.041Z",
+    "mode": "sequential HTTPS from audit host; no authenticated data or mutations; n=8 per route; includes network",
+    "stats": [
+      {
+        "name": "home",
+        "n": 8,
+        "statuses": [
+          200
+        ],
+        "firstMs": 2567.7,
+        "minMs": 40.9,
+        "medianMs": 48.2,
+        "p95Ms": 2567.7,
+        "maxMs": 2567.7
+      },
+      {
+        "name": "session-empty",
+        "n": 8,
+        "statuses": [
+          204
+        ],
+        "firstMs": 42.3,
+        "minMs": 32.2,
+        "medianMs": 33.4,
+        "p95Ms": 42.3,
+        "maxMs": 42.3
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "n": 8,
+        "statuses": [
+          401
+        ],
+        "firstMs": 54,
+        "minMs": 28.5,
+        "medianMs": 33.6,
+        "p95Ms": 56.7,
+        "maxMs": 56.7
+      },
+      {
+        "name": "api-404",
+        "n": 8,
+        "statuses": [
+          404
+        ],
+        "firstMs": 35.7,
+        "minMs": 26.6,
+        "medianMs": 42.5,
+        "p95Ms": 69.4,
+        "maxMs": 69.4
+      }
+    ],
+    "samples": [
+      {
+        "name": "home",
+        "round": 0,
+        "status": 200,
+        "ttfbMs": 2561.1,
+        "totalMs": 2567.7,
+        "bytes": 9333,
+        "cfRay": "a4530ce77c8c76c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 0,
+        "status": 204,
+        "ttfbMs": 42.3,
+        "totalMs": 42.3,
+        "bytes": 0,
+        "cfRay": "a4530cf64b0476c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 0,
+        "status": 401,
+        "ttfbMs": 53.7,
+        "totalMs": 54,
+        "bytes": 36,
+        "cfRay": "a4530cf69c3f5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 0,
+        "status": 404,
+        "ttfbMs": 35.5,
+        "totalMs": 35.7,
+        "bytes": 30,
+        "cfRay": "a4530cf6ed1a76c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 1,
+        "status": 200,
+        "ttfbMs": 39.5,
+        "totalMs": 40.9,
+        "bytes": 9333,
+        "cfRay": "a4530cf71dba5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 1,
+        "status": 204,
+        "ttfbMs": 37.8,
+        "totalMs": 37.8,
+        "bytes": 0,
+        "cfRay": "a4530cf75e9976c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 1,
+        "status": 401,
+        "ttfbMs": 30.6,
+        "totalMs": 31,
+        "bytes": 36,
+        "cfRay": "a4530cf79f2a5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 1,
+        "status": 404,
+        "ttfbMs": 69,
+        "totalMs": 69.4,
+        "bytes": 30,
+        "cfRay": "a4530cf7cfc376c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 2,
+        "status": 200,
+        "ttfbMs": 51.9,
+        "totalMs": 53.8,
+        "bytes": 9333,
+        "cfRay": "a4530cf848fe5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 2,
+        "status": 204,
+        "ttfbMs": 33.5,
+        "totalMs": 33.5,
+        "bytes": 0,
+        "cfRay": "a4530cf88a4776c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 2,
+        "status": 401,
+        "ttfbMs": 28.2,
+        "totalMs": 28.5,
+        "bytes": 36,
+        "cfRay": "a4530cf8ba8d5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 2,
+        "status": 404,
+        "ttfbMs": 26.1,
+        "totalMs": 26.6,
+        "bytes": 30,
+        "cfRay": "a4530cf8eb6a76c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 3,
+        "status": 200,
+        "ttfbMs": 48.6,
+        "totalMs": 50,
+        "bytes": 9333,
+        "cfRay": "a4530cf92b755a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 3,
+        "status": 204,
+        "ttfbMs": 32.4,
+        "totalMs": 32.5,
+        "bytes": 0,
+        "cfRay": "a4530cf96d1076c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 3,
+        "status": 401,
+        "ttfbMs": 30.2,
+        "totalMs": 30.5,
+        "bytes": 36,
+        "cfRay": "a4530cf99cbb5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 3,
+        "status": 404,
+        "ttfbMs": 43.2,
+        "totalMs": 43.4,
+        "bytes": 30,
+        "cfRay": "a4530cf9de4776c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 4,
+        "status": 200,
+        "ttfbMs": 54.4,
+        "totalMs": 55.3,
+        "bytes": 9333,
+        "cfRay": "a4530cfa0dde5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 4,
+        "status": 204,
+        "ttfbMs": 42.2,
+        "totalMs": 42.2,
+        "bytes": 0,
+        "cfRay": "a4530cfa684b76c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 4,
+        "status": 401,
+        "ttfbMs": 56.6,
+        "totalMs": 56.7,
+        "bytes": 36,
+        "cfRay": "a4530cfacfbc5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 4,
+        "status": 404,
+        "ttfbMs": 43.6,
+        "totalMs": 43.8,
+        "bytes": 30,
+        "cfRay": "a4530cfb1a9876c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 5,
+        "status": 200,
+        "ttfbMs": 42.1,
+        "totalMs": 42.8,
+        "bytes": 9333,
+        "cfRay": "a4530cfb593f5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 5,
+        "status": 204,
+        "ttfbMs": 32.1,
+        "totalMs": 32.2,
+        "bytes": 0,
+        "cfRay": "a4530cfb9c4676c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 5,
+        "status": 401,
+        "ttfbMs": 36.1,
+        "totalMs": 36.2,
+        "bytes": 36,
+        "cfRay": "a4530cfbca755a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 5,
+        "status": 404,
+        "ttfbMs": 41.7,
+        "totalMs": 42.1,
+        "bytes": 30,
+        "cfRay": "a4530cfc1e1476c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 6,
+        "status": 200,
+        "ttfbMs": 45.1,
+        "totalMs": 46.4,
+        "bytes": 9333,
+        "cfRay": "a4530cfc4c2e5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 6,
+        "status": 204,
+        "ttfbMs": 32.5,
+        "totalMs": 32.6,
+        "bytes": 0,
+        "cfRay": "a4530cfc9fda76c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 6,
+        "status": 401,
+        "ttfbMs": 39.1,
+        "totalMs": 39.3,
+        "bytes": 36,
+        "cfRay": "a4530cfccda35a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 6,
+        "status": 404,
+        "ttfbMs": 41.2,
+        "totalMs": 41.3,
+        "bytes": 30,
+        "cfRay": "a4530cfd193576c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "home",
+        "round": 7,
+        "status": 200,
+        "ttfbMs": 44.7,
+        "totalMs": 45.9,
+        "bytes": 9333,
+        "cfRay": "a4530cfd3f6b5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "session-empty",
+        "round": 7,
+        "status": 204,
+        "ttfbMs": 33.3,
+        "totalMs": 33.3,
+        "bytes": 0,
+        "cfRay": "a4530cfd9ad976c7-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "assigned-rooms-empty",
+        "round": 7,
+        "status": 401,
+        "ttfbMs": 29.2,
+        "totalMs": 29.4,
+        "bytes": 36,
+        "cfRay": "a4530cfdb8fd5a82-ICN",
+        "serverTiming": null
+      },
+      {
+        "name": "api-404",
+        "round": 7,
+        "status": 404,
+        "ttfbMs": 42.6,
+        "totalMs": 42.9,
+        "bytes": 30,
+        "cfRay": "a4530cfdebfe76c7-ICN",
+        "serverTiming": null
+      }
+    ]
+  },
+  "workerLogSubset": {
+    "groups": [
+      {
+        "route": "GET /api/notifications/events",
+        "n": 11,
+        "statuses": [
+          null,
+          404
+        ],
+        "outcomes": [
+          "canceled",
+          "ok"
+        ],
+        "medianWallMs": 289,
+        "maxWallMs": 73768,
+        "medianCpuMs": 2,
+        "maxCpuMs": 16
+      },
+      {
+        "route": "POST /api/rooms/:id/commands",
+        "n": 3,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 1087,
+        "maxWallMs": 1888,
+        "medianCpuMs": 9,
+        "maxCpuMs": 13
+      },
+      {
+        "route": "POST /api/rooms/:id",
+        "n": 1,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 1008,
+        "maxWallMs": 1008,
+        "medianCpuMs": 9,
+        "maxCpuMs": 9
+      },
+      {
+        "route": "POST /api/rooms/:id/sync",
+        "n": 25,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 595,
+        "maxWallMs": 684,
+        "medianCpuMs": 3,
+        "maxCpuMs": 6
+      },
+      {
+        "route": "GET /api/guest-sessions/rooms",
+        "n": 6,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 480,
+        "maxWallMs": 507,
+        "medianCpuMs": 2,
+        "maxCpuMs": 3
+      },
+      {
+        "route": "GET /api/guest-sessions",
+        "n": 7,
+        "statuses": [
+          204,
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 101,
+        "maxWallMs": 302,
+        "medianCpuMs": 1,
+        "maxCpuMs": 3
+      },
+      {
+        "route": "POST /api/guest-sessions",
+        "n": 1,
+        "statuses": [
+          201
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 111,
+        "maxWallMs": 111,
+        "medianCpuMs": 2,
+        "maxCpuMs": 2
+      },
+      {
+        "route": "GET /",
+        "n": 1,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 51,
+        "maxWallMs": 51,
+        "medianCpuMs": 45,
+        "maxCpuMs": 45
+      },
+      {
+        "route": "GET /rooms/:id",
+        "n": 5,
+        "statuses": [
+          200
+        ],
+        "outcomes": [
+          "ok"
+        ],
+        "medianWallMs": 11,
+        "maxWallMs": 45,
+        "medianCpuMs": 10,
+        "maxCpuMs": 40
+      }
+    ],
+    "rows": [
+      {
+        "timestamp": "2026-10-04T09:09:17.493Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 189,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:09:10.874Z",
+        "route": "GET /api/guest-sessions",
+        "status": 204,
+        "outcome": "ok",
+        "wallMs": 300,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:09:09.672Z",
+        "route": "GET /",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 51,
+        "cpuMs": 45
+      },
+      {
+        "timestamp": "2026-10-04T09:09:07.160Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 659,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:09:07.096Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 588,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:09:05.464Z",
+        "route": "GET /rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 37,
+        "cpuMs": 33
+      },
+      {
+        "timestamp": "2026-10-04T09:08:56.103Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 35452,
+        "cpuMs": 9
+      },
+      {
+        "timestamp": "2026-10-04T09:08:32.457Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 595,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:32.114Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 5369,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:08:31.781Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 570,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:31.240Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 684,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:31.177Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 620,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:28.886Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 632,
+        "cpuMs": 5
+      },
+      {
+        "timestamp": "2026-10-04T09:08:28.867Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 611,
+        "cpuMs": 6
+      },
+      {
+        "timestamp": "2026-10-04T09:08:21.303Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 677,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:20.776Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 569,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:20.596Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 592,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:08:20.468Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 10372,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:08:19.978Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 480,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:08:19.950Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 468,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:08:19.463Z",
+        "route": "GET /api/guest-sessions",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 100,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:08:19.456Z",
+        "route": "GET /api/guest-sessions",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 90,
+        "cpuMs": 0
+      },
+      {
+        "timestamp": "2026-10-04T09:08:15.905Z",
+        "route": "GET /rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 9,
+        "cpuMs": 9
+      },
+      {
+        "timestamp": "2026-10-04T09:08:03.166Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 73768,
+        "cpuMs": 16
+      },
+      {
+        "timestamp": "2026-10-04T09:07:13.853Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 591,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:07:13.220Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 608,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:07:12.592Z",
+        "route": "POST /api/rooms/:id/commands",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 1064,
+        "cpuMs": 9
+      },
+      {
+        "timestamp": "2026-10-04T09:07:11.432Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 583,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:07:10.762Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 665,
+        "cpuMs": 5
+      },
+      {
+        "timestamp": "2026-10-04T09:07:10.060Z",
+        "route": "POST /api/rooms/:id/commands",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 1087,
+        "cpuMs": 9
+      },
+      {
+        "timestamp": "2026-10-04T09:06:57.997Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 554,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:57.583Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 566,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:57.403Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 614,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:06:56.749Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 507,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:56.626Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 590,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:06:56.222Z",
+        "route": "GET /api/guest-sessions",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 91,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:06:56.055Z",
+        "route": "GET /rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 11,
+        "cpuMs": 10
+      },
+      {
+        "timestamp": "2026-10-04T09:06:53.599Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 593,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:06:52.982Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 18874,
+        "cpuMs": 7
+      },
+      {
+        "timestamp": "2026-10-04T09:06:52.623Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 595,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:52.347Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 606,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:51.995Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 493,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:51.470Z",
+        "route": "GET /api/guest-sessions",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 101,
+        "cpuMs": 0
+      },
+      {
+        "timestamp": "2026-10-04T09:06:51.166Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 589,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:50.545Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 579,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:06:49.619Z",
+        "route": "GET /api/notifications/events",
+        "outcome": "canceled",
+        "wallMs": 289,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:49.594Z",
+        "route": "GET /rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 7,
+        "cpuMs": 6
+      },
+      {
+        "timestamp": "2026-10-04T09:06:47.427Z",
+        "route": "POST /api/rooms/:id/commands",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 1888,
+        "cpuMs": 13
+      },
+      {
+        "timestamp": "2026-10-04T09:06:45.753Z",
+        "route": "GET /api/notifications/events",
+        "status": 404,
+        "outcome": "ok",
+        "wallMs": 201,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:06:44.422Z",
+        "route": "GET /api/notifications/events",
+        "status": 404,
+        "outcome": "ok",
+        "wallMs": 209,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:06:43.169Z",
+        "route": "GET /api/notifications/events",
+        "status": 404,
+        "outcome": "ok",
+        "wallMs": 208,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:42.737Z",
+        "route": "POST /api/rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 1008,
+        "cpuMs": 9
+      },
+      {
+        "timestamp": "2026-10-04T09:06:42.430Z",
+        "route": "GET /api/notifications/events",
+        "status": 404,
+        "outcome": "ok",
+        "wallMs": 200,
+        "cpuMs": 1
+      },
+      {
+        "timestamp": "2026-10-04T09:06:41.942Z",
+        "route": "GET /api/notifications/events",
+        "status": 404,
+        "outcome": "ok",
+        "wallMs": 200,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:39.873Z",
+        "route": "GET /api/guest-sessions/rooms",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 203,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:39.639Z",
+        "route": "POST /api/guest-sessions",
+        "status": 201,
+        "outcome": "ok",
+        "wallMs": 111,
+        "cpuMs": 2
+      },
+      {
+        "timestamp": "2026-10-04T09:06:38.036Z",
+        "route": "POST /api/rooms/:id/sync",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 610,
+        "cpuMs": 4
+      },
+      {
+        "timestamp": "2026-10-04T09:06:36.487Z",
+        "route": "GET /api/guest-sessions",
+        "status": 204,
+        "outcome": "ok",
+        "wallMs": 299,
+        "cpuMs": 0
+      },
+      {
+        "timestamp": "2026-10-04T09:06:36.478Z",
+        "route": "GET /api/guest-sessions",
+        "status": 204,
+        "outcome": "ok",
+        "wallMs": 302,
+        "cpuMs": 3
+      },
+      {
+        "timestamp": "2026-10-04T09:06:35.782Z",
+        "route": "GET /rooms/:id",
+        "status": 200,
+        "outcome": "ok",
+        "wallMs": 45,
+        "cpuMs": 40
+      }
+    ]
+  }
+}

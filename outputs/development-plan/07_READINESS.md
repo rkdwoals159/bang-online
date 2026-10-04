@@ -47,11 +47,10 @@ T54는 카드 type별 원본 숫자·무늬 영역을 확인해 마스크 좌표
 
 ## 출시 전 남는 실제 작업
 
-1. T01~T61 구현 및 수락 기준 실행, 실패 해결, 결과 기록.
+1. 기존 97-case 통합 기준의 남은 두 항목 D06/D18 및 공개 Sites에서의 실제 4인·7인 브라우저 대국, 재접속과 Worker 재시작 복구를 검증한다.
 2. 42개 이미지의 한국어 카드명 및 숫자 마스크 좌표 시각 검토.
-3. 호스팅 origin/DB/TLS/환경변수/백업/운영 연락 경로 선택.
-4. 4인·7인 실제 브라우저 세션으로 게임 종료·재접속·서버 재시작 흐름 확인.
-5. 게임 중 응답자가 장기간 돌아오지 않으면 판이 기다리는 제품 특성 고지. 타이머/봇/강제중단을 추가하려면 별도 온라인 규칙과 수락 케이스를 먼저 정의.
+3. 배포된 Sites D1의 백업·복원 절차, 사용량 관찰, 운영 연락 경로를 정한다.
+4. 게임 중 응답자가 장기간 돌아오지 않으면 판이 기다리는 제품 특성 고지. 타이머/봇/강제중단을 추가하려면 별도 온라인 규칙과 수락 케이스를 먼저 정의.
 
 ## 작업 결과 보고 포맷
 
@@ -73,6 +72,16 @@ Known failure / reproduction:
 
 - 배포 대상은 Codex Sites Worker 호환 런타임과 Sites 관리 D1 binding으로 고정한다. 외부 플랫폼/DB/socket service로 우회하지 않는다.
 - 기존 97개 통합 수락 기준은 현재 95/97 검증이며 D06/D18은 NOT RUN으로 유지한다. Sites S01–S09는 별도 집계한다.
-- 공개 전에 S01–S08 코드/DB/브라우저 evidence를 수집한다. 실제 4인과 7인 Sites 브라우저 흐름이 끝나기 전까지 online game release readiness를 완료로 바꾸지 않는다.
+- T106에서 S01–S08 로컬 evidence를 기록했고 T107에서 Sites 공개 배포를 마쳤다. S09는 배포·HTTP smoke 부분만 확인했으므로 실제 4인/7인 브라우저 대국과 재접속이 검증될 때까지 full online game release readiness는 미완료로 유지한다.
 - 무료 이용량은 Cloudflare Workers Free 및 D1 Free 정책에 따른다. 현재 공식 수치는 Workers 100,000 requests/day, D1 5,000,000 rows read/day, 100,000 rows written/day, 5 GB total이다. 한도를 넘으면 관련 요청이 초기화까지 실패할 수 있다.
 - 새 Site는 단 한 번 등록한다. `project_id` 외에 API credential, session secret 또는 production invite를 repo/workspace에 기록하지 않는다.
+
+## T107 실제 공개 배포 결과 (2026-09-29)
+
+- 배포 플랫폼은 Codex Sites Worker와 Sites 관리 D1 binding만 사용했다. 새 Site는 한 번만 등록했고 공개 권한은 사용자가 요청한 대로 `public`이다.
+- URL: [https://bang-online-ko.rkdwoals159.chatgpt.site](https://bang-online-ko.rkdwoals159.chatgpt.site/)
+- 배포 상태: **succeeded**. Sites version **1**, deployment `appgdep_6abace1e94f48191b386cc77d1f97309`.
+- 배포 소스 SHA는 `99c2c41ad639295fd83601995c4498a0516e46e7`이며 이 SHA를 Sites 원격 `main`으로 push한 뒤 같은 SHA에서 빌드한 archive와 함께 저장했다. 단기 Git 토큰은 push에만 사용했으며 repository나 로그에 저장하지 않았다.
+- 공개 URL smoke: `GET /` 및 `GET /rooms/new` → `200 text/html`; `GET /assets/cards/playing/01_bang.png` → `200 image/png`, 116,634 bytes; `GET /api/guest-sessions` → `204`. 이 확인을 위해 production room, guest identity, match 또는 게임 카드를 생성하지 않았다.
+- S09는 **PARTIAL**이다. 공개 access/version/deployment와 HTTP 경로는 확인했지만 4인·7인 전체 브라우저 대국, 승패 결과, 재접속·복귀는 **NOT RUN**이다. T106의 local Sites 결과와 기존 95/97 통합 수락 tally 및 D06/D18 NOT RUN은 변경하지 않는다.
+- 무료 운영량은 Cloudflare Workers Free의 100,000 requests/day 및 10 ms CPU/invocation, D1의 5,000,000 rows read/day·100,000 rows written/day·5 GB total 기준이다. 일일 한도를 넘으면 Worker 요청 또는 D1 query가 실패할 수 있다. 공식 문서: [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), [D1 free-tier enforcement](https://developers.cloudflare.com/changelog/post/2026-09-01-d1-free-tier-limit-enforcement/).

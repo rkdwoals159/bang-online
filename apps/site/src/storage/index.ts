@@ -18,6 +18,7 @@ export type {
   NewMatchPlayer,
   NewRoom,
   NewRoomPlayer,
+  OutboxInvalidationRecord,
   OutboxRecord,
   RoomCommandInput,
   RoomMutationOutcome,

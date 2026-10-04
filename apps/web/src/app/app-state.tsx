@@ -67,7 +67,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   if (!transport) {
     return (
       <div role={transportLoadFailed ? "alert" : "status"}>
-        {transportLoadFailed ? "게임 전송을 불러오지 못했어요. 새로고침해 주세요." : "게임 전송을 준비하고 있어요."}
+        {transportLoadFailed ? "게임을 불러오지 못했어요. 새로고침해 주세요." : "게임을 준비하고 있어요."}
       </div>
     );
   }
@@ -109,8 +109,8 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
         kind: "error",
         expired,
         message: expired
-          ? "게스트 세션이 만료됐어요. 초대 코드로 다시 참가하거나 새 세션을 시작해 주세요."
-          : "게스트 세션과 방 상태를 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.",
+          ? "접속 정보가 만료됐어요. 이름을 입력한 뒤 초대 코드로 다시 참가해 주세요."
+          : "참가 중인 방을 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.",
       });
     }
   }, [replaceAssignedRoomWatches, transport]);
@@ -129,21 +129,17 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
     setSessionRecovery((current) => ({
       kind: "error",
       expired: true,
-      message: "게스트 세션이 만료됐어요. 초대 코드로 다시 참가하거나 새 세션을 시작해 주세요.",
+      message: "접속 정보가 만료됐어요. 이름을 입력한 뒤 초대 코드로 다시 참가해 주세요.",
     }));
   }, [transportState.connection]);
 
   const adoptGuestSession = useCallback(async (guest: GuestSessionResponse) => {
-    let assignedRooms: readonly RoomView[] = [];
-    try {
-      assignedRooms = await transport.recoverAssignedSeats();
-    } catch {
-      // The session has already been created. The next room operation can retry
-      // connection and room synchronization without exposing cookie credentials.
-    }
+    // A newly issued identity has no assigned seats. Existing identities use
+    // retrySessionRecovery, which performs the authenticated recovery query.
+    const assignedRooms: readonly RoomView[] = [];
     replaceAssignedRoomWatches(assignedRooms);
     setSessionRecovery({ kind: "ready", guest, assignedRooms });
-  }, [replaceAssignedRoomWatches, transport]);
+  }, [replaceAssignedRoomWatches]);
 
   const roomEntryTransport = useState<RoomEntryTransport>(() => ({
     restoreGuestSession: () => transport.restoreGuestSession(),
@@ -231,7 +227,12 @@ export function waitForTransportConnection(
   timeoutMs = 10_000,
 ): Promise<void> {
   const current = transport.getSnapshot();
-  if (current.connection === "connected") return Promise.resolve();
+  const writesAvailable = (state: BrowserTransportState) => state.connection === "connected" ||
+    (state.connection === "disconnected" && transport.writesAvailableWhileDisconnected === true);
+  if (current.connection === "expired") {
+    return Promise.reject(new BrowserTransportError("SESSION_EXPIRED", "접속 정보가 만료됐어요."));
+  }
+  if (writesAvailable(current)) return Promise.resolve();
 
   return new Promise<void>((resolve, reject) => {
     let settled = false;
@@ -249,7 +250,7 @@ export function waitForTransportConnection(
 
     unsubscribe = transport.subscribe(() => {
       const state = transport.getSnapshot();
-      if (state.connection === "connected") finish();
+      if (writesAvailable(state)) finish();
       else if (state.connection === "expired") {
         finish(new BrowserTransportError("SESSION_EXPIRED", "게스트 세션이 만료됐어요."));
       }
@@ -257,7 +258,7 @@ export function waitForTransportConnection(
 
     transport.connect();
     const latest = transport.getSnapshot();
-    if (latest.connection === "connected") finish();
+    if (writesAvailable(latest)) finish();
     else if (latest.connection === "expired") {
       finish(new BrowserTransportError("SESSION_EXPIRED", "게스트 세션이 만료됐어요."));
     }

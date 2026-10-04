@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { RoomCommand, RoomView } from "../../../../../packages/contracts/src/protocol.js";
+import type { TransportConnectionState } from "../../transport/types.js";
 import { makeInviteUrl } from "../room-entry/model.js";
 import {
   buildRoomLobbyViewModel,
@@ -16,6 +17,8 @@ export interface LobbyProps {
   roomVersion: number;
   /** The one-time room invite value from room creation; RoomView itself omits it. */
   inviteCode?: string | null;
+  /** Local transport state can give the viewer a fresher reconnect hint than the room projection. */
+  viewerConnectionState?: TransportConnectionState;
   /** Parent owns T58 transport, syncing and receipt handling. */
   onCommand: (command: LobbyRoomCommand) => void | Promise<void>;
   createCommandId?: () => string;
@@ -39,6 +42,7 @@ export function Lobby({
   room,
   roomVersion,
   inviteCode = null,
+  viewerConnectionState,
   onCommand,
   createCommandId = commandId,
   origin,
@@ -125,6 +129,12 @@ export function Lobby({
                     <span aria-hidden="true">{seat.member.ready ? "✓" : "○"}</span>
                     {seat.readinessLabel}
                   </span>
+                  <span
+                    className={`room-lobby__connection room-lobby__connection--${connectionStateForSeat(seat.member, seat.isViewer, viewerConnectionState)}`}
+                    role="status"
+                  >
+                    {connectionLabelForSeat(seat.member, seat.isViewer, viewerConnectionState)}
+                  </span>
                   {seat.canKick && (
                     <button
                       type="button"
@@ -150,6 +160,12 @@ export function Lobby({
         <p className="room-lobby__status-message" role="status" aria-live="polite">
           {view.statusMessage}
         </p>
+        {room.members.some((member) => member.connectionState === "disconnected") ||
+          viewerConnectionState === "connecting" || viewerConnectionState === "disconnected" ? (
+          <p className="room-lobby__connection-hint" role="status" aria-live="polite">
+            연결이 끊겨도 좌석은 유지돼요. 잠시 기다리거나 초대 링크로 다시 들어와 주세요.
+          </p>
+        ) : null}
       </section>
 
       <section className="room-lobby__actions" aria-label="대기실 작업">
@@ -215,4 +231,37 @@ export function Lobby({
       {feedback && <p className="room-lobby__error" role="alert">{feedback}</p>}
     </main>
   );
+}
+
+type LobbyConnectionLabel = "connected" | "disconnected" | "unknown" | "connecting" | "expired";
+
+function connectionStateForSeat(
+  member: RoomView["members"][number],
+  isViewer: boolean,
+  viewerConnectionState?: TransportConnectionState,
+): LobbyConnectionLabel {
+  if (isViewer) {
+    if (viewerConnectionState === "connecting") return "connecting";
+    if (viewerConnectionState === "disconnected") return "disconnected";
+    if (viewerConnectionState === "expired") return "expired";
+    if (viewerConnectionState === "connected") return "connected";
+  }
+  return member.connectionState === "connected" || member.connectionState === "disconnected"
+    ? member.connectionState
+    : "unknown";
+}
+
+function connectionLabelForSeat(
+  member: RoomView["members"][number],
+  isViewer: boolean,
+  viewerConnectionState?: TransportConnectionState,
+): string {
+  const state = connectionStateForSeat(member, isViewer, viewerConnectionState);
+  switch (state) {
+    case "connected": return "연결됨";
+    case "disconnected": return isViewer ? "연결 끊김 · 복구 중" : "연결 끊김 · 기다리는 중";
+    case "connecting": return "다시 연결 중";
+    case "expired": return "참여 정보 만료";
+    case "unknown": return "연결 상태 확인 중";
+  }
 }

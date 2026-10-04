@@ -162,7 +162,7 @@ test("Sites requests use strict DTO parsing, cookie credentials and same-payload
 
   assert.deepEqual(await transport.restoreGuestSession(), guest);
   transport.connect();
-  eventSources[0].source.open();
+  assert.equal(eventSources.length, 0, "a new guest with no membership must not open SSE");
   const command = {
     protocolVersion: 1,
     commandId: "00000000-0000-4000-8000-000000000001",
@@ -182,6 +182,7 @@ test("Sites requests use strict DTO parsing, cookie credentials and same-payload
   const commandCalls = calls.filter(({ url }) => url.endsWith("/commands"));
   assert.equal(commandCalls.length, 2);
   assert.equal(commandCalls[0].init.body, commandCalls[1].init.body);
+  eventSources[0].source.open();
   for (const { init } of calls) {
     assert.equal(init.credentials, "include");
     assert.equal(init.cache, "no-store");

@@ -31,8 +31,8 @@ try {
   assert.match(survivorMarkup, /손패 2장/);
   assert.match(survivorMarkup, /버림더미/);
   assert.match(survivorMarkup, /9장/);
-  assert.match(survivorMarkup, /내 손패/);
-  assert.match(survivorMarkup, /맥주/);
+  assert.doesNotMatch(survivorMarkup, /내 손패/);
+  assert.doesNotMatch(survivorMarkup, /맥주/);
   assert.match(survivorMarkup, /현재 차례/);
   assert.match(survivorMarkup, /카드 사용/);
   assert.match(survivorMarkup, /남은 덱/);

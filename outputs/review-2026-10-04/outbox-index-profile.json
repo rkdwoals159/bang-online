@@ -1,0 +1,54 @@
+{
+  "observedAt": "2026-10-04T09:25:00.602Z",
+  "mode": "isolated Miniflare D1 synthetic sparse aggregate, 10000 events, 10 relevant; NOT production workload",
+  "query": "SELECT cursor, event_id, aggregate_id, aggregate_version, event_seq, kind FROM outbox WHERE cursor > ? AND aggregate_id IN (?, ?) ORDER BY cursor LIMIT ?",
+  "before": {
+    "plan": [
+      {
+        "id": 6,
+        "parent": 0,
+        "notused": 196,
+        "detail": "SEARCH outbox USING INTEGER PRIMARY KEY (rowid>?)"
+      }
+    ],
+    "meta": {
+      "served_by": "miniflare.db",
+      "duration": 1,
+      "changes": 0,
+      "last_row_id": 10000,
+      "changed_db": false,
+      "size_after": 1654784,
+      "rows_read": 10000,
+      "rows_written": 0
+    },
+    "count": 10
+  },
+  "after": {
+    "plan": [
+      {
+        "id": 7,
+        "parent": 0,
+        "notused": 80,
+        "detail": "SEARCH outbox USING INDEX outbox_aggregate_cursor_idx (aggregate_id=? AND cursor>?)"
+      },
+      {
+        "id": 43,
+        "parent": 0,
+        "notused": 0,
+        "detail": "USE TEMP B-TREE FOR ORDER BY"
+      }
+    ],
+    "meta": {
+      "served_by": "miniflare.db",
+      "duration": 1,
+      "changes": 0,
+      "last_row_id": 10000,
+      "changed_db": false,
+      "size_after": 1892352,
+      "rows_read": 24,
+      "rows_written": 0
+    },
+    "count": 10
+  },
+  "sameResults": true
+}

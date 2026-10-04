@@ -1,4 +1,4 @@
-import type { RoomCommand, RoomPreviewResponse, RoomView } from "../../../../../packages/contracts/src/protocol.js";
+import type { RoomCommand, RoomConnectionState, RoomPreviewResponse, RoomView } from "../../../../../packages/contracts/src/protocol.js";
 import { createEffectRegistry } from "../../../../../packages/engine/src/effects/registry.js";
 import type { InteractionIdentity } from "../../../../../packages/engine/src/effects/runtime/index.js";
 import { initializeGame } from "../../../../../packages/engine/src/setup/initialize.js";
@@ -19,6 +19,12 @@ import {
 import { opaqueId, opaqueSecret, sha256Hex, webCryptoRandomSource } from "../auth/crypto.js";
 
 const BASE_DECK_RULESET_VERSION = "base4-ko-online-1.0";
+const ROOM_PRESENCE_LEASE_MS = 45_000;
+
+function connectionState(lastPresenceAt: Date | null, observedAt: Date): RoomConnectionState {
+  if (lastPresenceAt === null) return "unknown";
+  return observedAt.getTime() - lastPresenceAt.getTime() <= ROOM_PRESENCE_LEASE_MS ? "connected" : "disconnected";
+}
 
 export interface D1RoomServiceOptions {
   now?: () => Date;
@@ -61,11 +67,6 @@ export class SiteRoomRateLimitError extends SiteRoomServiceError {
     super("RATE_LIMITED");
     this.name = "SiteRoomRateLimitError";
   }
-}
-
-interface ProfileRow {
-  player_id: string;
-  display_name: string;
 }
 
 interface RoomReceiptOutcome {
@@ -131,9 +132,9 @@ export class D1RoomService {
     return views;
   }
 
-  async roomViewForMember(roomId: string, playerId: string): Promise<RoomView | null> {
-    const room = await this.repository.getRoom(roomId);
-    if (!room || !room.players.some((member) => member.playerId === playerId)) return null;
+  async roomViewForMember(roomId: string, playerId: string, loadedRoom?: RoomRecord): Promise<RoomView | null> {
+    const room = loadedRoom ?? await this.repository.getRoom(roomId);
+    if (!room || room.id !== roomId || !room.players.some((member) => member.playerId === playerId)) return null;
     return this.projectRoom(room, playerId);
   }
 
@@ -461,19 +462,16 @@ export class D1RoomService {
 
   private async projectRoom(room: RoomRecord, viewerPlayerId: string): Promise<RoomView | null> {
     if (!room.players.some((member) => member.playerId === viewerPlayerId)) return null;
-    const profileResult = await this.db.prepare(`
-      SELECT rp.player_id, gs.display_name
-      FROM room_players AS rp JOIN guest_sessions AS gs ON gs.id = rp.player_id
-      WHERE rp.room_id = ? ORDER BY rp.seat_index
-    `).bind(room.id).all<ProfileRow>();
-    const names = new Map((profileResult.results ?? []).map((row) => [row.player_id, row.display_name]));
-    const members = room.players.map(({ playerId, seatIndex, ready }) => {
-      const displayName = names.get(playerId);
-      if (displayName === undefined) throw new D1StorageInvariantError("Room member profile is missing.");
-      return { playerId, displayName, seatIndex, ready };
-    });
+    const observedAt = this.now();
+    const members = room.players.map(({ playerId, displayName, seatIndex, ready, lastPresenceAt }) => ({
+      playerId,
+      displayName,
+      seatIndex,
+      ready,
+      connectionState: connectionState(lastPresenceAt, observedAt),
+    }));
     const hasStartedMatch = room.status === "in_game" || room.status === "paused" || room.status === "completed";
-    const activeMatchId = hasStartedMatch ? await this.repository.getLatestMatchIdForRoom(room.id) : null;
+    const activeMatchId = hasStartedMatch ? room.latestMatchId : null;
     if (hasStartedMatch && activeMatchId === null) throw new D1StorageInvariantError("Started room has no latest match.");
     return {
       roomId: room.id,
@@ -482,6 +480,7 @@ export class D1RoomService {
       ownerPlayerId: room.ownerPlayerId,
       capacity: room.capacity,
       rulesetVersion: BASE_DECK_RULESET_VERSION,
+      version: room.version,
       members,
       viewer: { playerId: viewerPlayerId, isOwner: room.ownerPlayerId === viewerPlayerId },
     };

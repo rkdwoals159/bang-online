@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-04T09:40:35.059Z",
+  "mode": "local real SitesGameTransport with delayed fake fetch; no EventSource or version hints or production network",
+  "scenario": "two concurrent callers request the same room snapshot",
+  "requestsWhileFirstPending": 1,
+  "totalRoomSyncRequests": 1,
+  "versionHintsEmitted": 0,
+  "finding": "concurrent passive callers share one request"
+}

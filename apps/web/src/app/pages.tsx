@@ -5,6 +5,7 @@ import { CharacterCardFace, RoleCardFace } from "../features/cards/CardFaces.js"
 import { GameTable } from "../features/game-table/GameTable.js";
 import { Lobby } from "../features/lobby/Lobby.js";
 import { ReactionPrompt } from "../features/reactions/ReactionPrompt.js";
+import { interactionLabel } from "../features/reactions/model.js";
 import { MatchInputGate, StatusPanel } from "../features/status/StatusPanel.js";
 import { RoomEntry } from "../features/room-entry/RoomEntry.js";
 import type { BrowserTransportState, MatchProjectionState, TransportConnectionState } from "../transport/types.js";
@@ -57,13 +58,13 @@ export function roomConnectionStatusMessage(
   connectionWasLost: boolean,
 ): string | null {
   if (connection === "disconnected" || lastError === "CONNECTION" || connectionWasLost) {
-    return "연결 끊김 · 재접속 시 현재 판을 복구합니다";
+    return "연결이 끊겼어요. 다시 연결하면 게임을 이어갈 수 있어요.";
   }
   if (connection === "connecting" && awaitingAuthoritativeSync) {
-    return "보안 세션으로 서버에 연결하고 있어요.";
+    return "게임에 연결하고 있어요.";
   }
   if (connection === "connected" && awaitingAuthoritativeSync) {
-    return "현재 판을 서버와 동기화하고 있어요.";
+    return "최신 게임 정보를 불러오고 있어요.";
   }
   return null;
 }
@@ -72,16 +73,23 @@ export function isRoomProjectionInputEnabled(
   connection: TransportConnectionState,
   lastError: BrowserTransportState["lastError"],
   awaitingAuthoritativeSync: boolean,
+  writesAvailableWhileDisconnected = false,
 ): boolean {
-  return connection === "connected" && lastError !== "CONNECTION" && !awaitingAuthoritativeSync;
+  const usableTransport = connection === "connected" ||
+    (writesAvailableWhileDisconnected && connection === "disconnected");
+  const connectionErrorAcknowledged = lastError !== "CONNECTION";
+  return usableTransport && connectionErrorAcknowledged && !awaitingAuthoritativeSync;
 }
 
 export function shouldRetryConnectionSync(
   connection: TransportConnectionState,
   lastError: BrowserTransportState["lastError"],
   alreadyAttempted: boolean,
+  writesAvailableWhileDisconnected = false,
 ): boolean {
-  return connection === "connected" && lastError === "CONNECTION" && !alreadyAttempted;
+  const usableTransport = connection === "connected" ||
+    (writesAvailableWhileDisconnected && connection === "disconnected");
+  return usableTransport && lastError === "CONNECTION" && !alreadyAttempted;
 }
 
 export async function syncRoomAndActiveMatch(
@@ -90,6 +98,13 @@ export async function syncRoomAndActiveMatch(
 ): Promise<void> {
   const roomSync = await transport.syncRoom(roomId);
   if (roomSync.room.activeMatchId) await transport.syncMatch(roomSync.room.activeMatchId);
+}
+
+function isVersionedRoomView(value: unknown, roomId: string): value is RoomView {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as Partial<RoomView>;
+  return candidate.roomId === roomId && typeof candidate.version === "number" &&
+    Number.isSafeInteger(candidate.version) && Array.isArray(candidate.members);
 }
 
 export function RoomConnectionNotice({ message }: { message: string | null }) {
@@ -117,7 +132,7 @@ export function RoomProjectionFrame({
         className="room-projection-input"
         disabled={!inputEnabled}
         aria-disabled={!inputEnabled}
-        aria-label={inputEnabled ? "방 화면 입력" : "서버 동기화 후 방 화면 입력 가능"}
+        aria-label={inputEnabled ? "방 화면 입력" : "연결 확인 후 방 화면 입력 가능"}
         style={{ border: 0, margin: 0, minWidth: 0, padding: 0, width: "100%" }}
       >
         {children}
@@ -129,30 +144,30 @@ export function RoomProjectionFrame({
 const inMemoryRoleConfirmations = new Set<string>();
 
 export const roleDescriptions: Readonly<Record<string, string>> = Object.freeze({
-  sheriff: "보안관은 무법자와 배신자를 모두 제거하면 승리.",
-  deputy: "부관은 보안관을 돕고 같은 진영으로 승리.",
-  outlaw: "무법자는 보안관을 제거하면 승리.",
-  renegade: "배신자는 자신만 살아남아야 승리.",
+  sheriff: "승리 목표: 무법자와 배신자를 모두 제거하세요.",
+  deputy: "승리 목표: 보안관을 도와 보안관 진영과 함께 승리하세요.",
+  outlaw: "승리 목표: 보안관을 제거하세요.",
+  renegade: "승리 목표: 마지막까지 혼자 살아남으세요.",
 });
 
 /** Presentation copy transcribed from 01_RULES.md C01–C16. It never drives game logic. */
 export const characterDescriptions: Readonly<Record<string, string>> = Object.freeze({
-  bart_cassidy: "생존한 채 잃은 HP당 덱1장. 치명상일 때 이 능력으로 먼저 Beer를 찾아 구제할 수 없음. Dynamite 생존이면3장",
-  black_jack: "뽑기 단계 두 번째 카드를 공개, Heart/Diamond이면 추가1장(추가 카드는 비공개). Draw!가 아님",
-  calamity_janet: "BANG을 Missed로, Missed를 BANG으로 사용/대응 가능. 공격 변환이면 BANG quota 적용. Duel/Indians도 변환 BANG 허용",
-  el_gringo: "다른 플레이어가 사용한 카드로 HP를 잃고 생존하면 HP당 그 사용자 손패 무작위1장. 상대 손패 없으면 없음. Dynamite 없음, 자신이 연 Duel에서 자신이 지면 없음",
-  jesse_jones: "뽑기 단계 첫1장을 덱 대신 다른 생존자 손패에서 무작위로 가져올 수 있음. 두 번째는 덱",
-  jourdonnais: "가상 Barrel 능력. 실제 Barrel도 있으면 각각1회 판정 가능",
-  kit_carlson: "뽑기 단계 덱3장을 혼자 보고2장 획득, 나머지1장을 덱 맨 위로 비공개 반환",
-  lucky_duke: "Draw!마다 2장 공개→원하는1장으로 판정→둘 다 버림. 일반 뽑기/Black Jack에는 적용 안 됨",
-  paul_regret: "상대가 보는 자기 거리+1; Mustang과 누적",
-  pedro_ramirez: "뽑기 단계 첫1장을 버림더미 top으로 대체 가능. 두 번째 덱. 버림더미 비었으면 대체 불가",
-  rose_doolan: "자기가 보는 상대 거리−1, Scope와 누적, 최소1",
-  sid_ketchum: "손패 정확히2장 버려 HP+1, 반복 가능, 최대HP까지. 자기 사용 단계 또는 치명상 구제. 다른 카드 해결 중 임의 끼어들기는 불가. 2명에서도 능력 회복 유효라는 제품 해석은 D02 참고",
-  slab_the_killer: "자기 BANG 카드 공격만 Missed2개 필요. Barrel 성공1개 인정. Gatling 강화 안 됨",
-  suzy_lafayette: "손패가 0이면 덱1장. 자신이 사용한 카드의 효과 해결을 먼저 마친 뒤 빈 손패를 확인하므로 마지막 Stagecoach/Wells Fargo/General Store로 카드를 얻었다면 능력 추가 뽑기 없음. Duel은 종료까지 기다림. Slab 대응 마지막 Missed 후에는 즉시 뽑고 새 Missed로 두 번째 대응 가능",
-  vulture_sam: "타인 탈락시 그 손패+장착 전부 자기 손패로 회수. 자동 장착 아님. 폭발한 Dynamite는 이미 버려져 제외",
-  willy_the_kid: "자기 턴 BANG 무제한. 사거리/대상 제한은 그대로",
+  bart_cassidy: "능력: 피해를 입고 살아남으면 잃은 생명력 1당 카드 1장을 뽑아요.\n주의: 다이너마이트 피해를 받고 살아남으면 카드 3장을 뽑아요. 치명상 구제에 이 능력으로 맥주를 찾아 쓸 수는 없어요.",
+  black_jack: "능력: 카드 뽑기 단계의 두 번째 카드를 공개해요. 하트나 다이아몬드라면 카드 1장을 더 비공개로 뽑아요.\n주의: 일반 판정(Draw!)에는 적용되지 않아요.",
+  calamity_janet: "능력: 빗나감!을 뱅!처럼, 뱅!을 빗나감!처럼 낼 수 있어요.\n주의: 공격 카드로 바꾸어 내면 뱅! 사용 횟수 제한을 따라요. 결투와 인디언!에서도 바꾸어 낼 수 있어요.",
+  el_gringo: "능력: 다른 플레이어가 사용한 카드로 피해를 입고 살아남으면, 잃은 생명력 1당 그 플레이어의 손패에서 카드 1장을 무작위로 가져와요.\n주의: 상대 손패가 없으면 가져오지 않아요. 다이너마이트와 자신이 시작한 결투에서 진 경우에는 발동하지 않아요.",
+  jesse_jones: "능력: 카드 뽑기 단계의 첫 카드 1장을 덱 대신 다른 생존자의 손패에서 무작위로 가져올 수 있어요.\n그 단계의 두 번째 카드는 덱에서 뽑아요.",
+  jourdonnais: "능력: 가상 술통이 있어요. 뱅! 또는 개틀링 공격을 받을 때 하트 판정으로 빗나감! 1개처럼 방어할 수 있어요.\n술통을 장착하고 있다면 두 번 따로 판정할 수 있어요.",
+  kit_carlson: "능력: 카드 뽑기 단계에 덱 맨 위 3장을 혼자 보고 2장을 손패에 넣어요.\n남은 1장은 덱 맨 위에 비공개로 돌려놔요.",
+  lucky_duke: "능력: 판정(Draw!)마다 카드 2장을 공개해요. 둘 중 원하는 카드로 판정한 뒤 두 장 모두 버려요.\n주의: 일반 카드 뽑기와 블랙 잭의 추가 뽑기에는 적용되지 않아요.",
+  paul_regret: "능력: 다른 플레이어가 보는 나와의 거리가 1 늘어나요.\n머스탱 효과와 함께 적용돼요.",
+  pedro_ramirez: "능력: 카드 뽑기 단계의 첫 카드 1장을 덱 대신 버림더미 맨 위에서 가져올 수 있어요.\n버림더미가 비어 있으면 덱에서 뽑아요. 두 번째 카드는 덱에서 뽑아요.",
+  rose_doolan: "능력: 내가 보는 다른 플레이어와의 거리가 1 줄어요.\n조준경 효과와 함께 적용되며 거리는 1보다 작아지지 않아요.",
+  sid_ketchum: "능력: 손패 2장을 버리고 생명력 1을 회복할 수 있어요. 최대 생명력까지 반복할 수 있어요.\n사용 시점: 내 카드 사용 단계 또는 생명력 구제 때예요. 다른 카드 효과가 해결되는 중에는 사용할 수 없어요.",
+  slab_the_killer: "능력: 내가 뱅!으로 공격하면 상대는 빗나감! 2장이 필요해요.\n술통 판정에 성공하면 빗나감! 1장으로 인정해요. 개틀링 공격에는 이 능력이 적용되지 않아요.",
+  suzy_lafayette: "능력: 손패가 비면 카드 1장을 뽑아요.\n시점: 내가 낸 카드의 효과가 모두 끝난 뒤 확인해요. 슬랩의 공격에 마지막 빗나감!을 내면 즉시 뽑고, 새로 뽑은 빗나감!으로 한 번 더 대응할 수 있어요.",
+  vulture_sam: "능력: 다른 플레이어가 탈락하면 그 사람의 손패와 장착 카드를 모두 내 손패로 가져와요.\n가져온 카드는 자동으로 장착되지 않아요. 이미 버린 다이너마이트는 가져오지 않아요.",
+  willy_the_kid: "능력: 내 차례에는 뱅!을 원하는 만큼 낼 수 있어요.\n각 공격의 거리와 대상 제한은 그대로예요.",
 });
 
 export function hasRoleRevealConfirmation(matchId: string): boolean {
@@ -250,6 +265,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     inviteCodeForRoom,
   } = useAppState();
   const roomId = route.roomId;
+  const writesAvailableWhileDisconnected = transport.writesAvailableWhileDisconnected === true;
   const roomProjection = transportState.rooms[roomId];
   const room = roomProjection?.room;
   const matchId = room?.activeMatchId ?? null;
@@ -261,6 +277,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
   const connectionErrorSyncAttempted = useRef(false);
   const connectionErrorSyncInFlight = useRef(false);
   const currentRoomId = useRef(roomId);
+  const authoritativeSyncGeneration = useRef(0);
   const isMounted = useRef(true);
   currentRoomId.current = roomId;
   const connectionErrorWasAcknowledged = transportState.lastError === "CONNECTION" &&
@@ -276,6 +293,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     transportState.connection,
     routeLastError,
     awaitingAuthoritativeSync,
+    writesAvailableWhileDisconnected,
   );
 
   useEffect(() => {
@@ -284,25 +302,30 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
   }, []);
 
   useEffect(() => {
-    if (transportState.connection !== "connected") {
+    const generation = ++authoritativeSyncGeneration.current;
+    const canSync = transportState.connection === "connected" ||
+      (writesAvailableWhileDisconnected && transportState.connection === "disconnected");
+    if (!canSync) {
       setAwaitingAuthoritativeSync(true);
       setConnectionErrorSyncRecovered(false);
       if (transportState.connection === "disconnected") setConnectionWasLost(true);
       return;
     }
     if (sessionRecovery.kind !== "ready" || !sessionRecovery.guest) return;
+    if (transportState.lastError === "CONNECTION") return;
 
-    let active = true;
     void syncRoomAndActiveMatch(transport, roomId).then(() => {
-      if (!active) return;
+      if (!isMounted.current || currentRoomId.current !== roomId ||
+          authoritativeSyncGeneration.current !== generation) return;
       setAwaitingAuthoritativeSync(false);
-      setConnectionWasLost(false);
-      setConnectionErrorSyncRecovered(false);
+      const latest = transport.getSnapshot();
+      if (latest.lastError === "CONNECTION") connectionErrorSyncAttempted.current = true;
+      setConnectionWasLost(latest.connection === "disconnected" || latest.lastError === "CONNECTION");
+      setConnectionErrorSyncRecovered(latest.lastError === "CONNECTION");
     }).catch(() => {
       // Keep the cached server projection visible and input locked until a sync succeeds.
     });
-    return () => { active = false; };
-  }, [roomId, sessionRecovery, transport, transportState.connection]);
+  }, [roomId, sessionRecovery, transport, transportState.connection, writesAvailableWhileDisconnected]);
 
   useEffect(() => {
     if (transportState.lastError !== "CONNECTION") {
@@ -321,15 +344,20 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
           transportState.connection,
           transportState.lastError,
           connectionErrorSyncAttempted.current,
+          writesAvailableWhileDisconnected,
         ) || connectionErrorSyncInFlight.current) return;
 
     connectionErrorSyncAttempted.current = true;
     connectionErrorSyncInFlight.current = true;
+    const generation = ++authoritativeSyncGeneration.current;
     void syncRoomAndActiveMatch(transport, roomId).then(() => {
-      if (!isMounted.current || currentRoomId.current !== roomId ||
-          transport.getSnapshot().connection !== "connected") return;
+      const latest = transport.getSnapshot();
+      const transportUsable = latest.connection === "connected" ||
+        (writesAvailableWhileDisconnected && latest.connection === "disconnected");
+      if (!isMounted.current || currentRoomId.current !== roomId || !transportUsable) return;
+      if (authoritativeSyncGeneration.current !== generation) return;
       setAwaitingAuthoritativeSync(false);
-      setConnectionWasLost(false);
+      setConnectionWasLost(latest.connection === "disconnected" || latest.lastError === "CONNECTION");
       setConnectionErrorSyncRecovered(true);
     }).catch(() => {
       // A failed retry remains locked; the attempt guard prevents an automatic retry loop.
@@ -339,10 +367,10 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
         connectionErrorSyncAttempted.current = false;
       }
     });
-  }, [roomId, sessionRecovery, transport, transportState.connection, transportState.lastError]);
+  }, [roomId, sessionRecovery, transport, transportState.connection, transportState.lastError, writesAvailableWhileDisconnected]);
 
   if (sessionRecovery.kind === "loading") {
-    return <LoadingFrame message="게스트 세션과 참여 중인 방을 확인하고 있어요." />;
+    return <LoadingFrame message="이 브라우저의 게임 참여 정보를 확인하고 있어요." />;
   }
   if (sessionRecovery.kind === "error") {
     return <SessionRecoveryError recovery={sessionRecovery} retry={retrySessionRecovery} />;
@@ -350,13 +378,14 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
   if (!sessionRecovery.guest) return <GuestRequiredPage />;
   if (transportState.connection === "expired") {
     return <SessionRecoveryError
-      recovery={{ kind: "error", expired: true, message: "게스트 세션이 만료됐어요. 초대 코드로 다시 참가하거나 새 세션을 시작해 주세요." }}
+      recovery={{ kind: "error", expired: true, message: "참여 정보가 만료됐어요. 초대 코드로 다시 참가하거나 새 방을 만들어 주세요." }}
       retry={retrySessionRecovery}
     />;
   }
   if (!room) {
     if (transportState.lastError === "SYNC_REJECTED") return <RoomUnavailablePage />;
-    if (transportState.connection === "disconnected" || transportState.lastError === "CONNECTION") {
+    if ((transportState.connection === "disconnected" || transportState.lastError === "CONNECTION") &&
+        !writesAvailableWhileDisconnected) {
       return <>
         <RoomConnectionNotice message={connectionMessage} />
         <ErrorFrame message="방에 연결하지 못했어요. 네트워크를 확인한 뒤 다시 불러와 주세요." />
@@ -365,8 +394,8 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     return <>
       <RoomConnectionNotice message={connectionMessage} />
       <LoadingFrame message={transportState.connection === "connected"
-        ? "방의 최신 서버 상태를 확인하고 있어요."
-        : "보안 세션으로 서버에 연결하고 있어요."} />
+        ? "방 상태를 확인하고 있어요."
+        : "방에 연결하고 있어요."} />
     </>;
   }
   if (!surface) return <>
@@ -382,8 +411,8 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     return <>
       <RoomConnectionNotice message={connectionMessage} />
       <LoadingFrame message={surface.kind === "starting"
-        ? "서버가 매치를 준비하고 있어요."
-        : "활성 매치의 비공개 서버 스냅샷을 동기화하고 있어요."} />
+        ? "게임을 준비하고 있어요."
+        : "현재 게임 정보를 불러오고 있어요."} />
     </>;
   }
   if (surface.kind === "closed") return <>
@@ -414,9 +443,10 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
           room={room}
           roomVersion={roomProjection?.version ?? 0}
           inviteCode={inviteCodeForRoom(roomId)}
+          viewerConnectionState={transportState.connection}
           onCommand={async (command) => {
-            await transport.sendRoomCommand(command);
-            await transport.syncRoom(roomId);
+            const response = await transport.sendRoomCommand(command);
+            if (!isVersionedRoomView(response, roomId)) await transport.syncRoom(roomId);
           }}
         />
       </RoomProjectionFrame>
@@ -425,7 +455,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
 
   if (!matchProjection) return <>
     <RoomConnectionNotice message={connectionMessage} />
-    <LoadingFrame message="매치 스냅샷을 불러오고 있어요." />
+    <LoadingFrame message="현재 게임 정보를 불러오고 있어요." />
   </>;
   if (visibleSurface === "role-reveal") {
     return <RoomProjectionFrame message={connectionMessage} inputEnabled={inputEnabled}>
@@ -462,9 +492,9 @@ export function RoleRevealPage({ snapshot, onContinue }: { snapshot: MatchSnapsh
 
   return (
     <section className="page-card role-reveal-page" aria-labelledby="role-reveal-title">
-      <p className="eyebrow">서버가 확인한 비공개 배정</p>
+      <p className="eyebrow">내 역할과 인물</p>
       <h1 id="role-reveal-title">역할과 인물을 확인해 주세요</h1>
-      <p className="page-description">이 화면에는 현재 게스트에게 허용된 자기 역할과 인물 정보만 표시됩니다.</p>
+      <p className="page-description">내 역할의 승리 조건과 인물 능력을 확인한 뒤 게임을 시작하세요.</p>
       <div className="role-reveal-page__cards">
         <RoleCardFace roleId={role} description={roleDescriptions[role] ?? "역할 설명을 확인할 수 없습니다."} />
         <CharacterCardFace
@@ -504,23 +534,104 @@ export function MatchPage({
   showActions: boolean;
 }) {
   const statusSync = { version, snapshot, visibleEvents };
+  const completed = snapshot.status === "completed";
   return (
-    <div className="match-page">
-      <GameTable snapshot={snapshot} />
-      <StatusPanel
-        sync={statusSync}
-        room={room}
-        roomVersion={roomVersion}
-        matchId={matchId}
-        transport={transport}
-      />
-      {showActions ? (
+    <div className={`match-page${completed ? " match-page--result" : " match-page--playing"}`}>
+      {!completed ? <MatchRequestBanner snapshot={snapshot} /> : null}
+      {completed ? (
+        <StatusPanel
+          sync={statusSync}
+          room={room}
+          roomVersion={roomVersion}
+          matchId={matchId}
+          transport={transport}
+        />
+      ) : null}
+      {showActions && !completed ? (
         <MatchInputGate status={snapshot.status}>
-          <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
           <ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
+          <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
         </MatchInputGate>
       ) : null}
+      {completed ? (
+        <details className="match-page__history">
+          <summary>게임판과 진행 기록 보기</summary>
+          <GameTable snapshot={snapshot} />
+        </details>
+      ) : (
+        <>
+          <GameTable snapshot={snapshot} />
+          <StatusPanel
+            sync={statusSync}
+            room={room}
+            roomVersion={roomVersion}
+            matchId={matchId}
+            transport={transport}
+          />
+        </>
+      )}
     </div>
+  );
+}
+
+const requestPhaseLabels: Readonly<Record<string, string>> = {
+  start: "턴 시작",
+  draw: "카드 뽑기",
+  play: "카드 사용",
+  discard: "손패 정리",
+};
+
+function MatchRequestBanner({ snapshot }: { snapshot: MatchSnapshotView }) {
+  const turnOwner = snapshot.publicTable.players.find(
+    (player) => player.playerId === snapshot.publicTable.turn.currentPlayerId,
+  );
+  const pending = snapshot.pendingInteraction;
+  const responderId = pending && "currentResponderPlayerId" in pending
+    ? pending.currentResponderPlayerId
+    : null;
+  const responder = responderId
+    ? snapshot.publicTable.players.find((player) => player.playerId === responderId)
+    : undefined;
+  const myTurn = turnOwner?.playerId === snapshot.viewer.playerId;
+  const myResponse = responderId === snapshot.viewer.playerId && pending !== null && pending !== undefined &&
+    "responseOptions" in pending && pending.responseOptions.length > 0;
+  const phase = requestPhaseLabels[snapshot.publicTable.turn.phase] ?? "진행 중";
+  const request = pending ? interactionLabel(pending.kind) : null;
+  const instruction = snapshot.status === "paused"
+    ? "게임이 잠시 멈춰 있어요. 다시 진행되면 행동을 고를 수 있어요."
+    : snapshot.status === "recovery_required"
+      ? "게임 정보를 확인하고 있어요. 최신 상태를 기다려 주세요."
+      : snapshot.viewer.mode !== "active"
+        ? "탈락한 상태예요. 공개된 진행을 볼 수 있어요."
+        : myTurn
+          ? "내 차례예요. 아래에서 카드를 고를 수 있어요."
+          : turnOwner ? `${turnOwner.displayName} 님 차례예요.` : "현재 차례를 확인하고 있어요.";
+  const responseInstruction = snapshot.status === "paused"
+    ? "게임이 잠시 멈춰 있어요. 다시 진행되면 응답할 수 있어요."
+    : snapshot.status === "recovery_required"
+      ? "게임 정보를 확인하고 있어요. 최신 상태를 기다려 주세요."
+      : myResponse
+        ? "내 응답 차례예요. 아래에서 선택해 주세요."
+        : responder ? `${responder.displayName} 님이 응답 중이에요.` : "응답이 끝나면 다음 행동을 고를 수 있어요.";
+
+  return (
+    <section className="match-request" aria-label="현재 차례와 응답" role="status" aria-live="polite">
+      <div className="match-request__turn">
+        <span>차례</span>
+        <strong>{turnOwner?.displayName ?? "확인 중"}</strong>
+        <span>{phase}</span>
+      </div>
+      {pending ? (
+        <div className="match-request__response">
+          <span>{request}</span>
+          <strong>{responder?.displayName ?? (responderId ? "응답자 확인 중" : "응답 처리 중")}</strong>
+          {"step" in pending ? <span>{pending.step.current}/{pending.step.total}</span> : null}
+          <p>{responseInstruction}</p>
+        </div>
+      ) : (
+        <p className="match-request__instruction">{instruction}</p>
+      )}
+    </section>
   );
 }
 
@@ -528,12 +639,12 @@ function SessionRecoveryError({ recovery, retry }: { recovery: Extract<SessionRe
   return (
     <section className="state-frame" role="alert">
       <span className="state-icon state-icon-error" aria-hidden="true">!</span>
-      <h1>{recovery.expired ? "세션이 만료됐어요" : "세션을 복구하지 못했어요"}</h1>
+      <h1>{recovery.expired ? "참여 정보가 만료됐어요" : "참여 정보를 불러오지 못했어요"}</h1>
       <p>{recovery.message}</p>
       <div className="state-actions">
         <button className="button button-primary" onClick={() => void retry()}>다시 확인</button>
         <AppLink className="button button-secondary" to="/rooms/join">초대 코드로 참가</AppLink>
-        <AppLink className="button button-secondary" to="/rooms/new">새 세션 시작</AppLink>
+        <AppLink className="button button-secondary" to="/rooms/new">새 방 만들기</AppLink>
       </div>
     </section>
   );
@@ -543,11 +654,11 @@ function GuestRequiredPage() {
   return (
     <section className="state-frame" role="status">
       <span className="state-icon" aria-hidden="true">?</span>
-      <h1>게스트 세션이 필요해요</h1>
-      <p>이 방은 브라우저의 참여 좌석으로 동기화할 수 없어요. 새 세션을 만들거나 초대 코드로 참가해 주세요.</p>
+      <h1>참여 정보가 필요해요</h1>
+      <p>이 방에서 내 참여 정보를 찾을 수 없어요. 초대 코드로 다시 참가하거나 새 방을 만들어 주세요.</p>
       <div className="state-actions">
         <AppLink className="button button-primary" to="/rooms/join">초대 코드로 참가</AppLink>
-        <AppLink className="button button-secondary" to="/rooms/new">새 세션 시작</AppLink>
+        <AppLink className="button button-secondary" to="/rooms/new">새 방 만들기</AppLink>
       </div>
     </section>
   );
@@ -558,7 +669,7 @@ function RoomUnavailablePage() {
     <section className="state-frame" role="alert">
       <span className="state-icon state-icon-error" aria-hidden="true">!</span>
       <h1>방을 불러올 수 없어요</h1>
-      <p>이 브라우저의 참여 좌석을 확인할 수 없거나 방이 더 이상 열려 있지 않아요.</p>
+      <p>참가한 방을 찾을 수 없어요. 초대 코드를 확인하거나 첫 화면으로 돌아가 주세요.</p>
       <div className="state-actions">
         <AppLink className="button button-primary" to="/rooms/join">초대 코드로 참가</AppLink>
         <AppLink className="button button-secondary" to="/">첫 화면으로</AppLink>
@@ -585,7 +696,7 @@ function HomePage() {
         <p className="eyebrow">기본판 · 4–7명</p>
         <h1 id="page-title">친구들과 시작하는 뱅!</h1>
         <p className="page-description">
-          초대 링크로 모여 역할을 숨기고, 서버가 판정하는 한 판을 함께 즐겨 보세요.
+          초대 링크로 모여 역할을 숨기고 친구들과 전략을 겨뤄 보세요.
         </p>
         <div className="home-actions">
           <AppLink className="button button-primary" to="/rooms/new">새 방 만들기</AppLink>

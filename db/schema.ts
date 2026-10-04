@@ -147,6 +147,7 @@ export const outbox = sqliteTable("outbox", {
 }, (table) => [
   uniqueIndex("outbox_event_id_unique").on(table.eventId),
   index("outbox_unpublished_cursor_idx").on(table.cursor).where(sql`${table.publishedAt} IS NULL`),
+  index("outbox_aggregate_cursor_idx").on(table.aggregateId, table.cursor),
   check("outbox_aggregate_version_check", sql`${table.aggregateVersion} >= 0`),
   check("outbox_event_seq_check", sql`${table.eventSeq} >= 0`),
   check("outbox_kind_check", sql`${table.kind} IN ('match:changed', 'room:changed')`),

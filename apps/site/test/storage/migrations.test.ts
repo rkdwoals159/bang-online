@@ -6,7 +6,9 @@ import type { D1DatabaseLike } from "../../src/storage/d1-types.js";
 import { applyD1Migrations, createD1MigrationBootstrap, splitMigrationSql } from "../../src/storage/migrations.js";
 
 const migrationSql = await readFile(new URL("../../../../drizzle/0000_long_iron_man.sql", import.meta.url), "utf8");
+const outboxIndexSql = await readFile(new URL("../../../../drizzle/0001_jazzy_enchantress.sql", import.meta.url), "utf8");
 const migration = { version: 1, name: "0000_long_iron_man", sql: migrationSql } as const;
+const outboxIndexMigration = { version: 2, name: "0001_jazzy_enchantress", sql: outboxIndexSql } as const;
 const runtimes: Miniflare[] = [];
 
 async function newD1() {
@@ -96,4 +98,22 @@ test("Drizzle migration ledger rejects SQL edits after application", async () =>
     applyD1Migrations(db, [{ ...migration, sql: `${migration.sql}\n-- changed` }]),
     /differs from the SQL already applied/u,
   );
+});
+
+test("outbox aggregate cursor index applies as a separate versioned migration", async () => {
+  const db = await newD1();
+  await applyD1Migrations(db, [migration, outboxIndexMigration]);
+
+  const index = await db.prepare(
+    "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'outbox_aggregate_cursor_idx'",
+  ).first<{ sql: string }>();
+  assert.equal(index?.sql, "CREATE INDEX `outbox_aggregate_cursor_idx` ON `outbox` (`aggregate_id`,`cursor`)");
+
+  const ledger = await db.prepare("SELECT version, name FROM schema_migrations ORDER BY version").all<{
+    version: number; name: string;
+  }>();
+  assert.deepEqual(ledger.results, [
+    { version: 1, name: migration.name },
+    { version: 2, name: outboxIndexMigration.name },
+  ]);
 });

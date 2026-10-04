@@ -36,6 +36,7 @@ export interface RoomPlayerRecord extends NewRoomPlayer {
   ready: boolean;
   joinedAt: Date;
   lastPresenceAt: Date | null;
+  displayName: string;
 }
 
 export interface RoomRecord {
@@ -47,6 +48,7 @@ export interface RoomRecord {
   version: number;
   createdAt: Date;
   updatedAt: Date;
+  latestMatchId: string | null;
   players: RoomPlayerRecord[];
 }
 
@@ -155,6 +157,16 @@ export interface OutboxRecord {
   retryCount: number;
 }
 
+/** Minimal invalidation metadata for authorized SSE polling. */
+export interface OutboxInvalidationRecord {
+  cursor: number;
+  eventId: string;
+  aggregateId: string;
+  aggregateVersion: number;
+  eventSeq: number;
+  kind: "match:changed" | "room:changed";
+}
+
 export type RoomPlayerWrite =
   | { operation: "insert"; playerId: string; seatIndex: number; ready?: boolean }
   | { operation: "delete"; playerId: string }
@@ -235,6 +247,7 @@ interface RoomRow {
   version: number | string;
   created_at: string;
   updated_at: string;
+  latest_match_id: string | null;
 }
 
 interface RoomPlayerRow {
@@ -243,6 +256,7 @@ interface RoomPlayerRow {
   ready: number | boolean;
   joined_at: string;
   last_presence_at: string | null;
+  display_name: string | null;
 }
 
 interface MatchRow {
@@ -299,6 +313,15 @@ interface OutboxRow {
   created_at: string;
   published_at: string | null;
   retry_count: number;
+}
+
+interface OutboxInvalidationRow {
+  cursor: number | string;
+  event_id: string;
+  aggregate_id: string;
+  aggregate_version: number | string;
+  event_seq: number | string;
+  kind: "match:changed" | "room:changed";
 }
 
 interface MatchMetadataRow {
@@ -395,12 +418,14 @@ function assertObjectJson(value: unknown, label: string): JsonValue {
 }
 
 function mapRoomPlayer(row: RoomPlayerRow): RoomPlayerRecord {
+  if (row.display_name === null) throw new D1StorageInvariantError("Room member profile is missing.");
   return {
     playerId: row.player_id,
     seatIndex: safeInteger(row.seat_index, "room seat index"),
     ready: bool(row.ready),
     joinedAt: date(row.joined_at),
     lastPresenceAt: row.last_presence_at === null ? null : date(row.last_presence_at),
+    displayName: row.display_name,
   };
 }
 
@@ -418,6 +443,7 @@ function mapRoom(row: RoomRow, players: RoomPlayerRow[]): RoomRecord {
     version: safeInteger(row.version, "room version"),
     createdAt: date(row.created_at),
     updatedAt: date(row.updated_at),
+    latestMatchId: row.latest_match_id,
     players: players.map(mapRoomPlayer),
   };
 }
@@ -729,16 +755,23 @@ export class D1StorageRepository {
   }
 
   async getRoom(roomId: string): Promise<RoomRecord | null> {
-    const row = await this.db.prepare(`
-      SELECT id, owner_player_id, invite_code_hash, status, capacity, version, created_at, updated_at
-      FROM rooms WHERE id = ?
-    `).bind(roomId).first<RoomRow>();
+    requiredText(roomId, "Room ID");
+    const results = await this.db.batch([
+      this.db.prepare(`
+        SELECT id, owner_player_id, invite_code_hash, status, capacity, version, created_at, updated_at,
+          (SELECT id FROM matches WHERE room_id = rooms.id
+           ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id
+        FROM rooms WHERE id = ?
+      `).bind(roomId),
+      this.db.prepare(`
+        SELECT rp.player_id, rp.seat_index, rp.ready, rp.joined_at, rp.last_presence_at, gs.display_name
+        FROM room_players AS rp LEFT JOIN guest_sessions AS gs ON gs.id = rp.player_id
+        WHERE rp.room_id = ? ORDER BY rp.seat_index
+      `).bind(roomId),
+    ]);
+    const row = results[0]?.results?.[0] as RoomRow | undefined;
     if (!row) return null;
-    const players = await this.db.prepare(`
-      SELECT player_id, seat_index, ready, joined_at, last_presence_at
-      FROM room_players WHERE room_id = ? ORDER BY seat_index
-    `).bind(roomId).all<RoomPlayerRow>();
-    return mapRoom(row, players.results ?? []);
+    return mapRoom(row, (results[1]?.results ?? []) as RoomPlayerRow[]);
   }
 
   async getRoomPreviewByInviteHash(inviteCodeHash: string): Promise<RoomPreviewRecord | null> {
@@ -752,11 +785,32 @@ export class D1StorageRepository {
   }
 
   async listRoomsForPlayer(playerId: string): Promise<RoomRecord[]> {
-    const ids = await this.db.prepare(`
-      SELECT room_id FROM room_players WHERE player_id = ? ORDER BY joined_at, room_id
-    `).bind(playerId).all<{ room_id: string }>();
-    const rooms = await Promise.all((ids.results ?? []).map(({ room_id }) => this.getRoom(room_id)));
-    return rooms.filter((room): room is RoomRecord => room !== null);
+    requiredText(playerId, "Player ID");
+    const result = await this.db.prepare(`
+      SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at,
+        (SELECT id FROM matches WHERE room_id = r.id
+         ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id,
+        viewer.joined_at AS viewer_joined_at,
+        members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at,
+        gs.display_name
+      FROM room_players AS viewer
+      JOIN rooms AS r ON r.id = viewer.room_id
+      JOIN room_players AS members ON members.room_id = r.id
+      LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id
+      WHERE viewer.player_id = ?
+      ORDER BY viewer.joined_at, r.id, members.seat_index
+    `).bind(playerId).all<RoomRow & RoomPlayerRow & { viewer_joined_at: string }>();
+    const groups = new Map<string, { room: RoomRow; players: RoomPlayerRow[] }>();
+    for (const row of result.results ?? []) {
+      let group = groups.get(row.id);
+      if (!group) {
+        const { viewer_joined_at: _viewerJoinedAt, ...room } = row;
+        group = { room, players: [] };
+        groups.set(row.id, group);
+      }
+      group.players.push(row);
+    }
+    return [...groups.values()].map(({ room, players }) => mapRoom(room, players));
   }
 
   async createMatch(input: NewMatch): Promise<void> {
@@ -773,17 +827,46 @@ export class D1StorageRepository {
   }
 
   async getMatch(matchId: string, options: { supportedSchemaVersion?: number } = {}): Promise<MatchRecord | null> {
-    const row = await this.db.prepare(`
+    return this.loadMatch(matchId, options);
+  }
+
+  /**
+   * The first row is membership-scoped, and the player rows are gated by the same
+   * membership predicate. State JSON is decoded only after that authorization row
+   * exists, within one D1 batch snapshot.
+   */
+  async getMatchForPlayer(
+    matchId: string,
+    playerId: string,
+    options: { supportedSchemaVersion?: number } = {},
+  ): Promise<MatchRecord | null> {
+    requiredText(playerId, "Player ID");
+    return this.loadMatch(matchId, options, playerId);
+  }
+
+  private async loadMatch(
+    matchId: string,
+    options: { supportedSchemaVersion?: number },
+    playerId?: string,
+  ): Promise<MatchRecord | null> {
+    requiredText(matchId, "Match ID");
+    const membershipClause = playerId === undefined ? "" :
+      " AND EXISTS (SELECT 1 FROM match_players WHERE match_id = matches.id AND player_id = ?)";
+    const headerStatement = this.db.prepare(`
       SELECT id, room_id, status, version, event_seq, ruleset_version, state_schema_version, state_json,
              created_at, started_at, updated_at, ended_at
-      FROM matches WHERE id = ?
-    `).bind(matchId).first<MatchRow>();
-    if (!row) return null;
-    const players = await this.db.prepare(`
+      FROM matches WHERE id = ?${membershipClause}
+    `).bind(...(playerId === undefined ? [matchId] : [matchId, playerId]));
+    const playersStatement = this.db.prepare(`
       SELECT player_id, seat_index, alive, eliminated_at, connection_state
-      FROM match_players WHERE match_id = ? ORDER BY seat_index
-    `).bind(matchId).all<MatchPlayerRow>();
-    return mapMatch(row, players.results ?? [], options.supportedSchemaVersion);
+      FROM match_players WHERE match_id = ?${playerId === undefined ? "" : `
+        AND EXISTS (SELECT 1 FROM match_players WHERE match_id = ? AND player_id = ?)`}
+      ORDER BY seat_index
+    `).bind(...(playerId === undefined ? [matchId] : [matchId, matchId, playerId]));
+    const results = await this.db.batch([headerStatement, playersStatement]);
+    const row = results[0]?.results?.[0] as MatchRow | undefined;
+    if (!row) return null;
+    return mapMatch(row, (results[1]?.results ?? []) as MatchPlayerRow[], options.supportedSchemaVersion);
   }
 
   async findCommandReceipt(actorPlayerId: string, commandId: string): Promise<CommandReceiptRecord | null> {
@@ -817,6 +900,44 @@ export class D1StorageRepository {
       FROM outbox WHERE cursor > ?${membership} ORDER BY cursor LIMIT ?
     `).bind(...values).all<OutboxRow>();
     return (result.results ?? []).map(mapOutbox);
+  }
+
+  async listOutboxInvalidationsAfter(
+    cursor: number,
+    aggregateIds: readonly string[],
+    limit = 100,
+  ): Promise<OutboxInvalidationRecord[]> {
+    safeInteger(cursor, "outbox cursor");
+    this.validateLimit(limit, "outbox query limit");
+    if (aggregateIds.length === 0) return [];
+    const membership = ` AND aggregate_id IN (${aggregateIds.map(() => "?").join(", ")})`;
+    const result = await this.db.prepare(`
+      SELECT cursor, event_id, aggregate_id, aggregate_version, event_seq, kind
+      FROM outbox WHERE cursor > ?${membership} ORDER BY cursor LIMIT ?
+    `).bind(cursor, ...aggregateIds, limit).all<OutboxInvalidationRow>();
+    return (result.results ?? []).map((row) => ({
+      cursor: safeInteger(row.cursor, "outbox cursor", 1),
+      eventId: row.event_id,
+      aggregateId: row.aggregate_id,
+      aggregateVersion: safeInteger(row.aggregate_version, "outbox aggregate version"),
+      eventSeq: safeInteger(row.event_seq, "outbox event sequence"),
+      kind: row.kind,
+    }));
+  }
+
+  /** Renew this player's observation without changing membership or game state. */
+  async touchRoomPresence(playerId: string, observedAt = new Date()): Promise<number> {
+    requiredText(playerId, "Player ID");
+    const observedAtText = timestamp(observedAt)!;
+    const result = await this.db.prepare(`
+      UPDATE room_players
+      SET last_presence_at = CASE
+        WHEN last_presence_at IS NULL OR last_presence_at < ? THEN ?
+        ELSE last_presence_at
+      END
+      WHERE player_id = ?
+    `).bind(observedAtText, observedAtText, playerId).run();
+    return changes(result);
   }
 
   async listPendingOutbox(limit = 100): Promise<OutboxRecord[]> {

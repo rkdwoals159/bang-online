@@ -547,3 +547,11 @@ SSE event ID는 D1 `outbox.cursor`의 증가 정수다. `data`에는 다음 allo
 
 모든 Site 전송은 단일 출처다. browser transport는 기존 Socket transport와 별도 `SitesGameTransport`를 제공하고 사이트 빌드만 후자를 선택한다. 로컬 Vite 개발은 기존 Socket.IO transport를 계속 선택한다. UI/engine과 canonical DTO는 전송 구현에 의존하지 않는다.
 
+## 2026-10-04 동기화 및 접속 표시 보완
+
+- 기존 v1 sync 요청은 전체 응답을 유지한다. 캐시가 있는 클라이언트만 `acceptUnchanged:true`를 추가한다.
+- 같은 room version 또는 같은 match version/eventSeq를 인증·멤버십·지원 schema/ruleset 확인 후 비교해 `status:"unchanged"`와 식별자/버전만 반환할 수 있다. 클라이언트는 요청 ID와 자원 ID, 캐시 버전/cursor가 모두 일치할 때만 기존 projection을 재사용한다. 미일치·캐시 없음은 전체 sync로 재요청한다.
+- RoomView의 선택적 `version`은 같은 projection에서 읽은 방 버전이며, 방 명령 성공 응답에도 사용할 수 있다. RoomSyncResponse에 포함되면 envelope version과 같아야 한다.
+- RoomView.members의 선택적 connectionState는 connected/disconnected/unknown이다. 비공개 게임 규칙·시간 제한·좌석 유지에는 영향을 주지 않는다.
+- SSE `presence` 이벤트는 RoomPresenceView(protocolVersion/roomId/observedAt/members[playerId,connectionState])만 전달한다. 인증된 현재 방 멤버에게만 노출하며, 권위 게임 버전과 분리한다. 마지막 접속 확인의 만료는 자동 탈락이나 자리 제거를 뜻하지 않는다.
+

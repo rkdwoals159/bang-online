@@ -5,6 +5,7 @@ import {
   parseMatchSyncResponse,
   parseRoomSyncRequest,
   parseRoomSyncResponse,
+  parseSyncUnchangedResponse,
   parseSyncRejectedResponse,
 } from "../../../../../packages/contracts/src/validation.js";
 import { projectMatchSnapshot } from "../../../../../packages/engine/src/state/projection.js";
@@ -106,19 +107,34 @@ export async function handleSyncRoute(
 
       const repository = new D1StorageRepository(env.DB);
       const record = await repository.getRoom(parsed.value.roomId);
-      const room = record?.players.some((member) => member.playerId === playerId)
-        ? await new D1RoomService(env.DB, options).roomViewForMember(parsed.value.roomId, playerId)
+      const room = record
+        ? await new D1RoomService(env.DB, options).roomViewForMember(parsed.value.roomId, playerId, record)
         : null;
       if (!record || !room || room.viewer.playerId !== playerId || !room.members.some((member) => member.playerId === playerId)) {
         return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
+      }
+      if (room.version !== record.version || room.rulesetVersion !== BASE_DECK_RULESET_VERSION) {
+        return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+      }
+
+      if (parsed.value.acceptUnchanged === true && parsed.value.knownVersion === room.version) {
+        const unchanged = {
+          protocolVersion: 1 as const,
+          requestId: parsed.value.requestId,
+          status: "unchanged" as const,
+          roomId: room.roomId,
+          version: room.version,
+        };
+        if (!parseSyncUnchangedResponse(unchanged).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+        return jsonResponse(unchanged);
       }
 
       const response = {
         protocolVersion: 1 as const,
         requestId: parsed.value.requestId,
         roomId: parsed.value.roomId,
-        version: record.version,
-        requiresFullSnapshot: parsed.value.knownVersion !== record.version,
+        version: room.version,
+        requiresFullSnapshot: parsed.value.knownVersion !== room.version,
         room,
       };
       if (!parseRoomSyncResponse(response).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
@@ -144,17 +160,10 @@ export async function handleSyncRoute(
     const playerId = await authenticatedPlayer(request, env, options);
     if (!playerId) return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
 
-    const membership = await env.DB.prepare(`
-      SELECT 1 AS found FROM match_players WHERE match_id = ? AND player_id = ?
-    `).bind(parsed.value.matchId, playerId).first<{ found: number }>();
-    if (!membership) {
-      return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
-    }
-
     const repository = new D1StorageRepository(env.DB);
     let match;
     try {
-      match = await repository.getMatch(parsed.value.matchId, { supportedSchemaVersion: 1 });
+      match = await repository.getMatchForPlayer(parsed.value.matchId, playerId, { supportedSchemaVersion: 1 });
     } catch (error) {
       if (error instanceof UnsupportedMatchStateError) {
         return jsonResponse(rejected(requestId, "RECOVERY_REQUIRED"));
@@ -169,6 +178,19 @@ export async function handleSyncRoute(
     }
 
     const afterEventSeq = parsed.value.afterEventSeq;
+    if (parsed.value.acceptUnchanged === true && parsed.value.knownVersion === match.version && afterEventSeq === match.eventSeq) {
+      const unchanged = {
+        protocolVersion: 1 as const,
+        requestId: parsed.value.requestId,
+        status: "unchanged" as const,
+        matchId: match.id,
+        version: match.version,
+        eventSeq: match.eventSeq,
+      };
+      if (!parseSyncUnchangedResponse(unchanged).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+      return jsonResponse(unchanged);
+    }
+
     const events = afterEventSeq <= match.eventSeq
       ? await repository.listMatchEvents(match.id, afterEventSeq)
       : [];

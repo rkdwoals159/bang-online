@@ -120,7 +120,7 @@ export function RoomEntry({
       setGuest(created);
       setAssignedRooms([]);
       setErrorMessage(null);
-      setNotice("게스트 세션이 준비됐어요. 방을 만들거나 초대 코드로 참가할 수 있어요.");
+      setNotice("참여 준비가 됐어요. 방을 만들거나 초대 코드로 참가할 수 있어요.");
     } catch (error) {
       setErrorMessage(messageFrom(error, CONNECTION_ERROR_MESSAGE));
     } finally {
@@ -226,7 +226,7 @@ export function RoomEntry({
       <header className="room-entry__header">
         <p className="room-entry__eyebrow">기본판 · 4–7명</p>
         <h1 id="room-entry-title">친구와 뱅! 시작하기</h1>
-        <p>게스트 이름으로 세션을 만든 다음 비공개 방을 만들거나 초대 코드로 참가하세요.</p>
+        <p>이름을 정한 뒤 방을 만들거나 초대 코드로 참가하세요.</p>
       </header>
 
       {errorMessage && <p className="room-entry__message room-entry__message--error" role="alert">{errorMessage}</p>}
@@ -235,17 +235,17 @@ export function RoomEntry({
       {restoringSession ? (
         <section className="room-entry__panel" role="status" aria-live="polite">
           <span className="room-entry__spinner" aria-hidden="true" />
-          <p>보안 세션을 확인하고 있어요.</p>
+          <p>이 브라우저의 참여 정보를 확인하고 있어요.</p>
         </section>
       ) : guest ? (
         <>
-          <section className="room-entry__identity" aria-label="게스트 세션">
+          <section className="room-entry__identity" aria-label="내 참여 정보">
             <span className="room-entry__identity-mark" aria-hidden="true">{guest.player.displayName.slice(0, 1)}</span>
             <div>
               <p className="room-entry__identity-label">현재 게스트</p>
               <p className="room-entry__identity-name">{guest.player.displayName}</p>
             </div>
-            <p className="room-entry__cookie-note">재접속은 브라우저 보안 세션으로 확인합니다.</p>
+            <p className="room-entry__cookie-note">이 브라우저의 참여 정보로 다시 들어올 수 있어요.</p>
           </section>
 
           {assignedRooms.length > 0 && (
@@ -325,7 +325,7 @@ export function RoomEntry({
               ) : createdRoom?.duplicate ? (
                 <div className="room-entry__invite-result" role="status">
                   <h3>생성 결과를 다시 확인했어요</h3>
-                  <p>같은 요청은 다시 처리하지 않았고, 보안상 초대 코드는 재전송되지 않습니다. 새 코드가 필요하면 새 방을 만들어 주세요.</p>
+                  <p>방은 이미 만들어졌어요. 초대 코드는 다시 표시할 수 없으니 새 초대가 필요하면 새 방을 만들어 주세요.</p>
                 </div>
               ) : null}
             </section>
@@ -364,7 +364,6 @@ export function RoomEntry({
                   <dl>
                     <div><dt>현재 인원</dt><dd>{preview.occupancy}명</dd></div>
                     <div><dt>방 상태</dt><dd>{statusLabels[preview.status]}</dd></div>
-                    <div><dt>확인한 버전</dt><dd>v{preview.version}</dd></div>
                   </dl>
                   <button
                     className="room-entry__button room-entry__button--primary"
@@ -373,7 +372,7 @@ export function RoomEntry({
                   >
                     {busy === "join" ? "입장하고 있어요…" : "이 방에 참가하기"}
                   </button>
-                  <p className="room-entry__hint">입장할 때 서버가 방 버전과 좌석을 다시 확인합니다.</p>
+                  <p className="room-entry__hint">방 상태와 남은 자리는 입장할 때 다시 확인해요.</p>
                 </div>
               )}
             </section>
@@ -410,7 +409,7 @@ export function RoomEntry({
               placeholder="방에서 사용할 이름"
               disabled={busy !== null}
             />
-            <p id="room-entry-name-help" className="room-entry__hint">앞뒤 공백을 제외하고 유니코드 코드 포인트 기준 1–20자로 입력해 주세요. 빈 이름과 제어 문자는 사용할 수 없고 같은 이름은 허용돼요.</p>
+            <p id="room-entry-name-help" className="room-entry__hint">앞뒤 공백을 뺀 1–20자예요. 같은 이름도 사용할 수 있어요.</p>
             {displayNameError && <p id="room-entry-name-error" className="room-entry__field-error" role="alert">{displayNameError}</p>}
             <button className="room-entry__button room-entry__button--primary" disabled={busy !== null}>
               {busy === "session" ? "게스트 세션을 만들고 있어요…" : "게스트로 계속"}

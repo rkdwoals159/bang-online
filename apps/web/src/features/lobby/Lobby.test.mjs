@@ -22,12 +22,13 @@ after(async () => {
   await vite?.close();
 });
 
-function room({ status = "waiting", count = 4, capacity = 4, owner = true, ready = true } = {}) {
+function room({ status = "waiting", count = 4, capacity = 4, owner = true, ready = true, connectionState } = {}) {
   const members = Array.from({ length: count }, (_, index) => ({
     playerId: `player-${index + 1}`,
     displayName: index === 0 ? "<img src=x onerror=alert(1)>" : `Guest ${index + 1}`,
     seatIndex: index,
     ready,
+    ...(connectionState ? { connectionState } : {}),
   }));
   return {
     roomId: "room-123",
@@ -40,11 +41,12 @@ function room({ status = "waiting", count = 4, capacity = 4, owner = true, ready
   };
 }
 
-function markup(roomView) {
+function markup(roomView, viewerConnectionState) {
   return renderToStaticMarkup(createElement(Lobby, {
     room: roomView,
     roomVersion: 12,
     inviteCode: "invite-value",
+    viewerConnectionState,
     origin: "https://game.example",
     onCommand() {},
     createCommandId: () => "command-1",
@@ -80,4 +82,16 @@ test("shows owner controls only to the owner and keeps full rooms closed to invi
   assert.doesNotMatch(guestHtml, /내보내기/);
   assert.match(fullHtml, /방 정원이 찼어요\. 추가 참가를 받을 수 없어요\./);
   assert.doesNotMatch(fullHtml, /room-lobby-invite-url/);
+});
+
+test("shows explicit presence and never treats a missing status as connected", () => {
+  const unknown = markup(room({ connectionState: undefined }));
+  const disconnected = markup(room({ connectionState: "disconnected" }));
+  const reconnectingViewer = markup(room(), "connecting");
+
+  assert.match(unknown, /연결 상태 확인 중/);
+  assert.doesNotMatch(unknown, /연결됨/);
+  assert.match(disconnected, /연결 끊김 · 기다리는 중/);
+  assert.match(disconnected, /좌석은 유지돼요/);
+  assert.match(reconnectingViewer, /다시 연결 중/);
 });

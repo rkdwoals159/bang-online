@@ -246,6 +246,46 @@ async function seedMatch(repository: Awaited<ReturnType<typeof createIsolatedD1>
   await repository.createMatch(makeMatch(matchId));
 }
 
+test("room and match projections use consistent D1 batches and assigned-room recovery avoids N+1 reads", async () => {
+  const { runtime, db, repository } = await createIsolatedD1();
+  try {
+    await seedMatch(repository);
+    await repository.createRoom({ id: "room-2", ownerPlayerId: playerIds[0], inviteCodeHash: "invite-hash-room-2",
+      capacity: 4, players: playerIds.map((playerId, seatIndex) => ({ playerId, seatIndex, ready: true })) });
+    const stats = { prepareCalls: 0, batchCalls: 0, batchSizes: [] as number[] };
+    const countedDb: D1DatabaseLike = {
+      prepare(query) { stats.prepareCalls += 1; return db.prepare(query); },
+      batch(statements) { stats.batchCalls += 1; stats.batchSizes.push(statements.length); return db.batch(statements); },
+      exec(query) { return db.exec(query); },
+    };
+    const counted = new D1StorageRepository(countedDb);
+
+    const room = await counted.getRoom("room-1");
+    assert.equal(room?.players[0]?.displayName, "Player 1");
+    assert.equal(stats.batchCalls, 1);
+    assert.deepEqual(stats.batchSizes, [2], "header and player/profile rows share one snapshot");
+
+    stats.prepareCalls = 0;
+    const assignedRooms = await counted.listRoomsForPlayer(playerIds[0]);
+    assert.equal(assignedRooms.length, 2);
+    assert.equal(stats.prepareCalls, 1, "all assigned room projections are loaded with one joined query");
+
+    stats.batchCalls = 0;
+    stats.batchSizes.length = 0;
+    const authorizedMatch = await counted.getMatchForPlayer("match-1", playerIds[0], { supportedSchemaVersion: 1 });
+    assert.equal(authorizedMatch?.players.length, 4);
+    assert.equal(stats.batchCalls, 1);
+    assert.deepEqual(stats.batchSizes, [2], "match metadata and players share one snapshot");
+
+    await db.prepare("UPDATE matches SET state_json = '{}' WHERE id = ?").bind("match-1").run();
+    assert.equal(await counted.getMatchForPlayer("match-1", "outsider"), null,
+      "unauthorized membership is rejected before malformed state JSON is decoded");
+    await assert.rejects(counted.getMatchForPlayer("match-1", playerIds[0], { supportedSchemaVersion: 1 }));
+  } finally {
+    await runtime.dispose();
+  }
+});
+
 test("D1 batch statement failure rolls back earlier writes", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {

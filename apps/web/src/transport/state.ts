@@ -1,7 +1,9 @@
 import type {
   MatchSyncResponse,
   PublicMatchEvent,
+  RoomPresenceView,
   RoomSyncResponse,
+  RoomView,
 } from "../../../../packages/contracts/src/protocol.js";
 import type {
   BrowserTransportState,
@@ -51,6 +53,7 @@ export class BrowserTransportStore {
   }
 
   setError(error: BrowserTransportState["lastError"]): void {
+    if (this.current.lastError === error) return;
     this.update({ lastError: error });
   }
 
@@ -62,9 +65,15 @@ export class BrowserTransportStore {
 
   applyRoomSync(response: RoomSyncResponse): boolean {
     const previous = this.current.rooms[response.roomId];
-    if (previous && response.version < previous.version) return false;
+    if (previous && response.version < previous.version) {
+      this.setError(null);
+      return false;
+    }
     if (previous && response.version === previous.version) {
-      if (previous.requiresFullSnapshot === response.requiresFullSnapshot) return false;
+      if (previous.requiresFullSnapshot === response.requiresFullSnapshot) {
+        this.setError(null);
+        return false;
+      }
       const next = Object.freeze({ ...previous, requiresFullSnapshot: response.requiresFullSnapshot });
       this.update({
         rooms: Object.freeze({ ...this.current.rooms, [response.roomId]: next }),
@@ -73,10 +82,12 @@ export class BrowserTransportStore {
       return true;
     }
 
+    const room = preserveRoomPresence(response.room, previous?.room);
     const next: RoomProjectionState = Object.freeze({
       version: response.version,
-      room: response.room,
+      room,
       requiresFullSnapshot: response.requiresFullSnapshot,
+      ...(previous?.presenceObservedAt ? { presenceObservedAt: previous.presenceObservedAt } : {}),
     });
     this.update({
       rooms: Object.freeze({ ...this.current.rooms, [response.roomId]: next }),
@@ -85,13 +96,64 @@ export class BrowserTransportStore {
     return true;
   }
 
+  /** Apply a canonical room-command projection only when it carries its source version. */
+  applyRoomCommand(room: RoomView): boolean {
+    if (room.version === undefined) return false;
+    const previous = this.current.rooms[room.roomId];
+    if (previous && room.version <= previous.version) return false;
+    const next: RoomProjectionState = Object.freeze({
+      version: room.version,
+      room: preserveRoomPresence(room, previous?.room),
+      requiresFullSnapshot: false,
+      ...(previous?.presenceObservedAt ? { presenceObservedAt: previous.presenceObservedAt } : {}),
+    });
+    this.update({
+      rooms: Object.freeze({ ...this.current.rooms, [room.roomId]: next }),
+      lastError: null,
+    });
+    return true;
+  }
+
+  /** Apply a membership-scoped, volatile presence observation without changing room.version. */
+  applyRoomPresence(view: RoomPresenceView): boolean {
+    const previous = this.current.rooms[view.roomId];
+    if (!previous) return false;
+    const observedAt = Date.parse(view.observedAt);
+    if (!Number.isFinite(observedAt) ||
+        (previous.presenceObservedAt && observedAt <= Date.parse(previous.presenceObservedAt))) return false;
+    const knownMembers = new Set(previous.room.members.map((member) => member.playerId));
+    const states = new Map(view.members
+      .filter((member) => knownMembers.has(member.playerId))
+      .map((member) => [member.playerId, member.connectionState] as const));
+    if (states.size === 0) return false;
+    const members = previous.room.members.map((member) => {
+      const connectionState = states.get(member.playerId);
+      return connectionState === undefined || connectionState === member.connectionState
+        ? member
+        : { ...member, connectionState };
+    });
+    const next: RoomProjectionState = Object.freeze({
+      ...previous,
+      room: { ...previous.room, members },
+      presenceObservedAt: view.observedAt,
+    });
+    this.update({ rooms: Object.freeze({ ...this.current.rooms, [view.roomId]: next }) });
+    return true;
+  }
+
   applyMatchSync(response: MatchSyncResponse): boolean {
     const previous = this.current.matches[response.matchId];
-    if (previous && (response.version < previous.version || response.eventSeq < previous.eventSeq)) return false;
+    if (previous && (response.version < previous.version || response.eventSeq < previous.eventSeq)) {
+      this.setError(null);
+      return false;
+    }
 
     const sameCursor = previous?.version === response.version && previous.eventSeq === response.eventSeq;
     if (sameCursor && previous && !response.requiresFullSnapshot) {
-      if (!previous.requiresFullSnapshot) return false;
+      if (!previous.requiresFullSnapshot) {
+        this.setError(null);
+        return false;
+      }
       const next = Object.freeze({ ...previous, requiresFullSnapshot: false });
       this.update({
         matches: Object.freeze({ ...this.current.matches, [response.matchId]: next }),
@@ -121,4 +183,14 @@ export class BrowserTransportStore {
     this.current = Object.freeze({ ...this.current, ...patch });
     for (const listener of this.listeners) listener();
   }
+}
+
+function preserveRoomPresence(incoming: RoomView, previous?: RoomView): RoomView {
+  if (!previous) return incoming;
+  const previousByPlayer = new Map(previous.members.map((member) => [member.playerId, member] as const));
+  const members = incoming.members.map((member) => {
+    const prior = previousByPlayer.get(member.playerId);
+    return prior?.connectionState === undefined ? member : { ...member, connectionState: prior.connectionState };
+  });
+  return { ...incoming, members };
 }

@@ -115,7 +115,7 @@ test("a non-responder sees progress only and no response options or card IDs", (
   }));
 
   assert.match(markup, /2\/4/);
-  assert.match(markup, /초원 별가 현재 응답 중입니다/);
+  assert.match(markup, /초원 별 님이 응답 중이에요/);
   assert.doesNotMatch(markup, /빗나감! 사용|피해 받기|own-missed|interaction-1|<button/);
 });
 
@@ -173,7 +173,7 @@ test("Vulture Sam cleanup discard prompt uses only server-projected candidates a
     matchId: "match-a", version: 25, snapshot: observerSnapshot,
     transport: { sendMatchCommand: async () => { throw new Error("not submitted"); }, syncMatch: async () => syncResponse(observerSnapshot) },
   }));
-  assert.match(observerMarkup, /초원 별가 현재 응답 중입니다/);
+  assert.match(observerMarkup, /초원 별 님이 응답 중이에요/);
   assert.doesNotMatch(observerMarkup, /역마차|빗나감|cleanup-[abc]|<button/);
 });
 

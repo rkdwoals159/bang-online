@@ -170,15 +170,18 @@ test("RoomView activeMatchId drives lobby, sync, game and result projections", (
 });
 
 test("room connection notice is accessible and stays until authoritative route sync succeeds", () => {
-  const disconnectedMessage = "연결 끊김 · 재접속 시 현재 판을 복구합니다";
+  const disconnectedMessage = "연결이 끊겼어요. 다시 연결하면 게임을 이어갈 수 있어요.";
   assert.equal(roomConnectionStatusMessage("disconnected", null, true, false), disconnectedMessage);
   assert.equal(roomConnectionStatusMessage("connected", "CONNECTION", true, false), disconnectedMessage);
   assert.equal(roomConnectionStatusMessage("connected", null, true, true), disconnectedMessage);
-  assert.equal(roomConnectionStatusMessage("connecting", null, true, false), "보안 세션으로 서버에 연결하고 있어요.");
+  assert.equal(roomConnectionStatusMessage("connecting", null, true, false), "게임에 연결하고 있어요.");
   assert.equal(roomConnectionStatusMessage("connecting", null, true, true), disconnectedMessage);
-  assert.equal(roomConnectionStatusMessage("connected", null, true, false), "현재 판을 서버와 동기화하고 있어요.");
+  assert.equal(roomConnectionStatusMessage("connected", null, true, false), "최신 게임 정보를 불러오고 있어요.");
   assert.equal(roomConnectionStatusMessage("connected", null, false, false), null);
   assert.equal(isRoomProjectionInputEnabled("disconnected", null, false), false);
+  assert.equal(isRoomProjectionInputEnabled("disconnected", null, false, true), true);
+  assert.equal(isRoomProjectionInputEnabled("disconnected", "CONNECTION", false, true), false);
+  assert.equal(isRoomProjectionInputEnabled("disconnected", null, true, true), false);
   assert.equal(isRoomProjectionInputEnabled("connected", "CONNECTION", false), false);
   assert.equal(isRoomProjectionInputEnabled("connected", null, true), false);
   assert.equal(isRoomProjectionInputEnabled("connected", null, false), true);
@@ -187,7 +190,7 @@ test("room connection notice is accessible and stays until authoritative route s
   assert.match(markup, /role="status"/);
   assert.match(markup, /aria-live="polite"/);
   assert.match(markup, /aria-atomic="true"/);
-  assert.match(markup, /연결 끊김 · 재접속 시 현재 판을 복구합니다/);
+  assert.match(markup, /연결이 끊겼어요\. 다시 연결하면 게임을 이어갈 수 있어요\./);
   assert.equal(renderToStaticMarkup(createElement(RoomConnectionNotice, { message: null })), "");
 });
 
@@ -197,6 +200,7 @@ test("connected CONNECTION errors trigger one route resync attempt without an ef
   // from that failed sync does not automatically start another retry.
   assert.equal(shouldRetryConnectionSync("connected", "CONNECTION", true), false);
   assert.equal(shouldRetryConnectionSync("disconnected", "CONNECTION", false), false);
+  assert.equal(shouldRetryConnectionSync("disconnected", "CONNECTION", false, true), true);
   assert.equal(shouldRetryConnectionSync("connected", null, false), false);
 });
 
@@ -272,6 +276,7 @@ test("role and character face copy is supplied for every canonical base-game ent
   assert.equal(Object.keys(characterDescriptions).length, 16);
   assert.equal(Object.values(roleDescriptions).every((copy) => copy.trim().length > 0), true);
   assert.equal(Object.values(characterDescriptions).every((copy) => copy.trim().length > 0), true);
+  assert.match(characterDescriptions.jourdonnais, /뱅! 또는 개틀링 공격을 받을 때/);
 });
 
 test("role reveal renders only the viewer's role and character with canonical rule copy", () => {
@@ -297,8 +302,8 @@ test("role reveal renders only the viewer's role and character with canonical ru
 
   assert.match(markup, /보안관/);
   assert.match(markup, /바트 캐시디/);
-  assert.match(markup, /보안관은 무법자와 배신자를 모두 제거하면 승리/);
-  assert.match(markup, /생존한 채 잃은 HP당 덱1장/);
+  assert.match(markup, /승리 목표: 무법자와 배신자를 모두 제거하세요/);
+  assert.match(markup, /잃은 생명력 1당 카드 1장을 뽑아요/);
   assert.match(markup, /확인하고 게임판으로/);
   assert.doesNotMatch(markup, /바람|player-b|비공개 상대 역할/);
 });
@@ -339,11 +344,14 @@ test("match route composition passes private hand, legalActions, pending and res
     showActions: true,
   }));
 
-  assert.match(playingMarkup, /내 손패/);
+  assert.match(playingMarkup, /현재 차례/);
+  assert.match(playingMarkup, /내 응답 차례예요/);
   assert.match(playingMarkup, /빗나감! 8 하트/);
-  assert.match(playingMarkup, /사용 가능/);
   assert.match(playingMarkup, /뱅! 응답/);
   assert.match(playingMarkup, /행동 입력/);
+  assert.equal((playingMarkup.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
+  assert.ok(playingMarkup.indexOf("match-request") < playingMarkup.indexOf("game-actions"));
+  assert.ok(playingMarkup.indexOf("game-actions") < playingMarkup.indexOf("game-table"));
   assert.doesNotMatch(playingMarkup, /private-card-id|private-interaction-id/);
 
   const reconnectMarkup = renderToStaticMarkup(createElement(RoomProjectionFrame, {
@@ -361,7 +369,6 @@ test("match route composition passes private hand, legalActions, pending and res
   })));
   assert.match(reconnectMarkup, /연결 끊김 · 재접속 시 현재 판을 복구합니다/);
   assert.match(reconnectMarkup, /<fieldset[^>]*disabled=""[^>]*aria-disabled="true"/);
-  assert.match(reconnectMarkup, /내 손패/);
   assert.match(reconnectMarkup, /뱅! 응답/);
   assert.doesNotMatch(reconnectMarkup, /private-card-id|private-interaction-id/);
 
@@ -406,11 +413,24 @@ test("match route composition passes private hand, legalActions, pending and res
   }));
 
   assert.match(resultMarkup, /게임 결과/);
+  assert.ok(resultMarkup.indexOf("게임 결과") < resultMarkup.indexOf("match-page__history"));
+  assert.match(resultMarkup, /게임판과 진행 기록 보기/);
   assert.match(resultMarkup, /승리 플레이어/);
   assert.match(resultMarkup, /무법자/);
   assert.match(resultMarkup, /대기실로 돌아가기/);
   assert.doesNotMatch(resultMarkup, /서버가 허용한 행동|행동 입력/);
   assert.doesNotMatch(resultMarkup, /private-card-id|private-interaction-id/);
+
+  const ownTurnSnapshot = {
+    ...snapshot,
+    pendingInteraction: null,
+  };
+  const ownTurnMarkup = renderToStaticMarkup(createElement(MatchPage, {
+    matchId: "match-a", version: 12, snapshot: ownTurnSnapshot, visibleEvents: [],
+    room: roomView({ status: "in_game" }), roomVersion: 15, transport, showActions: true,
+  }));
+  assert.equal((ownTurnMarkup.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
+  assert.ok(ownTurnMarkup.indexOf("game-actions") < ownTurnMarkup.indexOf("game-table"));
 });
 
 test("result return uses one exact empty command then waits for a newer lobby sync projection", async () => {

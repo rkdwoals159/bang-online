@@ -1,0 +1,1 @@
+CREATE INDEX `outbox_aggregate_cursor_idx` ON `outbox` (`aggregate_id`,`cursor`);

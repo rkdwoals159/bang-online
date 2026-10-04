@@ -1,0 +1,883 @@
+{
+  "observedAt": "2026-10-04T09:40:29.649Z",
+  "mode": "AFTER fixes: isolated local Miniflare D1; real route handlers; NOT production latency; production default SSE interval",
+  "summary": [
+    {
+      "label": "bootstrap-existing-schema-first-call",
+      "n": 1,
+      "medianMs": 55.59,
+      "minMs": 55.59,
+      "maxMs": 55.59,
+      "bindingCalls": [
+        4
+      ],
+      "statements": [
+        4
+      ]
+    },
+    {
+      "label": "bootstrap-warm-same-binding",
+      "n": 1,
+      "medianMs": 0.02,
+      "minMs": 0.02,
+      "maxMs": 0.02,
+      "bindingCalls": [
+        0
+      ],
+      "statements": [
+        0
+      ]
+    },
+    {
+      "label": "guest-create",
+      "n": 4,
+      "medianMs": 16.57,
+      "minMs": 15.19,
+      "maxMs": 25.13,
+      "bindingCalls": [
+        1
+      ],
+      "statements": [
+        1
+      ]
+    },
+    {
+      "label": "room-create",
+      "n": 1,
+      "medianMs": 94.34,
+      "minMs": 94.34,
+      "maxMs": 94.34,
+      "bindingCalls": [
+        5
+      ],
+      "statements": [
+        9
+      ]
+    },
+    {
+      "label": "invite-preview",
+      "n": 1,
+      "medianMs": 192.52,
+      "minMs": 192.52,
+      "maxMs": 192.52,
+      "bindingCalls": [
+        10
+      ],
+      "statements": [
+        17
+      ]
+    },
+    {
+      "label": "room-join",
+      "n": 3,
+      "medianMs": 286.96,
+      "minMs": 279.45,
+      "maxMs": 332.7,
+      "bindingCalls": [
+        15
+      ],
+      "statements": [
+        30
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "n": 5,
+      "medianMs": 13.4,
+      "minMs": 12.7,
+      "maxMs": 15.27,
+      "bindingCalls": [
+        1
+      ],
+      "statements": [
+        1
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "n": 5,
+      "medianMs": 33.14,
+      "minMs": 30.25,
+      "maxMs": 37.12,
+      "bindingCalls": [
+        2
+      ],
+      "statements": [
+        2
+      ]
+    },
+    {
+      "label": "room-sync",
+      "n": 5,
+      "medianMs": 33.69,
+      "minMs": 30.85,
+      "maxMs": 37.19,
+      "bindingCalls": [
+        2
+      ],
+      "statements": [
+        3
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "n": 5,
+      "medianMs": 31.91,
+      "minMs": 31.38,
+      "maxMs": 34.33,
+      "bindingCalls": [
+        2
+      ],
+      "statements": [
+        3
+      ]
+    },
+    {
+      "label": "sse-open-plus-initial-empty-poll",
+      "n": 1,
+      "medianMs": 355.46,
+      "minMs": 355.46,
+      "maxMs": 355.46,
+      "bindingCalls": [
+        4
+      ],
+      "statements": [
+        5
+      ]
+    },
+    {
+      "label": "room-ready-command",
+      "n": 4,
+      "medianMs": 153.13,
+      "minMs": 146.54,
+      "maxMs": 158.52,
+      "bindingCalls": [
+        7
+      ],
+      "statements": [
+        15
+      ]
+    },
+    {
+      "label": "sse-ack-to-other-viewer-invalidation",
+      "n": 1,
+      "medianMs": 1620.76,
+      "minMs": 1620.76,
+      "maxMs": 1620.76,
+      "bindingCalls": [
+        3
+      ],
+      "statements": [
+        4
+      ]
+    },
+    {
+      "label": "room-start-command",
+      "n": 1,
+      "medianMs": 244.24,
+      "minMs": 244.24,
+      "maxMs": 244.24,
+      "bindingCalls": [
+        8
+      ],
+      "statements": [
+        22
+      ]
+    },
+    {
+      "label": "match-sync",
+      "n": 8,
+      "medianMs": 50.54,
+      "minMs": 47.7,
+      "maxMs": 61.01,
+      "bindingCalls": [
+        3
+      ],
+      "statements": [
+        4
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "n": 5,
+      "medianMs": 36.14,
+      "minMs": 35.53,
+      "maxMs": 36.99,
+      "bindingCalls": [
+        2
+      ],
+      "statements": [
+        3
+      ]
+    },
+    {
+      "label": "match-end-turn-command",
+      "n": 1,
+      "medianMs": 164.68,
+      "minMs": 164.68,
+      "maxMs": 164.68,
+      "bindingCalls": [
+        9
+      ],
+      "statements": [
+        14
+      ]
+    }
+  ],
+  "records": [
+    {
+      "label": "bootstrap-existing-schema-first-call",
+      "elapsedMs": 55.59,
+      "bindingCalls": 4,
+      "statements": 4,
+      "operations": [
+        "run: CREATE TABLE IF NOT EXISTS schema_migrations ( version INTEGER PRIMARY KEY CHECK (version > 0), name TEXT NOT NULL, checksum TEXT NOT NULL CHECK (length(checksum) = 64), applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) )",
+        "all: SELECT version, name, checksum FROM schema_migrations ORDER BY version",
+        "first: SELECT version, name, checksum FROM schema_migrations WHERE version = ?",
+        "first: SELECT version, name, checksum FROM schema_migrations WHERE version = ?"
+      ]
+    },
+    {
+      "label": "bootstrap-warm-same-binding",
+      "elapsedMs": 0.02,
+      "bindingCalls": 0,
+      "statements": 0,
+      "operations": []
+    },
+    {
+      "label": "guest-create",
+      "elapsedMs": 25.13,
+      "status": 201,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "run: INSERT INTO guest_sessions (id, token_hash, display_name, expires_at) VALUES (?, ?, ?, ?)"
+      ]
+    },
+    {
+      "label": "guest-create",
+      "elapsedMs": 16.57,
+      "status": 201,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "run: INSERT INTO guest_sessions (id, token_hash, display_name, expires_at) VALUES (?, ?, ?, ?)"
+      ]
+    },
+    {
+      "label": "guest-create",
+      "elapsedMs": 15.52,
+      "status": 201,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "run: INSERT INTO guest_sessions (id, token_hash, display_name, expires_at) VALUES (?, ?, ?, ?)"
+      ]
+    },
+    {
+      "label": "guest-create",
+      "elapsedMs": 15.19,
+      "status": 201,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "run: INSERT INTO guest_sessions (id, token_hash, display_name, expires_at) VALUES (?, ?, ?, ?)"
+      ]
+    },
+    {
+      "label": "room-create",
+      "elapsedMs": 94.34,
+      "status": 200,
+      "bindingCalls": 5,
+      "statements": 9,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(4)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "invite-preview",
+      "elapsedMs": 192.52,
+      "status": 200,
+      "bindingCalls": 10,
+      "statements": 17,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "run: INSERT INTO invite_attempts (bucket_hash, last_activity_at) VALUES (?, ?) ON CONFLICT (bucket_hash) DO NOTHING",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "first: SELECT COUNT(*) AS count FROM invite_lookup_reservations WHERE bucket_hash = ? AND expires_at > ?",
+        "batch(5)",
+        "first: SELECT r.id, r.version, r.status, COUNT(rp.player_id) AS occupancy FROM rooms r LEFT JOIN room_players rp ON rp.room_id = r.id WHERE r.invite_code_hash = ? GROUP BY r.id, r.version, r.status",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "batch(4)"
+      ]
+    },
+    {
+      "label": "room-join",
+      "elapsedMs": 286.96,
+      "status": 200,
+      "bindingCalls": 15,
+      "statements": 30,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "run: INSERT INTO invite_attempts (bucket_hash, last_activity_at) VALUES (?, ?) ON CONFLICT (bucket_hash) DO NOTHING",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "first: SELECT COUNT(*) AS count FROM invite_lookup_reservations WHERE bucket_hash = ? AND expires_at > ?",
+        "batch(5)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "batch(4)"
+      ]
+    },
+    {
+      "label": "room-join",
+      "elapsedMs": 279.45,
+      "status": 200,
+      "bindingCalls": 15,
+      "statements": 30,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "run: INSERT INTO invite_attempts (bucket_hash, last_activity_at) VALUES (?, ?) ON CONFLICT (bucket_hash) DO NOTHING",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "first: SELECT COUNT(*) AS count FROM invite_lookup_reservations WHERE bucket_hash = ? AND expires_at > ?",
+        "batch(5)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "batch(4)"
+      ]
+    },
+    {
+      "label": "room-join",
+      "elapsedMs": 332.7,
+      "status": 200,
+      "bindingCalls": 15,
+      "statements": 30,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "run: INSERT INTO invite_attempts (bucket_hash, last_activity_at) VALUES (?, ?) ON CONFLICT (bucket_hash) DO NOTHING",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "first: SELECT COUNT(*) AS count FROM invite_lookup_reservations WHERE bucket_hash = ? AND expires_at > ?",
+        "batch(5)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)",
+        "first: SELECT reservation_id, bucket_hash, expires_at FROM invite_lookup_reservations WHERE reservation_id = ?",
+        "first: SELECT bucket_hash, failures_json, last_invalid_at, last_activity_at, retry_delay_ms, retry_at, version FROM invite_attempts WHERE bucket_hash = ?",
+        "batch(4)"
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "elapsedMs": 13.4,
+      "status": 200,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?"
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "elapsedMs": 33.14,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 2,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "all: SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at, (SELECT id FROM matches WHERE room_id = r.id ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id, viewer.joined_at AS viewer_joined_at, members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at, gs.display_name FROM room_players AS viewer JOIN rooms AS r ON r.id = viewer.room_id JOIN room_players AS members ON members.room_id = r.id LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id WHERE viewer.player_id = ? ORDER BY viewer.joined_at, r.id, members.seat_index"
+      ]
+    },
+    {
+      "label": "room-sync",
+      "elapsedMs": 34.83,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "elapsedMs": 15.27,
+      "status": 200,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?"
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "elapsedMs": 31.62,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 2,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "all: SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at, (SELECT id FROM matches WHERE room_id = r.id ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id, viewer.joined_at AS viewer_joined_at, members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at, gs.display_name FROM room_players AS viewer JOIN rooms AS r ON r.id = viewer.room_id JOIN room_players AS members ON members.room_id = r.id LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id WHERE viewer.player_id = ? ORDER BY viewer.joined_at, r.id, members.seat_index"
+      ]
+    },
+    {
+      "label": "room-sync",
+      "elapsedMs": 30.85,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "elapsedMs": 12.7,
+      "status": 200,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?"
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "elapsedMs": 33.44,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 2,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "all: SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at, (SELECT id FROM matches WHERE room_id = r.id ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id, viewer.joined_at AS viewer_joined_at, members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at, gs.display_name FROM room_players AS viewer JOIN rooms AS r ON r.id = viewer.room_id JOIN room_players AS members ON members.room_id = r.id LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id WHERE viewer.player_id = ? ORDER BY viewer.joined_at, r.id, members.seat_index"
+      ]
+    },
+    {
+      "label": "room-sync",
+      "elapsedMs": 33.26,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "elapsedMs": 14.85,
+      "status": 200,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?"
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "elapsedMs": 37.12,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 2,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "all: SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at, (SELECT id FROM matches WHERE room_id = r.id ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id, viewer.joined_at AS viewer_joined_at, members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at, gs.display_name FROM room_players AS viewer JOIN rooms AS r ON r.id = viewer.room_id JOIN room_players AS members ON members.room_id = r.id LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id WHERE viewer.player_id = ? ORDER BY viewer.joined_at, r.id, members.seat_index"
+      ]
+    },
+    {
+      "label": "room-sync",
+      "elapsedMs": 37.19,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "session-authenticated",
+      "elapsedMs": 13.3,
+      "status": 200,
+      "bindingCalls": 1,
+      "statements": 1,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?"
+      ]
+    },
+    {
+      "label": "assigned-rooms",
+      "elapsedMs": 30.25,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 2,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "all: SELECT r.id, r.owner_player_id, r.invite_code_hash, r.status, r.capacity, r.version, r.created_at, r.updated_at, (SELECT id FROM matches WHERE room_id = r.id ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id, viewer.joined_at AS viewer_joined_at, members.player_id, members.seat_index, members.ready, members.joined_at, members.last_presence_at, gs.display_name FROM room_players AS viewer JOIN rooms AS r ON r.id = viewer.room_id JOIN room_players AS members ON members.room_id = r.id LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id WHERE viewer.player_id = ? ORDER BY viewer.joined_at, r.id, members.seat_index"
+      ]
+    },
+    {
+      "label": "room-sync",
+      "elapsedMs": 33.69,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "elapsedMs": 31.76,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "elapsedMs": 34.33,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "elapsedMs": 32.35,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "elapsedMs": 31.38,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-sync-unchanged",
+      "elapsedMs": 31.91,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "sse-open-plus-initial-empty-poll",
+      "elapsedMs": 355.46,
+      "status": 200,
+      "bindingCalls": 4,
+      "statements": 5,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "run: UPDATE room_players SET last_presence_at = CASE WHEN last_presence_at IS NULL OR last_presence_at < ? THEN ? ELSE last_presence_at END WHERE player_id = ?",
+        "all: SELECT cursor, event_id, aggregate_id, aggregate_version, event_seq, kind FROM outbox WHERE cursor > ? AND aggregate_id IN (?) ORDER BY cursor LIMIT ?"
+      ]
+    },
+    {
+      "label": "room-ready-command",
+      "elapsedMs": 146.54,
+      "status": 200,
+      "bindingCalls": 7,
+      "statements": 15,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "sse-ack-to-other-viewer-invalidation",
+      "elapsedMs": 1620.76,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT cursor, event_id, aggregate_id, aggregate_version, event_seq, kind FROM outbox WHERE cursor > ? AND aggregate_id IN (?) ORDER BY cursor LIMIT ?"
+      ]
+    },
+    {
+      "label": "room-ready-command",
+      "elapsedMs": 158.52,
+      "status": 200,
+      "bindingCalls": 7,
+      "statements": 15,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-ready-command",
+      "elapsedMs": 152.17,
+      "status": 200,
+      "bindingCalls": 7,
+      "statements": 15,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-ready-command",
+      "elapsedMs": 153.13,
+      "status": 200,
+      "bindingCalls": 7,
+      "statements": 15,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(6)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "room-start-command",
+      "elapsedMs": 244.24,
+      "status": 200,
+      "bindingCalls": 8,
+      "statements": 22,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "batch(11)",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 49.6,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 61.01,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 48.81,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 51.18,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 50.54,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 47.7,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 50.02,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync",
+      "elapsedMs": 55.39,
+      "status": 200,
+      "bindingCalls": 3,
+      "statements": 4,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)",
+        "all: SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at FROM match_events WHERE match_id = ? AND event_seq > ? ORDER BY event_seq LIMIT ?"
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "elapsedMs": 36.14,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "elapsedMs": 36.44,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "elapsedMs": 36.02,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "elapsedMs": 36.99,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-sync-unchanged",
+      "elapsedMs": 35.53,
+      "status": 200,
+      "bindingCalls": 2,
+      "statements": 3,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "batch(2)"
+      ]
+    },
+    {
+      "label": "match-end-turn-command",
+      "elapsedMs": 164.68,
+      "status": 200,
+      "bindingCalls": 9,
+      "statements": 14,
+      "operations": [
+        "first: SELECT id, display_name, expires_at FROM guest_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > ?",
+        "first: SELECT 1 AS found FROM match_players WHERE match_id = ? AND player_id = ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "batch(2)",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "first: SELECT actor_player_id, command_id, match_id, room_id, request_hash, outcome_json, created_at FROM command_receipts WHERE actor_player_id = ? AND command_id = ?",
+        "first: SELECT version, event_seq, ruleset_version, state_schema_version FROM matches WHERE id = ?",
+        "first: SELECT 1 AS found FROM match_players WHERE match_id = ? AND player_id = ?",
+        "batch(5)"
+      ]
+    }
+  ]
+}

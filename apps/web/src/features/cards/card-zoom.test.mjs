@@ -110,10 +110,10 @@ test("hand zoom has a named dialog and stays separate from action selection", ()
   assert.match(markup, /<dialog[^>]+aria-modal="true"[^>]+aria-hidden="true"[^>]+aria-labelledby=/);
   assert.match(markup, /뱅! 카드 상세/);
   assert.match(markup, /닫기/);
-  assert.match(markup, /서버가 허용한 대상과 사용 방식/);
+  assert.match(markup, /사용 대상과 방식/);
   assert.match(markup, /바람/);
   assert.match(markup, /맥주 카드 상세/);
-  assert.match(markup, /지금은 사용 불가/);
+  assert.match(markup, /지금 가능한 사용 방법이 없어요/);
   assert.doesNotMatch(markup, /<button\b[^>]*>(?:(?!<\/button>)[\s\S])*?<button\b/);
   assert.doesNotMatch(markup, /own-bang|own-beer|cardInstanceId/);
 });
@@ -133,7 +133,7 @@ test("response zoom is limited to card faces named by the current responder opti
   const markup = renderReaction(snapshot);
 
   assert.match(markup, /카드 상세 보기: 빗나감!, 8 하트/);
-  assert.match(markup, /서버가 허용한 응답/);
+  assert.match(markup, /카드 응답/);
   assert.doesNotMatch(markup, /카드 상세 보기: 맥주, 7 하트/);
   assert.doesNotMatch(markup, /own-missed|own-beer|interaction-1|cardInstanceId/);
 

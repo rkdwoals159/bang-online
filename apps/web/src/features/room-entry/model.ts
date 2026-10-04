@@ -53,7 +53,7 @@ export function normalizeDisplayName(input: string): string {
     throw new RangeError("이름에는 제어 문자를 사용할 수 없어요.");
   }
   if (Array.from(displayName).length > MAX_DISPLAY_NAME_CODE_POINTS) {
-    throw new RangeError("이름은 앞뒤 공백을 제외하고 유니코드 코드 포인트 기준 최대 20자까지 입력할 수 있어요.");
+    throw new RangeError("이름은 앞뒤 공백을 빼고 20자 이내로 입력해 주세요.");
   }
   return displayName;
 }

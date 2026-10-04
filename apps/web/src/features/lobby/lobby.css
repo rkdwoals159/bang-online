@@ -208,6 +208,38 @@
   color: #1d6943;
 }
 
+.room-lobby__connection {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding: 4px 8px;
+  border: 1px solid rgba(91, 106, 94, 0.18);
+  border-radius: 999px;
+  background: #f3f5ef;
+  color: #58665b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.room-lobby__connection--connected {
+  border-color: rgba(29, 105, 67, 0.2);
+  background: #edf6ef;
+  color: #1d6943;
+}
+
+.room-lobby__connection--disconnected,
+.room-lobby__connection--expired {
+  border-color: rgba(143, 58, 48, 0.22);
+  background: #fbefec;
+  color: #8f3a30;
+}
+
+.room-lobby__connection--connecting,
+.room-lobby__connection--unknown {
+  border-color: rgba(140, 104, 39, 0.22);
+  background: #fbf5e6;
+  color: #684b18;
+}
+
 .room-lobby__ready > span {
   font-size: 15px;
 }
@@ -251,6 +283,17 @@
   color: #475748;
   font-size: 13px;
   line-height: 1.55;
+}
+
+.room-lobby__connection-hint {
+  margin: 0;
+  padding: 10px 13px;
+  border-left: 4px solid #b28a36;
+  border-radius: 8px;
+  background: #fbf5e6;
+  color: #594b2c;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .room-lobby__actions {

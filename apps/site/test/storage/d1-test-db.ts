@@ -5,6 +5,7 @@ import { applyD1Migrations } from "../../src/storage/migrations.js";
 import { D1StorageRepository } from "../../src/storage/repository.js";
 
 const initialMigration = await readFile(new URL("../../../../drizzle/0000_long_iron_man.sql", import.meta.url), "utf8");
+const outboxAggregateCursorMigration = await readFile(new URL("../../../../drizzle/0001_jazzy_enchantress.sql", import.meta.url), "utf8");
 
 export async function createIsolatedD1() {
   const runtime = new Miniflare({
@@ -13,7 +14,10 @@ export async function createIsolatedD1() {
     d1Databases: ["DB"],
   });
   const db: D1DatabaseLike = await runtime.getD1Database("DB");
-  await applyD1Migrations(db, [{ version: 1, name: "0000_long_iron_man", sql: initialMigration }]);
+  await applyD1Migrations(db, [
+    { version: 1, name: "0000_long_iron_man", sql: initialMigration },
+    { version: 2, name: "0001_jazzy_enchantress", sql: outboxAggregateCursorMigration },
+  ]);
   return { runtime, db, repository: new D1StorageRepository(db) };
 }
 
