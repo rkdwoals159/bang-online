@@ -11,11 +11,16 @@
 .game-actions__cards { display: flex; max-width: 100%; gap: 8px; margin: 0; padding: 8px 4px 12px; overflow-x: auto; list-style: none; scrollbar-width: thin; scrollbar-color: var(--color-muted) var(--color-surface-soft); }
 .game-actions__cards li { flex: 0 0 104px; min-width: 0; }
 .game-actions__card-entry { display: grid; gap: 8px; }
-.game-actions__card { display: grid; width: 100%; min-height: 196px; align-content: start; justify-items: center; gap: 8px; padding: 8px; border: 2px solid transparent; border-radius: var(--radius-sm); background: var(--color-surface-soft); color: var(--color-ink); text-align: center; transition: background var(--motion-fast), border-color var(--motion-fast); }
+.game-actions__card { display: grid; width: 100%; min-height: 52px; align-content: center; justify-items: center; gap: 4px; padding: 8px; border: 2px solid transparent; border-radius: var(--radius-sm); background: var(--color-surface-soft); color: var(--color-ink); text-align: center; transition: background var(--motion-fast), border-color var(--motion-fast); }
 .game-actions__card .playing-card { width: 78px; border: 1px solid var(--color-border); }
 .game-actions__card-name { font-size: 13px; font-weight: 750; }
 .game-actions__card-state { font-size: 12px; color: var(--color-muted); line-height: 1.4; }
 .game-actions__card-zoom-trigger { width: 100%; }
+.game-actions__card-zoom-trigger .playing-card { width: 96px; }
+.game-actions__cards > li { animation: hand-card-arrive 200ms ease-out both; }
+.game-actions__card-entry:has(.is-selected) .card-zoom__trigger { transform: translateY(-4px); }
+@keyframes hand-card-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .game-actions__cards > li { animation: none; } .game-actions__card-entry:has(.is-selected) .card-zoom__trigger { transform: none; } }
 .game-actions__card:not(:disabled):hover { border-color: var(--color-forest); background: var(--color-positive-soft); }
 .game-actions__card.is-selected, .game-actions__target.is-selected { border-color: var(--color-brass-ink); background: var(--color-brass-soft); }
 .game-actions__card:disabled .playing-card { opacity: .82; }

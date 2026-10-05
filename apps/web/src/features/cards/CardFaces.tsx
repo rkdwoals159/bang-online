@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { characterDescriptions } from "./character-descriptions.js";
 import type { CardFaceView } from "../../../../../packages/contracts/src/protocol.js";
 import {
   getCharacterCardPresentation,
@@ -8,10 +9,12 @@ import {
 } from "./assets.js";
 import "./cards.css";
 
-/** Public character artwork, decorative next to the visible character name. */
+/** Public character artwork opens ability text without sending a game command. */
 export function CharacterPortrait({ characterId }: { characterId: string }) {
   const presentation = getCharacterCardPresentation(characterId);
-  return <span className="character-portrait" aria-hidden="true"><CardArtwork className="character-portrait__artwork" assetUrl={presentation.assetUrl} imageAlt="" fallbackText={presentation.fallbackText} /></span>;
+  return <CardDetailButton title={`${presentation.name} 능력`} label={`캐릭터 상세 보기: ${presentation.name}`} className="character-detail" trigger={<span className="character-portrait" aria-hidden="true"><CardArtwork className="character-portrait__artwork" assetUrl={presentation.assetUrl} imageAlt="" fallbackText={presentation.fallbackText} /></span>}>
+    <CharacterCardFace characterId={characterId} description={characterDescriptions[characterId] ?? "인물 설명을 확인할 수 없습니다."} interactive={false} />
+  </CardDetailButton>;
 }
 
 export function PlayingCardFace({ card }: { card: CardFaceView }) {
@@ -77,7 +80,7 @@ export function PlayingCardZoomButton({
   details = [],
   detailHeading = "현재 허용된 선택",
   triggerClassName = "",
-  triggerText = "상세 보기",
+  triggerText,
 }: {
   card: CardFaceView;
   details?: readonly string[];
@@ -86,8 +89,23 @@ export function PlayingCardZoomButton({
   triggerText?: string;
 }) {
   const presentation = getPlayingCardPresentation(card);
+  return <CardDetailButton title={`${presentation.cardName} 카드 상세`} label={`카드 상세 보기: ${presentation.accessibleLabel}`} className={triggerClassName} trigger={triggerText ?? <PlayingCardFace card={card} />}>
+    <div className="card-zoom__content">
+      <div className="card-zoom__visual"><PlayingCardFace card={card} /></div>
+      <div className="card-zoom__text">
+        <p className="card-zoom__description">{getPlayingCardDescription(card.typeId)}</p>
+        {details.length > 0 ? <section className="card-zoom__details" aria-label={detailHeading}>
+          <h3>{detailHeading}</h3><ul>{details.map((detail, index) => <li key={`${index}-${detail}`}>{detail}</li>)}</ul>
+        </section> : null}
+      </div>
+    </div>
+  </CardDetailButton>;
+}
+
+function CardDetailButton({ title, label, trigger, children, className = "" }: {
+  title: string; label: string; trigger: ReactNode; children: ReactNode; className?: string;
+}) {
   const titleId = useId();
-  const descriptionId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openedRef = useRef(false);
@@ -119,16 +137,16 @@ export function PlayingCardZoomButton({
   }
 
   return (
-    <div className="card-zoom">
+    <div className={`card-zoom ${className}`}>
       <button
         ref={triggerRef}
-        className={`card-zoom__trigger${triggerClassName ? ` ${triggerClassName}` : ""}`}
+        className="card-zoom__trigger"
         type="button"
-        aria-label={`카드 상세 보기: ${presentation.accessibleLabel}`}
+        aria-label={label}
         aria-haspopup="dialog"
         onClick={() => setIsOpen(true)}
       >
-        {triggerText}
+        {trigger}
       </button>
       {isOpen ? <dialog
         ref={dialogRef}
@@ -136,7 +154,6 @@ export function PlayingCardZoomButton({
         aria-modal="true"
         aria-hidden={isOpen ? undefined : true}
         aria-labelledby={titleId}
-        aria-describedby={descriptionId}
         onCancel={(event) => {
           event.preventDefault();
           closeDialog();
@@ -147,26 +164,10 @@ export function PlayingCardZoomButton({
         }}
       >
         <header className="card-zoom__header">
-          <h2 id={titleId} className="card-zoom__title">{presentation.cardName} 카드 상세</h2>
+          <h2 id={titleId} className="card-zoom__title">{title}</h2>
           <button className="card-zoom__close" type="button" onClick={closeDialog}>닫기</button>
         </header>
-        <div className="card-zoom__content">
-          <div className="card-zoom__visual">
-            <PlayingCardFace card={card} />
-          </div>
-          <div className="card-zoom__text">
-            <p className="card-zoom__identity">{presentation.rankText} · {presentation.suitName}</p>
-            <p id={descriptionId} className="card-zoom__description">{getPlayingCardDescription(card.typeId)}</p>
-            {details.length > 0 ? (
-              <section className="card-zoom__details" aria-label={detailHeading}>
-                <h3>{detailHeading}</h3>
-                <ul>
-                  {details.map((detail, index) => <li key={`${index}-${detail}`}>{detail}</li>)}
-                </ul>
-              </section>
-            ) : null}
-          </div>
-        </div>
+        {children}
       </dialog> : null}
     </div>
   );
@@ -199,10 +200,12 @@ export function OpponentHandBacks({ count, label = "상대 손패" }: { count: n
 export function CharacterCardFace({
   characterId,
   description,
+  interactive = true,
 }: {
   characterId: string;
   /** Provide the ruleset's text description separately from the image. */
   description: string;
+  interactive?: boolean;
 }) {
   const presentation = getCharacterCardPresentation(characterId);
   return (
@@ -213,6 +216,7 @@ export function CharacterCardFace({
       imageAlt={presentation.imageAlt}
       fallbackText={presentation.fallbackText}
       description={description}
+      characterId={interactive ? characterId : undefined}
     />
   );
 }
@@ -238,6 +242,7 @@ function RosterCard({
   imageAlt,
   fallbackText,
   description,
+  characterId,
 }: {
   kind: "인물" | "역할";
   name: string;
@@ -245,15 +250,18 @@ function RosterCard({
   imageAlt: string;
   fallbackText: string;
   description: string;
+  characterId?: string;
 }) {
   return (
     <article className="roster-card" aria-label={`${name} ${kind} 카드`}>
-      <CardArtwork
+      {characterId ? <CardDetailButton title={`${name} 능력`} label={`캐릭터 상세 보기: ${name}`} className="roster-card__detail" trigger={<CardArtwork className="roster-card__artwork" assetUrl={assetUrl} imageAlt={imageAlt} fallbackText={fallbackText} />}>
+        <CharacterCardFace characterId={characterId} description={description} interactive={false} />
+      </CardDetailButton> : <CardArtwork
         className="roster-card__artwork"
         assetUrl={assetUrl}
         imageAlt={imageAlt}
         fallbackText={fallbackText}
-      />
+      />}
       <h3>{name}</h3>
       <p>{description}</p>
     </article>

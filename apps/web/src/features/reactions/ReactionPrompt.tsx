@@ -7,7 +7,8 @@ import type {
   MatchSyncResponse,
   PendingRespondOption,
 } from "../../../../../packages/contracts/src/protocol.js";
-import { PlayingCardFace, PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { getPlayingCardPresentation } from "../cards/assets.js";
+import { PlayingCardZoomButton } from "../cards/CardFaces.js";
 import {
   cardFaceLabel,
   createRespondCommand,
@@ -98,6 +99,9 @@ export function ReactionPrompt({
     option.choice === "ORDER_CARDS" && !("orderedCardInstanceIds" in option),
   );
   const discardOrder = responderPrompt?.discardOrder;
+  const selectableOptions = responderPrompt?.responseOptions.filter(option =>
+    option.choice !== "ORDER_CARDS" || "orderedCardInstanceIds" in option,
+  ) ?? [];
   const visibleOrder = selectedOrder?.matchId === matchId &&
     selectedOrder.version === projection.version &&
     selectedOrder.interactionId === pending.interactionId
@@ -118,15 +122,10 @@ export function ReactionPrompt({
     busyRef.current = true;
     setBusy(true);
     setPendingCommand(command);
-    setNotice("응답을 보내고 있어요.");
+    setNotice("");
 
     try {
-      const result = await sendAndRefreshResponse(transport, command, (acknowledgement) => {
-        if (currentMatchIdRef.current !== command.matchId) return;
-        setNotice(acknowledgement.status === "rejected"
-          ? "요청을 확인했어요. 최신 진행 상태를 불러오고 있어요."
-          : "응답이 접수됐어요. 진행 상태를 업데이트하고 있어요.");
-      });
+      const result = await sendAndRefreshResponse(transport, command);
       if (currentMatchIdRef.current !== command.matchId) return;
 
       if (result.projection) {
@@ -137,17 +136,17 @@ export function ReactionPrompt({
         setPendingCommand(null);
         setNotice(result.acknowledgement.status === "rejected"
           ? rejectionMessage(result.acknowledgement.error.code)
-          : "응답을 반영하고 진행 상황을 새로 불러왔어요.");
+          : "");
       } else {
-        setNotice("응답은 전송했지만 최신 진행 상태를 확인하지 못했어요. 같은 명령 ID로 다시 확인할 수 있습니다.");
+        setNotice("연결이 지연되고 있어요. 잠시 후 다시 확인해 주세요.");
       }
     } catch {
       if (currentMatchIdRef.current !== command.matchId) return;
-      setNotice("응답 결과를 확인하지 못했어요. 같은 명령 ID로 다시 확인합니다.");
+      setNotice("연결이 지연되고 있어요. 잠시 후 다시 확인해 주세요.");
       try {
         await refreshProjection(command.matchId);
       } catch {
-        setNotice("응답 결과와 최신 진행 상태를 확인하지 못했어요. 같은 명령을 보관했습니다.");
+        setNotice("연결 상태를 확인하고 다시 시도해 주세요.");
       }
     } finally {
       if (currentMatchIdRef.current === command.matchId) {
@@ -198,13 +197,13 @@ export function ReactionPrompt({
     : null;
 
   return (
-    <section className="reaction-prompt" aria-labelledby="reaction-prompt-title">
+    <section className="reaction-prompt" aria-labelledby="reaction-prompt-title" aria-busy={busy}>
       <header className="reaction-prompt__header">
         <div>
-          <p className="reaction-prompt__eyebrow">현재 응답</p>
-          <h2 id="reaction-prompt-title">{interactionLabel(pending.kind)}</h2>
+          <h2 id="reaction-prompt-title">{pending.kind === "DISCARDS_ORDER" && currentSnapshot.publicTable.turn.phase === "discard" ? "초과 카드 버리기" : interactionLabel(pending.kind)}</h2>
         </div>
-        {"step" in pending ? (
+        {busy ? <span className="game-processing" role="status">처리 중…</span> : null}
+        {"step" in pending && pending.step.total > 1 ? (
           <span className="reaction-prompt__step" aria-label={`응답 단계 ${pending.step.current}/${pending.step.total}`}>
             {pending.step.current}/{pending.step.total}
           </span>
@@ -218,20 +217,21 @@ export function ReactionPrompt({
           <p>{({ jail: "감옥: 하트이면 턴 진행", dynamite: "다이너마이트: 스페이드 2–9이면 폭발",
             barrel: "술통: 하트이면 방어", jourdonnais_virtual_barrel: "주르도네: 하트이면 방어" })[currentSnapshot.publicTable.luckyJudgment.sourceKind]}</p>
           {currentSnapshot.publicTable.luckyJudgment.cards.map(card => <div key={card.cardInstanceId}>
-            <PlayingCardFace card={card} /><span>{cardFaceLabel(card)}</span><PlayingCardZoomButton card={card} />
+            <PlayingCardZoomButton card={card} /><span>{cardFaceLabel(card)}</span>
           </div>)}
         </div>
       ) : null}
       {isResponder && responderPrompt ? (
         <>
           <p className="reaction-prompt__instruction">
-            {currentResponderName ?? "현재 참가자"} 님 차례예요. 필요한 응답을 골라 주세요.
+            {discardOrder && currentSnapshot.publicTable.turn.phase === "discard"
+              ? `${currentResponderName ?? "현재 참가자"} 님의 턴을 마치려면 ${discardOrder.requiredCount}장을 버려야 해요. 남은 체력만큼만 손패를 남길 수 있어요.`
+              : `${currentResponderName ?? "현재 참가자"} 님이 선택해 주세요.`}
           </p>
           {orderTemplate ? (
             discardOrder ? (
               <fieldset className="reaction-prompt__discard-order">
-                <legend>버릴 순서 선택 · {visibleOrder.length}/{discardOrder.requiredCount}장</legend>
-                <p>선택한 순서대로 버려져요. 필요한 장수를 골라 주세요.</p>
+                <legend>버릴 카드 · {visibleOrder.length}/{discardOrder.requiredCount}장 선택</legend>
                 <ul className="reaction-prompt__discard-candidates" aria-label="버릴 카드 후보">
                   {discardOrder.allowedCards.map((card) => {
                     const orderIndex = visibleOrder.indexOf(card.cardInstanceId);
@@ -239,22 +239,19 @@ export function ReactionPrompt({
                     return (
                       <li key={card.cardInstanceId}>
                         <div className="reaction-prompt__discard-candidate">
+                          <PlayingCardZoomButton card={card} triggerClassName="reaction-prompt__discard-zoom-trigger" />
                           <button
                             className="reaction-prompt__discard-card-choice"
                             type="button"
                             aria-pressed={selected}
-                            aria-label={`${cardFaceLabel(card)}${selected ? `, 선택 ${orderIndex + 1}, 다시 누르면 제외` : ", 버릴 순서에 추가"}`}
+                            aria-label={`${getPlayingCardPresentation(card).accessibleLabel}${selected ? `, 선택 ${orderIndex + 1}, 다시 누르면 제외` : ", 버릴 순서에 추가"}`}
                             disabled={!canRespond || (!selected && visibleOrder.length >= discardOrder.requiredCount)}
                             onClick={() => toggleOrderCard(card.cardInstanceId)}
                           >
                             {selected ? <span className="reaction-prompt__discard-position">{orderIndex + 1}</span> : null}
-                            <PlayingCardFace card={card} />
                             <span>{cardFaceLabel(card)}</span>
+                            <span>{selected ? "선택됨" : "버리기"}</span>
                           </button>
-                          <PlayingCardZoomButton
-                            card={card}
-                            triggerClassName="reaction-prompt__discard-zoom-trigger"
-                          />
                         </div>
                       </li>
                     );
@@ -275,7 +272,7 @@ export function ReactionPrompt({
                     disabled={!canRespond || visibleOrder.length !== discardOrder.requiredCount}
                     onClick={submitDiscardOrder}
                   >
-                    선택한 순서 제출
+                    {busy ? "처리 중…" : "선택한 카드 버리기"}
                   </button>
                   <button
                     type="button"
@@ -292,10 +289,10 @@ export function ReactionPrompt({
               </p>
             )
           ) : null}
-          {responderPrompt.responseOptions.length > 0 ? (
+          {selectableOptions.length > 0 ? (
             <ul className="reaction-prompt__options" aria-label="응답 선택지">
-              {responderPrompt.responseOptions.map((option, index) => {
-                const presentation = presentOption(option, currentSnapshot, index, responderPrompt.responseOptions.length);
+              {selectableOptions.map((option, index) => {
+                const presentation = presentOption(option, currentSnapshot, index, selectableOptions.length);
                 const cardFaces = responseCardFaces(option, responderHand);
                 const isOrderTemplate = option.choice === "ORDER_CARDS" && !("orderedCardInstanceIds" in option);
                 return (
@@ -308,8 +305,6 @@ export function ReactionPrompt({
                         onClick={() => submitOption(option)}
                       >
                         <strong>{presentation.label}</strong>
-                        {["GENERAL_STORE_PICK", "KIT_CARLSON_PICK", "LUCKY_DRAW"].includes(pending.kind)
-                          ? cardFaces.map(card => <PlayingCardFace key={card.cardInstanceId} card={card} />) : null}
                         {presentation.detail ? <span>{presentation.detail}</span> : null}
                       </button>
                       {cardFaces.map((card) => (
@@ -326,14 +321,13 @@ export function ReactionPrompt({
                 );
               })}
             </ul>
-          ) : (
-            <p className="reaction-prompt__empty" role="status">현재 응답 선택지가 없습니다.</p>
-          )}
-          {activePendingCommand ? (
+          ) : !discardOrder ? (
+            <p className="reaction-prompt__empty" role="status">선택할 수 있는 응답이 없어요.</p>
+          ) : null}
+          {activePendingCommand && !busy ? (
             <div className="reaction-prompt__retry">
-              <p>이전 응답 결과를 기다리고 있어요. 같은 명령 ID로 다시 보내면 중복 실행되지 않습니다.</p>
               <button type="button" disabled={busy} onClick={retryPending}>
-                {busy ? "확인 중…" : "같은 응답 다시 확인"}
+                {busy ? "확인 중…" : "다시 확인"}
               </button>
             </div>
           ) : null}
@@ -344,9 +338,8 @@ export function ReactionPrompt({
             <ul className="reaction-prompt__store-pool" aria-label="잡화점에 남은 공개 카드">
               {currentSnapshot.publicTable.generalStoreCards.map(card => (
                 <li key={card.cardInstanceId}>
-                  <PlayingCardFace card={card} />
-                  <span>{cardFaceLabel(card)}</span>
                   <PlayingCardZoomButton card={card} />
+                  <span>{cardFaceLabel(card)}</span>
                 </li>
               ))}
             </ul>
@@ -365,9 +358,9 @@ export function ReactionPrompt({
 }
 
 function rejectionMessage(code: string): string {
-  if (code === "STALE_VERSION") return "판이 업데이트되어 최신 진행 상태를 불러왔어요.";
-  if (code === "INVALID_CHOICE" || code === "ILLEGAL_ACTION") return "응답을 반영하지 못했어요. 최신 선택지를 다시 확인해 주세요.";
-  return "응답을 반영하지 못했어요. 최신 진행 상태를 다시 확인해 주세요.";
+  if (code === "STALE_VERSION") return "진행 상황이 바뀌었어요. 다시 골라 주세요.";
+  if (code === "INVALID_CHOICE" || code === "ILLEGAL_ACTION") return "지금은 선택할 수 없어요. 다시 골라 주세요.";
+  return "선택하지 못했어요. 다시 시도해 주세요.";
 }
 
 function responseCardFaces(

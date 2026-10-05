@@ -8,6 +8,7 @@ let vite;
 let ActionsPanel;
 let ReactionPrompt;
 let getPlayingCardDescription;
+let CharacterPortrait;
 
 test("R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers", () => {
   const choiceCards = [
@@ -40,7 +41,7 @@ before(async () => {
     logLevel: "silent",
     server: { middlewareMode: true },
   });
-  ({ getPlayingCardDescription } = await vite.ssrLoadModule("/src/features/cards/CardFaces.tsx"));
+  ({ getPlayingCardDescription, CharacterPortrait } = await vite.ssrLoadModule("/src/features/cards/CardFaces.tsx"));
   ({ ActionsPanel } = await vite.ssrLoadModule("/src/features/actions/ActionsPanel.tsx"));
   ({ ReactionPrompt } = await vite.ssrLoadModule("/src/features/reactions/ReactionPrompt.tsx"));
 });
@@ -136,6 +137,33 @@ test("hand zoom keeps named triggers and mounts detail content only when opened"
   assert.doesNotMatch(markup, /own-bang|own-beer|cardInstanceId/);
 });
 
+test("card images are detail triggers and use buttons contain no image or duplicate detail text", () => {
+  const markup = renderActions();
+  assert.match(markup, /<button[^>]*class="card-zoom__trigger"[^>]*aria-haspopup="dialog"[^>]*><div class="playing-card"/);
+  assert.match(markup, /class="game-actions__card"[^>]*><span class="game-actions__card-name">뱅!<\/span>/);
+  assert.doesNotMatch(markup, />상세 보기<|>뱅! A 스페이드</);
+});
+
+test("all public character portraits have accessible image triggers without mounting dialogs eagerly", () => {
+  for (const characterId of ['bart_cassidy', 'black_jack', 'calamity_janet', 'el_gringo', 'jesse_jones', 'jourdonnais', 'kit_carlson', 'lucky_duke', 'paul_regret', 'pedro_ramirez', 'rose_doolan', 'sid_ketchum', 'slab_the_killer', 'suzy_lafayette', 'vulture_sam', 'willy_the_kid']) {
+    const markup = renderToStaticMarkup(createElement(CharacterPortrait, { characterId }));
+    assert.match(markup, /캐릭터 상세 보기:/);
+    assert.match(markup, /aria-haspopup="dialog"/);
+    assert.doesNotMatch(markup, /<dialog/);
+  }
+});
+
+test("turn-end discard copy states the required count and current-health rule", () => {
+  const pending = responderPending([{ interactionId: 'interaction-1', choice: 'ORDER_CARDS' }], { requiredCount: 1, allowedCards: hand });
+  const snapshot = matchSnapshot({ pendingInteraction: pending });
+  snapshot.publicTable.turn.phase = 'discard';
+  const markup = renderReaction(snapshot);
+  assert.match(markup, /초과 카드 버리기/);
+  assert.match(markup, /1장을 버려야 해요/);
+  assert.match(markup, /남은 체력만큼만 손패/);
+  assert.doesNotMatch(markup, />카드 정리<|>카드 버릴 순서 정하기<|>상세 보기</);
+});
+
 test("response zoom is limited to card faces named by the current responder options", () => {
   const pendingInteraction = responderPending([
     { interactionId: "interaction-1", choice: "USE_MISSED", cardInstanceId: "own-missed" },
@@ -184,6 +212,8 @@ test("discard-order zoom uses only the responder's projected allowedCards", () =
   assert.match(markup, /카드 상세 보기: 맥주, 7 하트/);
   assert.match(markup, /카드 상세 보기: 뱅!, A 클럽/);
   assert.match(markup, /버릴 카드 후보/);
+  assert.match(markup, /aria-label="맥주, 7 하트, 버릴 순서에 추가"/);
+  assert.doesNotMatch(markup, /aria-label="응답 선택지"|현재 응답 선택지가 없습니다/);
   assert.doesNotMatch(markup, /candidate-beer|candidate-bang|interaction-1|cardInstanceId/);
   assert.doesNotMatch(markup, /<button\b[^>]*>(?:(?!<\/button>)[\s\S])*?<button\b/);
 });

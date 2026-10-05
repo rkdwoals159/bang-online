@@ -80,8 +80,8 @@ test("General Store selection shows public card names, suits, images and zoom wh
   ];
   const markup = renderToStaticMarkup(createElement(ReactionPrompt, { matchId: "match-a", version: 22, snapshot: view,
     transport: { sendMatchCommand: async () => {}, syncMatch: async () => {} } }));
-  assert.match(markup, /맥주 6 하트/);
-  assert.match(markup, /뱅! A 스페이드/);
+  assert.match(markup, /카드 상세 보기: 맥주, 6 하트/);
+  assert.match(markup, /뱅!/);
   assert.match(markup, /01_birra\.png/);
   assert.match(markup, /01_bang\.png/);
   assert.match(markup, /카드 상세/);
@@ -94,7 +94,7 @@ test("General Store selection shows public card names, suits, images and zoom wh
   const waitingMarkup = renderToStaticMarkup(createElement(ReactionPrompt, { matchId: "match-a", version: 22, snapshot: waiting,
     transport: { sendMatchCommand: async () => {}, syncMatch: async () => {} } }));
   assert.match(waitingMarkup, /잡화점에 남은 공개 카드/);
-  assert.match(waitingMarkup, /맥주 6 하트/);
+  assert.match(waitingMarkup, /카드 상세 보기: 맥주, 6 하트/);
   assert.doesNotMatch(waitingMarkup, /응답 선택지|응답 내용은 다른 참가자에게 공개되지/);
 });
 
@@ -125,7 +125,7 @@ test("only the current responder's pending options are offered, with the server 
   assert.match(markup, /2\/3/);
   assert.match(markup, /빗나감! 사용/);
   assert.match(markup, /피해 받기/);
-  assert.match(markup, /빗나감! 8 하트/);
+  assert.match(markup, /카드 상세 보기: 빗나감!, 8 하트/);
   assert.doesNotMatch(markup, /own-missed|interaction-1|cardInstanceId/);
 });
 
@@ -185,10 +185,10 @@ test("Vulture Sam cleanup discard prompt uses only server-projected candidates a
     transport: { sendMatchCommand: async () => { throw new Error("not submitted"); }, syncMatch: async () => syncResponse(sheriffSnapshot) },
   }));
 
-  assert.match(sheriffMarkup, /카드 정리/);
+  assert.match(sheriffMarkup, /카드 버리기/);
   assert.match(sheriffMarkup, /0\/2장/);
-  assert.match(sheriffMarkup, /역마차 9 스페이드/);
-  assert.match(sheriffMarkup, /선택한 순서 제출/);
+  assert.match(sheriffMarkup, /카드 상세 보기: 역마차, 9 스페이드/);
+  assert.match(sheriffMarkup, /선택한 카드 버리기/);
   assert.doesNotMatch(sheriffMarkup, /cleanup-a|cleanup-b|cleanup-c/);
 
   const progress = {

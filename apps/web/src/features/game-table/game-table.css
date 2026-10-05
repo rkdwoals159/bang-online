@@ -6,12 +6,6 @@
 .game-table__observer-note { margin: 0; padding: 16px 24px; background: var(--color-felt); color: var(--color-on-felt); font-size: 14px; }
 .game-table__surface { position: relative; padding: 24px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--color-felt); }
 .game-table__felt { display: none; }
-.game-table__center { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .7fr); gap: 16px; margin-bottom: 24px; padding: 20px; border: 1px solid rgb(184 204 191 / 24%); border-radius: var(--radius-md); background: var(--color-felt-edge); }
-.game-table__turn, .game-table__discard, .game-table__deck { display: grid; align-content: start; gap: 6px; min-width: 0; font-size: 13px; color: var(--color-on-felt-muted); }
-.game-table__turn strong, .game-table__discard strong, .game-table__deck strong { color: var(--color-on-felt); font-size: 18px; overflow-wrap: anywhere; }
-.game-table__center-label { color: var(--color-brass); font-size: 12px; font-weight: 700; }
-.game-table__discard, .game-table__deck { padding-left: 16px; border-left: 1px solid rgb(184 204 191 / 24%); }
-.game-table__discard span:last-child { font-size: 12px; }
 .game-table__seats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
 .game-table__seat { min-width: 0; }
 .game-table__seat-card { display: grid; position: relative; grid-template-columns: 52px minmax(0, 1fr); grid-template-rows: auto auto auto auto; column-gap: 12px; min-height: 152px; padding: 16px; border: 2px solid transparent; border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-ink); }
@@ -32,12 +26,17 @@
 .game-table__health .app-icon { width: 16px; height: 16px; }
 .game-table__health strong { color: var(--color-ink); font-size: 16px; font-variant-numeric: tabular-nums; }
 .game-table__health-max { color: var(--color-muted); font-size: 12px; }
+.game-table__health { animation: health-change 260ms ease-out; }
+.game-table__turn-badge { animation: turn-arrive 220ms ease-out; }
+@keyframes health-change { from { transform: scale(1.15); } to { transform: none; } }
+@keyframes turn-arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .game-table__health, .game-table__turn-badge { animation: none; } }
 .game-table__seat-meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin-top: 12px; font-size: 12px; color: var(--color-muted); }
 .game-table__in-play { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 12px; }
 .game-table__seat-caption { font-size: 12px; }
 .game-table__in-play ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .game-table__in-play li { padding: 4px 8px; border-radius: 6px; background: var(--color-positive-soft); color: var(--color-positive); font-size: 12px; }
 .game-table__eliminated-label { grid-column: 1 / -1; margin-top: 8px; font-size: 12px; color: var(--color-danger); font-weight: 750; }
-@media (min-width: 1101px) { .game-table__seats:has(> :nth-child(7)) { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-table__seats:has(> :nth-child(7)) .game-table__seat-card { grid-template-columns: minmax(0, 1fr); } .game-table__seats:has(> :nth-child(7)) .character-portrait { display: none; } .game-table__seats:has(> :nth-child(7)) .game-table__seat-heading, .game-table__seats:has(> :nth-child(7)) .game-table__character, .game-table__seats:has(> :nth-child(7)) .game-table__health { grid-column: 1; } }
+@media (min-width: 1101px) { .game-table__seats:has(> :nth-child(7)) { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-table__seats:has(> :nth-child(7)) .game-table__seat-card { grid-template-columns: minmax(0, 1fr); } .game-table__seats:has(> :nth-child(7)) .character-detail { grid-column: 1; grid-row: auto; } .game-table__seats:has(> :nth-child(7)) .game-table__seat-heading, .game-table__seats:has(> :nth-child(7)) .game-table__character, .game-table__seats:has(> :nth-child(7)) .game-table__health { grid-column: 1; } }
 @media (max-width: 1100px) and (min-width: 761px) { .game-table__seats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .game-table__header { padding: 16px 16px 0; } .game-table__header h1 { font-size: 20px; } .game-table__surface { padding: 16px; } .game-table__center { gap: 12px; padding: 16px; margin-bottom: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); } .game-table__deck { grid-column: 1 / -1; border-left: 0; padding: 12px 0 0; border-top: 1px solid rgb(184 204 191 / 24%); grid-template-columns: 1fr 1fr; } .game-table__seat-card { grid-template-columns: minmax(0, 1fr); padding: 12px; min-height: 0; } .character-portrait { display: none; } .game-table__seat-heading, .game-table__character, .game-table__health { grid-column: 1; } .game-table__seat-meta { display: grid; } }
+@media (max-width: 600px) { .game-table__header { padding: 16px 16px 0; } .game-table__header h1 { font-size: 20px; } .game-table__surface { padding: 16px; } .game-table__center { gap: 12px; padding: 16px; margin-bottom: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); } .game-table__deck { grid-column: 1 / -1; border-left: 0; padding: 12px 0 0; border-top: 1px solid rgb(184 204 191 / 24%); grid-template-columns: 1fr 1fr; } .game-table__seat-card { grid-template-columns: minmax(0, 1fr); padding: 12px; min-height: 0; } .character-detail { grid-column: 1; grid-row: auto; } .game-table__seat-heading, .game-table__character, .game-table__health { grid-column: 1; } .game-table__seat-meta { display: grid; } }

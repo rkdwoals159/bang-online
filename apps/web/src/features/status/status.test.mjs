@@ -161,7 +161,7 @@ test("keeps public log closed by default and formats only allowlisted events wit
   assert.deepEqual(view.publicLog.map(({ eventSeq }) => eventSeq), [4, 6]);
   assert.match(view.publicLog[0].message, /초원 별 님이 바람 님을 뱅!으로 공격해요\./);
   assert.equal(view.publicLog[1].message, "초원 별 님의 뱅!이 바람 님에게 적중했어요.");
-  assert.match(html, /최근 공개 기록 \(최대 100건\)/);
+  assert.match(html, /게임 기록/);
   assert.doesNotMatch(html, /data-event-seq=|뱅!으로 공격해요\.|private-resolution-sentinel/);
   assert.match(html, /현재 차례/);
   assert.match(html, /초원 별/);

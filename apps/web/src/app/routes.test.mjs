@@ -176,7 +176,7 @@ test("room connection notice is accessible and stays until authoritative route s
   assert.equal(roomConnectionStatusMessage("connected", null, true, true), disconnectedMessage);
   assert.equal(roomConnectionStatusMessage("connecting", null, true, false), "게임에 연결하고 있어요.");
   assert.equal(roomConnectionStatusMessage("connecting", null, true, true), disconnectedMessage);
-  assert.equal(roomConnectionStatusMessage("connected", null, true, false), "최신 게임 정보를 불러오고 있어요.");
+  assert.equal(roomConnectionStatusMessage("connected", null, true, false), "연결 중…");
   assert.equal(roomConnectionStatusMessage("connected", null, false, false), null);
   assert.equal(isRoomProjectionInputEnabled("disconnected", null, false), false);
   assert.equal(isRoomProjectionInputEnabled("disconnected", null, false, true), true);
@@ -345,7 +345,7 @@ test("match route composition passes private hand, legalActions, pending and res
   }));
 
   assert.match(playingMarkup, /현재 차례/);
-  assert.match(playingMarkup, /내 응답 차례예요/);
+  assert.match(playingMarkup, /초원 별 님이 선택해 주세요/);
   assert.match(playingMarkup, /빗나감! 8 하트/);
   assert.match(playingMarkup, /뱅! 응답/);
   assert.match(playingMarkup, /행동 입력/);

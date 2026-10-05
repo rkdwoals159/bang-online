@@ -283,7 +283,7 @@ test("shows turn ownership and pending response without making card actions avai
     } }),
     transport,
   }));
-  assert.match(pending, /내 응답 차례예요/);
+  assert.match(pending, /응답 대기/);
   assert.equal((pending.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
   assert.match(pending, /응답이 끝나면 선택할 수 있어요/);
   assert.doesNotMatch(pending, /private-interaction-id|own-beer/);
@@ -318,6 +318,6 @@ test("renders two linear Sid cost selectors instead of one button per card pair"
   assert.doesNotMatch(markup, /<button[^>]*class="game-actions__ability/);
   assert.match(markup, /aria-label="첫 번째 능력 비용 카드"/);
   assert.match(markup, /aria-label="두 번째 능력 비용 카드"/);
-  assert.match(markup, /<button class="game-actions__button game-actions__button--primary" type="button" disabled="">선택한 능력 제출<\/button>/);
+  assert.match(markup, /<button class="game-actions__button game-actions__button--primary" type="button" disabled="">능력 사용<\/button>/);
   assert.doesNotMatch(markup, /private-hand-0|private-hand-79/);
 });

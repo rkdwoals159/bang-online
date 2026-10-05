@@ -16,12 +16,12 @@ before(async () => {
 });
 after(async () => { await vite?.close(); });
 
-test('design: public portraits are decorative and preserve role/hand privacy', () => {
+test('design: public portraits open character details and preserve role/hand privacy', () => {
   for (const snapshot of [survivorSnapshot, eliminatedSnapshot]) {
     const markup = renderToStaticMarkup(createElement(GameTable, { snapshot }));
     for (const sentinel of forbiddenSentinels) assert.equal(markup.includes(sentinel), false);
     assert.equal((markup.match(/class="character-portrait" aria-hidden="true"/g) ?? []).length, snapshot.publicTable.players.length);
-    assert.doesNotMatch(markup, /내 손패|<button\b|\bdata-[\w-]+=/);
+    assert.doesNotMatch(markup, /내 손패|\bdata-[\w-]+=/);
   }
   const markup = renderToStaticMarkup(createElement(GameTable, { snapshot: survivorSnapshot }));
   assert.match(markup, /내 역할 배신자/);

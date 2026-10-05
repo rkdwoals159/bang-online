@@ -40,16 +40,8 @@ function AppShell({ children }: { children: ReactNode }) {
           <span className="brand-mark" aria-hidden="true">B!</span>
           <span className="brand-name">BANG! <span>온라인</span></span>
         </AppLink>
-        <div className="header-note">
-          <span className="header-dot" aria-hidden="true" />
-          한국어 기본판 · 4–7명
-        </div>
       </header>
       <main className="main-content" id="main-content" tabIndex={-1}>{children}</main>
-      <footer className="site-footer">
-        <span>기본판 · 4–7명</span>
-        <span>게임 규칙은 서버가 판정합니다</span>
-      </footer>
     </div>
   );
 }

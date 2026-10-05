@@ -16,17 +16,37 @@
 }
 
 .card-zoom__trigger {
-  min-width: 5rem;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 44px;
   min-height: 44px;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--color-border);
+  padding: 0;
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--color-surface-soft);
+  background: transparent;
   color: var(--color-ink);
   cursor: pointer;
   font: inherit;
   font-size: 12px;
   font-weight: 800;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.card-zoom__trigger:hover { transform: translateY(-3px); filter: brightness(1.04); }
+.card-zoom__trigger:active { transform: scale(.97); }
+.card-zoom__trigger:focus-visible { outline: 3px solid var(--color-brass-ink); outline-offset: 3px; }
+.character-detail { grid-row: 1 / 4; width: 52px; }
+.card-zoom__dialog > .roster-card { width: min(100%, 18rem); margin: auto; }
+.card-zoom__dialog .roster-card p { white-space: pre-line; font-size: 15px; }
+.card-zoom__dialog[open] { animation: card-detail-open 180ms ease-out both; }
+.card-zoom__dialog[open]::backdrop { animation: card-detail-backdrop 160ms ease-out both; }
+@keyframes card-detail-open { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes card-detail-backdrop { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .card-zoom__trigger { transition: none; }
+  .card-zoom__trigger:hover, .card-zoom__trigger:active { transform: none; }
+  .card-zoom__dialog[open], .card-zoom__dialog[open]::backdrop { animation: none; }
 }
 
 .card-zoom__dialog {

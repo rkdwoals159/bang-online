@@ -5,7 +5,7 @@ import type {
   MatchSnapshotView,
   MatchSyncResponse,
 } from "../../../../../packages/contracts/src/protocol.js";
-import { PlayingCardFace, PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { PlayingCardZoomButton } from "../cards/CardFaces.js";
 import {
   cardName,
   createActionCommand,
@@ -156,15 +156,10 @@ export function ActionsPanel({
     busyRef.current = true;
     setBusy(true);
     setPendingCommand(command);
-    setNotice("행동을 보내고 있어요.");
+    setNotice("");
 
     try {
-      const result = await sendAndRefreshAction(transport, command, (acknowledgement) => {
-        if (currentMatchIdRef.current !== command.matchId) return;
-        setNotice(acknowledgement.status === "rejected"
-          ? "요청을 확인했어요. 최신 게임 상태를 불러오고 있어요."
-          : "행동이 접수됐어요. 판을 업데이트하고 있어요.");
-      });
+      const result = await sendAndRefreshAction(transport, command);
       if (currentMatchIdRef.current !== command.matchId) return;
       setSelection(null);
       setNoHealBeerConfirmation(null);
@@ -184,20 +179,20 @@ export function ActionsPanel({
       if (result.acknowledgement.status === "rejected") {
         setNotice(result.projection
           ? rejectionMessage(result.acknowledgement.error.code)
-          : "행동을 반영하지 못했어요. 최신 게임 정보를 불러온 뒤 다시 선택해 주세요.");
+          : "지금은 사용할 수 없어요. 다시 골라 주세요.");
       } else {
         setNotice(result.projection
-          ? "행동을 반영했어요. 최신 게임 정보를 불러왔어요."
-          : "행동을 확인하고 있어요. 최신 게임 정보를 다시 불러와 주세요.");
+          ? ""
+          : "연결이 지연되고 있어요. 다시 확인해 주세요.");
       }
     } catch {
       if (currentMatchIdRef.current !== command.matchId) return;
       setNeedsRefresh(true);
-      setNotice("행동 결과를 확인하지 못했어요. 아래에서 다시 확인할 수 있어요.");
+      setNotice("연결이 지연되고 있어요. 다시 확인해 주세요.");
       try {
         await refreshProjection(command.matchId);
       } catch {
-        setNotice("행동 결과와 최신 게임 정보를 확인하지 못했어요. 다시 시도해 주세요.");
+        setNotice("연결 상태를 확인하고 다시 시도해 주세요.");
       }
     } finally {
       if (currentMatchIdRef.current === command.matchId) {
@@ -311,11 +306,10 @@ export function ActionsPanel({
   );
 
   return (
-    <section className="game-actions" aria-labelledby="game-actions-title">
+    <section className="game-actions" aria-labelledby="game-actions-title" aria-busy={busy}>
       <header className="game-actions__header">
         <div>
-          <p className="game-actions__eyebrow">내 카드와 행동</p>
-          <h2 id="game-actions-title">행동 선택</h2>
+          <h2 id="game-actions-title">내 손패</h2>
         </div>
         <span className="game-actions__version">손패 {hand.length}장</span>
       </header>
@@ -333,7 +327,7 @@ export function ActionsPanel({
         <p className="game-actions__empty" role="status">탈락한 플레이어는 공개 테이블만 볼 수 있습니다.</p>
       ) : needsRefresh ? (
         <div className="game-actions__recovery">
-          <p>최신 게임 정보를 확인한 뒤 행동을 다시 고를 수 있어요.</p>
+          <p>연결이 지연되고 있어요.</p>
           <button
             className="game-actions__button game-actions__button--secondary"
             type="button"
@@ -342,7 +336,7 @@ export function ActionsPanel({
               setBusy(true);
               busyRef.current = true;
               void refreshProjection(matchId)
-                .then(() => setNotice("최신 게임 정보를 불러왔어요."))
+                .then(() => setNotice(""))
                 .catch(() => setNotice("최신 게임 정보를 불러오지 못했어요. 다시 시도해 주세요."))
                 .finally(() => {
                   if (currentMatchIdRef.current === matchId) {
@@ -352,42 +346,28 @@ export function ActionsPanel({
                 });
             }}
           >
-            최신 게임 정보 다시 불러오기
+            다시 확인
           </button>
         </div>
       ) : null}
 
       {currentSnapshot.status === "playing" && activeViewer && !needsRefresh ? (
         <>
-          {pendingInteraction ? (
-            <p className="game-actions__turn-note" role="status" aria-live="polite">
-              {viewerIsResponder
-                ? "내 응답 차례예요. 위의 응답 선택을 확인해 주세요."
-                : pendingResponderId
-                  ? `${currentSnapshot.publicTable.players.find((player) => player.playerId === pendingResponderId)?.displayName ?? "다른 참가자"} 님이 응답 중이에요.`
-                  : "진행 중인 응답이 끝나면 다음 행동을 고를 수 있어요."}
-            </p>
-          ) : !viewerIsTurnOwner ? (
-            <p className="game-actions__turn-note" role="status" aria-live="polite">
-              {turnOwner ? `${turnOwner.displayName} 님 차례예요. 내 차례가 되면 행동을 고를 수 있어요.` : "다른 참가자의 차례예요."}
-            </p>
-          ) : null}
-          {activePendingCommand ? (
+          {activePendingCommand && !busy ? (
             <div className="game-actions__pending" role="status">
-              <p>이전 행동 결과를 확인하고 있어요. 다시 확인해도 행동은 중복 적용되지 않아요.</p>
               <button
                 className="game-actions__button game-actions__button--primary"
                 type="button"
                 disabled={busy}
                 onClick={() => void send(activePendingCommand)}
               >
-                {busy ? "확인 중…" : "전송 결과 다시 확인"}
+                {busy ? "확인 중…" : "다시 확인"}
               </button>
             </div>
           ) : null}
 
           <fieldset className="game-actions__fieldset">
-            <legend>손패 카드</legend>
+            <legend className="sr-only">손패 카드</legend>
             {hand.length > 0 ? (
               <ul className="game-actions__cards" aria-label="내 손패에서 카드 선택">
                 {hand.map((card) => {
@@ -408,6 +388,7 @@ export function ActionsPanel({
                   return (
                     <li key={card.cardInstanceId}>
                       <div className="game-actions__card-entry">
+                        <PlayingCardZoomButton card={card} details={actionDetails} detailHeading={canUseCard ? "사용 대상과 방식" : "카드 사용 상태"} triggerClassName="game-actions__card-zoom-trigger" />
                         <button
                           className={`game-actions__card${selected ? " is-selected" : ""}`}
                           type="button"
@@ -416,16 +397,9 @@ export function ActionsPanel({
                           disabled={!canAct || !isLegal}
                           onClick={() => chooseCard(card.cardInstanceId)}
                         >
-                          <PlayingCardFace card={card} />
                           <span className="game-actions__card-name">{cardName(card.typeId)}</span>
-                          <span className="game-actions__card-state">{canUseCard ? "사용 가능" : pendingInteraction ? "응답 대기" : !viewerIsTurnOwner ? "상대 차례" : currentSnapshot.publicTable.turn.phase === "discard" ? "정리 단계" : "사용 불가"}</span>
+                          <span className="game-actions__card-state">{canUseCard ? "사용" : pendingInteraction ? "응답 대기" : !viewerIsTurnOwner ? "상대 차례" : currentSnapshot.publicTable.turn.phase === "discard" ? "카드 버리기" : "사용 불가"}</span>
                         </button>
-                        <PlayingCardZoomButton
-                          card={card}
-                          details={actionDetails}
-                          detailHeading={canUseCard ? "사용 대상과 방식" : "카드 사용 상태"}
-                          triggerClassName="game-actions__card-zoom-trigger"
-                        />
                       </div>
                     </li>
                   );
@@ -503,7 +477,7 @@ export function ActionsPanel({
                     if (visibleSelection.proposalIndex !== null) submitProposal(visibleSelection.proposalIndex);
                   }}
                 >
-                  {selectedBeerReasons.length > 0 ? "확인하고 맥주 사용" : "선택한 행동 제출"}
+                  {busy ? "처리 중…" : selectedBeerReasons.length > 0 ? "확인하고 맥주 사용" : "카드 사용"}
                 </button>
               </div>
             </section>
@@ -592,7 +566,7 @@ export function ActionsPanel({
                   if (selectedSidAbilityProposalIndex !== null) submitProposal(selectedSidAbilityProposalIndex);
                 }}
               >
-                선택한 능력 제출
+                능력 사용
               </button>
             </fieldset>
           ) : null}
@@ -607,7 +581,7 @@ export function ActionsPanel({
                   disabled={!canAct}
                   onClick={() => submitProposal(index)}
                 >
-                  턴 종료
+                  {busy ? "처리 중…" : "턴 종료"}
                 </button>
               ))}
             </div>
@@ -623,9 +597,9 @@ export function ActionsPanel({
 }
 
 function rejectionMessage(code: string): string {
-  if (code === "STALE_VERSION") return "게임이 업데이트되어 선택을 지웠어요. 최신 선택지를 불러옵니다.";
-  if (code === "ILLEGAL_ACTION" || code === "INVALID_CHOICE") return "그 행동은 지금 할 수 없어요. 최신 선택지를 불러옵니다.";
-  return "행동을 반영하지 못했어요. 최신 게임 정보를 확인합니다.";
+  if (code === "STALE_VERSION") return "진행 상황이 바뀌었어요. 다시 골라 주세요.";
+  if (code === "ILLEGAL_ACTION" || code === "INVALID_CHOICE") return "지금은 사용할 수 없어요. 다시 골라 주세요.";
+  return "사용하지 못했어요. 다시 시도해 주세요.";
 }
 
 function suitName(suit: CardSuit): string {

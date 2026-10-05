@@ -1,3 +1,4 @@
+import { characterDescriptions } from "../features/cards/character-descriptions.js";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { MatchSnapshotView, RoomView, PublicMatchEvent } from "../../../../packages/contracts/src/protocol.js";
 import { ActionsPanel } from "../features/actions/ActionsPanel.js";
@@ -65,7 +66,7 @@ export function roomConnectionStatusMessage(
     return "게임에 연결하고 있어요.";
   }
   if (connection === "connected" && awaitingAuthoritativeSync) {
-    return "최신 게임 정보를 불러오고 있어요.";
+    return "연결 중…";
   }
   return null;
 }
@@ -151,25 +152,7 @@ export const roleDescriptions: Readonly<Record<string, string>> = Object.freeze(
   renegade: "승리 목표: 마지막까지 혼자 살아남으세요.",
 });
 
-/** Presentation copy transcribed from 01_RULES.md C01–C16. It never drives game logic. */
-export const characterDescriptions: Readonly<Record<string, string>> = Object.freeze({
-  bart_cassidy: "능력: 피해를 입고 살아남으면 잃은 생명력 1당 카드 1장을 뽑아요.\n주의: 다이너마이트 피해를 받고 살아남으면 카드 3장을 뽑아요. 치명상 구제에 이 능력으로 맥주를 찾아 쓸 수는 없어요.",
-  black_jack: "능력: 카드 뽑기 단계의 두 번째 카드를 공개해요. 하트나 다이아몬드라면 카드 1장을 더 비공개로 뽑아요.\n주의: 일반 판정(Draw!)에는 적용되지 않아요.",
-  calamity_janet: "능력: 빗나감!을 뱅!처럼, 뱅!을 빗나감!처럼 낼 수 있어요.\n주의: 공격 카드로 바꾸어 내면 뱅! 사용 횟수 제한을 따라요. 결투와 인디언!에서도 바꾸어 낼 수 있어요.",
-  el_gringo: "능력: 다른 플레이어가 사용한 카드로 피해를 입고 살아남으면, 잃은 생명력 1당 그 플레이어의 손패에서 카드 1장을 무작위로 가져와요.\n주의: 상대 손패가 없으면 가져오지 않아요. 다이너마이트와 자신이 시작한 결투에서 진 경우에는 발동하지 않아요.",
-  jesse_jones: "능력: 카드 뽑기 단계의 첫 카드 1장을 덱 대신 다른 생존자의 손패에서 무작위로 가져올 수 있어요.\n그 단계의 두 번째 카드는 덱에서 뽑아요.",
-  jourdonnais: "능력: 가상 술통이 있어요. 뱅! 또는 개틀링 공격을 받을 때 하트 판정으로 빗나감! 1개처럼 방어할 수 있어요.\n술통을 장착하고 있다면 두 번 따로 판정할 수 있어요.",
-  kit_carlson: "능력: 카드 뽑기 단계에 덱 맨 위 3장을 혼자 보고 2장을 손패에 넣어요.\n남은 1장은 덱 맨 위에 비공개로 돌려놔요.",
-  lucky_duke: "능력: 판정(Draw!)마다 카드 2장을 공개해요. 둘 중 원하는 카드로 판정한 뒤 두 장 모두 버려요.\n주의: 일반 카드 뽑기와 블랙 잭의 추가 뽑기에는 적용되지 않아요.",
-  paul_regret: "능력: 다른 플레이어가 보는 나와의 거리가 1 늘어나요.\n머스탱 효과와 함께 적용돼요.",
-  pedro_ramirez: "능력: 카드 뽑기 단계의 첫 카드 1장을 덱 대신 버림더미 맨 위에서 가져올 수 있어요.\n버림더미가 비어 있으면 덱에서 뽑아요. 두 번째 카드는 덱에서 뽑아요.",
-  rose_doolan: "능력: 내가 보는 다른 플레이어와의 거리가 1 줄어요.\n조준경 효과와 함께 적용되며 거리는 1보다 작아지지 않아요.",
-  sid_ketchum: "능력: 손패 2장을 버리고 생명력 1을 회복할 수 있어요. 최대 생명력까지 반복할 수 있어요.\n사용 시점: 내 카드 사용 단계 또는 생명력 구제 때예요. 다른 카드 효과가 해결되는 중에는 사용할 수 없어요.",
-  slab_the_killer: "능력: 내가 뱅!으로 공격하면 상대는 빗나감! 2장이 필요해요.\n술통 판정에 성공하면 빗나감! 1장으로 인정해요. 개틀링 공격에는 이 능력이 적용되지 않아요.",
-  suzy_lafayette: "능력: 손패가 비면 카드 1장을 뽑아요.\n시점: 내가 낸 카드의 효과가 모두 끝난 뒤 확인해요. 슬랩의 공격에 마지막 빗나감!을 내면 즉시 뽑고, 새로 뽑은 빗나감!으로 한 번 더 대응할 수 있어요.",
-  vulture_sam: "능력: 다른 플레이어가 탈락하면 그 사람의 손패와 장착 카드를 모두 내 손패로 가져와요.\n가져온 카드는 자동으로 장착되지 않아요. 이미 버린 다이너마이트는 가져오지 않아요.",
-  willy_the_kid: "능력: 내 차례에는 뱅!을 원하는 만큼 낼 수 있어요.\n각 공격의 거리와 대상 제한은 그대로예요.",
-});
+export { characterDescriptions } from "../features/cards/character-descriptions.js";
 
 export function hasRoleRevealConfirmation(matchId: string): boolean {
   try {
@@ -525,6 +508,9 @@ export function MatchPage({
 }) {
   const statusSync = { version, snapshot, visibleEvents };
   const completed = snapshot.status === "completed";
+  const pending = snapshot.pendingInteraction;
+  const choosingDiscards = pending && "discardOrder" in pending && pending.discardOrder &&
+    "currentResponderPlayerId" in pending && pending.currentResponderPlayerId === snapshot.viewer.playerId;
   return (
     <div className={`match-page${completed ? " match-page--result" : " match-page--playing"}`}>
       {!completed ? <MatchRequestBanner snapshot={snapshot} /> : null}
@@ -540,7 +526,7 @@ export function MatchPage({
       {showActions && !completed ? (
         <MatchInputGate status={snapshot.status}>
           <ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
-          <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
+          {!choosingDiscards ? <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
         </MatchInputGate>
       ) : null}
       {completed ? (
@@ -564,13 +550,6 @@ export function MatchPage({
   );
 }
 
-const requestPhaseLabels: Readonly<Record<string, string>> = {
-  start: "턴 시작",
-  draw: "카드 뽑기",
-  play: "카드 사용",
-  discard: "손패 정리",
-};
-
 function MatchRequestBanner({ snapshot }: { snapshot: MatchSnapshotView }) {
   const turnOwner = snapshot.publicTable.players.find(
     (player) => player.playerId === snapshot.publicTable.turn.currentPlayerId,
@@ -583,10 +562,7 @@ function MatchRequestBanner({ snapshot }: { snapshot: MatchSnapshotView }) {
     ? snapshot.publicTable.players.find((player) => player.playerId === responderId)
     : undefined;
   const myTurn = turnOwner?.playerId === snapshot.viewer.playerId;
-  const myResponse = responderId === snapshot.viewer.playerId && pending !== null && pending !== undefined &&
-    "responseOptions" in pending && pending.responseOptions.length > 0;
-  const phase = requestPhaseLabels[snapshot.publicTable.turn.phase] ?? "진행 중";
-  const request = pending ? interactionLabel(pending.kind) : null;
+  const request = pending ? pending.kind === "DISCARDS_ORDER" && snapshot.publicTable.turn.phase === "discard" ? "초과 카드 버리기" : interactionLabel(pending.kind) : null;
   const instruction = snapshot.status === "paused"
     ? "게임이 잠시 멈춰 있어요. 다시 진행되면 행동을 고를 수 있어요."
     : snapshot.status === "recovery_required"
@@ -596,27 +572,18 @@ function MatchRequestBanner({ snapshot }: { snapshot: MatchSnapshotView }) {
         : myTurn
           ? "내 차례예요. 아래에서 카드를 고를 수 있어요."
           : turnOwner ? `${turnOwner.displayName} 님 차례예요.` : "현재 차례를 확인하고 있어요.";
-  const responseInstruction = snapshot.status === "paused"
-    ? "게임이 잠시 멈춰 있어요. 다시 진행되면 응답할 수 있어요."
-    : snapshot.status === "recovery_required"
-      ? "게임 정보를 확인하고 있어요. 최신 상태를 기다려 주세요."
-      : myResponse
-        ? "내 응답 차례예요. 아래에서 선택해 주세요."
-        : responder ? `${responder.displayName} 님이 응답 중이에요.` : "응답이 끝나면 다음 행동을 고를 수 있어요.";
 
   return (
     <section className="match-request" aria-label="현재 차례와 응답" role="status" aria-live="polite">
-      <div className="match-request__turn">
-        <span>차례</span>
+      <div className="match-request__turn" key={snapshot.publicTable.turn.currentPlayerId}>
+        <span>현재 차례</span>
         <strong>{turnOwner?.displayName ?? "확인 중"}</strong>
-        <span>{phase}</span>
       </div>
       {pending ? (
         <div className="match-request__response">
           <span>{request}</span>
           <strong>{responder?.displayName ?? (responderId ? "응답자 확인 중" : "응답 처리 중")}</strong>
-          {"step" in pending ? <span>{pending.step.current}/{pending.step.total}</span> : null}
-          <p>{responseInstruction}</p>
+          {"step" in pending && pending.step.total > 1 ? <span>{pending.step.current}/{pending.step.total}</span> : null}
         </div>
       ) : (
         <p className="match-request__instruction">{instruction}</p>

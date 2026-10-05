@@ -29,15 +29,15 @@ try {
   assert.match(survivorMarkup, /보안관/);
   assert.match(survivorMarkup, /역할 비공개/);
   assert.match(survivorMarkup, /손패 2장/);
-  assert.match(survivorMarkup, /버림더미/);
-  assert.match(survivorMarkup, /9장/);
+  assert.doesNotMatch(survivorMarkup, /버림더미|남은 덱/);
+  assert.doesNotMatch(survivorMarkup, /9장/);
   assert.doesNotMatch(survivorMarkup, /내 손패/);
   assert.doesNotMatch(survivorMarkup, /맥주/);
   assert.match(survivorMarkup, /현재 차례/);
-  assert.match(survivorMarkup, /카드 사용/);
-  assert.match(survivorMarkup, /남은 덱/);
-  assert.match(survivorMarkup, /57장/);
-  assert.doesNotMatch(survivorMarkup, /<button\b/);
+  assert.match(survivorMarkup, /캐릭터 상세 보기/);
+
+  assert.doesNotMatch(survivorMarkup, /57장/);
+  assert.match(survivorMarkup, /aria-haspopup="dialog"/);
 
   const eliminatedMarkup = renderToStaticMarkup(
     React.createElement(GameTable, { snapshot: eliminatedSnapshot }),
@@ -45,9 +45,9 @@ try {
   assert.match(eliminatedMarkup, /탈락한 플레이어/);
   assert.match(eliminatedMarkup, /부관/);
   assert.match(eliminatedMarkup, /손패 3장/);
-  assert.match(eliminatedMarkup, /63장/);
+  assert.doesNotMatch(eliminatedMarkup, /63장/);
   assert.doesNotMatch(eliminatedMarkup, /내 손패/);
-  assert.doesNotMatch(eliminatedMarkup, /<button\b/);
+  assert.match(eliminatedMarkup, /aria-haspopup="dialog"/);
 
   for (const sentinel of forbiddenSentinels) {
     assert.equal(survivorMarkup.includes(sentinel), false, `survivor leaked ${sentinel}`);

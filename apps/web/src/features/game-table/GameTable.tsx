@@ -1,7 +1,7 @@
+import { cardName } from "../actions/model.js";
 import { CharacterPortrait } from "../cards/CardFaces.js";
 import { AppIcon } from "../../components/AppIcon.js";
 import type {
-  CardFaceView,
   MatchSnapshotView,
   PublicPlayerView,
   RoleId,
@@ -34,52 +34,6 @@ const characterNames: Record<string, string> = {
   willy_the_kid: "윌리 더 키드",
 };
 
-const cardNames: Record<string, string> = {
-  bang: "뱅!",
-  missed: "빗나감!",
-  beer: "맥주",
-  saloon: "술집",
-  stagecoach: "역마차",
-  wells_fargo: "웰스 파고",
-  general_store: "잡화점",
-  panic: "패닉!",
-  cat_balou: "캣 벌루",
-  gatling: "개틀링",
-  indians: "인디언!",
-  duel: "결투",
-  barrel: "술통",
-  jail: "감옥",
-  dynamite: "다이너마이트",
-  mustang: "머스탱",
-  scope: "조준경",
-  volcanic: "볼캐닉",
-  schofield: "스코필드",
-  remington: "레밍턴",
-  carabine: "레밍턴 카빈",
-  winchester: "윈체스터",
-};
-
-const suitMarks: Record<CardFaceView["suit"], string> = {
-  SPADES: "♠",
-  HEARTS: "♥",
-  DIAMONDS: "♦",
-  CLUBS: "♣",
-};
-
-const suitNames: Record<CardFaceView["suit"], string> = {
-  SPADES: "스페이드",
-  HEARTS: "하트",
-  DIAMONDS: "다이아몬드",
-  CLUBS: "클럽",
-};
-
-const phaseNames: Record<string, string> = {
-  start: "턴 시작",
-  draw: "카드 뽑기",
-  play: "카드 사용",
-  discard: "손패 정리",
-};
-
 const statusNames: Record<MatchSnapshotView["status"], string> = {
   playing: "게임 진행 중",
   paused: "게임 일시 정지",
@@ -100,19 +54,12 @@ interface PositionedPlayer {
 export function GameTable({ snapshot }: GameTableProps) {
   const players = orderPlayersForViewer(snapshot);
   const activeSelfPrivate = snapshot.viewer.mode === "active" ? snapshot.selfPrivate : null;
-  const currentPlayer = snapshot.publicTable.players.find(
-    (player) => player.playerId === snapshot.publicTable.turn.currentPlayerId,
-  );
-  const currentPlayerName = currentPlayer?.displayName ?? "게임 진행 중";
-  const phaseName = phaseNames[snapshot.publicTable.turn.phase] ?? "진행 중";
   const isEliminated = snapshot.viewer.mode === "eliminated_observer";
-  const discardTop = snapshot.publicTable.publicDiscard.topCard;
 
   return (
     <section className="game-table" aria-labelledby="game-table-title">
       <header className="game-table__header">
         <div>
-          <p className="game-table__eyebrow">기본판 · {players.length}명</p>
           <h1 id="game-table-title">게임 테이블</h1>
         </div>
         <span className="game-table__status">{statusNames[snapshot.status]}</span>
@@ -126,34 +73,6 @@ export function GameTable({ snapshot }: GameTableProps) {
 
       <div className="game-table__surface">
         <div className="game-table__felt" aria-hidden="true" />
-
-        <div className="game-table__center">
-          <section className="game-table__turn" aria-label="현재 차례와 단계">
-            <span className="game-table__center-label">현재 차례</span>
-            <strong>{currentPlayerName}</strong>
-            <span>{phaseName}</span>
-          </section>
-
-          <section className="game-table__discard" aria-label="버림더미">
-            <span className="game-table__center-label">버림더미</span>
-            {discardTop ? (
-              <>
-                <strong>{cardNames[discardTop.typeId] ?? "공개 카드"}</strong>
-                <span aria-label={`${discardTop.rank} ${suitNames[discardTop.suit]}`}>
-                  {discardTop.rank} {suitMarks[discardTop.suit]}
-                </span>
-              </>
-            ) : (
-              <span>아직 버린 카드가 없어요</span>
-            )}
-            <span>{snapshot.publicTable.publicDiscard.count}장</span>
-          </section>
-
-          <section className="game-table__deck" aria-label="남은 덱 카드 수">
-            <span className="game-table__center-label">남은 덱</span>
-            <strong>{snapshot.publicTable.deckCount}장</strong>
-          </section>
-        </div>
 
         <ol className="game-table__seats" aria-label="플레이어 좌석">
           {players.map(({ player }) => (
@@ -224,7 +143,7 @@ function PlayerSeat({
 
         <p className="game-table__character">{characterName}</p>
 
-        <div className="game-table__health" aria-label={`생명력 ${player.hp}/${player.maxHp}`}>
+        <div key={player.hp} className="game-table__health" aria-label={`생명력 ${player.hp}/${player.maxHp}`}>
           <AppIcon name="heart" />
           <strong>{player.hp}</strong>
           <span className="game-table__health-max">/ {player.maxHp}</span>
@@ -241,7 +160,7 @@ function PlayerSeat({
             <ul aria-label={`${player.displayName}의 공개 장착 카드`}>
               {player.inPlay.map((card, index) => (
                 <li key={`${card.typeId}-${card.rank}-${card.suit}-${index}`}>
-                  {cardNames[card.typeId] ?? "테이블 카드"}
+                  {cardName(card.typeId)}
                 </li>
               ))}
             </ul>

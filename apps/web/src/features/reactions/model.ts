@@ -8,7 +8,6 @@ import type {
   PendingDiscardOrderView,
   PendingRespondOption,
   RespondPayload,
-  Suit,
 } from "../../../../../packages/contracts/src/protocol.js";
 
 export interface ReactionProjection {
@@ -177,16 +176,7 @@ function cardName(typeId: string): string {
 }
 
 export function cardFaceLabel(card: CardFaceView): string {
-  return `${cardName(card.typeId)} ${card.rank} ${suitName(card.suit)}`;
-}
-
-function suitName(suit: Suit): string {
-  switch (suit) {
-    case "SPADES": return "스페이드";
-    case "HEARTS": return "하트";
-    case "DIAMONDS": return "다이아몬드";
-    case "CLUBS": return "클럽";
-  }
+  return cardName(card.typeId);
 }
 
 const choiceLabels: Readonly<Record<string, string>> = Object.freeze({
@@ -219,7 +209,7 @@ const interactionLabels: Readonly<Record<string, string>> = Object.freeze({
   GATLING_RESPONSE: "개틀링 응답",
   DUEL_RESPONSE: "결투 응답",
   DEATH_RESCUE: "생명력 구제",
-  DISCARDS_ORDER: "카드 정리",
+  DISCARDS_ORDER: "카드 버리기",
   GENERAL_STORE_PICK: "잡화점 선택",
   KIT_CARLSON_PICK: "킷 칼슨 선택",
   LUCKY_DRAW: "럭키 판정 선택",

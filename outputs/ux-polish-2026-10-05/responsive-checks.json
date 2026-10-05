@@ -1,0 +1,190 @@
+{
+  "fourPlayers": [
+    {
+      "width": 375,
+      "scrollWidth": 360,
+      "portraits": 4
+    },
+    {
+      "portraits": 4,
+      "scrollWidth": 753,
+      "width": 768
+    },
+    {
+      "portraits": 4,
+      "scrollWidth": 1009,
+      "width": 1024
+    },
+    {
+      "portraits": 4,
+      "scrollWidth": 1440,
+      "width": 1440
+    }
+  ],
+  "sevenPlayers": [
+    {
+      "portraits": [
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        }
+      ],
+      "scrollWidth": 360,
+      "width": 375
+    },
+    {
+      "portraits": [
+        {
+          "display": "block",
+          "height": 93.78125,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 93.78125,
+          "width": 52
+        }
+      ],
+      "scrollWidth": 753,
+      "width": 768
+    },
+    {
+      "portraits": [
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        }
+      ],
+      "scrollWidth": 1009,
+      "width": 1024
+    },
+    {
+      "portraits": [
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        },
+        {
+          "display": "block",
+          "height": 78,
+          "width": 52
+        }
+      ],
+      "scrollWidth": 1425,
+      "width": 1440
+    }
+  ]
+}

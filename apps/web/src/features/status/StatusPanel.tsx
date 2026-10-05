@@ -12,7 +12,6 @@ import type { MatchStatusSync } from "./model.js";
 import {
   buildMatchStatusViewModel,
   isMatchActionInputEnabled,
-  MAX_PUBLIC_LOG_EVENTS,
   mergeMatchStatusProjection,
 } from "./model.js";
 import "./status.css";
@@ -161,7 +160,7 @@ export function MatchInputGate({
       aria-disabled={!inputEnabled}
       data-input-enabled={inputEnabled ? "true" : "false"}
     >
-      <legend>행동 입력</legend>
+      <legend className="sr-only">행동 입력</legend>
       {inputEnabled ? children : (
         <p role="status" aria-live="polite">
           지금은 행동을 고를 수 없어요.
@@ -316,13 +315,12 @@ export function StatusPanel({
 
       <details className="match-status__log" onToggle={(event) => setLogOpen(event.currentTarget.open)}>
         <summary className="match-status__log-summary" id="match-public-log-title">
-          최근 공개 기록 (최대 {MAX_PUBLIC_LOG_EVENTS}건) <span>{view.publicLog.length}건 표시</span>
+          게임 기록
         </summary>
         {logOpen && view.publicLog.length > 0 ? (
           <ol className="match-status__events" aria-label="공개 게임 이벤트">
             {view.publicLog.map((entry) => (
               <li key={entry.eventSeq} data-event-seq={entry.eventSeq}>
-                <span className="match-status__event-seq">#{entry.eventSeq}</span>
                 <span>{entry.message}</span>
               </li>
             ))}
