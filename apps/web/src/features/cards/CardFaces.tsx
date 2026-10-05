@@ -8,6 +8,12 @@ import {
 } from "./assets.js";
 import "./cards.css";
 
+/** Public character artwork, decorative next to the visible character name. */
+export function CharacterPortrait({ characterId }: { characterId: string }) {
+  const presentation = getCharacterCardPresentation(characterId);
+  return <span className="character-portrait" aria-hidden="true"><CardArtwork className="character-portrait__artwork" assetUrl={presentation.assetUrl} imageAlt="" fallbackText={presentation.fallbackText} /></span>;
+}
+
 export function PlayingCardFace({ card }: { card: CardFaceView }) {
   const presentation = getPlayingCardPresentation(card);
 

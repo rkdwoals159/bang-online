@@ -82,6 +82,7 @@ test("shows owner controls only to the owner and keeps full rooms closed to invi
   assert.doesNotMatch(guestHtml, /내보내기/);
   assert.match(fullHtml, /방 정원이 찼어요\. 추가 참가를 받을 수 없어요\./);
   assert.doesNotMatch(fullHtml, /room-lobby-invite-url/);
+  assert.equal((fullHtml.match(/방 정원이 찼어요\. 추가 참가를 받을 수 없어요\./g) ?? []).length, 1);
 });
 
 test("shows explicit presence and never treats a missing status as connected", () => {

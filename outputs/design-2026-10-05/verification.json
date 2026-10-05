@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-05",
+  "baselineCommit": "8cae85f37cf6afd8c7dd1050db5b40a47ef537db",
+  "fullAutoDiscovery": { "passed": 695, "failed": 0, "durationMs": 220520.446, "scope": "Root Node auto-discovery, before final minor CSS/lobby copy changes" },
+  "finalWeb": { "passed": 133, "failed": 0, "durationMs": 13711.6958, "addedDesignCases": 7 },
+  "countsOverlap": true,
+  "typecheckWeb": "PASS",
+  "typecheckSites": "PASS",
+  "projectionRenderFixtures": "PASS",
+  "productionBuild": "PASS",
+  "staging": "PASS",
+  "principalContrastPairs": { "count": 10, "minimumRatio": 4.5, "status": "PASS" },
+  "responsive": { "viewportWidths": [375, 768, 1024, 1440], "observedContentWidths": [360, 753, 1009, 1425], "playerCounts": [4, 7], "horizontalOverflow": 0, "sevenPlayerSeatOverlap": false },
+  "browser": { "environment": "local Sites", "controlledFixtures": true, "normalCompleteGame": "NOT RUN", "beerNoHealConfirmationAndConsumption": "PASS", "generalStoreNamesAndActualPick": "PASS", "mobileCardDetailAndEscape": "PASS", "observerAndResultProjection": "PASS", "returnToLobby": "PASS", "fourAndSevenPlayerStart": "PASS" },
+  "cssSourceMeasurement": { "scope": "Concatenated shared CSS source, not deployment bundle or API latency", "beforeBytes": 67518, "afterBytes": 63197, "beforeGzipBytes": 13289, "afterGzipBytes": 11680, "gzipReductionPercent": 12.1 },
+  "acceptance": { "passed": 95, "total": 97, "D06": "NOT RUN", "D18": "NOT RUN", "S09": "NOT RUN", "promotedByDesignWork": false },
+  "knownDevelopmentWarning": "Existing vinext/React flushSync lifecycle warning observed once",
+  "deployment": "Recorded separately in DEPLOYMENT.md and deployment-result.json"
+}

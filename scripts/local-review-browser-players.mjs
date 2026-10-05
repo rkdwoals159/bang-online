@@ -2,14 +2,16 @@ import { randomUUID } from 'node:crypto';
 const origin = 'http://localhost:5173';
 const roomId = process.argv[2];
 const inviteCode = process.argv[3];
+const capacity = Number(process.argv[4] ?? 4);
 if (!roomId || !inviteCode) throw new Error('Local review requires a room ID and invite code');
+if (![4, 5, 6, 7].includes(capacity)) throw new Error('Local review capacity must be 4–7');
 async function request(path, cookie, body) {
   const response = await fetch(origin + path, { method: body ? 'POST' : 'GET', headers: { Origin: origin, ...(cookie ? { Cookie: cookie } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
   const result = await response.json();
   if (!response.ok || result.status === 'rejected') throw new Error(JSON.stringify(result));
   return { result, cookie: response.headers.get('set-cookie')?.split(';')[0] };
 }
-for (let i = 2; i <= 4; i++) {
+for (let i = 2; i <= capacity; i++) {
   const guest = await request('/api/guest-sessions', undefined, { protocolVersion: 1, displayName: `로컬 검증 ${i}` });
   // Guests cannot read an unjoined room: use invite preview to obtain the current version.
   const preview = await request('/api/rooms/preview', guest.cookie, { protocolVersion: 1, requestId: randomUUID(), inviteCode });

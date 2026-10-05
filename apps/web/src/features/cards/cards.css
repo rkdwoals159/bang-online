@@ -6,9 +6,9 @@
   aspect-ratio: 216 / 333;
   overflow: hidden;
   flex: 0 0 auto;
-  border-radius: 0.55rem;
-  background: #fffdf7;
-  box-shadow: 0 0.35rem 0.8rem rgb(20 28 20 / 18%);
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 6px rgb(20 28 20 / 12%);
 }
 
 .card-zoom {
@@ -17,15 +17,15 @@
 
 .card-zoom__trigger {
   min-width: 5rem;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0.45rem 0.7rem;
-  border: 1px solid rgb(42 76 48 / 24%);
-  border-radius: 0.65rem;
-  background: #f0f3e9;
-  color: #35533d;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
   cursor: pointer;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -37,10 +37,10 @@
   overflow: auto;
   margin: auto;
   padding: clamp(1rem, 3vw, 1.5rem);
-  border: 1px solid rgb(34 53 40 / 22%);
-  border-radius: 1rem;
-  background: #fffdf6;
-  color: #20382a;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-ink);
   box-shadow: 0 1rem 4rem rgb(0 0 0 / 35%);
 }
 
@@ -58,18 +58,18 @@
 
 .card-zoom__title {
   margin: 0;
-  color: #1d3326;
+  color: var(--color-ink);
   font-size: clamp(1.25rem, 3vw, 1.65rem);
 }
 
 .card-zoom__close {
   min-width: 4rem;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0.45rem 0.75rem;
-  border: 1px solid rgb(42 76 48 / 24%);
-  border-radius: 0.65rem;
-  background: #f0f3e9;
-  color: #35533d;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
   cursor: pointer;
   font: inherit;
   font-weight: 800;
@@ -97,14 +97,14 @@
 
 .card-zoom__identity {
   margin: 0 0 0.75rem;
-  color: #705922;
+  color: var(--color-brass-ink);
   font-size: 1.1rem;
   font-weight: 900;
 }
 
 .card-zoom__description {
   margin: 0;
-  color: #334a38;
+  color: var(--color-ink);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -112,12 +112,12 @@
 .card-zoom__details {
   margin-top: 1rem;
   padding-top: 0.85rem;
-  border-top: 1px solid rgb(34 53 40 / 15%);
+  border-top: 1px solid var(--color-border);
 }
 
 .card-zoom__details h3 {
   margin: 0 0 0.45rem;
-  color: #405a45;
+  color: var(--color-muted);
   font-size: 0.9rem;
 }
 
@@ -126,7 +126,7 @@
   gap: 0.35rem;
   margin: 0;
   padding-inline-start: 1.15rem;
-  color: #405a45;
+  color: var(--color-muted);
   line-height: 1.5;
 }
 
@@ -219,7 +219,7 @@
 }
 
 .opponent-hand__count {
-  color: #d8d1b7;
+  color: var(--color-muted);
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -264,7 +264,7 @@
 }
 
 .opponent-hand__empty {
-  color: #cfc9b8;
+  color: var(--color-muted);
   font-size: 0.75rem;
 }
 
@@ -272,7 +272,7 @@
   display: grid;
   width: min(100%, 13rem);
   gap: 0.5rem;
-  color: #f5f2e9;
+  color: var(--color-ink);
 }
 
 .roster-card__artwork {
@@ -293,7 +293,7 @@
 }
 
 .roster-card p {
-  color: #d8d1b7;
+  color: var(--color-muted);
   font-size: 0.88rem;
   line-height: 1.5;
 }
@@ -301,15 +301,18 @@
 .card-attribution {
   margin-block: 1rem;
   padding: 0.8rem 1rem;
-  border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: 0.75rem;
-  color: #e9e5d8;
-  background: rgb(10 18 13 / 35%);
-  font-size: 0.82rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  background: var(--color-surface);
+  font-size: 13px;
   line-height: 1.55;
 }
 
 .card-attribution summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
   font-weight: 700;
 }
@@ -322,7 +325,7 @@
 }
 
 .card-attribution a {
-  color: #f0d99b;
+  color: var(--color-forest);
   text-underline-offset: 0.15em;
 }
 

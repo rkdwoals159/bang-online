@@ -317,6 +317,7 @@ export function ActionsPanel({
           <p className="game-actions__eyebrow">내 카드와 행동</p>
           <h2 id="game-actions-title">행동 선택</h2>
         </div>
+        <span className="game-actions__version">손패 {hand.length}장</span>
       </header>
 
       {notice ? <p className="game-actions__notice" role="status" aria-live="polite">{notice}</p> : null}
@@ -417,7 +418,7 @@ export function ActionsPanel({
                         >
                           <PlayingCardFace card={card} />
                           <span className="game-actions__card-name">{cardName(card.typeId)}</span>
-                          <span className="game-actions__card-state">{canUseCard ? "사용 가능" : disabledReason}</span>
+                          <span className="game-actions__card-state">{canUseCard ? "사용 가능" : pendingInteraction ? "응답 대기" : !viewerIsTurnOwner ? "상대 차례" : currentSnapshot.publicTable.turn.phase === "discard" ? "정리 단계" : "사용 불가"}</span>
                         </button>
                         <PlayingCardZoomButton
                           card={card}

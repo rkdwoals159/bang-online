@@ -12,6 +12,7 @@ import type { BrowserTransportState, MatchProjectionState, TransportConnectionSt
 import { AppLink, navigateTo, replaceTo, type AppRoute } from "./router.js";
 import { useAppState, type SessionRecovery } from "./app-state.js";
 import { ErrorFrame, LoadingFrame } from "./app-frames.js";
+import { AppIcon } from "../components/AppIcon.js";
 
 type RoomSurface =
   | { kind: "lobby" }
@@ -699,20 +700,19 @@ function HomePage() {
           초대 링크로 모여 역할을 숨기고 친구들과 전략을 겨뤄 보세요.
         </p>
         <div className="home-actions">
-          <AppLink className="button button-primary" to="/rooms/new">새 방 만들기</AppLink>
+          <AppLink className="button button-primary" to="/rooms/new">새 방 만들기 <AppIcon name="arrow" /></AppLink>
           <AppLink className="button button-secondary" to="/rooms/join">초대 링크로 참가</AppLink>
+        </div>
+        <div className="home-meta">
+          <span><AppIcon name="users" />4–7명</span>
+          <span><AppIcon name="cards" />기본판</span>
+          <span>계정 없이 시작</span>
         </div>
       </div>
       <div className="table-art" aria-hidden="true">
-        <div className="table-ring">
-          <span className="table-seat seat-top" />
-          <span className="table-seat seat-right" />
-          <span className="table-seat seat-bottom" />
-          <span className="table-seat seat-left" />
-          <span className="table-center">BANG!</span>
-        </div>
-        <span className="art-star art-star-one">✦</span>
-        <span className="art-star art-star-two">✦</span>
+        <span className="table-art__wordmark">BANG!</span>
+        <span className="table-art__caption">친구들과 함께하는 서부의 한 판</span>
+        <div className="table-art__suits">♠ ♥ ♦ ♣</div>
       </div>
     </section>
   );

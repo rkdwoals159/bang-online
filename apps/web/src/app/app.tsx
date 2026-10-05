@@ -34,6 +34,7 @@ function CurrentRoute() {
 function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">본문으로 건너뛰기</a>
       <header className="site-header">
         <AppLink className="brand" to="/" ariaLabel="뱅! 온라인 첫 화면">
           <span className="brand-mark" aria-hidden="true">B!</span>
@@ -41,10 +42,10 @@ function AppShell({ children }: { children: ReactNode }) {
         </AppLink>
         <div className="header-note">
           <span className="header-dot" aria-hidden="true" />
-          초대받은 친구들과 함께
+          한국어 기본판 · 4–7명
         </div>
       </header>
-      <div className="main-content">{children}</div>
+      <main className="main-content" id="main-content" tabIndex={-1}>{children}</main>
       <footer className="site-footer">
         <span>기본판 · 4–7명</span>
         <span>게임 규칙은 서버가 판정합니다</span>

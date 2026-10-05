@@ -87,12 +87,12 @@ export function Lobby({
   }
 
   return (
-    <main className="room-lobby" aria-labelledby="room-lobby-title">
+    <section className="room-lobby" aria-labelledby="room-lobby-title">
       <header className="room-lobby__header">
         <div>
           <p className="room-lobby__eyebrow">게임 준비 · 기본판</p>
           <h1 id="room-lobby-title">대기실</h1>
-          <p className="room-lobby__room-id">방 ID <strong>{room.roomId}</strong></p>
+          <details className="room-lobby__room-info"><summary>방 정보</summary><p className="room-lobby__room-id">방 ID <strong>{room.roomId}</strong></p></details>
         </div>
         <span className={`room-lobby__status room-lobby__status--${room.status}`}>
           {view.statusLabel}
@@ -175,7 +175,7 @@ export function Lobby({
             <h2>{view.viewerReady ? "준비 완료" : "아직 준비 전"}</h2>
             <p className="room-lobby__hint">
               {view.canSetReady
-                ? "준비 상태는 서버 방 상태에 따라 다른 참가자에게 표시돼요."
+                ? "게임을 시작할 준비가 되면 준비 완료를 눌러 주세요."
                 : "대기 중인 방에서만 준비 상태를 바꿀 수 있어요."}
             </p>
           </div>
@@ -194,7 +194,7 @@ export function Lobby({
             <p className="room-lobby__eyebrow">게임 시작</p>
             <h2>{view.viewerIsOwner ? "방장" : "방장 대기 중"}</h2>
             <p className="room-lobby__hint">
-              {view.startBlockedReason ?? "모두 준비했어요. 방장이 시작 명령을 보내면 게임이 시작됩니다."}
+              {view.startBlockedReason ?? "모두 준비했어요. 게임 시작을 누르면 역할과 인물이 배정돼요."}
             </p>
           </div>
           <button
@@ -212,7 +212,7 @@ export function Lobby({
         <div>
           <p className="room-lobby__eyebrow">친구 초대</p>
           <h2 id="room-lobby-invite-title">비공개 링크 공유</h2>
-          <p className="room-lobby__hint">{view.inviteMessage}</p>
+          <p className="room-lobby__hint" role="status">{view.inviteMessage}</p>
         </div>
         {inviteUrl ? (
           <div className="room-lobby__invite-controls">
@@ -223,13 +223,11 @@ export function Lobby({
             </button>
             {inviteFeedback && <p className="room-lobby__hint" role="status" aria-live="polite">{inviteFeedback}</p>}
           </div>
-        ) : (
-          <p className="room-lobby__invite-locked" role="status">{view.inviteMessage}</p>
-        )}
+        ) : null}
       </section>
 
       {feedback && <p className="room-lobby__error" role="alert">{feedback}</p>}
-    </main>
+    </section>
   );
 }
 

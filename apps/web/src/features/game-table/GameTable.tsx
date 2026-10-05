@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { CharacterPortrait } from "../cards/CardFaces.js";
+import { AppIcon } from "../../components/AppIcon.js";
 import type {
   CardFaceView,
   MatchSnapshotView,
@@ -155,12 +156,10 @@ export function GameTable({ snapshot }: GameTableProps) {
         </div>
 
         <ol className="game-table__seats" aria-label="플레이어 좌석">
-          {players.map(({ player, relativeIndex }) => (
+          {players.map(({ player }) => (
             <PlayerSeat
               key={player.playerId}
               player={player}
-              relativeIndex={relativeIndex}
-              playerCount={players.length}
               isViewer={player.playerId === snapshot.viewer.playerId}
               isCurrentTurn={player.playerId === snapshot.publicTable.turn.currentPlayerId}
               ownRole={
@@ -179,15 +178,11 @@ export function GameTable({ snapshot }: GameTableProps) {
 
 function PlayerSeat({
   player,
-  relativeIndex,
-  playerCount,
   isViewer,
   isCurrentTurn,
   ownRole,
 }: {
   player: PublicPlayerView;
-  relativeIndex: number;
-  playerCount: number;
   isViewer: boolean;
   isCurrentTurn: boolean;
   ownRole: RoleId | null;
@@ -198,7 +193,7 @@ function PlayerSeat({
     isViewer ? "내 자리" : `${player.displayName} 자리`,
     characterName,
     `${player.hp}/${player.maxHp} 생명력`,
-    role ? `공개 역할 ${roleNames[role]}` : "역할 비공개",
+    role ? `${player.role ? "공개 역할" : "내 역할"} ${roleNames[role]}` : "역할 비공개",
     `손패 ${player.handCount}장`,
     isCurrentTurn ? "현재 차례" : null,
     player.eliminated ? "탈락" : null,
@@ -216,9 +211,9 @@ function PlayerSeat({
       ]
         .filter(Boolean)
         .join(" ")}
-      style={seatPosition(relativeIndex, playerCount)}
     >
       <article className="game-table__seat-card" aria-label={accessibleName}>
+        <CharacterPortrait characterId={player.characterId} />
         <div className="game-table__seat-heading">
           <div className="game-table__player-name">
             {isViewer ? <span className="game-table__you-label">내 자리</span> : null}
@@ -230,7 +225,7 @@ function PlayerSeat({
         <p className="game-table__character">{characterName}</p>
 
         <div className="game-table__health" aria-label={`생명력 ${player.hp}/${player.maxHp}`}>
-          <span aria-hidden="true">♥</span>
+          <AppIcon name="heart" />
           <strong>{player.hp}</strong>
           <span className="game-table__health-max">/ {player.maxHp}</span>
         </div>
@@ -273,12 +268,3 @@ function orderPlayersForViewer(snapshot: MatchSnapshotView): PositionedPlayer[] 
     .sort((first, second) => first.relativeIndex - second.relativeIndex);
 }
 
-function seatPosition(relativeIndex: number, playerCount: number): CSSProperties {
-  const angle = (2 * Math.PI * relativeIndex) / playerCount;
-  const left = 50 + 37 * Math.sin(angle);
-  const top = 50 + 36 * Math.cos(angle);
-  return {
-    left: `${left.toFixed(3)}%`,
-    top: `${top.toFixed(3)}%`,
-  };
-}

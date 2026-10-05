@@ -222,7 +222,7 @@ export function RoomEntry({
   }
 
   return (
-    <main className="room-entry" aria-labelledby="room-entry-title">
+    <section className="room-entry" aria-labelledby="room-entry-title">
       <header className="room-entry__header">
         <p className="room-entry__eyebrow">기본판 · 4–7명</p>
         <h1 id="room-entry-title">친구와 뱅! 시작하기</h1>
@@ -417,6 +417,6 @@ export function RoomEntry({
           </form>
         </section>
       )}
-    </main>
+    </section>
   );
 }
