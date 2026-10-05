@@ -1,0 +1,98 @@
+[
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 5,
+    "commandId": "5a19cef4-7f4b-481f-9d19-bd0d10d9b176"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 6,
+    "choice": "CHOOSE_CARD",
+    "commandId": "e40237f5-c996-4994-933e-3a49ce36c810"
+  },
+  {
+    "count": 4,
+    "viewer": 2,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 7,
+    "choice": "CHOOSE_CARD",
+    "commandId": "1d9071a4-d075-41f8-adb9-fa50cb2c6fbb"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 8,
+    "choice": "CHOOSE_CARD",
+    "commandId": "dd1390a5-16f0-4cd2-ba77-fe1160804406"
+  },
+  {
+    "count": 4,
+    "viewer": 0,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 9,
+    "choice": "CHOOSE_CARD",
+    "commandId": "dd0a27f7-eb4b-4a6e-9bf9-eb68dc528b39"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 10,
+    "commandId": "d34f88cb-6bcf-442c-a9e6-21aa42c306d7"
+  },
+  {
+    "count": 4,
+    "viewer": 0,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 11,
+    "choice": "USE_MISSED",
+    "commandId": "4a77c972-ceba-42e3-b084-ad64c0e3d027"
+  },
+  {
+    "count": 4,
+    "viewer": 2,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 12,
+    "choice": "USE_MISSED",
+    "commandId": "89b123d8-eccc-444d-b922-b06217a0a499"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 13,
+    "choice": "TAKE_HIT",
+    "commandId": "2015e3fd-f82d-44c3-bcdc-ab3c91eb1d96"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "END_TURN",
+    "status": "accepted",
+    "expectedVersion": 14,
+    "commandId": "badca6cc-9d50-4916-87ce-9a4a037261d3"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 15,
+    "choice": "ORDER_CARDS",
+    "commandId": "bea2e030-4ae3-41de-a2dc-6e4c97339c62"
+  }
+]

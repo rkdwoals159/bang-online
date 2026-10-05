@@ -148,7 +148,7 @@ function CardDetailButton({ title, label, trigger, children, className = "", onI
         className="card-zoom__trigger"
         type="button"
         aria-label={label}
-        aria-haspopup="dialog"
+        aria-haspopup={onInspect ? undefined : "dialog"}
         onClick={() => { if (onInspect?.() !== false) setIsOpen(true); }}
       >
         {trigger}

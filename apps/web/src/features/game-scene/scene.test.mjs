@@ -21,5 +21,26 @@ test('opponent hand back icons exactly reflect public counts, including more tha
 test('public distance and role use authenticated projection while own HUD shows own role',()=>{const markup=render(survivorSnapshot);assert.match(markup,/나에게서 거리/);assert.match(markup,/배신자/);assert.match(markup,/보안관/);assert.match(markup,/역할 비공개/);});
 test('observer retains public scene without any private hand input',()=>{const markup=render(eliminatedSnapshot);assert.match(markup,/탈락 · 경기를 지켜보고 있어요/);assert.doesNotMatch(markup,/id="game-actions-title"|내 손패에서 카드 선택/);});
 test('zero healing beer retains confirmation and image selection uses legal candidates',()=>{const view=structuredClone(survivorSnapshot);view.publicTable.turn.currentPlayerId=view.viewer.playerId;view.legalActions=[{type:'PLAY_CARD',payload:{cardInstanceId:view.selfPrivate.hand[0].cardInstanceId}},{type:'END_TURN',payload:{}}];const markup=render(view);assert.match(markup,/맥주 선택/);assert.match(markup,/차례 마치기/);assert.doesNotMatch(markup,/맥주 6 하트, 사용 가능/);});
-test('every projected response uses a central scene dialog including ordered discard',()=>{const view=structuredClone(survivorSnapshot);view.pendingInteraction={kind:'DISCARDS_ORDER',interactionId:'discard',currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:1},allowedChoices:['ORDER_CARDS'],responseOptions:[{interactionId:'discard',choice:'ORDER_CARDS'}],discardOrder:{requiredCount:1,allowedCards:view.selfPrivate.hand}};const markup=render(view);assert.match(markup,/choice-stage__dialog/);assert.match(markup,/버릴 카드 후보/);assert.match(markup,/게임판 보기/);});
+test('every projected response uses the inline table area including ordered discard',()=>{const view=structuredClone(survivorSnapshot);view.pendingInteraction={kind:'DISCARDS_ORDER',interactionId:'discard',currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:1},allowedChoices:['ORDER_CARDS'],responseOptions:[{interactionId:'discard',choice:'ORDER_CARDS'}],discardOrder:{requiredCount:1,allowedCards:view.selfPrivate.hand}};const markup=render(view);assert.match(markup,/scene-center/);assert.match(markup,/class="table-stage"/);assert.match(markup,/버릴 카드 후보/);assert.doesNotMatch(markup,/choice-stage__dialog|게임판 보기|aria-modal="true"/);});
 test('first scene render is silent and exposes no history animation',()=>{const markup=render(survivorSnapshot);assert.doesNotMatch(markup,/data-last-sound|scene-card-flight|table-effects--shot/);});
+
+test('scene store has a nonmodal shared table area for picker and observers',()=>{
+  const view=structuredClone(survivorSnapshot),card={cardInstanceId:'store-public',typeId:'beer',rank:'6',suit:'HEARTS'};
+  view.pendingInteraction={kind:'GENERAL_STORE_PICK',interactionId:'store',currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:4},allowedChoices:['CHOOSE_CARD'],responseOptions:[{interactionId:'store',choice:'CHOOSE_CARD',selectedCardInstanceId:card.cardInstanceId}]};view.publicTable.generalStoreCards=[card];
+  const own=render(view);assert.match(own,/class="table-stage"/);assert.match(own,/맥주, 6 하트 가져오기/);assert.doesNotMatch(own,/choice-stage__dialog|aria-modal="true"|게임판 보기/);
+  view.viewer.playerId='player-four';view.selfPrivate=null;delete view.pendingInteraction.responseOptions;view.pendingInteraction.allowedChoices=[];
+  const observer=render(view);assert.match(observer,/class="table-stage"/);assert.match(observer,/맥주 카드 그림/);assert.doesNotMatch(observer,/가져오기|store-public|aria-modal="true"/);
+});
+
+test('all projected request kinds use a visible inline region without a close or reopen step',()=>{
+  for(const kind of ['BANG_RESPONSE','GATLING_RESPONSE','INDIANS_RESPONSE','DUEL_RESPONSE','DEATH_RESCUE','LUCKY_DRAW','KIT_CARLSON_PICK','PEDRO_DISCARD_TOP','JESSE_DRAW_SOURCE']){
+    const view=structuredClone(survivorSnapshot);view.pendingInteraction={kind,interactionId:'request:'+kind,currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:1},allowedChoices:[],responseOptions:[]};
+    const markup=render(view);assert.match(markup,/class="table-stage"/,kind);assert.doesNotMatch(markup,/choice-stage__dialog|aria-modal="true"|게임판 보기|카드 펼쳐 보기/,kind);
+  }
+});
+
+test('tablewide response preserves private choices and shared progress without a dialog',()=>{
+  const view=structuredClone(survivorSnapshot);view.pendingInteraction={kind:'GATLING_RESPONSE',interactionId:'attack:self',currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:1},allowedChoices:['TAKE_HIT'],responseOptions:[{interactionId:'attack:self',choice:'TAKE_HIT'}]};
+  view.publicTable.tablewideAttack={attackId:'attack',kind:'gatling',sourcePlayerId:'player-sheriff',targets:[{playerId:view.viewer.playerId,status:'waiting'},{playerId:'player-four',status:'submitted'}]};
+  const markup=render(view);assert.match(markup,/광역 공격 대응 상황/);assert.match(markup,/제출 완료/);assert.match(markup,/응답 선택지/);assert.doesNotMatch(markup,/choice-stage__dialog|aria-modal="true"/);
+});

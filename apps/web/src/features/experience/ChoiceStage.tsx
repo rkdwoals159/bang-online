@@ -1,12 +1,39 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { MatchSnapshotView, PendingRespondOption } from "../../../../../packages/contracts/src/protocol.js";
 import { PlayingCardFace, PlayingCardZoomButton } from "../cards/CardFaces.js";
 import { getCharacterCardPresentation, getPlayingCardPresentation } from "../cards/assets.js";
 import { useGameExperience } from "./GameExperience.js";
 import "./choice-stage.css";
 
-/** Native modal focus containment, with a dock so observers can return to the table. */
-export function ChoiceStage({ interactionId, title, attentionKey, children, dockLabel = "카드 펼쳐 보기" }: { interactionId: string; title: string; attentionKey?: string; children: ReactNode; dockLabel?: string }) {
+interface ChoiceStageProps { interactionId: string; title: string; attentionKey?: string; children: ReactNode; dockLabel?: string; presentation?: "modal" | "table" }
+export const TableStageHost = createContext<HTMLElement | null>(null);
+
+/** Action choices live on the table; optional inspection/settings retain their dialogs. */
+export function ChoiceStage(props: ChoiceStageProps) {
+  return props.presentation === "table" ? <TableStage {...props} /> : <ModalStage {...props} />;
+}
+
+function TableStage({ interactionId, title, children }: ChoiceStageProps) {
+  const host = useContext(TableStageHost);
+  const titleId = useId(), region = useRef<HTMLElement>(null);
+  const ownedFocus = useRef(false);
+  useEffect(() => {
+    // A picked card can disappear. Keep its focus in the action area, without
+    // trapping focus or moving it away from a seat, hand card or inspection dialog.
+    if (ownedFocus.current && document.activeElement === document.body) region.current?.focus({ preventScroll: true });
+  }, [children, interactionId]);
+  const content = <section ref={region} tabIndex={-1} className="table-stage" aria-labelledby={titleId}
+    onFocusCapture={() => { ownedFocus.current = true; }}
+    onBlurCapture={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) ownedFocus.current = false; }}>
+    <header className="table-stage__header"><h2 id={titleId}>{title}</h2></header>
+    <div className="table-stage__body">{children}</div>
+  </section>;
+  return host ? createPortal(content, host) : content;
+}
+
+/** Native modal focus containment for optional inspection/settings. */
+function ModalStage({ interactionId, title, attentionKey, children, dockLabel = "카드 펼쳐 보기" }: ChoiceStageProps) {
   const [expanded, setExpanded] = useState(true);
   const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -33,10 +60,11 @@ export function ChoiceStage({ interactionId, title, attentionKey, children, dock
   </section>;
 }
 
-export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, notice, onChoose, retry, imagePick = false }: {
+export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, notice, onChoose, retry, imagePick = false, presentation = "modal" }: {
   snapshot: MatchSnapshotView; canRespond: boolean; isResponder: boolean; busy: boolean; notice: string;
   onChoose: (option: PendingRespondOption) => void; retry?: () => void;
   imagePick?: boolean;
+  presentation?: "modal" | "table";
 }) {
   const game = useGameExperience();
   const pending = snapshot.pendingInteraction;
@@ -49,7 +77,7 @@ export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, not
   const living = snapshot.publicTable.players.filter(p => !p.eliminated);
   const players = [...living].sort((a,b) => ((a.seatIndex - (actor?.seatIndex ?? 0) + snapshot.publicTable.players.length) % snapshot.publicTable.players.length) - ((b.seatIndex - (actor?.seatIndex ?? 0) + snapshot.publicTable.players.length) % snapshot.publicTable.players.length));
   const cue = game?.cue;
-  return <ChoiceStage interactionId={pending.interactionId} title="잡화점" attentionKey={isResponder ? snapshot.viewer.playerId : undefined}>
+  return <ChoiceStage presentation={presentation} interactionId={pending.interactionId} title="잡화점" attentionKey={isResponder ? snapshot.viewer.playerId : undefined}>
     <p className={`store-stage__turn${isResponder ? " store-stage__turn--mine" : ""}`} role="status" aria-live="polite">
       {busy ? "카드를 가져오는 중…" : isResponder ? "내 차례! 원하는 카드 한 장을 가져가세요." : `${responder?.displayName ?? "현재 참가자"} 님이 고르고 있어요.`}
     </p>
@@ -60,7 +88,7 @@ export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, not
         const presentation = getPlayingCardPresentation(card);
         return <li key={card.cardInstanceId} style={{ "--deal-index": index } as CSSProperties}>
           <PlayingCardZoomButton card={card} triggerLabel={imagePick && isResponder && option ? `${presentation.accessibleLabel} 가져오기` : undefined} onInspect={imagePick && isResponder && option ? () => { if (canRespond) onChoose(option); return false; } : undefined} />
-          {imagePick && isResponder ? <PlayingCardZoomButton card={card} triggerText={presentation.cardName} triggerLabel={`${presentation.cardName} 설명 보기`} /> : <strong>{presentation.cardName}</strong>}
+          <strong>{presentation.cardName}</strong>
           {isResponder && !imagePick ? <button type="button" aria-label={`${presentation.accessibleLabel} 가져오기`} disabled={!canRespond || !option} onClick={() => { if (option) onChoose(option); }}>가져오기</button> : null}
         </li>;
       })}

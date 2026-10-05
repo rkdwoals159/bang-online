@@ -207,7 +207,7 @@ export function ReactionPrompt({
     ? responderName(currentSnapshot, responderPlayerId)
     : null;
 
-  if (pending.kind === "GENERAL_STORE_PICK") return <GeneralStoreStage imagePick={variant === "scene"} snapshot={currentSnapshot} canRespond={canRespond} isResponder={isResponder} busy={busy} notice={notice} onChoose={submitOption} retry={activePendingCommand && !busy ? retryPending : undefined} />;
+  if (pending.kind === "GENERAL_STORE_PICK") return <GeneralStoreStage presentation={variant === "scene" ? "table" : "modal"} imagePick={variant === "scene"} snapshot={currentSnapshot} canRespond={canRespond} isResponder={isResponder} busy={busy} notice={notice} onChoose={submitOption} retry={activePendingCommand && !busy ? retryPending : undefined} />;
 
   const content = (
     <section className={`reaction-prompt reaction-prompt--${pending.kind.toLowerCase()}`} aria-labelledby="reaction-prompt-title" aria-busy={busy}>
@@ -370,7 +370,7 @@ export function ReactionPrompt({
   );
   const usesStage = variant === "scene" || pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
   const attack = currentSnapshot.publicTable.tablewideAttack;
-  if (attack) return <ChoiceStage interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
+  if (attack) return <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
     <p className="tablewide-stage__hint">각자 대응을 선택하세요. 모든 플레이어의 진행 상황이 함께 표시돼요.</p>
     <ul className="tablewide-stage__players" aria-label="광역 공격 대응 상황" aria-live="polite">
       {attack.targets.map(target => {
@@ -381,7 +381,7 @@ export function ReactionPrompt({
     </ul>
     {content}
   </ChoiceStage>;
-  return usesStage ? <ChoiceStage interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;
+  return usesStage ? <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;
 }
 
 function rejectionMessage(code: string): string {

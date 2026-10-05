@@ -9,6 +9,7 @@
 - UI/API 개선 및 검증 범위: [개선 결과](outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md)
 - 최신 로직·성능 재검토: [수정 목록과 증거](outputs/review-2026-10-04/logic-performance-audit/REPORT.md)
 - 전체 게임 씬 개편: [구현·검증 결과](outputs/game-scene-implementation-2026-10-05/IMPLEMENTATION.md), [운영 반영](outputs/game-scene-implementation-2026-10-05/DEPLOYMENT.md)
+- 액션을 테이블 중앙에서 진행: [변경·검증](outputs/table-actions-2026-10-05/CHANGES.md), [운영 반영](outputs/table-actions-2026-10-05/DEPLOYMENT.md)
 
 ## 설치 및 빌드
 

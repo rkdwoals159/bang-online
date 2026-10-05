@@ -101,7 +101,7 @@ export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | 
     const measure = () => {
       const bounds = table.getBoundingClientRect();
       const seats = new Map(Array.from(table.querySelectorAll<HTMLElement>("[data-player-seat]")).map(e => [e.dataset.playerSeat, e]));
-      const center = (id: string): Point | undefined => { const seat = seats.get(id); if (!seat) return; const r = (seat.querySelector(".character-detail") ?? seat).getBoundingClientRect(); return { x: r.left + r.width / 2 - bounds.left, y: r.top + r.height / 2 - bounds.top }; };
+      const center = (id: string): Point | undefined => { const seat = id === table.dataset.viewerId ? table.querySelector<HTMLElement>(".scene-self") ?? seats.get(id) : seats.get(id); if (!seat) return; const r = (seat.querySelector(".character-detail") ?? seat).getBoundingClientRect(); return { x: r.left + r.width / 2 - bounds.left, y: r.top + r.height / 2 - bounds.top }; };
       const anchor = (name:string):Point|undefined => { const element=table.querySelector<HTMLElement>(`[data-card-anchor="${name}"]`); if (!element) return; const r=element.getBoundingClientRect(); return {x:r.left+r.width/2-bounds.left,y:r.top+r.height/2-bounds.top}; };
       const hand = (id:string):Point|undefined => id===table.dataset.viewerId ? anchor("hand") ?? center(id) : center(id);
       const source=cue.actorId?center(cue.actorId):undefined;
@@ -112,7 +112,7 @@ export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | 
       else if(["play","shot","burst","threat","duel"].includes(cue.kind))route(cue.actorId?hand(cue.actorId):undefined,anchor("discard"));
       else if(cue.kind==="equip")cue.targetIds.forEach(id=>route(cue.actorId?hand(cue.actorId):anchor("discard"),center(id)));
       else if(cue.kind==="discard")cue.targetIds.forEach(id=>route(hand(id),anchor("discard")));
-      else if(cue.kind==="pick")cue.targetIds.forEach(id=>route(cue.actorId?hand(id):anchor("discard"),hand(cue.actorId??id)));
+      else if(cue.kind==="pick")cue.targetIds.forEach(id=>route(cue.actorId?hand(id):anchor("choice") ?? anchor("discard"),hand(cue.actorId??id)));
       else if(cue.kind==="pass")targets.forEach(p=>route(source,p));
       setGeometry({ id: cue.id, source, targets, flights });
     };

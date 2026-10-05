@@ -647,6 +647,6 @@ function suitName(suit: CardSuit): string {
 }
 
 
-function AbilityStage({scene,close,children}:{scene:boolean;close:()=>void;children:import("react").ReactNode}) { return scene ? <ChoiceStage interactionId="sid-ability" title="시드 케첨 · 생명력 회복" dockLabel="능력 선택">{children}<button type="button" onClick={close}>닫기</button></ChoiceStage> : <>{children}</>; }
+function AbilityStage({scene,close,children}:{scene:boolean;close:()=>void;children:import("react").ReactNode}) { return scene ? <ChoiceStage presentation="table" interactionId="sid-ability" title="시드 케첨 · 생명력 회복">{children}<button type="button" onClick={close}>취소</button></ChoiceStage> : <>{children}</>; }
 
 function TargetChoices({scene,hasSelection,children}:{scene:boolean;hasSelection:boolean;children:import("react").ReactNode}) { return scene ? <details className="scene-target-menu"><summary>{hasSelection ? "대상 변경" : "대상 선택"}</summary>{children}</details> : <>{children}</>; }

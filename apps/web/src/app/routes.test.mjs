@@ -416,7 +416,8 @@ test("match route composition passes private hand, legalActions, pending and res
   assert.match(resultMarkup, /게임 결과/);
   assert.match(resultMarkup, /scene-result/);
   assert.match(resultMarkup, /시계 방향 게임 테이블/);
-  assert.match(resultMarkup, /결과 보기/);
+  assert.match(resultMarkup, /class="table-stage"/);
+  assert.doesNotMatch(resultMarkup, /choice-stage__dialog|aria-modal="true"/);
   assert.match(resultMarkup, /승리 플레이어/);
   assert.match(resultMarkup, /무법자/);
   assert.match(resultMarkup, /대기실로 돌아가기/);

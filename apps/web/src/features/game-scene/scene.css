@@ -92,3 +92,74 @@
 .scene-discard:has(>span:only-child){visibility:hidden}.game-actions--scene .game-actions__cards>li{animation:scene-hand-deal 220ms ease-out}
 @keyframes scene-hand-deal{from{opacity:0;transform:translateY(25px) rotate(var(--card-angle))}to{opacity:1;transform:rotate(var(--card-angle))}}
 .game-scene .reaction-prompt__discard-card-choice{background:#233d2c;color:#f7ecce;border-color:#768765}.game-scene .reaction-prompt__discard-card-choice[aria-pressed="true"]{border:2px solid #edc57b;background:#57492b}.game-scene .reaction-prompt__discard-position{background:#ecc477;color:#1c2b1e}.game-scene .reaction-prompt__discard-sequence li{background:#1e392b;color:#e4d6b8}
+
+/* Required choices are part of the table, with no backdrop, dialog or focus trap. */
+.scene-center{position:absolute;inset:calc(64px + (100% - 329px)*.30) 27% 287px;z-index:5;display:flex;align-items:center;justify-content:center;pointer-events:none;min-height:0}
+.scene-center:empty{display:none}
+.game-scene:has(.table-stage) .scene-mark,.game-scene:has(.table-stage) .scene-piles{visibility:hidden}
+.game-scene:has(.table-stage) .scene-seat--self{visibility:hidden}
+.table-stage{width:100%;min-width:0;max-height:100%;display:flex;flex-direction:column;pointer-events:auto;color:var(--scene-ink);background:linear-gradient(90deg,#142e22e8,#1e402dea,#142e22e8);border-block:1px solid #bb9b5e66;border-radius:8px;padding:12px;overflow:hidden}
+.table-stage:focus-visible{outline:3px solid #ffe2a0;outline-offset:2px}
+.table-stage__header{flex:0 0 auto;text-align:center;margin-bottom:10px}
+.table-stage__header h2{margin:0;color:var(--scene-gold);font-size:20px;line-height:1.4}
+.table-stage__body{min-height:0;overflow-y:auto;overscroll-behavior:contain;scroll-padding:10px;scrollbar-color:#ac985c #17251f;padding:3px}
+.table-stage__body button{min-height:44px}
+.table-stage .reaction-prompt{padding:0}
+.table-stage .reaction-prompt__instruction,.table-stage .reaction-prompt__progress,.table-stage .store-stage__turn{padding:6px 8px;margin:0 0 10px;font-size:14px;line-height:1.5}
+.table-stage .tablewide-stage__hint{margin:0 0 10px;padding:8px 10px;font-size:14px;line-height:1.5}
+.table-stage .tablewide-stage__players{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px;padding:0;margin:0 0 12px}
+.table-stage .tablewide-stage__players li{padding:6px;gap:4px;font-size:12px;min-width:0}
+.table-stage .tablewide-stage__players strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.table-stage .reaction-prompt__options{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0;padding:3px}
+.table-stage .reaction-prompt__option-row{display:flex;align-items:center;gap:8px}
+.table-stage .reaction-prompt__option{min-width:0;flex:1;padding:10px;font-size:14px}
+.table-stage .reaction-prompt__option span{font-size:12px}
+.table-stage .reaction-prompt__option-row .card-zoom{flex:0 0 48px}
+.table-stage .reaction-prompt__option-row .playing-card{width:48px}
+.table-stage .reaction-prompt__option-zoom-trigger{padding:0;border:0;background:none}
+.table-stage .reaction-prompt__judgment{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.table-stage .reaction-prompt__judgment>p{flex-basis:100%;margin:0;font-size:14px}
+.table-stage .reaction-prompt__judgment .playing-card{width:65px}
+.table-stage .store-stage__cards{display:flex;overflow-x:auto;justify-content:safe center;align-items:start;padding:5px 3px 12px;gap:10px;scroll-padding:6px}
+.game-scene .table-stage .store-stage__cards>li{flex:0 0 68px;padding:0;gap:5px}
+.game-scene .table-stage .store-stage__cards .playing-card{width:68px}
+.table-stage .store-stage__cards .card-zoom{width:auto}
+.table-stage .store-stage__cards li>strong{font-size:13px}
+.table-stage .store-stage__cards .card-zoom__trigger:has(>span){padding:5px;font-size:13px;max-width:76px}
+.table-stage .store-stage__players{gap:6px;margin:6px 0 0;padding-top:6px}
+.table-stage .store-stage__players li{display:flex;align-items:center;padding:3px 5px;gap:4px;font-size:12px}
+.table-stage .store-stage__players img{display:none}
+.table-stage .store-stage__taken{display:none}
+.table-stage .reaction-prompt__discard-candidates{display:flex;overflow-x:auto;gap:8px;padding:4px 3px 12px}
+.table-stage .reaction-prompt__discard-candidates>li{flex:0 0 76px}
+.table-stage .reaction-prompt__discard-candidate .playing-card{width:76px}
+.table-stage .reaction-prompt__discard-card-choice{padding:6px;gap:3px;font-size:12px}
+.table-stage .reaction-prompt__discard-card-choice>span:last-child{display:none}
+.table-stage .reaction-prompt__discard-position{width:22px;height:22px;top:-18px;right:3px;font-size:12px}
+.table-stage .reaction-prompt__discard-sequence{margin:8px 0;display:flex;flex-wrap:wrap;gap:6px;padding:0;list-style:none;counter-reset:discard}
+.table-stage .reaction-prompt__discard-sequence li{padding:4px 6px;font-size:12px;counter-increment:discard}
+.table-stage .reaction-prompt__discard-sequence li:before{content:counter(discard) ". ";color:var(--scene-gold)}
+.table-stage .reaction-prompt__discard-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.table-stage .game-actions__abilities{margin:0;padding:0;border:0}
+.table-stage .game-actions__sid-costs{gap:10px}
+@media(max-height:760px) and (min-width:601px){.scene-center{inset:calc(54px + (100% - 279px)*.29) 27% 247px}}
+@media(max-width:600px){
+  .scene-center{inset:188px 10px 289px}
+  .game-scene:has(.table-stage) .scene-seat--self{visibility:visible}
+  .table-stage{padding:10px}
+  .table-stage__header h2{font-size:18px}
+  .game-scene:has(.table-stage) .scene-seats{position:absolute;inset:8px 10px auto;display:flex;gap:10px;padding:18px 4px 24px;overflow-x:auto;list-style:none;scrollbar-color:#ac985c #17251f}
+  .game-scene:has(.table-stage) .scene-seats>.scene-seat{position:relative;left:auto!important;top:auto!important;transform:none;flex:0 0 96px;width:96px}
+  .game-scene:has(.table-stage) .scene-seat--self article{grid-template-rows:20px 19px 16px 16px}
+  .game-scene:has(.table-stage) .scene-seat--self .scene-seat__hand{grid-row:4}
+  .game-scene:has(.table-stage) .scene-seat--self .scene-seat__role{display:block}
+  .game-scene:has(.table-stage) .scene-seat--self .scene-hearts{grid-row:3}
+  .game-scene:has(.table-stage) .scene-seat .scene-seat__equipment{bottom:0;right:0;transform:translateY(75%);font-size:11px;min-height:44px}
+}
+@media(max-height:500px) and (min-width:601px){
+  .game-scene:has(.table-stage){height:max(550px,100dvh);min-height:550px}
+  .scene-center{inset:155px 27% 196px}
+  .table-stage{padding:6px 8px}
+  .table-stage__header{margin-bottom:5px}.table-stage__header h2{font-size:16px}
+  .table-stage .tablewide-stage__players{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
