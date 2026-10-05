@@ -2,11 +2,12 @@ import { createContext, useContext, useEffect, useId, useRef, useState, type CSS
 import { createPortal } from "react-dom";
 import type { MatchSnapshotView, PendingRespondOption } from "../../../../../packages/contracts/src/protocol.js";
 import { PlayingCardFace, PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { CardInspectionHost } from "../cards/CardInspectionHost.js";
 import { getCharacterCardPresentation, getPlayingCardPresentation } from "../cards/assets.js";
 import { useGameExperience } from "./GameExperience.js";
 import "./choice-stage.css";
 
-interface ChoiceStageProps { interactionId: string; title: string; attentionKey?: string; children: ReactNode; dockLabel?: string; presentation?: "modal" | "table" }
+interface ChoiceStageProps { interactionId: string; title: string; attentionKey?: string; children: ReactNode; dockLabel?: string; presentation?: "modal" | "table"; onDismiss?: () => void }
 export const TableStageHost = createContext<HTMLElement | null>(null);
 
 /** Action choices live on the table; optional inspection/settings retain their dialogs. */
@@ -33,7 +34,8 @@ function TableStage({ interactionId, title, children }: ChoiceStageProps) {
 }
 
 /** Native modal focus containment for optional inspection/settings. */
-function ModalStage({ interactionId, title, attentionKey, children, dockLabel = "카드 펼쳐 보기" }: ChoiceStageProps) {
+function ModalStage({ interactionId, title, attentionKey, children, dockLabel = "카드 펼쳐 보기", onDismiss }: ChoiceStageProps) {
+  const inspectionHost = useContext(CardInspectionHost);
   const [expanded, setExpanded] = useState(true);
   const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -51,13 +53,15 @@ function ModalStage({ interactionId, title, attentionKey, children, dockLabel = 
   }, [children]);
   useEffect(() => () => { if (originalFocus.current?.isConnected) originalFocus.current.focus(); }, []);
   function minimize() { setExpanded(false); }
-  return <section className="choice-stage" aria-label={title}>
-    <div className="choice-stage__dock"><strong>{title}</strong><button ref={trigger} type="button" onClick={() => setExpanded(true)}>{dockLabel}</button></div>
-    <dialog ref={dialog} tabIndex={-1} className="choice-stage__dialog" aria-labelledby={titleId} aria-modal="true" onCancel={event => { event.preventDefault(); minimize(); }} onClose={minimize}>
-      <header className="choice-stage__header"><h2 id={titleId}>{title}</h2><button type="button" onClick={minimize}>게임판 보기</button></header>
+  function dismiss() { if (onDismiss) onDismiss(); else minimize(); }
+  const content = <section className="choice-stage" aria-label={title}>
+    {!onDismiss ? <div className="choice-stage__dock"><strong>{title}</strong><button ref={trigger} type="button" onClick={() => setExpanded(true)}>{dockLabel}</button></div> : null}
+    <dialog ref={dialog} tabIndex={-1} className="choice-stage__dialog" aria-labelledby={titleId} aria-modal="true" onCancel={event => { event.preventDefault(); dismiss(); }} onClose={dismiss}>
+      <header className="choice-stage__header"><h2 id={titleId}>{title}</h2><button type="button" onClick={dismiss}>{onDismiss ? "닫기" : "게임판 보기"}</button></header>
       {children}
     </dialog>
   </section>;
+  return onDismiss && inspectionHost ? createPortal(content, inspectionHost) : content;
 }
 
 export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, notice, onChoose, retry, imagePick = false, presentation = "modal" }: {

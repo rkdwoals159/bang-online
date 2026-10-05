@@ -63,6 +63,6 @@ function SceneSeat({player,snapshot,position}: {player:PublicPlayerView;snapshot
       {available?<button className="scene-seat__target" type="button" aria-pressed={selected} aria-label={`${player.displayName} 대상 선택`} onClick={()=>targeting?.choosePlayer(player.playerId)}>{selected?"선택됨":"조준"}</button>:null}
       {player.eliminated?<span className="scene-seat__out">탈락</span>:null}
     </article>
-    {equipmentOpen?<ChoiceStage interactionId={`equipment:${player.playerId}`} title={`${player.displayName} · 장착 카드`}><div className="scene-equipment">{player.inPlay.map(card=><div key={card.cardInstanceId}><PlayingCardZoomButton card={card} /><strong>{cardName(card.typeId)}</strong></div>)}</div><button type="button" onClick={()=>setEquipmentOpen(false)}>닫기</button></ChoiceStage>:null}
+    {equipmentOpen?<ChoiceStage interactionId={`equipment:${player.playerId}`} title={`${player.displayName} · 장착 카드`} onDismiss={()=>setEquipmentOpen(false)}><div className="scene-equipment">{player.inPlay.map(card=><div key={card.cardInstanceId}><PlayingCardZoomButton card={card} /><strong>{cardName(card.typeId)}</strong></div>)}</div></ChoiceStage>:null}
   </li>;
 }

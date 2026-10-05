@@ -4,17 +4,22 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 import { survivorSnapshot, eliminatedSnapshot, forbiddenSentinels } from '../game-table/game-table.fixtures.mjs';
-let vite, ReactionPrompt, GameExperience, MatchPage;
+let vite, ReactionPrompt, GameExperience, MatchPage, ChoiceStage;
 before(async () => {
   vite = await createServer({ configFile: 'apps/web/vite.config.ts', root: 'apps/web', appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
   ({ ReactionPrompt } = await vite.ssrLoadModule('/src/features/reactions/ReactionPrompt.tsx'));
   ({ GameExperience } = await vite.ssrLoadModule('/src/features/experience/GameExperience.tsx'));
   ({ MatchPage } = await vite.ssrLoadModule('/src/app/pages.tsx'));
+  ({ ChoiceStage } = await vite.ssrLoadModule('/src/features/experience/ChoiceStage.tsx'));
 });
 after(async () => { await vite?.close(); });
 const card = { cardInstanceId: 'public-choice', typeId: 'beer', rank: '6', suit: 'HEARTS' };
 const pending = (view, kind, options = []) => ({ interactionId: 'test-choice', kind, currentResponderPlayerId: view.viewer.playerId, allowedChoices: options.map(o => o.choice), responseOptions: options, step: { current: 1, total: 1 } });
 const render = view => renderToStaticMarkup(createElement(ReactionPrompt, { matchId: 'experience-test', version: 8, snapshot: view, transport: {} }));
+test('dismissible inspection has one close control and no minimized dock',()=>{
+  const markup=renderToStaticMarkup(createElement(ChoiceStage,{interactionId:'equipment:test',title:'장착 카드',onDismiss:()=>{}},createElement('p',null,'공개 장착 카드')));
+  assert.equal((markup.match(/>닫기<\/button>/g)??[]).length,1);assert.match(markup,/choice-stage__dialog/);assert.doesNotMatch(markup,/게임판 보기|카드 펼쳐 보기|choice-stage__dock/);
+});
 test('Indians explains its effect and shows public damage/card choices without ordered waiting copy',()=>{
   const view=structuredClone(survivorSnapshot);view.pendingInteraction=pending(view,'INDIANS_RESPONSE',[]);
   view.publicTable.tablewideAttack={attackId:'indians-test',kind:'indians',sourcePlayerId:'player-sheriff',targets:[{playerId:view.viewer.playerId,status:'submitted',response:'USE_BANG'},{playerId:'player-four',status:'resolved',response:'TAKE_HIT'}]};

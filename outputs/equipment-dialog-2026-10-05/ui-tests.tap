@@ -1,0 +1,142 @@
+TAP version 13
+# Subtest: dismissible inspection has one close control and no minimized dock
+ok 1 - dismissible inspection has one close control and no minimized dock
+  ---
+  duration_ms: 4261.7011
+  type: 'test'
+  ...
+# Subtest: Indians explains its effect and shows public damage/card choices without ordered waiting copy
+ok 2 - Indians explains its effect and shows public damage/card choices without ordered waiting copy
+  ---
+  duration_ms: 5.7487
+  type: 'test'
+  ...
+# Subtest: shared store offers only the current picker a take button; observers see public cards
+ok 3 - shared store offers only the current picker a take button; observers see public cards
+  ---
+  duration_ms: 31.6363
+  type: 'test'
+  ...
+# Subtest: Kit private choice opens a stage only for its authenticated picker
+ok 4 - Kit private choice opens a stage only for its authenticated picker
+  ---
+  duration_ms: 12.9393
+  type: 'test'
+  ...
+# Subtest: Lucky judgments are public while response options stay with Lucky
+ok 5 - Lucky judgments are public while response options stay with Lucky
+  ---
+  duration_ms: 3.105
+  type: 'test'
+  ...
+# Subtest: the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+ok 6 - the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+  ---
+  duration_ms: 15.5954
+  type: 'test'
+  ...
+# Subtest: mobile navigation points to my response only when I am the responder and is absent for observers
+ok 7 - mobile navigation points to my response only when I am the responder and is absent for observers
+  ---
+  duration_ms: 2.7803
+  type: 'test'
+  ...
+# Subtest: observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+ok 8 - observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+  ---
+  duration_ms: 77.8943
+  type: 'test'
+  ...
+# Subtest: 4–7 seats use explicit clockwise centers with self at the bottom
+ok 9 - 4–7 seats use explicit clockwise centers with self at the bottom
+  ---
+  duration_ms: 1708.9005
+  type: 'test'
+  ...
+# Subtest: one persistent scene has menu, public table and private hand without web page panels
+ok 10 - one persistent scene has menu, public table and private hand without web page panels
+  ---
+  duration_ms: 27.6941
+  type: 'test'
+  ...
+# Subtest: inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+ok 11 - inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+  ---
+  duration_ms: 9.9585
+  type: 'test'
+  ...
+# Subtest: scene never renders hidden opponent role, card identities or deck contents
+ok 12 - scene never renders hidden opponent role, card identities or deck contents
+  ---
+  duration_ms: 11.4712
+  type: 'test'
+  ...
+# Subtest: opponent hand back icons exactly reflect public counts, including more than 80
+ok 13 - opponent hand back icons exactly reflect public counts, including more than 80
+  ---
+  duration_ms: 10.4679
+  type: 'test'
+  ...
+# Subtest: public distance and role use authenticated projection while own HUD shows own role
+ok 14 - public distance and role use authenticated projection while own HUD shows own role
+  ---
+  duration_ms: 10.7396
+  type: 'test'
+  ...
+# Subtest: observer retains public scene without any private hand input
+ok 15 - observer retains public scene without any private hand input
+  ---
+  duration_ms: 4.7652
+  type: 'test'
+  ...
+# Subtest: zero healing beer retains confirmation and image selection uses legal candidates
+ok 16 - zero healing beer retains confirmation and image selection uses legal candidates
+  ---
+  duration_ms: 13.6458
+  type: 'test'
+  ...
+# Subtest: empty hand uses its own compact status and preserves the legal end-turn action
+ok 17 - empty hand uses its own compact status and preserves the legal end-turn action
+  ---
+  duration_ms: 10.6778
+  type: 'test'
+  ...
+# Subtest: every projected response uses the inline table area including ordered discard
+ok 18 - every projected response uses the inline table area including ordered discard
+  ---
+  duration_ms: 17.3479
+  type: 'test'
+  ...
+# Subtest: first scene render is silent and exposes no history animation
+ok 19 - first scene render is silent and exposes no history animation
+  ---
+  duration_ms: 10.0372
+  type: 'test'
+  ...
+# Subtest: scene store has a nonmodal shared table area for picker and observers
+ok 20 - scene store has a nonmodal shared table area for picker and observers
+  ---
+  duration_ms: 33.5521
+  type: 'test'
+  ...
+# Subtest: all projected request kinds use a visible inline region without a close or reopen step
+ok 21 - all projected request kinds use a visible inline region without a close or reopen step
+  ---
+  duration_ms: 177.3922
+  type: 'test'
+  ...
+# Subtest: tablewide response preserves private choices and shared progress without a dialog
+ok 22 - tablewide response preserves private choices and shared progress without a dialog
+  ---
+  duration_ms: 34.1264
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12052.3763
