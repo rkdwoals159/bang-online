@@ -1,0 +1,67 @@
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2K
+transforming...✓ 290 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (17%)
+  - rsc:virtual-client-package (15%)
+  - vinext:css-data-url (11%)
+  - vinext:middleware-server-only (7%)
+  - alias (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 5.51s
+[2/5] analyze server references...
+[2K
+transforming...✓ 164 modules transformed.
+rendering chunks...
+✓ built in 1.89s
+[3/5] build rsc environment...
+[2K
+transforming...✓ 287 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 2.83s
+[4/5] build client environment...
+[2K
+transforming...✓ 206 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (22%)
+  - rsc:virtual-client-package (10%)
+  - vinext:validate-middleware-exports (7%)
+  - alias (7%)
+  - vinext:css-data-url (7%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 3.28s
+[5/5] build ssr environment...
+[2K
+transforming...✓ 178 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (22%)
+  - rsc:use-client (9%)
+  - rsc:use-server (7%)
+  - vinext:validate-middleware-exports (6%)
+  - rsc:scan-strip (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 3.42s
+[0m
+  Route (app)
+  ┌ ? /      
+  └ ƒ /:path+
+
+  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+  Build complete. Run `vinext start` to start the production server.
+

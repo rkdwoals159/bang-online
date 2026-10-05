@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { MatchSnapshotView, PublicMatchEvent, RoomView } from "../../../../../packages/contracts/src/protocol.js";
 import { ActionsPanel, type ActionTransport } from "../actions/ActionsPanel.js";
 import { CharacterPortrait } from "../cards/CardFaces.js";
+import { CardInspectionHost } from "../cards/CardInspectionHost.js";
 import { getCharacterCardPresentation } from "../cards/assets.js";
 import { ReactionPrompt } from "../reactions/ReactionPrompt.js";
 import { interactionLabel } from "../reactions/model.js";
@@ -19,6 +20,7 @@ export interface GameSceneProps {
 export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersion,transport,showActions}:GameSceneProps) {
   const surface=useRef<HTMLDivElement>(null);
   const [centerHost,setCenterHost]=useState<HTMLDivElement|null>(null);
+  const [inspectionHost,setInspectionHost]=useState<HTMLDivElement|null>(null);
   const [logOpen,setLogOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[fullscreenError,setFullscreenError]=useState("");
   const completed=snapshot.status==="completed", pending=snapshot.pendingInteraction;
   const self=snapshot.publicTable.players.find(p=>p.playerId===snapshot.viewer.playerId);
@@ -28,7 +30,7 @@ export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersi
   const statusProps={sync,room,roomVersion,matchId,transport};
   const caption=completed?"게임 종료":snapshot.status==="paused"?"잠시 멈춤":snapshot.status==="recovery_required"?"연결 확인 중":pending?interactionLabel(pending.kind):mine?"내 차례":`${turn?.displayName ?? "참가자"} 님 차례`;
   async function fullscreen() { try { setFullscreenError(""); if (document.fullscreenElement) await document.exitFullscreen(); else if (surface.current?.requestFullscreen) await surface.current.requestFullscreen(); else setFullscreenError("이 브라우저에서는 전체 화면을 지원하지 않아요."); } catch {setFullscreenError("전체 화면을 열지 못했어요.");} }
-  return <TableStageHost.Provider value={centerHost}><div className="game-scene" ref={surface} data-match-id={matchId} data-viewer-id={snapshot.viewer.playerId}>
+  return <CardInspectionHost.Provider value={inspectionHost}><TableStageHost.Provider value={centerHost}><div className="game-scene" ref={surface} data-match-id={matchId} data-viewer-id={snapshot.viewer.playerId}>
     <header className="scene-hud"><strong className="scene-brand" aria-label="뱅 온라인">BANG!</strong><span className={`scene-turn${mine&&!pending?" scene-turn--mine":""}`} role="status" aria-live="polite" title={caption}>{caption}</span><nav aria-label="경기 메뉴"><button type="button" aria-pressed={logOpen} onClick={()=>setLogOpen(!logOpen)}>기록</button><button type="button" onClick={()=>setSettingsOpen(true)}>설정</button><button className="scene-fullscreen" type="button" onClick={()=>void fullscreen()}>전체 화면</button></nav></header>
     <SceneTable snapshot={snapshot} />
     <div className="scene-center" ref={setCenterHost} data-card-anchor="choice">
@@ -43,5 +45,6 @@ export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersi
     {settingsOpen?<ChoiceStage interactionId="scene-settings" title="경기 설정" dockLabel="설정 열기"><GameExperienceControls/><p>효과음은 직접 켜면 재생돼요. 기기의 동작 줄이기 설정도 적용합니다.</p>{fullscreenError?<p role="alert">{fullscreenError}</p>:null}<button type="button" onClick={()=>setSettingsOpen(false)}>닫기</button></ChoiceStage>:null}
     {fullscreenError&&!settingsOpen?<p className="scene-error" role="alert">{fullscreenError}<button type="button" onClick={()=>setFullscreenError("")}>닫기</button></p>:null}
     <TableEffects surface={surface}/>
-  </div></TableStageHost.Provider>;
+    <div className="scene-inspections" ref={setInspectionHost}/>
+  </div></TableStageHost.Provider></CardInspectionHost.Provider>;
 }

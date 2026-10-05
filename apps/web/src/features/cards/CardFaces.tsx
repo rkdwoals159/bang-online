@@ -1,4 +1,6 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { CardInspectionHost } from "./CardInspectionHost.js";
 import { characterDescriptions } from "./character-descriptions.js";
 import type { CardFaceView } from "../../../../../packages/contracts/src/protocol.js";
 import {
@@ -111,6 +113,7 @@ function CardDetailButton({ title, label, trigger, children, className = "", onI
   onInspect?: () => boolean | void;
 }) {
   const titleId = useId();
+  const inspectionHost = useContext(CardInspectionHost);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openedRef = useRef(false);
@@ -141,19 +144,7 @@ function CardDetailButton({ title, label, trigger, children, className = "", onI
     setIsOpen(false);
   }
 
-  return (
-    <div className={`card-zoom ${className}`}>
-      <button
-        ref={triggerRef}
-        className="card-zoom__trigger"
-        type="button"
-        aria-label={label}
-        aria-haspopup={onInspect ? undefined : "dialog"}
-        onClick={() => { if (onInspect?.() !== false) setIsOpen(true); }}
-      >
-        {trigger}
-      </button>
-      {isOpen ? <dialog
+  const dialog = isOpen ? <dialog
         ref={dialogRef}
         className="card-zoom__dialog"
         aria-modal="true"
@@ -173,7 +164,21 @@ function CardDetailButton({ title, label, trigger, children, className = "", onI
           <button className="card-zoom__close" type="button" onClick={closeDialog}>닫기</button>
         </header>
         {children}
-      </dialog> : null}
+      </dialog> : null;
+
+  return (
+    <div className={`card-zoom ${className}`}>
+      <button
+        ref={triggerRef}
+        className="card-zoom__trigger"
+        type="button"
+        aria-label={label}
+        aria-haspopup={onInspect ? undefined : "dialog"}
+        onClick={() => { if (onInspect?.() !== false) setIsOpen(true); }}
+      >
+        {trigger}
+      </button>
+      {dialog && inspectionHost ? createPortal(dialog, inspectionHost) : dialog}
     </div>
   );
 }

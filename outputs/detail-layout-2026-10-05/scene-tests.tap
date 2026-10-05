@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: 4–7 seats use explicit clockwise centers with self at the bottom
+ok 1 - 4–7 seats use explicit clockwise centers with self at the bottom
+  ---
+  duration_ms: 1784.2604
+  type: 'test'
+  ...
+# Subtest: one persistent scene has menu, public table and private hand without web page panels
+ok 2 - one persistent scene has menu, public table and private hand without web page panels
+  ---
+  duration_ms: 49.9001
+  type: 'test'
+  ...
+# Subtest: inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+ok 3 - inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+  ---
+  duration_ms: 16.2042
+  type: 'test'
+  ...
+# Subtest: scene never renders hidden opponent role, card identities or deck contents
+ok 4 - scene never renders hidden opponent role, card identities or deck contents
+  ---
+  duration_ms: 15.7408
+  type: 'test'
+  ...
+# Subtest: opponent hand back icons exactly reflect public counts, including more than 80
+ok 5 - opponent hand back icons exactly reflect public counts, including more than 80
+  ---
+  duration_ms: 18.0583
+  type: 'test'
+  ...
+# Subtest: public distance and role use authenticated projection while own HUD shows own role
+ok 6 - public distance and role use authenticated projection while own HUD shows own role
+  ---
+  duration_ms: 17.2038
+  type: 'test'
+  ...
+# Subtest: observer retains public scene without any private hand input
+ok 7 - observer retains public scene without any private hand input
+  ---
+  duration_ms: 13.0946
+  type: 'test'
+  ...
+# Subtest: zero healing beer retains confirmation and image selection uses legal candidates
+ok 8 - zero healing beer retains confirmation and image selection uses legal candidates
+  ---
+  duration_ms: 15.9264
+  type: 'test'
+  ...
+# Subtest: every projected response uses the inline table area including ordered discard
+ok 9 - every projected response uses the inline table area including ordered discard
+  ---
+  duration_ms: 20.5254
+  type: 'test'
+  ...
+# Subtest: first scene render is silent and exposes no history animation
+ok 10 - first scene render is silent and exposes no history animation
+  ---
+  duration_ms: 23.8667
+  type: 'test'
+  ...
+# Subtest: scene store has a nonmodal shared table area for picker and observers
+ok 11 - scene store has a nonmodal shared table area for picker and observers
+  ---
+  duration_ms: 40.9546
+  type: 'test'
+  ...
+# Subtest: all projected request kinds use a visible inline region without a close or reopen step
+ok 12 - all projected request kinds use a visible inline region without a close or reopen step
+  ---
+  duration_ms: 249.5768
+  type: 'test'
+  ...
+# Subtest: tablewide response preserves private choices and shared progress without a dialog
+ok 13 - tablewide response preserves private choices and shared progress without a dialog
+  ---
+  duration_ms: 23.6497
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4259.8343

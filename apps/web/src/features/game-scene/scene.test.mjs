@@ -16,6 +16,11 @@ test('one persistent scene has menu, public table and private hand without web p
   const view=structuredClone(survivorSnapshot);view.legalActions=[];const markup=render(view);
   assert.match(markup,/game-scene/);assert.match(markup,/scene-hand-dock/);assert.match(markup,/시계 방향 게임 테이블/);assert.match(markup,/경기 메뉴/);assert.doesNotMatch(markup,/게임 화면 바로가기|현재 판|게임 진행|게임 규칙은 서버/);
 });
+test('inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs',()=>{
+  const markup=render(survivorSnapshot);
+  assert.match(markup,/<\/footer>(?:<div[^>]*><\/div>)*<div class="scene-inspections"><\/div><\/div><\/div>$/);
+  assert.doesNotMatch(markup,/<dialog/);
+});
 test('scene never renders hidden opponent role, card identities or deck contents',()=>{const markup=render(survivorSnapshot);for(const secret of forbiddenSentinels)assert.equal(markup.includes(secret),false);assert.doesNotMatch(markup,/deckCount|privateResolutionContext/);});
 test('opponent hand back icons exactly reflect public counts, including more than 80',()=>{const view=structuredClone(survivorSnapshot);view.publicTable.players[0].handCount=81;const markup=render(view);assert.equal((markup.match(/class="scene-seat__hand"/g)??[]).length,4);const first=markup.match(/aria-label="손패 81장"[^>]*>(.*?)<\/span>/s);assert.ok(first);assert.equal((first[1].match(/<i /g)??[]).length,81);});
 test('public distance and role use authenticated projection while own HUD shows own role',()=>{const markup=render(survivorSnapshot);assert.match(markup,/나에게서 거리/);assert.match(markup,/배신자/);assert.match(markup,/보안관/);assert.match(markup,/역할 비공개/);});

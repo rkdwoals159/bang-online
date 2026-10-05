@@ -37,8 +37,20 @@
 .card-zoom__trigger:active { transform: scale(.97); }
 .card-zoom__trigger:focus-visible { outline: 3px solid var(--color-brass-ink); outline-offset: 3px; }
 .character-detail { grid-row: 1 / 4; width: 52px; }
-.card-zoom__dialog > .roster-card { width: min(100%, 18rem); margin: auto; }
-.card-zoom__dialog .roster-card p { white-space: pre-line; font-size: 15px; }
+.card-zoom__dialog > .roster-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  column-gap: clamp(1rem, 3vw, 1.5rem);
+  row-gap: .75rem;
+}
+.card-zoom__dialog > .roster-card > .roster-card__artwork { grid-column: 1; grid-row: 1 / 3; height: auto; }
+.card-zoom__dialog > .roster-card > h3,
+.card-zoom__dialog > .roster-card > p { grid-column: 2; min-width: 0; }
+.card-zoom__dialog > .roster-card > p { white-space: pre-line; font-size: 1rem; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
 .card-zoom__dialog[open] { animation: card-detail-open 180ms ease-out both; }
 .card-zoom__dialog[open]::backdrop { animation: card-detail-backdrop 160ms ease-out both; }
 @keyframes card-detail-open { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
@@ -350,6 +362,10 @@
 }
 
 @media (max-width: 560px) {
+  .card-zoom__dialog > .roster-card { grid-template-columns: minmax(0, 1fr); }
+  .card-zoom__dialog > .roster-card > .roster-card__artwork { grid-column: 1; grid-row: auto; width: min(100%, 8rem); justify-self: center; }
+  .card-zoom__dialog > .roster-card > h3,
+  .card-zoom__dialog > .roster-card > p { grid-column: 1; }
   .playing-card {
     width: clamp(6.4rem, 35vw, 8rem);
   }
