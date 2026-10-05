@@ -1,0 +1,27 @@
+{
+  "verified": true,
+  "scope": "Local design prototype only",
+  "interactions": [
+    "BANG projectile and target HP change",
+    "Gatling shared dialog, independent own defense, automatic demo opponents, closes after all",
+    "Indians shared dialog and own BANG defense",
+    "General Store names, own selection, cards move to shared player rows, automatic demo picks",
+    "Two card draw flight and public hand icons",
+    "Healing sample",
+    "Turn highlight changes",
+    "Role reveal and enter",
+    "Victory and return",
+    "Character detail",
+    "Card selection and enlarged explanation",
+    "Sound setting toggle",
+    "Reduced motion BANG response"
+  ],
+  "newConsoleErrors": [],
+  "notVerified": [
+    "Full game server integration",
+    "Real FPS",
+    "Sound listening quality",
+    "Full accessibility",
+    "Every card and character"
+  ]
+}
