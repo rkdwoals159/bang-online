@@ -6,7 +6,7 @@ import type {
   MatchSnapshotView,
   MatchSyncResponse,
 } from "../../../../../packages/contracts/src/protocol.js";
-import { PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { getPlayingCardDescription, PlayingCardZoomButton } from "../cards/CardFaces.js";
 import {
   cardName,
   createActionCommand,
@@ -113,6 +113,7 @@ export function ActionsPanel({
     [actions],
   );
   const handById = useMemo(() => new Map(hand.map((card) => [card.cardInstanceId, card])), [hand]);
+  const selectedCard = visibleSelection ? handById.get(visibleSelection.cardInstanceId) : undefined;
   const handIndexById = useMemo(
     () => new Map(hand.map((card, index) => [card.cardInstanceId, index])),
     [hand],
@@ -407,7 +408,7 @@ export function ActionsPanel({
                         ? "손패를 버리는 단계예요"
                         : "지금 가능한 사용 방법이 없어요";
                   const actionDetails = canUseCard
-                    ? getTargetOptions(currentSnapshot, actions, indexes).map((option) => option.label)
+                    ? getTargetOptions(currentSnapshot, actions, indexes).map((option) => option.label).filter(Boolean)
                     : [disabledReason];
                   return (
                     <li key={card.cardInstanceId}>
@@ -439,9 +440,12 @@ export function ActionsPanel({
               <div>
                 <p className="game-actions__eyebrow">선택한 카드</p>
                 <h3 id="game-actions-choice-title">
-                  {cardName(hand.find((card) => card.cardInstanceId === visibleSelection.cardInstanceId)?.typeId ?? "")}
+                  {cardName(selectedCard?.typeId ?? "")}
                 </h3>
               </div>
+              {selectedCard ? (
+                <p className="game-actions__card-description">{getPlayingCardDescription(selectedCard.typeId)}</p>
+              ) : null}
               {activeTargetOptions.length > 1 ? (
                 <fieldset className="game-actions__targets" disabled={!canAct}>
                 <legend>사용할 대상과 방식을 선택하세요</legend>
@@ -453,15 +457,15 @@ export function ActionsPanel({
                       aria-pressed={visibleSelection.proposalIndex === option.index}
                       onClick={() => chooseProposal(option.index)}
                     >
-                      {option.label}
+                      {option.label || "카드 사용"}
                     </button>
                   ))}
                 </fieldset>
-              ) : (
+              ) : activeTargetOptions.length === 0 || activeTargetOptions[0]?.label ? (
                 <p className="game-actions__selected-target">
                   {activeTargetOptions[0]?.label ?? "지금은 선택할 수 있는 행동이 없어요."}
                 </p>
-              )}
+              ) : null}
               {selectedBeerReasons.length > 0 ? (
                 <div className="game-actions__beer-confirmation">
                   <p>맥주를 사용해도 생명력은 회복되지 않아요.</p>

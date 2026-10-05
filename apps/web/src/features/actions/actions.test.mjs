@@ -97,6 +97,18 @@ test("offers only card and target candidates from legalActions", () => {
   assert.doesNotMatch(JSON.stringify(targets), /노을|player-c|own-beer/);
 });
 
+test("self-use candidates omit generic guidance and preserve conversion context", () => {
+  const candidates = [
+    { type: "PLAY_CARD", payload: { cardInstanceId: "own-barrel" } },
+    { type: "PLAY_CARD", payload: { cardInstanceId: "own-missed", targetPlayerId: "player-b", asCardType: "bang" } },
+  ];
+  assert.deepEqual(getTargetOptions(snapshot(), candidates, [0, 1]), [
+    { index: 0, label: "" },
+    { index: 1, label: "바람 · 뱅!으로 사용" },
+  ]);
+  assert.equal(candidates[0].payload.cardInstanceId, "own-barrel");
+});
+
 test("explains only the two public no-recovery Beer conditions", () => {
   const atMaximum = snapshot();
   assert.deepEqual(noHealBeerReasons(atMaximum, "own-beer"), ["현재 생명력이 최대라 회복량은 0이에요."]);

@@ -61,7 +61,7 @@ export function getTargetOptions(
 
     return [{
       index,
-      label: labelParts.length > 0 ? labelParts.join(" · ") : "이 카드 사용",
+      label: labelParts.join(" · "),
     }];
   });
 }

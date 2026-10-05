@@ -28,6 +28,7 @@
 .game-actions__targets { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 12px; }
 .game-actions__target { min-height: 44px; max-width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-ink); font-size: 14px; line-height: 1.4; text-align: left; overflow-wrap: anywhere; }
 .game-actions__selected-target { margin: 0; font-size: 14px; color: var(--color-muted); }
+.game-actions__card-description { margin: 0; color: var(--color-ink); font-size: 16px; line-height: 1.65; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word; }
 .game-actions__controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .game-actions__button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 10px 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-ink); font-size: 14px; font-weight: 750; transition: background var(--motion-fast); }
 .game-actions__button--primary { border-color: var(--color-forest); background: var(--color-forest); color: var(--color-on-felt); }
