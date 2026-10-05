@@ -5,7 +5,6 @@ import { makeInviteUrl } from "../room-entry/model.js";
 import {
   buildRoomLobbyViewModel,
   makeKickMemberCommand,
-  makeSetReadyCommand,
   makeStartMatchCommand,
   type LobbyRoomCommand,
 } from "./model.js";
@@ -90,7 +89,6 @@ export function Lobby({
     <section className="room-lobby" aria-labelledby="room-lobby-title">
       <header className="room-lobby__header">
         <div>
-          <p className="room-lobby__eyebrow">게임 준비 · 기본판</p>
           <h1 id="room-lobby-title">대기실</h1>
           <details className="room-lobby__room-info"><summary>방 정보</summary><p className="room-lobby__room-id">방 ID <strong>{room.roomId}</strong></p></details>
         </div>
@@ -103,7 +101,7 @@ export function Lobby({
         <div className="room-lobby__section-heading">
           <div>
             <p className="room-lobby__eyebrow">참가자</p>
-            <h2 id="room-lobby-members-title">좌석과 준비 상태</h2>
+            <h2 id="room-lobby-members-title">참가자 목록</h2>
           </div>
           <p className="room-lobby__occupancy" aria-label={`현재 ${view.occupancy}명, 최대 ${view.capacity}명`}>
             {view.occupancy}<span> / {view.capacity}명</span>
@@ -125,10 +123,6 @@ export function Lobby({
                       <span>{seat.isOwner ? "방장" : "게스트"}{seat.isViewer ? " · 나" : ""}</span>
                     </div>
                   </div>
-                  <span className={`room-lobby__ready${seat.member.ready ? " room-lobby__ready--yes" : ""}`}>
-                    <span aria-hidden="true">{seat.member.ready ? "✓" : "○"}</span>
-                    {seat.readinessLabel}
-                  </span>
                   <span
                     className={`room-lobby__connection room-lobby__connection--${connectionStateForSeat(seat.member, seat.isViewer, viewerConnectionState)}`}
                     role="status"
@@ -169,32 +163,12 @@ export function Lobby({
       </section>
 
       <section className="room-lobby__actions" aria-label="대기실 작업">
-        <div className="room-lobby__panel room-lobby__ready-panel">
-          <div>
-            <p className="room-lobby__eyebrow">내 상태</p>
-            <h2>{view.viewerReady ? "준비 완료" : "아직 준비 전"}</h2>
-            <p className="room-lobby__hint">
-              {view.canSetReady
-                ? "게임을 시작할 준비가 되면 준비 완료를 눌러 주세요."
-                : "대기 중인 방에서만 준비 상태를 바꿀 수 있어요."}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="room-lobby__button room-lobby__button--secondary"
-            disabled={!view.canSetReady || busy}
-            onClick={() => send(makeSetReadyCommand(room.roomId, roomVersion, view.nextReadyValue, createCommandId()))}
-          >
-            {view.viewerReady ? "준비 취소" : "준비 완료"}
-          </button>
-        </div>
-
         <div className="room-lobby__panel room-lobby__start-panel">
           <div>
             <p className="room-lobby__eyebrow">게임 시작</p>
             <h2>{view.viewerIsOwner ? "방장" : "방장 대기 중"}</h2>
             <p className="room-lobby__hint">
-              {view.startBlockedReason ?? "모두 준비했어요. 게임 시작을 누르면 역할과 인물이 배정돼요."}
+              {view.startBlockedReason ?? "게임 시작을 누르면 역할과 인물이 배정돼요."}
             </p>
           </div>
           <button

@@ -16,7 +16,7 @@ import {
   type RoomEntryTransport,
   type RoomCapacity,
 } from "../features/room-entry/model.js";
-import { makeSetReadyCommand, makeStartMatchCommand } from "../features/lobby/model.js";
+import { makeStartMatchCommand } from "../features/lobby/model.js";
 import type { BrowserTransportState, GameTransport } from "../transport/types.js";
 import type { SessionRecovery } from "./app-state.js";
 import { navigateTo, resolveRoute } from "./router.js";
@@ -265,29 +265,10 @@ export function createBangWebMcpTools(runtime: BangWebMcpRuntime): WebMcpTool[] 
     },
   };
 
-  const setReadyTool: WebMcpTool = {
-    name: "bang.set_ready",
-    title: "방 준비 상태 변경",
-    description: "현재 대기실에서 현재 게스트의 준비 상태를 변경합니다.",
-    inputSchema: objectSchema({ ready: { type: "boolean" } }, ["ready"]),
-    annotations: { consequentialHint: true },
-    async execute(input) {
-      const record = exactRecord(input, ["ready"]);
-      if (typeof record.ready !== "boolean") throw new WebMcpActionError("BAD_REQUEST", "ready 값은 true 또는 false여야 합니다.");
-      const current = await currentRoom(runtime);
-      const command = makeSetReadyCommand(current.roomId, current.version, record.ready, commandId());
-      const parsed = parseRoomCommand(command);
-      if (!parsed.ok) throw new WebMcpActionError("BAD_REQUEST", "준비 상태 입력을 확인해 주세요.");
-      const acknowledgement = await runtime.transport.sendRoomCommand(parsed.value as RoomCommand);
-      const updated = await runtime.transport.syncRoom(current.roomId);
-      return { acknowledgement, room: updated.room, version: updated.version };
-    },
-  };
-
   const startMatchTool: WebMcpTool = {
     name: "bang.start_match",
     title: "현재 방에서 게임 시작",
-    description: "현재 대기실의 기본판 게임 시작 요청을 서버에 전송합니다. 서버가 인원·방장·준비 상태를 검증합니다.",
+    description: "현재 대기실의 기본판 게임 시작 요청을 서버에 전송합니다. 서버가 인원·방장·대기실 상태를 검증합니다.",
     inputSchema: noInputSchema,
     annotations: { consequentialHint: true },
     async execute(input) {
@@ -403,7 +384,7 @@ export function createBangWebMcpTools(runtime: BangWebMcpRuntime): WebMcpTool[] 
     },
   };
 
-  return [stateTool, createGuestTool, createRoomTool, joinRoomTool, setReadyTool, startMatchTool, actionTool];
+  return [stateTool, createGuestTool, createRoomTool, joinRoomTool, startMatchTool, actionTool];
 }
 
 export async function registerBangWebMcpTools(

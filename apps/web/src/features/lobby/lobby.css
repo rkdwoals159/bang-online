@@ -21,8 +21,6 @@
 .room-lobby__member-copy { display: grid; min-width: 0; gap: 4px; }
 .room-lobby__member-copy strong { font-size: 15px; overflow-wrap: anywhere; }
 .room-lobby__member-copy span { color: var(--color-muted); font-size: 12px; }
-.room-lobby__ready { display: flex; align-items: center; gap: 6px; color: var(--color-muted); font-size: 13px; font-weight: 650; }
-.room-lobby__ready--yes { color: var(--color-positive); }
 .room-lobby__connection { color: var(--color-muted); font-size: 12px; }
 .room-lobby__connection--disconnected, .room-lobby__connection--expired { color: var(--color-danger); }
 .room-lobby__kick { justify-self: start; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-danger); font-size: 12px; }
@@ -32,7 +30,7 @@
 .room-lobby__status-message, .room-lobby__connection-hint { margin: 20px 0 0; color: var(--color-muted); font-size: 14px; line-height: 1.5; }
 .room-lobby__connection-hint { padding: 12px; border-radius: 8px; background: var(--color-brass-soft); color: var(--color-brass-ink); }
 .room-lobby__actions { display: grid; grid-column: 2; gap: 16px; }
-.room-lobby__ready-panel, .room-lobby__start-panel { display: grid; gap: 16px; }
+.room-lobby__start-panel { display: grid; gap: 16px; }
 .room-lobby__start-panel { background: var(--color-felt); border-color: var(--color-felt); color: var(--color-on-felt); }
 .room-lobby__start-panel .room-lobby__eyebrow { color: var(--color-brass); }
 .room-lobby__hint { margin: 12px 0 0; color: var(--color-muted); font-size: 14px; line-height: 1.6; }
@@ -47,6 +45,6 @@
 .room-lobby__invite-controls input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface-soft); color: var(--color-ink); font-size: 13px; }
 .room-lobby__error { grid-column: 1 / -1; padding: 16px; margin: 0; border-radius: 8px; background: var(--color-danger-soft); color: var(--color-danger); font-size: 14px; }
 .room-lobby__sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-@media (max-width: 850px) { .room-lobby { grid-template-columns: minmax(0, 1fr); gap: 16px; } .room-lobby > .room-lobby__panel:first-of-type, .room-lobby__actions, .room-lobby__invite-panel { grid-column: 1; grid-row: auto; } .room-lobby__actions { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; } }
+@media (max-width: 850px) { .room-lobby { grid-template-columns: minmax(0, 1fr); gap: 16px; } .room-lobby > .room-lobby__panel:first-of-type, .room-lobby__actions, .room-lobby__invite-panel { grid-column: 1; grid-row: auto; } .room-lobby__actions { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) { .room-lobby__panel { padding: 16px; } .room-lobby__actions { grid-template-columns: minmax(0, 1fr); } .room-lobby__seat { padding: 12px; } .room-lobby__member { gap: 8px; } .room-lobby__member-copy strong { font-size: 14px; } }
 @media (max-width: 360px) { .room-lobby__seats { grid-template-columns: minmax(0, 1fr); } }

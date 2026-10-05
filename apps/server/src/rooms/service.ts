@@ -327,6 +327,7 @@ export class RoomService {
     };
   }
 
+  /** Legacy client compatibility; readiness flags do not gate match start. */
   async setReady(
     authenticatedPlayerId: string,
     input: RoomCommandInput & { ready: boolean },

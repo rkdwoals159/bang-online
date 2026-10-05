@@ -106,7 +106,7 @@ function returnedLobbyRoom(previous) {
     ...previous,
     status: "waiting",
     activeMatchId: null,
-    members: previous.members.map((member) => ({ ...member, ready: false })),
+    members: previous.members.map((member) => ({ ...member, ready: true })),
   };
 }
 

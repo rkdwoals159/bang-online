@@ -65,8 +65,7 @@ export function buildReturnToLobbyCommand(
 function preservesCompletedRoomSeats(previous: RoomView, next: RoomView): boolean {
   if (next.roomId !== previous.roomId || next.status !== "waiting" || next.activeMatchId !== null ||
       next.ownerPlayerId !== previous.ownerPlayerId || next.viewer.playerId !== previous.viewer.playerId ||
-      next.viewer.isOwner !== previous.viewer.isOwner || next.members.length !== previous.members.length ||
-      next.members.some((member) => member.ready)) return false;
+      next.viewer.isOwner !== previous.viewer.isOwner || next.members.length !== previous.members.length) return false;
 
   const previousSeats = new Map(previous.members.map((member) => [member.seatIndex, member.playerId]));
   return next.members.every((member) => previousSeats.get(member.seatIndex) === member.playerId);

@@ -280,8 +280,8 @@ export class D1RoomService {
         status: room.status,
         ownerPlayerId: room.ownerPlayerId,
         occupancy: room.players.length + 1,
-        playerWrites: [{ operation: "insert", playerId, seatIndex, ready: false }],
-        extraOutcome: { playerId, seatIndex, ready: false },
+        playerWrites: [{ operation: "insert", playerId, seatIndex, ready: true }],
+        extraOutcome: { playerId, seatIndex, ready: true },
       });
       outcome = "join-success";
       return result;
@@ -292,6 +292,7 @@ export class D1RoomService {
     }
   }
 
+  /** Legacy client compatibility; readiness flags do not gate match start. */
   async setReady(playerId: string, input: RoomActionInput & { ready: boolean }): Promise<RoomView | null> {
     const requestHash = await this.requestHash("SET_READY", [playerId, input.roomId, input.expectedVersion, input.ready]);
     const prior = await this.getPriorRoomReceipt(playerId, input.commandId, input.roomId, requestHash);
@@ -376,10 +377,10 @@ export class D1RoomService {
       status: "waiting",
       ownerPlayerId: room.ownerPlayerId,
       occupancy: room.players.length,
-      playerWrites: room.players.filter((member) => member.ready).map((member) => ({
+      playerWrites: room.players.filter((member) => !member.ready).map((member) => ({
         operation: "set-ready" as const,
         playerId: member.playerId,
-        ready: false,
+        ready: true,
       })),
     });
   }
@@ -404,7 +405,6 @@ export class D1RoomService {
     this.assertVersion(room, input.expectedVersion);
     if (room.status === "closed") throw new SiteRoomServiceError("ROOM_CLOSED");
     if (room.status !== "waiting" && room.status !== "in_game") throw new SiteRoomServiceError("ROOM_LOCKED");
-    if (room.players.some((member) => !member.ready)) throw new SiteRoomServiceError("ROOM_NOT_READY");
     if (room.status === "in_game") {
       const latestMatchId = await this.repository.getLatestMatchIdForRoom(room.id);
       const latestMatch = latestMatchId ? await this.repository.getMatch(latestMatchId) : null;

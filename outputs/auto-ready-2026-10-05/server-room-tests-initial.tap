@@ -1,0 +1,193 @@
+TAP version 13
+# Subtest: trims display names and enforces 1–20 Unicode code points without controls
+ok 1 - trims display names and enforces 1–20 Unicode code points without controls
+  ---
+  duration_ms: 29378.345
+  type: 'test'
+  ...
+# Subtest: issues hashed credentials, validates expiry and revocation, and disables expiry by default
+ok 2 - issues hashed credentials, validates expiry and revocation, and disables expiry by default
+  ---
+  duration_ms: 11173.1508
+  type: 'test'
+  ...
+# Subtest: injects guest TTL and room retention without enabling default cleanup
+ok 3 - injects guest TTL and room retention without enabling default cleanup
+  ---
+  duration_ms: 6214.3442
+  type: 'test'
+  ...
+# Subtest: creates private rooms with one-time invite secrets and public allowlisted outbox
+ok 4 - creates private rooms with one-time invite secrets and public allowlisted outbox
+  ---
+  duration_ms: 7521.4475
+  type: 'test'
+  ...
+# Subtest: joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+ok 5 - joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+  ---
+  duration_ms: 9941.1189
+  type: 'test'
+  ...
+# Subtest: readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+ok 6 - readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+  ---
+  duration_ms: 9310.4154
+  type: 'test'
+  ...
+# Subtest: only the owner can voluntarily close a room through the service
+ok 7 - only the owner can voluntarily close a room through the service
+  ---
+  duration_ms: 5431.7272
+  type: 'test'
+  ...
+# Subtest: the service does not close a room after its lobby is locked
+ok 8 - the service does not close a room after its lobby is locked
+  ---
+  duration_ms: 4758.3112
+  type: 'test'
+  ...
+# Subtest: starts an all-ready room once, returns the same match on retry, and projects its route
+not ok 9 - starts an all-ready room once, returns the same match on retry, and projects its route
+  ---
+  duration_ms: 7115.8683
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\server\\test\\rooms\\service.test.ts:2:13420'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    async TestContext.<anonymous> (C:\Users\user\Documents\Codex\2026-09-27\new-chat-2\apps\server\test\rooms\service.test.ts:490:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: restarts a completed match with a fresh seeded setup and preserves the prior record
+ok 10 - restarts a completed match with a fresh seeded setup and preserves the prior record
+  ---
+  duration_ms: 7080.2031
+  type: 'test'
+  ...
+# Subtest: requires at least four ready members and starts a seven-member room
+ok 11 - requires at least four ready members and starts a seven-member room
+  ---
+  duration_ms: 4820.301
+  type: 'test'
+  ...
+# Subtest: returns a completed room to the same lobby and requires readiness before starting again
+ok 12 - returns a completed room to the same lobby and requires readiness before starting again
+  ---
+  duration_ms: 5350.8628
+  type: 'test'
+  ...
+# Subtest: looks up only active hashed sessions and creates an idempotent room with a safe preview
+ok 13 - looks up only active hashed sessions and creates an idempotent room with a safe preview
+  ---
+  duration_ms: 29403.4354
+  type: 'test'
+  ...
+# Subtest: starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+ok 14 - starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+  ---
+  duration_ms: 11009.9631
+  type: 'test'
+  ...
+# Subtest: a duplicate room-start command returns the original match outcome without additional writes
+ok 15 - a duplicate room-start command returns the original match outcome without additional writes
+  ---
+  duration_ms: 6511.1925
+  type: 'test'
+  ...
+# Subtest: restarts directly from the latest completed match with atomic writes and preserved history
+ok 16 - restarts directly from the latest completed match with atomic writes and preserved history
+  ---
+  duration_ms: 8971.3893
+  type: 'test'
+  ...
+# Subtest: rejects in-game starts unless the latest same-room match is completed, with no writes
+ok 17 - rejects in-game starts unless the latest same-room match is completed, with no writes
+  ---
+  duration_ms: 28209.4499
+  type: 'test'
+  ...
+# Subtest: serializes concurrent direct restarts so only one new match becomes active
+ok 18 - serializes concurrent direct restarts so only one new match becomes active
+  ---
+  duration_ms: 8160.4476
+  type: 'test'
+  ...
+# Subtest: direct restart rechecks unchanged membership before writing
+ok 19 - direct restart rechecks unchanged membership before writing
+  ---
+  duration_ms: 10194.9095
+  type: 'test'
+  ...
+# Subtest: start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+ok 20 - start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+  ---
+  duration_ms: 19578.2441
+  type: 'test'
+  ...
+# Subtest: outbox failure rolls back the room, match, players, receipt, and preceding signal
+ok 21 - outbox failure rolls back the room, match, players, receipt, and preceding signal
+  ---
+  duration_ms: 2735.6794
+  type: 'test'
+  ...
+# Subtest: concurrent retries of one room-start command commit one match and return its original ID
+ok 22 - concurrent retries of one room-start command commit one match and return its original ID
+  ---
+  duration_ms: 2490.0086
+  type: 'test'
+  ...
+# Subtest: serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+ok 23 - serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+  ---
+  duration_ms: 12179.207
+  type: 'test'
+  ...
+# Subtest: persists room status changes and locks lobby membership outside WAITING
+ok 24 - persists room status changes and locks lobby membership outside WAITING
+  ---
+  duration_ms: 15085.865
+  type: 'test'
+  ...
+# Subtest: rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+ok 25 - rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+  ---
+  duration_ms: 4137.9297
+  type: 'test'
+  ...
+# Subtest: rejects leave by a non-member without changing the room
+ok 26 - rejects leave by a non-member without changing the room
+  ---
+  duration_ms: 2529.1422
+  type: 'test'
+  ...
+# Subtest: returns a completed match room to the lobby atomically and replays the original receipt
+ok 27 - returns a completed match room to the lobby atomically and replays the original receipt
+  ---
+  duration_ms: 2305.9139
+  type: 'test'
+  ...
+# Subtest: rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+ok 28 - rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+  ---
+  duration_ms: 12158.8622
+  type: 'test'
+  ...
+# Subtest: rolls back automatic readiness restoration, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+ok 29 - rolls back automatic readiness restoration, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+  ---
+  duration_ms: 2152.4103
+  type: 'test'
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 28
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 184912.1267

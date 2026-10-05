@@ -13,7 +13,6 @@ export interface LobbySeatViewModel {
   member: LobbyMember | null;
   isOwner: boolean;
   isViewer: boolean;
-  readinessLabel: string;
   canKick: boolean;
 }
 
@@ -24,12 +23,8 @@ export interface RoomLobbyViewModel {
   statusMessage: string;
   occupancy: number;
   capacity: RoomView["capacity"];
-  readyCount: number;
   seats: readonly LobbySeatViewModel[];
-  viewerReady: boolean | null;
   viewerIsOwner: boolean;
-  canSetReady: boolean;
-  nextReadyValue: boolean;
   canStart: boolean;
   startBlockedReason: string | null;
   canInvite: boolean;
@@ -54,7 +49,7 @@ function statusLockMessage(status: RoomStatus): string {
     case "starting":
       return "게임을 준비 중이에요. 새 참가와 좌석 변경은 잠겨 있어요.";
     case "in_game":
-      return "게임이 시작되어 새 참가, 준비 변경, 강퇴를 할 수 없어요.";
+      return "게임이 시작되어 새 참가와 강퇴를 할 수 없어요.";
     case "paused":
       return "방이 일시 정지되어 있어요. 새 참가와 좌석 변경은 잠겨 있어요.";
     case "completed":
@@ -66,12 +61,11 @@ function statusLockMessage(status: RoomStatus): string {
   }
 }
 
-function startReason(room: RoomView, occupancy: number, allReady: boolean, viewerMemberExists: boolean): string | null {
+function startReason(room: RoomView, occupancy: number, viewerMemberExists: boolean): string | null {
   if (room.status !== "waiting") return statusLockMessage(room.status);
   if (!isTrustedOwner(room)) return "게임 시작은 방장만 할 수 있어요.";
   if (!viewerMemberExists) return "이 방에서 내 게스트 좌석을 확인할 수 없어요.";
   if (occupancy < 4) return `게임을 시작하려면 최소 4명이 필요해요. 현재 ${occupancy}명입니다.`;
-  if (!allReady) return "모든 참가자가 준비하면 방장이 게임을 시작할 수 있어요.";
   return null;
 }
 
@@ -82,8 +76,6 @@ export function buildRoomLobbyViewModel(room: RoomView): RoomLobbyViewModel {
   const viewerMemberExists = viewerMember !== undefined;
   const viewerIsOwner = isTrustedOwner(room) && viewerMemberExists;
   const occupancy = members.length;
-  const readyCount = members.filter((member) => member.ready).length;
-  const allReady = occupancy > 0 && readyCount === occupancy;
   const bySeat = new Map(members.map((member) => [member.seatIndex, member]));
   const seats = Array.from({ length: room.capacity }, (_, seatIndex) => {
     const member = bySeat.get(seatIndex) ?? null;
@@ -93,12 +85,11 @@ export function buildRoomLobbyViewModel(room: RoomView): RoomLobbyViewModel {
       member,
       isOwner: member?.playerId === room.ownerPlayerId,
       isViewer: member?.playerId === room.viewer.playerId,
-      readinessLabel: member ? (member.ready ? "준비 완료" : "준비 중") : "빈 좌석",
       canKick: room.status === "waiting" && isTrustedOwner(room) && member !== null &&
         member.playerId !== room.viewer.playerId,
     };
   });
-  const blockedReason = startReason(room, occupancy, allReady, viewerMemberExists);
+  const blockedReason = startReason(room, occupancy, viewerMemberExists);
   const canInvite = room.status === "waiting" && occupancy < room.capacity;
 
   let inviteMessage: string;
@@ -117,10 +108,8 @@ export function buildRoomLobbyViewModel(room: RoomView): RoomLobbyViewModel {
     statusMessage = `현재 ${occupancy}/${room.capacity}명 · 방 정원이 찼어요.`;
   } else if (occupancy < 4) {
     statusMessage = `현재 ${occupancy}/${room.capacity}명 · 최소 4명이 모이면 시작할 수 있어요.`;
-  } else if (!allReady) {
-    statusMessage = `현재 ${occupancy}/${room.capacity}명 · 모두 준비하면 방장이 시작할 수 있어요.`;
   } else {
-    statusMessage = `현재 ${occupancy}/${room.capacity}명 · 모두 준비했어요. 방장이 게임을 시작할 수 있습니다.`;
+    statusMessage = `현재 ${occupancy}/${room.capacity}명 · 방장이 게임을 시작할 수 있어요.`;
   }
 
   return {
@@ -130,12 +119,8 @@ export function buildRoomLobbyViewModel(room: RoomView): RoomLobbyViewModel {
     statusMessage,
     occupancy,
     capacity: room.capacity,
-    readyCount,
     seats,
-    viewerReady: viewerMember?.ready ?? null,
     viewerIsOwner,
-    canSetReady: room.status === "waiting" && viewerMemberExists,
-    nextReadyValue: viewerMember ? !viewerMember.ready : true,
     canStart: blockedReason === null,
     startBlockedReason: blockedReason,
     canInvite,
@@ -143,6 +128,7 @@ export function buildRoomLobbyViewModel(room: RoomView): RoomLobbyViewModel {
   };
 }
 
+/** Legacy protocol helper; the lobby has no manual readiness action. */
 export function makeSetReadyCommand(
   roomId: string,
   expectedVersion: number,

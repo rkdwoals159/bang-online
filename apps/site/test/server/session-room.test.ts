@@ -526,7 +526,7 @@ test("concurrent JOIN is single-writer; room receipts replay and command hash mi
   }
 });
 
-test("room ready/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once", async () => {
+test("room automatic arrival/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {
     const clock = { value: FIXED_TIME };
@@ -539,21 +539,7 @@ test("room ready/owner/version guards and concurrent START_MATCH persist the ful
     ]);
     const { roomId } = await fillRoom(db, guests, options);
     const repository = new D1StorageRepository(db);
-    const beforeRejectedStart = {
-      matches: await countRows(db, "matches"),
-      receipts: await countRows(db, "command_receipts"),
-      outbox: await countRows(db, "outbox"),
-    };
-
-    const unreadyStart = await sendRoomCommand(db, guests[0]!, options,
-      roomCommand("START_MATCH", roomId, 3, {}), roomId);
-    assertRejected(unreadyStart.body, "ROOM_NOT_READY");
-    assert.deepEqual({
-      matches: await countRows(db, "matches"),
-      receipts: await countRows(db, "command_receipts"),
-      outbox: await countRows(db, "outbox"),
-    }, beforeRejectedStart);
-
+    assert.ok((await repository.getRoom(roomId))!.players.every(player => player.ready), "room creation and JOIN are automatically ready");
     const nonOwnerStart = await sendRoomCommand(db, guests[1]!, options,
       roomCommand("START_MATCH", roomId, 3, {}), roomId);
     assertRejected(nonOwnerStart.body, "ROOM_FORBIDDEN");
@@ -605,6 +591,8 @@ test("room ready/owner/version guards and concurrent START_MATCH persist the ful
       outbox: await countRows(db, "outbox"),
     }, beforeStaleStart);
 
+    // Simulate a room persisted by the previous release; readiness must not gate START_MATCH.
+    await db.prepare("UPDATE room_players SET ready = 0 WHERE room_id = ?").bind(roomId).run();
     const beforeConcurrentStart = {
       receipts: await countRows(db, "command_receipts"),
       outbox: await countRows(db, "outbox"),
@@ -697,7 +685,7 @@ test("room ready/owner/version guards and concurrent START_MATCH persist the ful
   }
 });
 
-test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and reset readiness", async () => {
+test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and allow an immediate rematch", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {
     const clock = { value: FIXED_TIME };
@@ -815,7 +803,7 @@ test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate on
     const lobbyView = assertRoomView(returned.body);
     assert.equal(lobbyView.status, "waiting");
     assert.equal(lobbyView.activeMatchId, null);
-    assert.ok(lobbyView.members.every((member) => !member.ready));
+    assert.ok(lobbyView.members.every((member) => member.ready));
     const lobbyRoom = await repository.getRoom(roomId);
     assert.ok(lobbyRoom);
     assert.equal(lobbyRoom.version, restartedRoom.version + 1);
@@ -824,22 +812,8 @@ test("completed direct restart and RETURN_TO_LOBBY preserve history, allocate on
     assert.deepEqual(await repository.getMatch(newMatchId), completedNewMatch);
     assert.deepEqual(await repository.listMatchEvents(oldMatchId), oldEvents);
     assert.deepEqual(await repository.listMatchEvents(newMatchId), completedEvents);
-    const beforeNotReadyStart = {
-      matches: await countRows(db, "matches"),
-      receipts: await countRows(db, "command_receipts"),
-      outbox: await countRows(db, "outbox"),
-    };
-    const notReadyStart = await sendRoomCommand(db, guests[0]!, options,
-      roomCommand("START_MATCH", roomId, lobbyRoom.version, {}), roomId);
-    assertRejected(notReadyStart.body, "ROOM_NOT_READY");
-    assert.deepEqual({
-      matches: await countRows(db, "matches"),
-      receipts: await countRows(db, "command_receipts"),
-      outbox: await countRows(db, "outbox"),
-    }, beforeNotReadyStart);
-    const readyAgainVersion = await readyAll(db, guests, options, roomId, lobbyRoom.version);
     const afterReturnStart = await sendRoomCommand(db, guests[0]!, options,
-      roomCommand("START_MATCH", roomId, readyAgainVersion, {}), roomId);
+      roomCommand("START_MATCH", roomId, lobbyRoom.version, {}), roomId);
     assert.equal(assertRoomView(afterReturnStart.body).status, "in_game");
     assert.equal(await countRows(db, "matches"), 3);
   } finally {

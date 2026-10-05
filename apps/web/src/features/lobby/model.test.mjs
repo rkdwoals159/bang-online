@@ -35,24 +35,13 @@ function room({
   };
 }
 
-test("shows server seats and readiness in seat order and blocks start until everyone is ready", () => {
-  const state = buildRoomLobbyViewModel(room({ ready: [true, false, true, true] }));
-
+test("arrival is sufficient: legacy unready flags do not block the owner", () => {
+  const state = buildRoomLobbyViewModel(room({ ready: [true, false, true, false] }));
   assert.equal(state.occupancy, 4);
-  assert.equal(state.readyCount, 3);
-  assert.equal(state.seats.length, 4);
-  assert.deepEqual(state.seats.map(({ seatNumber, member, readinessLabel }) => ({
-    seatNumber,
-    playerId: member?.playerId,
-    readinessLabel,
-  })), [
-    { seatNumber: 1, playerId: "player-1", readinessLabel: "준비 완료" },
-    { seatNumber: 2, playerId: "player-2", readinessLabel: "준비 중" },
-    { seatNumber: 3, playerId: "player-3", readinessLabel: "준비 완료" },
-    { seatNumber: 4, playerId: "player-4", readinessLabel: "준비 완료" },
-  ]);
-  assert.equal(state.canStart, false);
-  assert.match(state.startBlockedReason, /모든 참가자/);
+  assert.deepEqual(state.seats.map(({ seatNumber, member }) => [seatNumber, member?.playerId]), [[1, "player-1"], [2, "player-2"], [3, "player-3"], [4, "player-4"]]);
+  assert.equal(state.canStart, true);
+  assert.equal(state.startBlockedReason, null);
+  assert.doesNotMatch(state.statusMessage, /준비/);
 });
 
 test("leaves unoccupied room seats visible and blocks starting before four guests", () => {
@@ -87,10 +76,9 @@ test("a full seven-seat room has no invitation capacity for an eighth guest", ()
   assert.equal(state.inviteMessage, "방 정원이 찼어요. 추가 참가를 받을 수 없어요.");
 });
 
-test("started rooms disable readiness, start, invitations and kick actions", () => {
+test("started rooms disable start, invitations and kick actions", () => {
   for (const status of ["starting", "in_game", "paused", "completed", "closed"]) {
     const state = buildRoomLobbyViewModel(room({ status, ready: true }));
-    assert.equal(state.canSetReady, false, status);
     assert.equal(state.canStart, false, status);
     assert.equal(state.canInvite, false, status);
     assert.equal(state.seats.some(({ canKick }) => canKick), false, status);

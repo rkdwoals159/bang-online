@@ -401,12 +401,9 @@ async function insertMatchOutbox(
   );
 }
 
-function assertReadySnapshot(state: GameState, members: readonly RoomPlayerRow[]): void {
+function assertRosterSnapshot(state: GameState, members: readonly RoomPlayerRow[]): void {
   if (members.length < 4 || members.length > 7) {
     throw new RoomStartNotReadyError("A match requires four through seven room members.");
-  }
-  if (members.some(({ ready }) => !ready)) {
-    throw new RoomStartNotReadyError("Every room member must be ready before starting.");
   }
 
   const statePlayerIds = new Set<string>();
@@ -525,7 +522,7 @@ export class RoomLifecycleRepository {
       );
       await client.query(
         `INSERT INTO room_players (room_id, player_id, seat_index, ready)
-         VALUES ($1, $2, 0, false)`,
+         VALUES ($1, $2, 0, true)`,
         [input.id, input.ownerPlayerId],
       );
 
@@ -590,7 +587,7 @@ export class RoomLifecycleRepository {
 
       await client.query(
         `INSERT INTO room_players (room_id, player_id, seat_index, ready)
-         VALUES ($1, $2, $3, false)`,
+         VALUES ($1, $2, $3, true)`,
         [room.id, input.actorPlayerId, seatIndex],
       );
       return {
@@ -688,7 +685,7 @@ export class RoomLifecycleRepository {
     });
   }
 
-  /** Atomically starts a match from the locked, ready room roster. */
+  /** Atomically starts a match from the locked room roster. */
   async startRoomWithMatch(input: StartRoomWithMatchInput): Promise<StartRoomWithMatchResult> {
     validateCommand(input);
     if (!input.matchId.trim() || !input.matchOutboxEventId.trim()) {
@@ -753,7 +750,7 @@ export class RoomLifecycleRepository {
         );
         assertUnchangedRoster(room, members, previousRosterResult.rows);
       }
-      assertReadySnapshot(input.state, members);
+      assertRosterSnapshot(input.state, members);
 
       const nextVersion = currentVersion + 1;
       const outcome: StartRoomWithMatchOutcome = {
@@ -895,7 +892,7 @@ export class RoomLifecycleRepository {
       };
 
       await client.query("SAVEPOINT room_return_to_lobby_writes");
-      await client.query("UPDATE room_players SET ready = false WHERE room_id = $1", [room.id]);
+      await client.query("UPDATE room_players SET ready = true WHERE room_id = $1", [room.id]);
       const updatedRoom = await client.query<{ version: DatabaseInteger }>(
         `UPDATE rooms SET status = 'waiting', version = $3, updated_at = now()
          WHERE id = $1 AND status = $2 AND version = $4

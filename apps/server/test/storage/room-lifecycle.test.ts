@@ -131,10 +131,9 @@ async function markMatchCompleted(database: Awaited<ReturnType<typeof createData
 
 async function createReadyRoom(
   lifecycle: RoomLifecycleRepository,
-  options: { readonly memberCount?: number; readonly ready?: boolean } = {},
+  options: { readonly memberCount?: number } = {},
 ): Promise<number> {
   const memberCount = options.memberCount ?? 4;
-  const ready = options.ready ?? true;
   await lifecycle.createRoom(createInput({ capacity: 4 }));
   let version = 0;
   for (let index = 1; index < memberCount; index += 1) {
@@ -142,14 +141,6 @@ async function createReadyRoom(
     await lifecycle.joinRoom({
       ...commandBase("room-1", playerId, version, `join-start-${index}`),
       inviteCodeHash: "invite-hash-room-1",
-    });
-    version += 1;
-  }
-  for (let index = 0; index < memberCount; index += 1) {
-    if (!ready && index === memberCount - 1) continue;
-    await lifecycle.setReady({
-      ...commandBase("room-1", playerIds[index]!, version, `ready-start-${index}`),
-      ready: true,
     });
     version += 1;
   }
@@ -570,8 +561,8 @@ test("serializes concurrent direct restarts so only one new match becomes active
   }
 });
 
-test("direct restart rechecks unchanged membership and readiness before writing", async () => {
-  const scenarios = ["changed roster", "reordered seats", "not all ready"] as const;
+test("direct restart rechecks unchanged membership before writing", async () => {
+  const scenarios = ["changed roster", "reordered seats"] as const;
   for (const scenario of scenarios) {
     const { database, lifecycle, storage } = await createFixture();
     try {
@@ -593,8 +584,6 @@ test("direct restart rechecks unchanged membership and readiness before writing"
         await database.query("UPDATE room_players SET seat_index = 4 WHERE room_id = 'room-1' AND player_id = $1", [playerIds[2]]);
         await database.query("UPDATE room_players SET seat_index = 2 WHERE room_id = 'room-1' AND player_id = $1", [playerIds[3]]);
         await database.query("UPDATE room_players SET seat_index = 3 WHERE room_id = 'room-1' AND player_id = $1", [playerIds[2]]);
-      } else {
-        await database.query("UPDATE room_players SET ready = false WHERE room_id = 'room-1' AND player_id = $1", [playerIds[3]]);
       }
 
       const command = startInput(first.outcome.version, {
@@ -610,7 +599,7 @@ test("direct restart rechecks unchanged membership and readiness before writing"
            (SELECT count(*) FROM outbox)::text AS outbox`,
         [playerIds[0], command.commandId],
       );
-      const error = scenario === "not all ready" ? RoomStartNotReadyError : RoomLockedError;
+      const error = RoomLockedError;
       await assert.rejects(lifecycle.startRoomWithMatch(command), error, scenario);
       assert.deepEqual(await storage.getRoom("room-1"), beforeRoom);
       assert.equal(await storage.getMatch(command.matchId), null);
@@ -657,12 +646,6 @@ test("start rejects unauthorized, stale, incomplete, locked, and mismatched snap
       name: "fewer than four members",
       setup: (lifecycle) => createReadyRoom(lifecycle, { memberCount: 3 }),
       command: (version) => startInput(version, { commandId: "start-underfilled" }),
-      error: RoomStartNotReadyError,
-    },
-    {
-      name: "a member is not ready",
-      setup: (lifecycle) => createReadyRoom(lifecycle, { ready: false }),
-      command: (version) => startInput(version, { commandId: "start-not-ready" }),
       error: RoomStartNotReadyError,
     },
     {
@@ -861,6 +844,8 @@ test("serializes join, readiness, owner transfer, and D10 closure with room rece
       RoomFullError,
     );
 
+    // Exercise the legacy setter on a previously stored false flag.
+    await database.query("UPDATE room_players SET ready = false WHERE room_id = $1 AND player_id = $2", ["room-1", playerIds[1]]);
     const ready = { ...commandBase("room-1", playerIds[1], 3, "ready-player-2"), ready: true };
     const readyResult = await lifecycle.setReady(ready);
     assert.equal(readyResult.status, "applied");
@@ -1127,7 +1112,7 @@ test("returns a completed match room to the lobby atomically and replays the ori
     assert.equal(afterRoom?.ownerPlayerId, beforeRoom.ownerPlayerId);
     assert.deepEqual(afterRoom?.players.map(({ playerId, seatIndex }) => ({ playerId, seatIndex })),
       beforeRoom.players.map(({ playerId, seatIndex }) => ({ playerId, seatIndex })));
-    assert.deepEqual(afterRoom?.players.map(({ ready }) => ready), [false, false, false, false]);
+    assert.deepEqual(afterRoom?.players.map(({ ready }) => ready), [true, true, true, true]);
     assert.equal(await storage.getLatestMatchIdForRoom("room-1"), started.outcome.matchId);
     assert.deepEqual(await storage.getMatch(started.outcome.matchId), completedMatch);
     assert.deepEqual(
@@ -1270,7 +1255,7 @@ test("rejects return-to-lobby authorization, stale versions, and incomplete late
   }
 });
 
-test("rolls back readiness reset, room version, receipt, and outbox when return-to-lobby outbox insertion fails", async () => {
+test("rolls back automatic readiness restoration, room version, receipt, and outbox when return-to-lobby outbox insertion fails", async () => {
   const { database, lifecycle, storage } = await createFixture();
   try {
     const readyVersion = await createReadyRoom(lifecycle);
@@ -1306,4 +1291,25 @@ test("rolls back readiness reset, room version, receipt, and outbox when return-
   } finally {
     await database.close();
   }
+});
+
+
+test("room arrivals are automatically ready and legacy unready flags allow start and direct restart", async () => {
+  const { database, lifecycle, storage } = await createFixture();
+  try {
+    const version = await createReadyRoom(lifecycle);
+    assert.equal(version, 3, "only three JOIN commands changed the roster version");
+    assert.ok((await storage.getRoom("room-1"))!.players.every(player => player.ready));
+    await database.query("UPDATE room_players SET ready = false WHERE room_id = 'room-1'");
+    const started = await lifecycle.startRoomWithMatch(startInput(version));
+    assert.equal(started.status, "applied");
+    await markMatchCompleted(database, started.outcome.matchId);
+    const restarted = await lifecycle.startRoomWithMatch(startInput(started.outcome.version, {
+      commandId: "restart-with-legacy-flags", requestHash: "restart-with-legacy-flags-hash",
+      outboxEventId: "outbox-restart-with-legacy-flags", matchOutboxEventId: "match-outbox-restart-with-legacy-flags",
+      matchId: "match-restarted-with-legacy-flags",
+    }));
+    assert.equal(restarted.status, "applied");
+    assert.notEqual(restarted.outcome.matchId, started.outcome.matchId);
+  } finally { await database.close(); }
 });

@@ -457,7 +457,7 @@ test("the service does not close a room after its lobby is locked", async () => 
   }
 });
 
-test("starts an all-ready room once, returns the same match on retry, and projects its route", async () => {
+test("starts a room directly after arrival once, returns the same match on retry, and projects its route", async () => {
   const { database, service, storage } = await createFixture();
   try {
     const players = [];
@@ -482,24 +482,17 @@ test("starts an all-ready room once, returns the same match on retry, and projec
     }
 
     const rejectedCommandIds = [
-      "start-not-ready",
       "start-not-owner",
       "start-not-member",
       "start-stale-version",
     ];
-    await assert.rejects(
-      service.startMatch(ownerId, {
-        roomId: created.room.roomId,
-        expectedVersion: roomVersion,
-        commandId: rejectedCommandIds[0]!,
-      }),
-      (error: unknown) => error instanceof Error && "code" in error && error.code === "ROOM_NOT_READY",
-    );
+    assert.equal(roomVersion, 3);
+    assert.ok((await storage.getRoom(created.room.roomId))!.players.every(player => player.ready));
     await assert.rejects(
       service.startMatch(players[1]!.authenticated.playerId, {
         roomId: created.room.roomId,
         expectedVersion: roomVersion,
-        commandId: rejectedCommandIds[1]!,
+        commandId: rejectedCommandIds[0]!,
       }),
       RoomAuthorizationError,
     );
@@ -507,7 +500,7 @@ test("starts an all-ready room once, returns the same match on retry, and projec
       service.startMatch(players[4]!.authenticated.playerId, {
         roomId: created.room.roomId,
         expectedVersion: roomVersion,
-        commandId: rejectedCommandIds[2]!,
+        commandId: rejectedCommandIds[1]!,
       }),
       RoomAuthorizationError,
     );
@@ -515,7 +508,7 @@ test("starts an all-ready room once, returns the same match on retry, and projec
       service.startMatch(ownerId, {
         roomId: created.room.roomId,
         expectedVersion: roomVersion - 1,
-        commandId: rejectedCommandIds[3]!,
+        commandId: rejectedCommandIds[2]!,
       }),
       (error: unknown) => error instanceof Error && "code" in error && error.code === "STALE_VERSION",
     );
@@ -527,16 +520,6 @@ test("starts an all-ready room once, returns the same match on retry, and projec
     assert.equal(invalidReceipts.rows[0]?.count, "0");
     const noMatches = await database.query<{ count: string }>("SELECT count(*)::text AS count FROM matches");
     assert.equal(noMatches.rows[0]?.count, "0");
-
-    for (let index = 0; index < 4; index += 1) {
-      const result = await service.setReady(players[index]!.authenticated.playerId, {
-        roomId: created.room.roomId,
-        expectedVersion: roomVersion,
-        commandId: `ready-start-player-${index}`,
-        ready: true,
-      });
-      roomVersion = result.mutation.outcome.version;
-    }
 
     const startInput = {
       roomId: created.room.roomId,
@@ -736,7 +719,7 @@ test("restarts a completed match with a fresh seeded setup and preserves the pri
   }
 });
 
-test("requires at least four ready members and starts a seven-member room", async () => {
+test("requires at least four members and starts a seven-member room", async () => {
   const { database, service, storage } = await createFixture();
   try {
     const players = [];
@@ -910,7 +893,7 @@ test("returns a completed room to the same lobby and requires readiness before s
     assert.equal(returned.room?.activeMatchId, null);
     assert.equal(returned.room?.ownerPlayerId, ownerId);
     assert.deepEqual(returned.room?.members.map(({ playerId, seatIndex, ready }) => ({ playerId, seatIndex, ready })),
-      roster.map((playerId, seatIndex) => ({ playerId, seatIndex, ready: false })));
+      roster.map((playerId, seatIndex) => ({ playerId, seatIndex, ready: true })));
     assert.deepEqual(await storage.getMatch(started.matchId), completedMatch);
     assert.deepEqual(
       (await database.query(
@@ -924,33 +907,7 @@ test("returns a completed room to the same lobby and requires readiness before s
     assert.equal(duplicate.mutation.status, "duplicate");
     assert.deepEqual(duplicate.mutation.outcome, returned.mutation.outcome);
     assert.equal(duplicate.room?.activeMatchId, null);
-    const matchCountBeforeReady = await database.query<{ count: string }>(
-      "SELECT count(*)::text AS count FROM matches WHERE room_id = $1",
-      [created.room.roomId],
-    );
-    await assert.rejects(
-      service.startMatch(ownerId, {
-        roomId: created.room.roomId,
-        expectedVersion: returned.mutation.outcome.version,
-        commandId: "start-after-return-before-ready",
-      }),
-      (error: unknown) => error instanceof Error && "code" in error && error.code === "ROOM_NOT_READY",
-    );
-    assert.equal((await database.query<{ count: string }>(
-      "SELECT count(*)::text AS count FROM matches WHERE room_id = $1",
-      [created.room.roomId],
-    )).rows[0]?.count, matchCountBeforeReady.rows[0]?.count);
-
     roomVersion = returned.mutation.outcome.version;
-    for (let index = 0; index < 4; index += 1) {
-      const ready = await service.setReady(players[index]!.authenticated.playerId, {
-        roomId: created.room.roomId,
-        expectedVersion: roomVersion,
-        commandId: `ready-again-return-player-${index}`,
-        ready: true,
-      });
-      roomVersion = ready.mutation.outcome.version;
-    }
     const startedAgain = await service.startMatch(ownerId, {
       roomId: created.room.roomId,
       expectedVersion: roomVersion,

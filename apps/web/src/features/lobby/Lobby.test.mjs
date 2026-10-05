@@ -53,14 +53,15 @@ function markup(roomView, viewerConnectionState) {
   }));
 }
 
-test("renders HTML-like server guest names as text with readiness and explicit room status", () => {
+test("renders HTML-like server guest names as text without readiness controls and with explicit room status", () => {
   const html = markup(room({ ready: false }));
 
   assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
   assert.doesNotMatch(html, /<img(?:\s|>)/i);
   assert.doesNotMatch(html, /onerror="/i);
   assert.match(html, /게스트/);
-  assert.match(html, /준비 중/);
+  assert.doesNotMatch(html, /준비 완료|준비 취소|아직 준비 전|room-lobby__ready/);
+  assert.doesNotMatch(html, /<button[^>]*disabled=""[^>]*>게임 시작<\/button>/);
   assert.match(html, /대기 중/);
   assert.equal((html.match(/class="room-lobby__seat(?:\s|"|$)/g) ?? []).length, 4);
 });
@@ -68,7 +69,7 @@ test("renders HTML-like server guest names as text with readiness and explicit r
 test("renders disabled start and locked seat actions once the server room has started", () => {
   const html = markup(room({ status: "in_game", ready: true }));
 
-  assert.match(html, /게임이 시작되어 새 참가, 준비 변경, 강퇴를 할 수 없어요\./);
+  assert.match(html, /게임이 시작되어 새 참가와 강퇴를 할 수 없어요\./);
   assert.match(html, /<button[^>]*disabled=""[^>]*>게임 시작<\/button>/);
   assert.doesNotMatch(html, /내보내기/);
   assert.doesNotMatch(html, /room-lobby-invite-url/);

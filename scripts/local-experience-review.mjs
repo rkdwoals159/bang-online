@@ -19,8 +19,7 @@ if(mode==='setup'){
     const guest=await request('/api/guest-sessions',null,{protocolVersion:1,displayName:`로컬 연출 ${i}`});
     const preview=await request('/api/rooms/preview',guest.cookie,{protocolVersion:1,requestId:randomUUID(),inviteCode:argument});
     const envelope=(type,version,payload)=>({protocolVersion:1,commandId:randomUUID(),roomId,expectedVersion:version,type,payload});
-    const joined=await request(`/api/rooms/${roomId}/commands`,guest.cookie,envelope('JOIN',preview.result.version,{inviteCode:argument}));
-    await request(`/api/rooms/${roomId}/commands`,guest.cookie,envelope('SET_READY',joined.result.version,{ready:true}));
+    await request(`/api/rooms/${roomId}/commands`,guest.cookie,envelope('JOIN',preview.result.version,{inviteCode:argument}));
     guests.push({cookie:guest.cookie,playerId:guest.result.player.playerId});
   }
   await mkdir('.sites-runtime',{recursive:true});await writeFile(file,JSON.stringify(guests),{mode:0o600});console.log(JSON.stringify({readyBots:guests.length}));

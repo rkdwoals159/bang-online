@@ -306,7 +306,7 @@ test("uses a newer confirmed room command response and syncs only for older ackn
     status: "waiting",
     activeMatchId: null,
     version: 19,
-    members: previousRoom.members.map((member) => ({ ...member, ready: false })),
+    members: previousRoom.members.map((member) => ({ ...member, ready: true })),
   };
   let syncCalls = 0;
   await returnToLobbyFromResult({

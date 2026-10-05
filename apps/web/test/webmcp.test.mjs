@@ -88,7 +88,7 @@ test("WebMCP registers the primary guest, room, current state and match action t
   assert.equal(report.supported, true);
   assert.deepEqual(report.registered, [
     "bang.get_current_state", "bang.create_guest_session", "bang.create_room", "bang.join_room",
-    "bang.set_ready", "bang.start_match", "bang.perform_match_action",
+    "bang.start_match", "bang.perform_match_action",
   ]);
   assert.equal(report.failed.length, 0);
   assert.ok(registrations.every(({ options }) => options.signal === controller.signal));
@@ -108,8 +108,8 @@ test("unsupported and failing ModelContext registrations leave the game UI usabl
   }, runtime, new AbortController().signal);
   assert.equal(failed.supported, true);
   assert.equal(failed.registered.length, 0);
-  assert.equal(failed.failed.length, 7);
-  assert.equal(attempted, 7);
+  assert.equal(failed.failed.length, 6);
+  assert.equal(attempted, 6);
 });
 
 test("tool input validation rejects unknown keys and only sends server-projected legal actions", async () => {
@@ -162,13 +162,11 @@ test("current state is viewer-scoped and room lobby tools use current versioned 
   assert.equal(state.match.snapshot.selfPrivate.role, "outlaw");
   assert.equal(JSON.stringify(state).includes("credential"), false);
 
-  await tools.get("bang.set_ready").execute({ ready: true });
-  assert.equal(runtime.sentRoomCommands[0].type, "SET_READY");
-  assert.equal(runtime.sentRoomCommands[0].expectedVersion, 3);
+  assert.equal(tools.has("bang.set_ready"), false);
 
   await tools.get("bang.start_match").execute({});
-  assert.equal(runtime.sentRoomCommands[1].type, "START_MATCH");
-  assert.equal(runtime.sentRoomCommands[1].expectedVersion, 3);
+  assert.equal(runtime.sentRoomCommands[0].type, "START_MATCH");
+  assert.equal(runtime.sentRoomCommands[0].expectedVersion, 3);
 });
 
 test("tool discards follow the responder's exact private candidate set and count", async () => {

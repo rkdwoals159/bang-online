@@ -744,7 +744,7 @@ export class D1StorageRepository {
       await this.db.batch([
         this.db.prepare(`INSERT INTO rooms (id, owner_player_id, invite_code_hash, capacity) VALUES (?, ?, ?, ?)`)
           .bind(input.id, input.ownerPlayerId, input.inviteCodeHash, input.capacity),
-        this.db.prepare(`INSERT INTO room_players (room_id, player_id, seat_index, ready) VALUES (?, ?, 0, 0)`)
+        this.db.prepare(`INSERT INTO room_players (room_id, player_id, seat_index, ready) VALUES (?, ?, 0, 1)`)
           .bind(input.id, input.ownerPlayerId),
         receiptWrite(this.db, { actorPlayerId: input.actorPlayerId, commandId: input.commandId,
           requestHash: input.requestHash, outcome: outcome as unknown as JsonValue }, { matchId: null, roomId: input.id }),
@@ -1266,7 +1266,7 @@ export class D1StorageRepository {
       throw new D1StorageInvariantError("Only a waiting room or a room with a completed latest match can be started.");
     }
     if (room.ownerPlayerId !== input.actorPlayerId) throw new D1StorageInvariantError("Only the room owner can start a match.");
-    if (room.players.length < 4 || room.players.length > room.capacity || room.players.some((player) => !player.ready)) {
+    if (room.players.length < 4 || room.players.length > room.capacity) {
       throw new D1StorageInvariantError("Room roster is not ready for a match start.");
     }
     let completedMatch: MatchRecord | null = null;
@@ -1329,7 +1329,6 @@ export class D1StorageRepository {
       WHERE r.id = ? AND r.version = ? AND r.status = ? AND r.owner_player_id = ?
         AND EXISTS (SELECT 1 FROM room_players AS owner WHERE owner.room_id = r.id AND owner.player_id = ?)
         AND (SELECT COUNT(*) FROM room_players WHERE room_id = r.id) BETWEEN 4 AND r.capacity
-        AND NOT EXISTS (SELECT 1 FROM room_players WHERE room_id = r.id AND ready <> 1)
         AND (SELECT COUNT(*) FROM room_players WHERE room_id = r.id) = ?
         AND NOT EXISTS (
           SELECT 1 FROM room_players AS rp WHERE rp.room_id = r.id AND NOT (${roomRosterGuard})

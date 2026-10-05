@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: P02 scoped SSE checks membership and renews only the viewed room's lease
+ok 1 - P02 scoped SSE checks membership and renews only the viewed room's lease
+  ---
+  duration_ms: 7825.2708
+  type: 'test'
+  ...
+# Subtest: R07 and P01 successive command ACKs include private projections and delta sync preserves history
+ok 2 - R07 and P01 successive command ACKs include private projections and delta sync preserves history
+  ---
+  duration_ms: 6087.0099
+  type: 'test'
+  ...
+# Subtest: General Store HTTP sync includes public remaining faces and removes each selected card
+ok 3 - General Store HTTP sync includes public remaining faces and removes each selected card
+  ---
+  duration_ms: 7007.1311
+  type: 'test'
+  ...
+# Subtest: Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+ok 4 - Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+  ---
+  duration_ms: 6385.893
+  type: 'test'
+  ...
+# Subtest: accepted match commands use one authorization context batch and one atomic commit batch
+ok 5 - accepted match commands use one authorization context batch and one atomic commit batch
+  ---
+  duration_ms: 4763.7561
+  type: 'test'
+  ...
+# Subtest: match membership revoked after command load prevents the atomic commit
+ok 6 - match membership revoked after command load prevents the atomic commit
+  ---
+  duration_ms: 5127.737
+  type: 'test'
+  ...
+# Subtest: a command receipt cannot be reused across two authorized matches
+ok 7 - a command receipt cannot be reused across two authorized matches
+  ---
+  duration_ms: 5225.3185
+  type: 'test'
+  ...
+# Subtest: D1 expected-version CAS allows one writer for concurrent match commands
+ok 8 - D1 expected-version CAS allows one writer for concurrent match commands
+  ---
+  duration_ms: 6885.7803
+  type: 'test'
+  ...
+# Subtest: stale match cursors receive the recent event tail and an explicit full snapshot
+ok 9 - stale match cursors receive the recent event tail and an explicit full snapshot
+  ---
+  duration_ms: 7327.407
+  type: 'test'
+  ...
+# Subtest: room and match sync use strict canonical parsers and viewer-scoped private projections
+ok 10 - room and match sync use strict canonical parsers and viewer-scoped private projections
+  ---
+  duration_ms: 5224.9336
+  type: 'test'
+  ...
+# Subtest: unsupported match schema and ruleset disclose recovery only to members and never mutate state
+ok 11 - unsupported match schema and ruleset disclose recovery only to members and never mutate state
+  ---
+  duration_ms: 17728.7038
+  type: 'test'
+  ...
+# Subtest: existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+ok 12 - existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+  ---
+  duration_ms: 6925.938
+  type: 'test'
+  ...
+# Subtest: receipt replay survives malformed match snapshots, while fresh commands fail without writes
+ok 13 - receipt replay survives malformed match snapshots, while fresh commands fail without writes
+  ---
+  duration_ms: 5767.3493
+  type: 'test'
+  ...
+# Subtest: SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+ok 14 - SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+  ---
+  duration_ms: 7250.8574
+  type: 'test'
+  ...
+# Subtest: SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+ok 15 - SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+  ---
+  duration_ms: 7039.1007
+  type: 'test'
+  ...
+# Subtest: SSE keeps active matches on the fast poll after the activity warm window expires
+ok 16 - SSE keeps active matches on the fast poll after the activity warm window expires
+  ---
+  duration_ms: 6587.9365
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 117506.5321
