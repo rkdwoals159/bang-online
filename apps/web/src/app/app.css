@@ -65,12 +65,15 @@ h1 { margin: 0; color: var(--color-ink); font-size: clamp(28px, 3.3vw, 44px); fo
 .match-page__history > summary { min-height: 44px; align-content: center; font-weight: 750; }
 .match-page__history > .game-table { margin-top: 16px; }
 .role-reveal-page { display: grid; width: min(100%, 900px); gap: 16px; }
+.role-reveal-page > .page-description { max-width: none; margin: 0; word-break: keep-all; overflow-wrap: break-word; }
 .role-reveal-page__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 24px; padding: 24px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-soft); }
-.role-reveal-page__cards .roster-card { width: 100%; display: grid; grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 8px 16px; }
-.role-reveal-page__cards .roster-card__artwork { grid-row: 1 / 3; width: 112px; }
-.role-reveal-page__cards .roster-card h3 { align-self: end; }
-.role-reveal-page__cards .roster-card p { white-space: pre-line; font-size: 14px; line-height: 1.6; }
+.role-reveal-page__cards > .roster-card { width: 100%; min-width: 0; display: grid; grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 8px 16px; }
+.role-reveal-page__cards > .roster-card > .roster-card__artwork,
+.role-reveal-page__cards > .roster-card > .roster-card__detail { grid-column: 1; grid-row: 1 / 3; align-self: start; width: 112px; }
+.role-reveal-page__cards > .roster-card > h3 { grid-column: 2; grid-row: 1; align-self: start; margin: 0; }
+.role-reveal-page__cards > .roster-card > p { grid-column: 2; grid-row: 2; min-width: 0; margin: 0; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word; font-size: 15px; line-height: 1.65; }
 .role-reveal-page > .button { justify-self: start; }
+@media (max-width: 1100px) { .role-reveal-page__cards { grid-template-columns: minmax(0, 1fr); } }
 .text-link { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; margin-top: 16px; color: var(--color-forest); font-size: 14px; font-weight: 750; }
 .text-link:hover { text-decoration: underline; }
 .state-frame { text-align: center; }
@@ -108,5 +111,12 @@ h1 { margin: 0; color: var(--color-ink); font-size: clamp(28px, 3.3vw, 44px); fo
   .home-copy { padding: 28px 24px; }
   .home-meta { gap: 12px; }
   .role-reveal-page__cards { grid-template-columns: minmax(0, 1fr); }
+  .role-reveal-page__cards > .roster-card { grid-template-columns: 96px minmax(0, 1fr); }
+  .role-reveal-page__cards > .roster-card > .roster-card__artwork,
+  .role-reveal-page__cards > .roster-card > .roster-card__detail { grid-row: 1; width: 96px; }
+  .role-reveal-page__cards > .roster-card > .roster-card__artwork,
+  .role-reveal-page__cards > .roster-card > .roster-card__detail .roster-card__artwork { width: 96px; }
+  .role-reveal-page__cards > .roster-card > h3 { align-self: center; }
+  .role-reveal-page__cards > .roster-card > p { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

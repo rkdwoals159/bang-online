@@ -1,0 +1,86 @@
+[
+  {
+    "viewport": 1022,
+    "cards": [
+      {
+        "grid": "112px 640px",
+        "imageWidth": 112,
+        "imageX": 127,
+        "name": "보안관",
+        "overflow": false,
+        "textHeight": 144.859375,
+        "textWidth": 640,
+        "textX": 255
+      },
+      {
+        "grid": "112px 640px",
+        "imageWidth": 112,
+        "imageX": 127,
+        "name": "블랙 잭",
+        "overflow": false,
+        "textHeight": 144.859375,
+        "textWidth": 640,
+        "textX": 255
+      }
+    ]
+  },
+  {
+    "viewport": 375,
+    "cards": [
+      {
+        "grid": "96px 132px",
+        "imageWidth": 96,
+        "imageX": 58,
+        "name": "보안관",
+        "overflow": false,
+        "textHeight": 49.5,
+        "textWidth": 244,
+        "textX": 58
+      },
+      {
+        "grid": "96px 132px",
+        "imageWidth": 96,
+        "imageX": 58,
+        "name": "블랙 잭",
+        "overflow": false,
+        "textHeight": 148.5,
+        "textWidth": 244,
+        "textX": 58
+      }
+    ]
+  },
+  {
+    "viewport": 320,
+    "cards": [
+      {
+        "imageWidth": 96,
+        "name": "보안관",
+        "overflow": false,
+        "textWidth": 204
+      },
+      {
+        "imageWidth": 96,
+        "name": "블랙 잭",
+        "overflow": false,
+        "textWidth": 204
+      }
+    ]
+  },
+  {
+    "viewport": 1280,
+    "cards": [
+      {
+        "imageWidth": 112,
+        "name": "보안관",
+        "overflow": false,
+        "textWidth": 244
+      },
+      {
+        "imageWidth": 112,
+        "name": "블랙 잭",
+        "overflow": false,
+        "textWidth": 244
+      }
+    ]
+  }
+]

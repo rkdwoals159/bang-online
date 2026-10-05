@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { after, before, test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -559,4 +560,13 @@ test("room operations can wait for the new cookie-authenticated socket connectio
     if (originalWindow === undefined) delete globalThis.window;
     else globalThis.window = originalWindow;
   }
+});
+
+
+test("role introduction assigns the interactive portrait and text to explicit grid columns", () => {
+  const css = readFileSync(new URL('./app.css', import.meta.url), 'utf8');
+  assert.match(css, /\.role-reveal-page__cards > \.roster-card > \.roster-card__detail\s*\{[^}]*grid-column: 1;[^}]*grid-row: 1 \/ 3;/);
+  assert.match(css, /\.role-reveal-page__cards > \.roster-card > p\s*\{[^}]*grid-column: 2;[^}]*grid-row: 2;[^}]*word-break: keep-all;/);
+  assert.match(css, /\.role-reveal-page__cards > \.roster-card > p\s*\{ grid-column: 1 \/ -1; \}/);
+  assert.doesNotMatch(css, /\.role-reveal-page__cards \.roster-card p/);
 });
