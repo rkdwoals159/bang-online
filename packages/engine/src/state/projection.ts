@@ -8,6 +8,7 @@ import type {
 import { parsePendingInteractionView } from "../../../contracts/src/validation.js";
 import type { PhysicalCard as CatalogPhysicalCard } from "../../../catalog/src/schema.js";
 import { buildLegalActionCandidates } from "../actions/index.js";
+import { earlyTablewideInteraction, projectTablewideAttack } from "../effects/runtime/index.js";
 import type { GameState, JsonValue } from "./types.js";
 
 const INTERACTION_CURSOR_KEY = "__resolutionCursor";
@@ -164,6 +165,8 @@ export function projectMatchSnapshot(
   const discardPile = state.zones.discardPileCardInstanceIds;
   const discardTopId = discardPile.at(-1);
   const pending = state.resolution.pendingInteraction;
+  const tablewideAttack = projectTablewideAttack(state);
+  const viewerPending = earlyTablewideInteraction(state, viewerPlayerId) ?? pending;
   const viewerEliminated = viewerSeat.public.eliminated;
   const outcome: MatchOutcomeView | undefined = state.status === "completed"
     ? state.outcome
@@ -205,6 +208,7 @@ export function projectMatchSnapshot(
       ...(pending?.kind === "GENERAL_STORE_PICK"
         ? { generalStoreCards: state.zones.revealedPoolCardInstanceIds.map(toCardFace) }
         : {}),
+      ...(tablewideAttack ? { tablewideAttack } : {}),
     },
     selfPrivate: viewerEliminated
       ? null
@@ -214,6 +218,6 @@ export function projectMatchSnapshot(
         },
     legalActions: buildLegalActionCandidates(state, viewerPlayerId, { compactAbilityCosts: true }),
     ...(outcome ? { outcome } : {}),
-    pendingInteraction: projectPendingInteraction(pending, viewerPlayerId, toCardFace),
+    pendingInteraction: projectPendingInteraction(viewerPending, viewerPlayerId, toCardFace),
   };
 }

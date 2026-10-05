@@ -11,6 +11,7 @@ import {
   type EngineCommand,
 } from "../../../../packages/engine/src/commands/index.js";
 import type { EffectEventDraft } from "../../../../packages/engine/src/effects/api.js";
+import { isConcurrentTablewideResponse } from "../../../../packages/engine/src/effects/runtime/index.js";
 import type { GameState, JsonValue } from "../../../../packages/engine/src/state/types.js";
 import type { AuthenticatedSocketContext, GatewayAck, GatewayHandlers } from "../socket/gateway.js";
 import {
@@ -370,7 +371,7 @@ export async function processMatchCommand(
       const prior = await findPriorOutcome(context, command, requestHash, dependencies.storage);
       if (prior) return prior;
 
-      if (match.version !== command.expectedVersion) {
+      if (match.version !== command.expectedVersion && !(command.expectedVersion < match.version && isConcurrentTablewideResponse(match.state, context.playerId, command))) {
         const saved = await saveRejection(
           context,
           command,
@@ -437,7 +438,7 @@ export async function processMatchCommand(
       try {
         const commit = await dependencies.storage.commitMatch({
           matchId: command.matchId,
-          expectedVersion: command.expectedVersion,
+          expectedVersion: match.version,
           state: nextState,
           events,
           receipt,
@@ -453,6 +454,11 @@ export async function processMatchCommand(
           return rejected(command.commandId, "NOT_A_PLAYER");
         }
         if (error instanceof StaleMatchVersionError) {
+          const latest = await loadAuthorizedMatch(context, command.matchId, dependencies.storage);
+          if (latest && command.expectedVersion <= latest.version && isConcurrentTablewideResponse(latest.state, context.playerId, command)) {
+            match = latest;
+            continue;
+          }
           const saved = await saveRejection(
             context,
             command,

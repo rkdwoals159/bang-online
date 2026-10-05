@@ -287,7 +287,7 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
       !isVersion(input.viewer.seatIndex) || (input.viewer.mode !== "active" && input.viewer.mode !== "eliminated_observer")) return false;
 
   const table = input.publicTable;
-  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"], ["generalStoreCards", "luckyJudgment"]) ||
+  if (!isRecord(table) || !exactShape(table, ["players", "turn", "deckCount", "publicDiscard"], ["generalStoreCards", "luckyJudgment", "tablewideAttack"]) ||
       !Array.isArray(table.players) || !table.players.every(validPublicPlayer) || !isRecord(table.turn) ||
       !exactShape(table.turn, ["currentPlayerId", "phase"]) || !isText(table.turn.currentPlayerId) ||
       !isText(table.turn.phase) || !isVersion(table.deckCount) || !isRecord(table.publicDiscard) ||
@@ -305,7 +305,19 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
         !["jail", "dynamite", "barrel", "jourdonnais_virtual_barrel"].includes(String(judgment.sourceKind)) ||
         !Array.isArray(judgment.cards) || judgment.cards.length !== 2 || !judgment.cards.every(validPendingCardFace) ||
         new Set(judgment.cards.map(card => card.cardInstanceId)).size !== 2 ||
-        !isRecord(input.pendingInteraction) || input.pendingInteraction.kind !== "LUCKY_DRAW") return false;
+        !isRecord(input.pendingInteraction) || (input.pendingInteraction.kind !== "LUCKY_DRAW" && !table.tablewideAttack)) return false;
+  }
+  if (Object.hasOwn(table, "tablewideAttack")) {
+    const attack = table.tablewideAttack;
+    const publicPlayers = table.players as unknown[];
+    if (!isRecord(attack) || !exactKeys(attack, ["attackId", "kind", "sourcePlayerId", "targets"]) ||
+        !isText(attack.attackId) || !["gatling", "indians"].includes(String(attack.kind)) || !isText(attack.sourcePlayerId) ||
+        !Array.isArray(attack.targets) || attack.targets.length > 6 || attack.targets.length === 0 ||
+        new Set(attack.targets.map(target => isRecord(target) ? target.playerId : null)).size !== attack.targets.length ||
+        !attack.targets.every(target => isRecord(target) && exactKeys(target, ["playerId", "status"]) && isText(target.playerId) &&
+          target.playerId !== attack.sourcePlayerId && publicPlayers.some(player => isRecord(player) && player.playerId === target.playerId) &&
+          ["waiting", "submitted", "responding", "resolved", "eliminated"].includes(String(target.status))) ||
+        !publicPlayers.some(player => isRecord(player) && player.playerId === attack.sourcePlayerId)) return false;
   }
   if (input.selfPrivate !== null) {
     if (!isRecord(input.selfPrivate) || !exactShape(input.selfPrivate, ["role", "hand"]) ||

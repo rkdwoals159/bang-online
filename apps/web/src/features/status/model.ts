@@ -32,7 +32,15 @@ export interface MatchStatusProjection {
 
 export interface PublicLogEntry {
   eventSeq: number;
+  occurredAt: string;
   message: string;
+}
+
+export function formatLogTime(occurredAt: string, now: number): string {
+  const date = new Date(occurredAt);
+  if (!Number.isFinite(date.getTime())) return "시간 정보 없음";
+  const clock = [date.getHours(), date.getMinutes(), date.getSeconds()].map(value => String(value).padStart(2, "0")).join(":");
+  return `${clock}(${Math.max(0, Math.floor((now - date.getTime()) / 1000))}초 전)`;
 }
 
 export interface RevealedRoleEntry {
@@ -311,7 +319,7 @@ export function buildMatchStatusViewModel(
     revealedRoles,
     publicLog: projection.visibleEvents.flatMap((event) => {
       const message = formatPublicEvent(event, playersById);
-      return message === null ? [] : [{ eventSeq: event.eventSeq, message }];
-    }),
+      return message === null ? [] : [{ eventSeq: event.eventSeq, occurredAt: event.occurredAt, message }];
+    }).sort((a, b) => b.eventSeq - a.eventSeq),
   };
 }

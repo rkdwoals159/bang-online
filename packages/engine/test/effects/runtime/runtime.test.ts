@@ -12,11 +12,131 @@ import { createEffectRegistry } from "../../../src/effects/registry.ts";
 import { jailEffect } from "../../../src/effects/cards/jail.ts";
 import { panicEffect, catBalouEffect } from "../../../src/effects/cards/steal-discard.ts";
 import { gatlingEffect, indiansEffect, saloonEffect } from "../../../src/effects/cards/tablewide.ts";
-import { createEffectCommandHandlers, executeCardEffect, type EffectRuntimeOptions } from "../../../src/effects/runtime/index.ts";
+import { createEffectCommandHandlers, executeCardEffect, earlyTablewideInteraction, projectTablewideAttack, type EffectRuntimeOptions } from "../../../src/effects/runtime/index.ts";
+import { projectMatchSnapshot } from "../../../src/state/projection.ts";
 import type { CharacterAbilityModule, DamageResolvedHookInput } from "../../../src/effects/character-api.ts";
 import type { RandomSource } from "../../../src/random/shuffle.ts";
 import { initializeGame, type SetupPlayer } from "../../../src/setup/initialize.ts";
 import type { GameState } from "../../../src/state/types.ts";
+
+for (const cardType of ["gatling", "indians"] as const) {
+  test(`${cardType}: future targets submit in reverse order, privately and durably, without blocking`, () => {
+    const state = makeState();
+    state.seats.forEach(seat => { seat.public.characterId = "willy_the_kid"; seat.public.hp = seat.public.maxHp; });
+    const [actor, first, second, third] = state.seats;
+    const attackCard = moveCardToHand(state, cardType, actor!.public.playerId);
+    const responseCards = [second!, third!].map(seat => moveCardToHand(state, cardType === "gatling" ? "missed" : "bang", seat.public.playerId));
+    const handlers = createEffectCommandHandlers(registeredRuntimeOptions());
+    const opened = applyMatchCommand(state, actor!.public.playerId, playCard(state, actor!.public.playerId, attackCard), commandContext(handlers));
+    assert.ok(opened.ok); if (!opened.ok) return;
+    let saved = opened.state;
+    const firstInteractionId = saved.resolution.pendingInteraction!.interactionId;
+    const hpBefore = saved.seats.map(seat => seat.public.hp);
+    for (const index of [1, 0]) {
+      const target = [second!, third!][index]!;
+      const prompt = earlyTablewideInteraction(saved, target.public.playerId)!;
+      assert.ok(prompt);
+      const choice = cardType === "gatling" ? "USE_MISSED" : "USE_BANG";
+      const payload = { interactionId: prompt.interactionId, choice, cardInstanceId: responseCards[index]! };
+      const forged = applyMatchCommand(saved, target.public.playerId, { type: "RESPOND", payload: { ...payload, cardInstanceId: attackCard } } as EngineCommand, commandContext(handlers));
+      assert.equal(forged.ok, false);
+      const submitted = applyMatchCommand(saved, target.public.playerId, { type: "RESPOND", payload } as EngineCommand, commandContext(handlers));
+      assert.ok(submitted.ok); if (!submitted.ok) return;
+      saved = JSON.parse(JSON.stringify(submitted.state));
+      assert.equal(saved.resolution.pendingInteraction!.interactionId, firstInteractionId);
+      assert.deepEqual(saved.seats.map(seat => seat.public.hp), hpBefore);
+      assert.equal(projectTablewideAttack(saved)!.targets.find(item => item.playerId === target.public.playerId)!.status, "submitted");
+      const duplicate = applyMatchCommand(saved, target.public.playerId, { type: "RESPOND", payload } as EngineCommand, commandContext(handlers));
+      assert.equal(duplicate.ok, false);
+      const observer = JSON.stringify(projectMatchSnapshot(saved, actor!.public.playerId, BASE_PHYSICAL_CARDS));
+      assert.equal(observer.includes(responseCards[index]!), false, "reserved card IDs stay private");
+    }
+    const resolved = applyMatchCommand(saved, first!.public.playerId, respond(saved, firstInteractionId, "TAKE_HIT"), commandContext(handlers));
+    assert.ok(resolved.ok); if (!resolved.ok) return;
+    assert.equal(resolved.state.resolution.pendingInteraction, null);
+    assert.equal(projectTablewideAttack(resolved.state), null);
+    assert.equal(resolved.state.seats[1]!.public.hp, hpBefore[1]! - 1);
+    for (const index of [0, 1]) assert.equal(resolved.state.seats[index + 2]!.private.handCardInstanceIds.includes(responseCards[index]!), false);
+    assertCardZonesComplete(resolved.state);
+  });
+}
+
+test("early Gatling defense triggers Suzy once at actual card consumption", () => {
+  const state = makeState();
+  state.seats.forEach(seat => { seat.public.characterId = "willy_the_kid"; seat.public.hp = seat.public.maxHp; });
+  const [actor, first, second, suzy] = state.seats;
+  suzy!.public.characterId = "suzy_lafayette";
+  clearHandToDrawPile(state, suzy!.public.playerId);
+  const defense = moveCardToHand(state, "missed", suzy!.public.playerId);
+  const attack = moveCardToHand(state, "gatling", actor!.public.playerId);
+  const handlers = createEffectCommandHandlers(registeredRuntimeOptions());
+  const opened = applyMatchCommand(state, actor!.public.playerId, playCard(state, actor!.public.playerId, attack), commandContext(handlers));
+  assert.ok(opened.ok); if (!opened.ok) return;
+  const prompt = earlyTablewideInteraction(opened.state, suzy!.public.playerId)!;
+  const reserved = applyMatchCommand(opened.state, suzy!.public.playerId, respond(opened.state, prompt.interactionId, "USE_MISSED", defense), commandContext(handlers));
+  assert.ok(reserved.ok); if (!reserved.ok) return;
+  assert.deepEqual(reserved.state.seats[3]!.private.handCardInstanceIds, [defense]);
+  const firstHit = applyMatchCommand(reserved.state, first!.public.playerId, respond(reserved.state, reserved.state.resolution.pendingInteraction!.interactionId, "TAKE_HIT"), commandContext(handlers));
+  assert.ok(firstHit.ok); if (!firstHit.ok) return;
+  const expectedDraw = firstHit.state.zones.drawPileCardInstanceIds[0];
+  const secondHit = applyMatchCommand(firstHit.state, second!.public.playerId, respond(firstHit.state, firstHit.state.resolution.pendingInteraction!.interactionId, "TAKE_HIT"), commandContext(handlers));
+  assert.ok(secondHit.ok); if (!secondHit.ok) return;
+  assert.deepEqual(secondHit.state.seats[3]!.private.handCardInstanceIds, [expectedDraw]);
+  assertCardZonesComplete(secondHit.state);
+});
+
+test("a future target can reserve defense during another player's death rescue", () => {
+  const state = makeState();
+  state.seats.forEach(seat => { seat.public.characterId = "willy_the_kid"; seat.public.hp = seat.public.maxHp; });
+  const [actor, wounded, , future] = state.seats;
+  wounded!.public.hp = 1;
+  clearHandToDrawPile(state, wounded!.public.playerId);
+  moveCardToHand(state, "beer", wounded!.public.playerId);
+  const attack = moveCardToHand(state, "gatling", actor!.public.playerId);
+  const defense = moveCardToHand(state, "missed", future!.public.playerId);
+  const handlers = createEffectCommandHandlers(registeredRuntimeOptions());
+  const opened = applyMatchCommand(state, actor!.public.playerId, playCard(state, actor!.public.playerId, attack), commandContext(handlers));
+  assert.ok(opened.ok); if (!opened.ok) return;
+  const hit = applyMatchCommand(opened.state, wounded!.public.playerId, respond(opened.state, opened.state.resolution.pendingInteraction!.interactionId, "TAKE_HIT"), commandContext(handlers));
+  assert.ok(hit.ok); if (!hit.ok) return;
+  assert.equal(hit.state.resolution.pendingInteraction!.kind, "DEATH_RESCUE");
+  const futurePrompt = earlyTablewideInteraction(hit.state, future!.public.playerId);
+  assert.ok(futurePrompt);
+  const saved = applyMatchCommand(hit.state, future!.public.playerId, respond(hit.state, futurePrompt.interactionId, "USE_MISSED", defense), commandContext(handlers));
+  assert.ok(saved.ok); if (!saved.ok) return;
+  assert.deepEqual(saved.state.resolution.pendingDeath, hit.state.resolution.pendingDeath);
+  assert.equal(saved.state.resolution.pendingInteraction!.interactionId, hit.state.resolution.pendingInteraction!.interactionId);
+  assertCardZonesComplete(saved.state);
+});
+
+test("an early Barrel failure opens a fresh response and cannot reuse its old choice", () => {
+  const state = makeState();
+  state.seats.forEach(seat => { seat.public.characterId = "willy_the_kid"; seat.public.hp = seat.public.maxHp; });
+  const [actor, first, second, future] = state.seats;
+  const attack = moveCardToHand(state, "gatling", actor!.public.playerId);
+  moveCardToPlay(state, "barrel", future!.public.playerId);
+  const club = state.zones.drawPileCardInstanceIds.find(id => state.zones.cardsByInstanceId[id]!.suit === "CLUBS")!;
+  moveCardToDrawTop(state, club);
+  const handlers = createEffectCommandHandlers(registeredRuntimeOptions());
+  const opened = applyMatchCommand(state, actor!.public.playerId, playCard(state, actor!.public.playerId, attack), commandContext(handlers));
+  assert.ok(opened.ok); if (!opened.ok) return;
+  const prompt = earlyTablewideInteraction(opened.state, future!.public.playerId)!;
+  const reserved = applyMatchCommand(opened.state, future!.public.playerId, respond(opened.state, prompt.interactionId, "USE_BARREL"), commandContext(handlers));
+  assert.ok(reserved.ok); if (!reserved.ok) return;
+  let current = reserved.state;
+  for (const target of [first!, second!]) {
+    const result = applyMatchCommand(current, target.public.playerId, respond(current, current.resolution.pendingInteraction!.interactionId, "TAKE_HIT"), commandContext(handlers));
+    assert.ok(result.ok); if (!result.ok) return;
+    current = result.state;
+  }
+  assert.equal(current.resolution.pendingInteraction!.actorPlayerIds[0], future!.public.playerId);
+  assert.notEqual(current.resolution.pendingInteraction!.interactionId, prompt.interactionId);
+  assert.equal(current.resolution.pendingInteraction!.options.some(option => option.choice === "USE_BARREL"), false);
+  const complete = applyMatchCommand(current, future!.public.playerId, respond(current, current.resolution.pendingInteraction!.interactionId, "TAKE_HIT"), commandContext(handlers));
+  assert.ok(complete.ok); if (!complete.ok) return;
+  assert.equal(complete.state.resolution.pendingInteraction, null);
+  assertCardZonesComplete(complete.state);
+});
 
 function fixedRandom(): RandomSource {
   let cursor = 0;

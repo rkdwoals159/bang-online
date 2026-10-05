@@ -55,13 +55,13 @@ test('design: a single main landmark is reachable by skip link', async () => {
   assert.doesNotMatch(lobby + entry, /<main\b/);
 });
 
-test('design: desktop/tablet/mobile layouts avoid absolute seat positioning', async () => {
+test('design: circular seating keeps narrow-screen panning inside the table', async () => {
   const [app, table, reactions] = await Promise.all([source('app/app.css'), source('features/game-table/game-table.css'), source('features/reactions/reactions.css')]);
   assert.match(app, /"request" "table" "controls" "log"/);
   assert.match(app, /prefers-reduced-motion: reduce/);
-  assert.match(table, /repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.match(table, /:nth-child\(7\)/);
-  assert.doesNotMatch(table, /translate\(|--seat-x|--seat-y/);
+  assert.match(table, /game-table__scroll \{ overflow-x: auto/);
+  assert.match(table, /border-radius: 50%/);
+  assert.match(table, /translate\(-50%, -50%\)/);
   assert.match(reactions, /\.app-shell \.reaction-prompt \.reaction-prompt__options/);
 });
 

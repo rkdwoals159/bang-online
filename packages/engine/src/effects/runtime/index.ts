@@ -1,4 +1,5 @@
 import { BASE_PHYSICAL_CARDS } from "../../../../catalog/src/cards/index.js";
+import { gatlingEffect, indiansEffect } from "../cards/tablewide.js";
 import {
   type CommandExecutionHandlers,
   type CommandExecutionResult,
@@ -44,9 +45,11 @@ import {
   completeEffectStep,
   finishEffectResolution,
   openPendingInteraction,
+  submitInteractionResponse,
 } from "../../resolution/index.js";
 import type { RandomSource } from "../../random/shuffle.js";
-import type { EffectStep, GameState, InteractionOption, JsonValue, ResolutionFrame, SeatState } from "../../state/types.js";
+import type { EffectStep, GameState, InteractionOption, JsonValue, PendingInteraction, ResolutionFrame, SeatState } from "../../state/types.js";
+import type { TablewideAttackView } from "../../../../contracts/src/protocol.js";
 
 const FRAME_KIND = "EFFECT_RUNTIME";
 const INTERACTION_RESULTS_KEY = "__resolutionResults";
@@ -54,6 +57,87 @@ const SUZY_RESPONSE_HOOKS_KEY = "__suzyResponseHookInteractions";
 const RUN_EFFECT = "RUN_EFFECT";
 const RUN_DAMAGE_HOOK = "RUN_DAMAGE_HOOK";
 const MAX_STEPS_PER_COMMAND = 512;
+const EARLY_RESPONSES_KEY = "__tablewideEarlyResponses";
+const TABLEWIDE_TARGETS_KEY = "__tablewideTargets";
+const TABLEWIDE_ATTACK_ID_KEY = "__tablewideAttackId";
+
+function tablewideFrame(state: GameState): ResolutionFrame | undefined {
+  return state.resolution.continuations.find(frame => frame.kind === FRAME_KIND &&
+    ["gatling", "indians"].includes(runtimeContext(frame)?.effectTypeId ?? ""));
+}
+
+function earlyResponses(frame: ResolutionFrame): CompletedEffectInteraction[] {
+  const value = frame.payload[EARLY_RESPONSES_KEY];
+  return Array.isArray(value) ? value as unknown as CompletedEffectInteraction[] : [];
+}
+
+/** A future target may commit its exact choice while the earlier target resolves. */
+export function earlyTablewideInteraction(state: GameState, playerId: string): PendingInteraction | null {
+  if (state.status !== "playing" || state.resolution.pendingInteraction?.actorPlayerIds.includes(playerId)) return null;
+  const frame = tablewideFrame(state), context = frame && runtimeContext(frame);
+  if (!frame || !context || typeof frame.payload[TABLEWIDE_ATTACK_ID_KEY] !== "string" || earlyResponses(frame).some(response => response.responses.some(answer => answer.playerId === playerId))) return null;
+  const step = state.resolution.effectQueue.find(step => ["GATLING_TARGET", "INDIANS_TARGET"].includes(step.kind) && step.targetPlayerId === playerId);
+  if (!step || !uniqueSeat(state, playerId) || uniqueSeat(state, playerId)!.public.eliminated) return null;
+  const module = context.effectTypeId === "gatling" ? gatlingEffect : indiansEffect;
+  const result = module(moduleCardInput(state, context, frame.frameId, [{ kind: "player", playerId }], { nextFloat: () => 0.5 }, completedInteractions(frame) ?? []));
+  if (result.kind !== "response_required") return null;
+  // Build a candidate prompt independently of another target's rescue cursor.
+  // Collection writes only to the original frame and keeps the real pending death intact.
+  const opened = openPendingInteraction({ ...state, resolution: { ...state.resolution, pendingInteraction: null, pendingDeath: null } }, {
+    interactionId: `${frame.payload[TABLEWIDE_ATTACK_ID_KEY]}:tablewide:${playerId}`,
+    kind: result.request.kind,
+    responders: result.request.responders,
+    context: result.request.context,
+    resumeFrameId: frame.frameId,
+    createdAt: state.resolution.pendingInteraction?.createdAt ?? "2000-01-01T00:00:00.000Z",
+  });
+  return opened.ok ? opened.state.resolution.pendingInteraction : null;
+}
+
+/** A valid independent response can be revalidated against a newer aggregate version. */
+export function isConcurrentTablewideResponse(state: GameState, playerId: string, command: EngineCommand): boolean {
+  if (command.type !== "RESPOND" || state.status !== "playing" || !tablewideFrame(state)) return false;
+  const pending = state.resolution.pendingInteraction;
+  if (pending && ["GATLING_RESPONSE", "INDIANS_RESPONSE"].includes(pending.kind) &&
+      pending.actorPlayerIds.includes(playerId) && pending.interactionId === command.payload.interactionId) return true;
+  return earlyTablewideInteraction(state, playerId)?.interactionId === command.payload.interactionId;
+}
+
+export function projectTablewideAttack(state: GameState): TablewideAttackView | null {
+  const frame = tablewideFrame(state), context = frame && runtimeContext(frame);
+  const rawTargets = frame?.payload[TABLEWIDE_TARGETS_KEY];
+  if (!frame || !context || !Array.isArray(rawTargets) || typeof frame.payload[TABLEWIDE_ATTACK_ID_KEY] !== "string") return null;
+  const pending = state.resolution.pendingInteraction;
+  const reserved = earlyResponses(frame);
+  return {
+    attackId: frame.payload[TABLEWIDE_ATTACK_ID_KEY], kind: context.effectTypeId === "gatling" ? "gatling" : "indians", sourcePlayerId: context.actorPlayerId,
+    targets: rawTargets.flatMap(id => {
+      if (typeof id !== "string") return [];
+      const seat = uniqueSeat(state, id);
+      if (!seat) return [];
+      const status = seat.public.eliminated ? "eliminated" : pending?.actorPlayerIds.includes(id) ? "responding" :
+        state.resolution.effectQueue.some(step => step.targetPlayerId === id) ?
+          reserved.some(response => response.responses.some(answer => answer.playerId === id)) ? "submitted" : "waiting" : "resolved";
+      return [{ playerId: id, status }];
+    }),
+  };
+}
+
+function collectTablewideResponse(input: { state: GameState; actorPlayerId: string; command: Extract<EngineCommand, { type: "RESPOND" }> }): CommandExecutionResult | null {
+  const pending = earlyTablewideInteraction(input.state, input.actorPlayerId);
+  if (!pending || input.command.payload.interactionId !== pending.interactionId) return null;
+  const { interactionId, choice, ...payload } = input.command.payload;
+  const answered = submitInteractionResponse({ ...input.state, resolution: { ...input.state.resolution, pendingInteraction: pending } }, {
+    actorPlayerId: input.actorPlayerId, interactionId, choice, payload: payload as Record<string, JsonValue>,
+  });
+  if (!answered.ok) return commandFailure(answered.error.code, answered.error.message);
+  const frame = tablewideFrame(input.state)!;
+  const answer = completedInteractions(frameFor(answered.state, frame.frameId)!)?.at(-1);
+  if (!answer) return commandFailure("INVALID_STATE", "An independent response did not produce a saved choice.");
+  const updated = updateFramePayload(input.state, frame.frameId, { [EARLY_RESPONSES_KEY]: [...earlyResponses(frame), answer] as unknown as JsonValue });
+  if (!updated.ok) return commandFailure(updated.code, updated.message);
+  return safeResult(updated.value, [eventDraft("TABLEWIDE_RESPONSE_SUBMITTED", input.actorPlayerId, { playerId: input.actorPlayerId })], { kind: "response_submitted" });
+}
 
 type RuntimeCardRegistry = Readonly<Record<string, CardEffectModule | undefined>>;
 type RuntimeCharacterRegistry = Partial<{
@@ -766,6 +850,9 @@ function applySourceAndCostEvents(
   const applied = applyEvents(state, drafts);
   if (!applied.ok) return applied;
   const patch: Record<string, JsonValue> = {};
+  if (result.steps.some(step => step.kind === "GATLING_TARGET" || step.kind === "INDIANS_TARGET") && frame.payload[TABLEWIDE_TARGETS_KEY] === undefined) {
+    patch[TABLEWIDE_TARGETS_KEY] = result.steps.flatMap(step => step.targetPlayerId === null ? [] : [step.targetPlayerId]);
+  }
   if (context.mode === "card" && frame.payload.sourceConsumed !== true) patch.sourceConsumed = true;
   if (context.mode === "character" && frame.payload.costsApplied !== true) patch.costsApplied = true;
   const updated = Object.keys(patch).length > 0
@@ -789,7 +876,21 @@ function openEffectRequest(
   if (result.request.resumeFrameId !== frameId) return fail("INVALID_STATE", "The effect interaction must resume its owning runtime frame.");
   const identity = interactionIdentity(identityFactory);
   if (!identity.ok) return identity;
-  const opened = openPendingInteraction(state, { ...result.request, ...identity.value });
+  const frame = frameFor(state, frameId);
+  let prepared = state;
+  if (frame?.payload[TABLEWIDE_TARGETS_KEY] !== undefined && frame.payload[TABLEWIDE_ATTACK_ID_KEY] === undefined) {
+    const saved = updateFramePayload(state, frameId, { [TABLEWIDE_ATTACK_ID_KEY]: identity.value.interactionId });
+    if (!saved.ok) return saved;
+    prepared = saved.value;
+  }
+  const attackId = frame?.payload[TABLEWIDE_ATTACK_ID_KEY];
+  const targetId = result.request.responders[0]?.playerId;
+  const hasPriorResponse = frame && completedInteractions(frame)?.some(response =>
+    response.kind === result.request.kind && response.context.targetPlayerId === targetId);
+  const canonicalId = typeof attackId === "string" && targetId && !hasPriorResponse &&
+    ["GATLING_RESPONSE", "INDIANS_RESPONSE"].includes(result.request.kind)
+    ? `${attackId}:tablewide:${targetId}` : identity.value.interactionId;
+  const opened = openPendingInteraction(prepared, { ...result.request, ...identity.value, interactionId: canonicalId });
   return opened.ok ? { ok: true, value: opened.state } : fail(opened.error.code, opened.error.message);
 }
 
@@ -1181,6 +1282,7 @@ export function createEffectCommandHandlers(options: EffectRuntimeOptions): Comm
       );
     },
     resumeInteraction: resume,
+    tablewideRespond: collectTablewideResponse,
   };
 }
 
@@ -1548,7 +1650,7 @@ function runQueue(
     if (state.resolution.pendingInteraction !== null) {
       return { ok: true, value: { state, events, value: { kind: "interaction_pending", interactionKind: state.resolution.pendingInteraction.kind } } };
     }
-    const frame = frameFor(state, frameId);
+    let frame = frameFor(state, frameId);
     const context = frame ? runtimeContext(frame) : undefined;
     if (!frame || !context) return fail("FRAME_NOT_FOUND", "Effect runtime continuation is missing or malformed.");
     const current = state.resolution.effectQueue[0];
@@ -1633,6 +1735,14 @@ function runQueue(
     if (current.kind === "GATLING_TARGET" || current.kind === "INDIANS_TARGET") {
       const target = current.targetPlayerId;
       if (!target) return fail("INVALID_STATE", `${current.kind} requires a target player.`);
+      const early = earlyResponses(frame).find(response => response.context.targetPlayerId === target);
+      const prior = completedInteractions(frame);
+      if (early && prior && !prior.some(response => response.interactionId === early.interactionId)) {
+        const saved = updateFramePayload(state, frameId, { [INTERACTION_RESULTS_KEY]: [...prior, early] as unknown as JsonValue });
+        if (!saved.ok) return saved;
+        state = saved.value;
+        frame = frameFor(state, frameId)!;
+      }
       const interactions = completedInteractions(frame);
       if (!interactions) return fail("INVALID_STATE", "Saved effect interaction history is malformed.");
       const targetType = current.kind === "GATLING_TARGET" ? "gatling" : "indians";

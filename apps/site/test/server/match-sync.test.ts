@@ -11,6 +11,7 @@ import {
 } from "../../../../packages/contracts/src/validation.js";
 import type { GameState } from "../../../../packages/engine/src/state/types.js";
 import { buildLegalActionCandidates } from "../../../../packages/engine/src/actions/index.js";
+import { projectMatchSnapshot } from "../../../../packages/engine/src/state/projection.js";
 import { handleNotificationsRoute } from "../../src/server/routes/notifications.js";
 import { routeApiRequest } from "../../src/server/routes/index.js";
 import type { D1DatabaseLike } from "../../src/storage/d1-types.js";
@@ -18,6 +19,66 @@ import { D1StorageRepository } from "../../src/storage/repository.js";
 import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
+
+test("tablewide responses from one version all commit concurrently with private options", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    await completeTurnDrawIfNeeded(db, fixture.matchId, fixture.guests);
+    const repository = new D1StorageRepository(db);
+    const initial = await repository.getMatch(fixture.matchId);
+    assert.ok(initial);
+    const state = initial.state;
+    state.seats.forEach(seat => { seat.public.characterId = "willy_the_kid"; seat.public.hp = seat.public.maxHp; });
+    const source = state.turn.currentPlayerId;
+    const typeMap = new Map(BASE_PHYSICAL_CARDS.map(card => [card.definitionId, card.typeId]));
+    const give = (type: string, playerId: string) => {
+      const id = state.zones.drawPileCardInstanceIds.find(id => typeMap.get(state.zones.cardsByInstanceId[id]!.cardDefinitionId) === type) ??
+        Object.keys(state.zones.cardsByInstanceId).find(id => typeMap.get(state.zones.cardsByInstanceId[id]!.cardDefinitionId) === type)!;
+      assert.ok(id);
+      for (const seat of state.seats) {
+        seat.private.handCardInstanceIds = seat.private.handCardInstanceIds.filter(card => card !== id);
+        seat.public.inPlayCardInstanceIds = seat.public.inPlayCardInstanceIds.filter(card => card !== id);
+      }
+      state.zones.drawPileCardInstanceIds = state.zones.drawPileCardInstanceIds.filter(card => card !== id);
+      state.zones.discardPileCardInstanceIds = state.zones.discardPileCardInstanceIds.filter(card => card !== id);
+      state.zones.revealedPoolCardInstanceIds = state.zones.revealedPoolCardInstanceIds.filter(card => card !== id);
+      state.seats.find(seat => seat.public.playerId === playerId)!.private.handCardInstanceIds.push(id);
+      return id;
+    };
+    const attackCard = give("gatling", source);
+    const defenders = state.seats.filter(seat => seat.public.playerId !== source);
+    const cards = defenders.map(seat => give("missed", seat.public.playerId));
+    await db.prepare("UPDATE matches SET state_json = ? WHERE id = ? AND version = ?").bind(JSON.stringify(state), fixture.matchId, initial.version).run();
+    const owner = fixture.guests.find(guest => guest.playerId === source)!;
+    const played = await matchCommand(db, owner, fixture.matchId, "PLAY_CARD", initial.version, { cardInstanceId: attackCard });
+    assert.equal(played.ack.status, "accepted");
+    const opened = await repository.getMatch(fixture.matchId); assert.ok(opened);
+    const snapshots = defenders.map(seat => projectMatchSnapshot(opened.state, seat.public.playerId, BASE_PHYSICAL_CARDS));
+    snapshots.forEach((snapshot, index) => {
+      const pending = snapshot.pendingInteraction!;
+      assert.equal(pending.kind, "GATLING_RESPONSE");
+      assert.ok("responseOptions" in pending);
+      assert.equal(parseMatchSyncResponse({ protocolVersion: 1, requestId: "review", matchId: fixture.matchId, version: opened.version, eventSeq: opened.eventSeq, requiresFullSnapshot: true, snapshot, visibleEvents: [] }).ok, true);
+      const other = JSON.stringify(projectMatchSnapshot(opened.state, source, BASE_PHYSICAL_CARDS));
+      assert.equal(other.includes(cards[index]!), false);
+    });
+    const results = await Promise.all(defenders.map((seat, index) => matchCommand(db,
+      fixture.guests.find(guest => guest.playerId === seat.public.playerId)!, fixture.matchId, "RESPOND", opened.version,
+      { interactionId: snapshots[index]!.pendingInteraction!.interactionId, choice: "USE_MISSED", cardInstanceId: cards[index] },
+    )));
+    assert.ok(results.every(result => result.ack.status === "accepted"), JSON.stringify(results.map(result => result.ack)));
+    const finished = await repository.getMatch(fixture.matchId); assert.ok(finished);
+    assert.equal(finished.version, opened.version + 3);
+    assert.equal(finished.state.resolution.pendingInteraction, null);
+    assert.equal(finished.state.resolution.effectQueue.length, 0);
+    cards.forEach(id => assert.ok(finished.state.zones.discardPileCardInstanceIds.includes(id)));
+    for (const seat of finished.state.seats) assert.equal(seat.public.hp, seat.public.maxHp);
+    const replay = await routeApiRequest(request(`/api/matches/${fixture.matchId}/commands`, { cookie: fixture.guests.find(guest => guest.playerId === defenders[0]!.public.playerId)!.cookie, body: results[0]!.requestBody }), { DB: db });
+    assert.equal((await json(replay) as CommandAck).status, "accepted");
+    assert.equal((await repository.getMatch(fixture.matchId))!.version, finished.version);
+  } finally { await runtime.dispose(); }
+});
 
 test("P02 scoped SSE checks membership and renews only the viewed room's lease", async () => {
   const { runtime, db } = await createIsolatedD1();

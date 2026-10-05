@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: design: public portraits open character details and preserve role/hand privacy
+ok 1 - design: public portraits open character details and preserve role/hand privacy
+  ---
+  duration_ms: 1472.5526
+  type: 'test'
+  ...
+# Subtest: design: decorative portrait retains fallback and lazy image loading
+ok 2 - design: decorative portrait retains fallback and lazy image loading
+  ---
+  duration_ms: 1.5472
+  type: 'test'
+  ...
+# Subtest: design: hand count and visible card status complement the detailed accessible names
+ok 3 - design: hand count and visible card status complement the detailed accessible names
+  ---
+  duration_ms: 4.2767
+  type: 'test'
+  ...
+# Subtest: design: a single main landmark is reachable by skip link
+ok 4 - design: a single main landmark is reachable by skip link
+  ---
+  duration_ms: 2.8194
+  type: 'test'
+  ...
+# Subtest: design: circular seating keeps narrow-screen panning inside the table
+ok 5 - design: circular seating keeps narrow-screen panning inside the table
+  ---
+  duration_ms: 3.6059
+  type: 'test'
+  ...
+# Subtest: design: principal text combinations meet WCAG AA 4.5:1
+ok 6 - design: principal text combinations meet WCAG AA 4.5:1
+  ---
+  duration_ms: 8.0262
+  type: 'test'
+  ...
+# Subtest: design: shared tokens require no external fonts or animation dependencies
+ok 7 - design: shared tokens require no external fonts or animation dependencies
+  ---
+  duration_ms: 2.6716
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2941.0241

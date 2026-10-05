@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   PROTOCOL_VERSION,
@@ -11,6 +11,7 @@ import { parseRoomView } from "../../../../../packages/contracts/src/validation.
 import type { MatchStatusSync } from "./model.js";
 import {
   buildMatchStatusViewModel,
+  formatLogTime,
   isMatchActionInputEnabled,
   mergeMatchStatusProjection,
 } from "./model.js";
@@ -180,6 +181,22 @@ export function StatusPanel({
   const [returnBusy, setReturnBusy] = useState(false);
   const [returnFeedback, setReturnFeedback] = useState("");
   const [logOpen, setLogOpen] = useState(false);
+  const [logNow, setLogNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!logOpen) return;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const update = () => {
+      if (timer) clearInterval(timer);
+      timer = undefined;
+      if (!document.hidden) {
+        setLogNow(Date.now());
+        timer = setInterval(() => setLogNow(Date.now()), 1000);
+      }
+    };
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => { if (timer) clearInterval(timer); document.removeEventListener("visibilitychange", update); };
+  }, [logOpen]);
   const singleFlight = useRef(createSingleFlightRunner()).current;
 
   const projection = useMemo(
@@ -320,7 +337,7 @@ export function StatusPanel({
           <ol className="match-status__events" aria-label="공개 게임 이벤트">
             {view.publicLog.map((entry) => (
               <li key={entry.eventSeq} data-event-seq={entry.eventSeq}>
-                <span>{entry.message}</span>
+                <span><time dateTime={entry.occurredAt}>{formatLogTime(entry.occurredAt, logNow)}</time> - {entry.message}</span>
               </li>
             ))}
           </ol>

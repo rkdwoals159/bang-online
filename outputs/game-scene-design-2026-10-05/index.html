@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BANG! — 게임 씬 시안</title><link rel="stylesheet" href="scene.css"></head>
+<body>
+<nav class="preview-controls" aria-label="시안 조작"><strong>플레이 시안</strong><label>인원 <select id="count"><option>4</option><option>5</option><option>6</option><option selected>7</option></select></label><label>연출 <select id="demo"><option value="bang">뱅! 공격</option><option value="gatling">개틀링 · 동시 대응</option><option value="indians">인디언 · 동시 대응</option><option value="store">잡화점 · 카드 선택</option><option value="draw">카드 뽑기</option><option value="heal">맥주 · 회복</option><option value="turn">다음 차례</option><option value="role">역할 공개</option><option value="win">승리</option></select></label><button id="play">연출 재생</button><button id="sound" aria-pressed="false">소리 켜기</button><button id="motion" aria-pressed="true">모션 켜짐</button><span class="prototype-label">디자인 시안 · 실제 대전 아님</span></nav>
+<main class="game">
+<header class="hud"><div class="brand">BANG! <span>THE LAST SALOON</span></div><div class="turn-caption" id="turnCaption">당신의 차례</div><div class="hud-actions"><button id="logToggle" aria-expanded="false">게임 기록</button><button id="full">전체 화면</button></div></header>
+<section class="board" id="board" aria-label="원형 게임 테이블">
+<div class="table-shadow"></div><div class="table-rail"></div><div class="felt"><div class="felt-mark"><span>THE LAST</span><strong>SALOON</strong><span>한 발이 판을 바꾼다</span></div></div>
+<div id="seats" class="seats"></div><div class="center-piles"><div class="deck back" id="deck" aria-label="카드 더미"><span>B!</span></div><div class="played-card" id="played"><img src="../../apps/site/public/assets/cards/playing/01_mancato.png" alt="빗나감!" draggable="false"></div></div>
+<div class="turn-hint" id="hint">카드를 고르고, 상대를 선택하세요</div>
+<div id="fx" class="fx" aria-hidden="true"></div>
+<aside id="log" class="log" hidden><strong>게임 기록</strong><div id="logEntries"></div></aside>
+</section>
+<footer class="hand-dock">
+<div class="self-profile"><button id="character"><img src="../../apps/site/public/assets/cards/characters/01_willythekid.png" alt="윌리 더 키드 상세 설명"></button><div><strong>나 <span class="role">보안관</span></strong><div class="hearts" id="selfHearts"></div><span class="ability">뱅! 사용 횟수 제한 없음</span></div></div>
+<div class="hand-area"><div class="hand-heading"><span>내 손패</span><span class="hand-help">카드를 누르면 설명 · 다시 누르면 확대</span></div><div class="hand" id="hand"></div></div>
+<div class="action-bar"><div class="card-copy"><strong id="cardName">뱅!</strong><span id="cardDescription">사거리 안의 상대 한 명을 공격해요.</span></div><div class="action-buttons"><button id="cancel">선택 취소</button><button class="primary" id="use">상대 선택</button><button class="end-turn" id="end">차례 마치기</button></div></div>
+</footer>
+<dialog id="overlay"><button class="dialog-close" id="close" aria-label="창 닫기">×</button><div id="dialogContent"></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+</main><script defer src="scene.js"></script></body></html>

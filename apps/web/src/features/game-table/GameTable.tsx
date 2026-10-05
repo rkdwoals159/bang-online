@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { circleSeatPosition, viewerDistance } from "./layout.js";
 import { playSeatMotion } from "../experience/motion.js";
 import { GameExperienceControls, TableEffects, useGameExperience } from "../experience/GameExperience.js";
 import { cardName } from "../actions/model.js";
@@ -56,6 +57,8 @@ interface PositionedPlayer {
 /** A presentation-only table built from the authenticated seat's projection. */
 export function GameTable({ snapshot }: GameTableProps) {
   const players = orderPlayersForViewer(snapshot);
+  const livingPlayers = players.filter(({ player }) => !player.eliminated);
+  const eliminatedPlayers = players.filter(({ player }) => player.eliminated);
   const surface = useRef<HTMLDivElement>(null);
   const activeSelfPrivate = snapshot.viewer.mode === "active" ? snapshot.selfPrivate : null;
   const pending = snapshot.pendingInteraction;
@@ -79,14 +82,18 @@ export function GameTable({ snapshot }: GameTableProps) {
         </p>
       ) : null}
 
+      <div className="game-table__scroll" aria-label="원형 테이블, 좁은 화면에서는 좌우로 이동할 수 있습니다" tabIndex={0}>
       <div className="game-table__surface" ref={surface}>
         <div className="game-table__felt" aria-hidden="true" />
+        <div className="game-table__circle-center" aria-hidden="true"><strong>BANG!</strong><span>시계 방향으로 진행</span></div>
 
         <ol className="game-table__seats" aria-label="플레이어 좌석">
-          {players.map(({ player }) => (
+          {livingPlayers.map(({ player }, index) => (
             <PlayerSeat
               key={player.playerId}
               player={player}
+              position={circleSeatPosition(index, livingPlayers.length)}
+              distance={viewerDistance(snapshot, player)}
               responseLabel={player.playerId === responderId ? responseLabel : undefined}
               isViewer={player.playerId === snapshot.viewer.playerId}
               isCurrentTurn={player.playerId === snapshot.publicTable.turn.currentPlayerId}
@@ -100,6 +107,10 @@ export function GameTable({ snapshot }: GameTableProps) {
         </ol>
         <TableEffects surface={surface} />
       </div>
+      </div>
+      {eliminatedPlayers.length > 0 ? <ol className="game-table__eliminated-seats" aria-label="탈락한 플레이어">
+        {eliminatedPlayers.map(({ player }) => <PlayerSeat key={player.playerId} player={player} isViewer={player.playerId === snapshot.viewer.playerId} isCurrentTurn={false} ownRole={player.playerId === snapshot.viewer.playerId ? activeSelfPrivate?.role ?? null : null} />)}
+      </ol> : null}
 
     </section>
   );
@@ -111,12 +122,16 @@ function PlayerSeat({
   isCurrentTurn,
   ownRole,
   responseLabel,
+  position,
+  distance,
 }: {
   player: PublicPlayerView;
   isViewer: boolean;
   isCurrentTurn: boolean;
   ownRole: RoleId | null;
   responseLabel?: string;
+  position?: CSSProperties;
+  distance?: number | null;
 }) {
   const experience = useGameExperience();
   const cue = experience?.cue;
@@ -145,6 +160,7 @@ function PlayerSeat({
 
   return (
     <li
+      style={position}
       className={[
         "game-table__seat",
         isViewer ? "game-table__seat--viewer" : "",
@@ -164,10 +180,11 @@ function PlayerSeat({
             {isViewer ? <span className="game-table__you-label">내 자리</span> : null}
             <strong>{player.displayName}</strong>
           </div>
-          {isCurrentTurn ? <span className="game-table__turn-badge">현재 차례</span> : null}
+          {isCurrentTurn && !responseLabel ? <span className="game-table__turn-badge">현재 차례</span> : null}
         </div>
 
         <p className="game-table__character">{characterName}</p>
+        {distance !== undefined && distance !== null ? <span className="game-table__distance" aria-label={`나에게서 거리 ${distance}`}>거리 {distance}</span> : null}
         {responseLabel ? <span className="game-table__response-badge">{responseLabel}</span> : null}
 
         <div key={player.hp} className="game-table__health" aria-label={`생명력 ${player.hp}/${player.maxHp}`}>
@@ -178,7 +195,9 @@ function PlayerSeat({
 
         <div className="game-table__seat-meta">
           <span>{role ? `역할 · ${roleNames[role]}` : "역할 비공개"}</span>
-          <span>손패 {player.handCount}장</span>
+          <span className="game-table__hand" role="img" aria-label={`손패 ${player.handCount}장`} style={{ "--hand-count": Math.max(1, Math.min(80, player.handCount)) } as CSSProperties}>
+            {player.handCount === 0 ? <span>패 없음</span> : Array.from({ length: Math.min(80, player.handCount) }, (_, index) => <i key={index} className="game-table__hand-card" aria-hidden="true" />)}
+          </span>
         </div>
 
         <div className="game-table__in-play">

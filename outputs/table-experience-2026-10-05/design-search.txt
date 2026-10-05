@@ -1,0 +1,70 @@
+╔═════════════════════════════════════════════════════════════════════════════════════════╗
+║  TARGET: BANG Game Scene - RECOMMENDED DESIGN SYSTEM                                    ║
+╚═════════════════════════════════════════════════════════════════════════════════════════╝
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+├─── DESIGN DIALS ────────────────────────────────────────────────────────────────────────┤
+│  Variance: 6/10 — Balanced / Modern                                                     │
+│  Motion:   8/10 — Complex                                                               │
+│  Density:  8/10 — Dense / Dashboard                                                     │
+├─── PATTERN ─────────────────────────────────────────────────────────────────────────────┤
+│  Name: Feature-Rich Showcase                                                            │
+│     Conversion: Clear feature hierarchy. One key message per card. Strong CTA           │
+│     repetition.                                                                         │
+│     CTA: Hero (sticky) + After features + Bottom                                        │
+│     Sections:                                                                           │
+│       1. Hero (value prop)                                                              │
+│       2. Feature grid/cards (4-6)                                                       │
+│       3. Use cases or benefits                                                          │
+│       4. Social proof or logos                                                          │
+│       5. CTA                                                                            │
+├─── STYLE ───────────────────────────────────────────────────────────────────────────────┤
+│  Name: Minimalism                                                                       │
+├─── COLORS ──────────────────────────────────────────────────────────────────────────────┤
+│     Primary:           #15803D    (--color-primary)                                     │
+│     On Primary:        #FFFFFF    (--color-on-primary)                                  │
+│     Secondary:         #166534    (--color-secondary)                                   │
+│     On Secondary:      #FFFFFF    (--color-on-secondary)                                │
+│     Accent/CTA:        #D97706    (--color-accent)                                      │
+│     On Accent/CTA:     #000000    (--color-on-accent)                                   │
+│     Background:        #0F172A    (--color-background)                                  │
+│     Foreground:        #FFFFFF    (--color-foreground)                                  │
+│     Card:              #192134    (--color-card)                                        │
+│     Card Foreground:   #FFFFFF    (--color-card-foreground)                             │
+│     Muted:             #0F1F2B    (--color-muted)                                       │
+│     Muted Foreground:  #94A3B8    (--color-muted-foreground)                            │
+│     Border:            rgba(255,255,255,0.08) (--color-border)                          │
+│     Destructive:       #DC2626    (--color-destructive)                                 │
+│     On Destructive:    #FFFFFF    (--color-on-destructive)                              │
+│     Ring:              #15803D    (--color-ring)                                        │
+│     Notes: Felt green + gold on dark                                                    │
+├─── TYPOGRAPHY ──────────────────────────────────────────────────────────────────────────┤
+│  Inter / Inter                                                                          │
+│     Mood: flat, clean, system, bold, geometric, cross-platform, icon, poster, minimal,  │
+│     functional, responsive                                                              │
+│     Best For: Cross-platform apps, dashboards, system UI, onboarding, marketing pages,  │
+│     informational apps, icon-heavy interfaces                                           │
+│     Google Fonts:                                                                       │
+│     https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap    │
+│     CSS Import: @import url('https://fonts.googleapis.com/css2?family=Inter:wght@40...  │
+├─── KEY EFFECTS ─────────────────────────────────────────────────────────────────────────┤
+│     Color shift hover + Fast 150ms transitions + No shadows                             │
+├─── MOTION ──────────────────────────────────────────────────────────────────────────────┤
+│  Page Transition (Complex)                                                              │
+│     Trigger: route change | Duration: 500-800ms | Easing: expo.inOut                    │
+│     GSAP: const state = Flip.getState('.hero-image'); navigate(); Flip.from(state, {    │
+│     duration: 0.6, ease: 'expo.inOut', absolute: true, zIndex: 100 });                  │
+│     Framework: Requires the GSAP Flip plugin; the 'from' and 'to' route must render     │
+│     the same element with a shared data-flip-id; Use                                    │
+│     matchMedia('(prefers-reduced-motion: reduce)') to skip non-essential motion and     │
+│     render the final state immediately                                                  │
+├─── AVOID ───────────────────────────────────────────────────────────────────────────────┤
+│     Complex shadows + 3D effects                                                        │
+├─── PRE-DELIVERY CHECKLIST ──────────────────────────────────────────────────────────────┤
+│     [ ] No emojis as icons (use SVG: Heroicons/Lucide)                                  │
+│     [ ] cursor-pointer on all clickable elements                                        │
+│     [ ] Hover states with smooth transitions (150-300ms)                                │
+│     [ ] Light mode: text contrast 4.5:1 minimum                                         │
+│     [ ] Focus states visible for keyboard nav                                           │
+│     [ ] prefers-reduced-motion respected                                                │
+│     [ ] Responsive: 375px, 768px, 1024px, 1440px                                        │
+└─────────────────────────────────────────────────────────────────────────────────────────┘

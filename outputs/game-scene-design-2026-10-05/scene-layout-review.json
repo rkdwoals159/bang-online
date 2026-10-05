@@ -1,0 +1,146 @@
+[
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "n": "4",
+    "brokenImages": 0,
+    "count": 4,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "n": "5",
+    "brokenImages": 0,
+    "count": 5,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "n": "6",
+    "brokenImages": 0,
+    "count": 6,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "n": "7",
+    "brokenImages": 0,
+    "count": 7,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1024,
+      "height": 768
+    },
+    "n": "4",
+    "brokenImages": 0,
+    "count": 4,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1024,
+      "height": 768
+    },
+    "n": "5",
+    "brokenImages": 0,
+    "count": 5,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1024,
+      "height": 768
+    },
+    "n": "6",
+    "brokenImages": 0,
+    "count": 6,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 1024,
+      "height": 768
+    },
+    "n": "7",
+    "brokenImages": 0,
+    "count": 7,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 375,
+      "height": 812
+    },
+    "n": "4",
+    "brokenImages": 0,
+    "count": 4,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 375,
+      "height": 812
+    },
+    "n": "5",
+    "brokenImages": 0,
+    "count": 5,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 375,
+      "height": 812
+    },
+    "n": "6",
+    "brokenImages": 0,
+    "count": 6,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  },
+  {
+    "size": {
+      "width": 375,
+      "height": 812
+    },
+    "n": "7",
+    "brokenImages": 0,
+    "count": 7,
+    "horizontalOverflow": false,
+    "overlaps": [],
+    "seatClipped": false
+  }
+]

@@ -89,6 +89,8 @@ export interface CompletedInteractionExecutionInput {
  * state and return a candidate state plus event drafts.
  */
 export interface CommandExecutionHandlers {
+  /** Collect an independent tablewide response without advancing another player's effect. */
+  tablewideRespond?: (input: { state: GameState; actorPlayerId: string; command: RespondCommand }) => CommandExecutionResult | null;
   playCard?: (input: PlayCardExecutionInput) => CommandExecutionResult;
   useAbility?: (input: AbilityExecutionInput) => CommandExecutionResult;
   /** Called only after T12 completes the current interaction cursor. */
@@ -529,6 +531,14 @@ export function applyMatchCommand(
     });
   }
 
+  const earlyResponse = context.handlers?.tablewideRespond?.({ state, actorPlayerId, command });
+  if (earlyResponse) {
+    if (!earlyResponse.ok) return earlyResponse;
+    return commit(state, earlyResponse.output.state, earlyResponse.output.events, {
+      kind: "response", interactionKind: "TABLEWIDE_RESPONSE", completed: true, cursor: 0,
+      nextActorPlayerId: null, responseCount: 1, effectResumed: false, effectResult: earlyResponse.output.value,
+    });
+  }
   const pendingBefore = state.resolution.pendingInteraction;
   const submitted = submitResponse(state, actorPlayerId, command);
   if (!submitted.ok) return asCommandFailure(submitted.error);

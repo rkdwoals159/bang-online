@@ -366,6 +366,18 @@ export function ReactionPrompt({
     </section>
   );
   const usesStage = pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
+  const attack = currentSnapshot.publicTable.tablewideAttack;
+  if (attack) return <ChoiceStage interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
+    <p className="tablewide-stage__hint">각자 대응을 선택하세요. 모든 플레이어의 진행 상황이 함께 표시돼요.</p>
+    <ul className="tablewide-stage__players" aria-label="광역 공격 대응 상황" aria-live="polite">
+      {attack.targets.map(target => {
+        const player = currentSnapshot.publicTable.players.find(player => player.playerId === target.playerId);
+        const labels = { waiting: "대응 대기", submitted: "제출 완료", responding: "대응 중", resolved: "처리 완료", eliminated: "탈락" };
+        return <li key={target.playerId} data-response-status={target.status}><strong>{target.playerId === currentSnapshot.viewer.playerId ? "나" : player?.displayName ?? "플레이어"}</strong><span>{labels[target.status]}</span><span>체력 {player?.hp ?? 0}</span></li>;
+      })}
+    </ul>
+    {content}
+  </ChoiceStage>;
   return usesStage ? <ChoiceStage interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;
 }
 

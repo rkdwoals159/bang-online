@@ -8,6 +8,7 @@ import { createEffectRegistry } from "../../../../packages/engine/src/effects/re
 import type { EffectEventDraft } from "../../../../packages/engine/src/effects/api.ts";
 import type { GameState } from "../../../../packages/engine/src/state/types.ts";
 import { initializeGame } from "../../../../packages/engine/src/setup/initialize.ts";
+import { projectMatchSnapshot } from "../../../../packages/engine/src/state/projection.ts";
 import { withTurnStartEffects } from "../../../../packages/engine/src/turn/draw.ts";
 import type { PgClientLike, PgPoolLike } from "../../src/storage/database.ts";
 import { applyStorageMigrations } from "../../src/storage/migrations.ts";
@@ -188,6 +189,52 @@ function registeredRuntimeContext(matchId = MATCH_ID): ApplyMatchCommandContext 
 function cardTypeId(cardDefinitionId: string): string | undefined {
   return BASE_PHYSICAL_CARDS.find((card) => card.definitionId === cardDefinitionId)?.typeId;
 }
+
+test("same-version tablewide responses all commit and preserve private reservations", async () => {
+  let state = deterministicGameState();
+  const actor = state.turn.currentPlayerId;
+  state = { ...state, seats: state.seats.map(seat => ({ ...seat, public: { ...seat.public, characterId: "willy_the_kid", hp: 4, maxHp: 4 } })) };
+  const prepared = putCardInHand(state, "gatling", actor);
+  state = prepared.state;
+  const defenders = state.seats.filter(seat => seat.public.playerId !== actor).map(seat => seat.public.playerId);
+  const missed = Object.values(state.zones.cardsByInstanceId).filter(card => cardTypeId(card.cardDefinitionId) === "missed").slice(0, defenders.length);
+  assert.equal(missed.length, defenders.length);
+  const moved = new Set(missed.map(card => card.cardInstanceId));
+  state = {
+    ...state,
+    seats: state.seats.map(seat => ({ ...seat,
+      private: { ...seat.private, handCardInstanceIds: [...seat.private.handCardInstanceIds.filter(id => !moved.has(id)), ...missed.flatMap((card, index) => defenders[index] === seat.public.playerId ? [card.cardInstanceId] : [])] },
+      public: { ...seat.public, inPlayCardInstanceIds: seat.public.inPlayCardInstanceIds.filter(id => !moved.has(id)) },
+    })),
+    zones: { ...state.zones,
+      drawPileCardInstanceIds: state.zones.drawPileCardInstanceIds.filter(id => !moved.has(id)),
+      discardPileCardInstanceIds: state.zones.discardPileCardInstanceIds.filter(id => !moved.has(id)),
+      revealedPoolCardInstanceIds: state.zones.revealedPoolCardInstanceIds.filter(id => !moved.has(id)),
+    },
+  };
+  const { database, storage } = await fixture({ state, serializeConnections: true });
+  try {
+    const deps = dependencies(storage, { prepareEngineContext: () => registeredRuntimeContext() });
+    const played = await processMatchCommand(authContext(actor), { protocolVersion: 1, commandId: commandId(901), matchId: MATCH_ID, expectedVersion: 0, type: "PLAY_CARD", payload: { cardInstanceId: prepared.cardInstanceId } }, deps);
+    assert.equal(played?.status, "accepted");
+    const waiting = await storage.getMatch(MATCH_ID);
+    assert.ok(waiting);
+    const commands = defenders.map((id, index) => {
+      const pending = projectMatchSnapshot(waiting.state, id, BASE_PHYSICAL_CARDS).pendingInteraction;
+      assert.ok(pending && "responseOptions" in pending);
+      return { protocolVersion: 1, commandId: commandId(902 + index), matchId: MATCH_ID, expectedVersion: waiting.version, type: "RESPOND", payload: { interactionId: pending.interactionId, choice: "USE_MISSED", cardInstanceId: missed[index]!.cardInstanceId } } as MatchCommand;
+    });
+    const replies = await Promise.all(commands.map((command, index) => processMatchCommand(authContext(defenders[index]!), command, deps)));
+    assert.ok(replies.every(reply => reply?.status === "accepted"));
+    const final = await storage.getMatch(MATCH_ID);
+    assert.equal(final?.version, waiting.version + defenders.length);
+    assert.equal(final?.state.resolution.pendingInteraction, null);
+    assert.ok(missed.every(card => final?.state.zones.discardPileCardInstanceIds.includes(card.cardInstanceId)));
+    assert.ok(final?.state.seats.every(seat => seat.public.hp === 4));
+    assert.equal((await processMatchCommand(authContext(defenders[2]!), commands[2], deps))?.status, "accepted");
+    assert.equal((await storage.getMatch(MATCH_ID))?.version, final?.version);
+  } finally { await database.close(); }
+});
 
 function putCardInHand(state: GameState, typeId: string, playerId: string): { state: GameState; cardInstanceId: string } {
   const card = Object.values(state.zones.cardsByInstanceId).find((candidate) => cardTypeId(candidate.cardDefinitionId) === typeId);

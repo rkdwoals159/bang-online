@@ -239,6 +239,8 @@ export interface MatchSnapshotView {
     publicDiscard: { topCard: CardFaceView | null; count: number };
     /** Remaining public pool only while GENERAL_STORE_PICK is pending. */
     generalStoreCards?: readonly CardFaceView[];
+    /** Shared status only; another player's hand options and reserved choice remain private. */
+    tablewideAttack?: TablewideAttackView;
     /** C08: both judgment candidates are public before Lucky chooses. */
     luckyJudgment?: { sourceKind: "jail" | "dynamite" | "barrel" | "jourdonnais_virtual_barrel"; cards: readonly CardFaceView[] };
   };
@@ -249,6 +251,12 @@ export interface MatchSnapshotView {
   /** Present only when `status` is `completed`; never expose a pending winner. */
   outcome?: MatchOutcomeView;
   pendingInteraction: PendingInteractionView | null;
+}
+export interface TablewideAttackView {
+  attackId: string;
+  kind: "gatling" | "indians";
+  sourcePlayerId: string;
+  targets: readonly { playerId: string; status: "waiting" | "submitted" | "responding" | "resolved" | "eliminated" }[];
 }
 export interface PublicMatchEvent {
   eventSeq: number;

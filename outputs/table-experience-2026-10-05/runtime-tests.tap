@@ -1,0 +1,190 @@
+TAP version 13
+# Subtest: gatling: future targets submit in reverse order, privately and durably, without blocking
+ok 1 - gatling: future targets submit in reverse order, privately and durably, without blocking
+  ---
+  duration_ms: 20.5752
+  type: 'test'
+  ...
+# Subtest: indians: future targets submit in reverse order, privately and durably, without blocking
+ok 2 - indians: future targets submit in reverse order, privately and durably, without blocking
+  ---
+  duration_ms: 4.9797
+  type: 'test'
+  ...
+# Subtest: early Gatling defense triggers Suzy once at actual card consumption
+ok 3 - early Gatling defense triggers Suzy once at actual card consumption
+  ---
+  duration_ms: 4.123
+  type: 'test'
+  ...
+# Subtest: a future target can reserve defense during another player's death rescue
+ok 4 - a future target can reserve defense during another player's death rescue
+  ---
+  duration_ms: 1.9711
+  type: 'test'
+  ...
+# Subtest: an early Barrel failure opens a fresh response and cannot reuse its old choice
+ok 5 - an early Barrel failure opens a fresh response and cannot reuse its old choice
+  ---
+  duration_ms: 3.4493
+  type: 'test'
+  ...
+# Subtest: BANG response persists as JSON, applies the hit, and closes its continuation
+ok 6 - BANG response persists as JSON, applies the hit, and closes its continuation
+  ---
+  duration_ms: 2.5542
+  type: 'test'
+  ...
+# Subtest: Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+ok 7 - Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+  ---
+  duration_ms: 2.0071
+  type: 'test'
+  ...
+# Subtest: Suzy draws after the first Slab Missed before the second defense prompt opens
+ok 8 - Suzy draws after the first Slab Missed before the second defense prompt opens
+  ---
+  duration_ms: 2.2833
+  type: 'test'
+  ...
+# Subtest: Suzy waits until an initiated Duel fully resolves before drawing
+ok 9 - Suzy waits until an initiated Duel fully resolves before drawing
+  ---
+  duration_ms: 2.8612
+  type: 'test'
+  ...
+# Subtest: Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+ok 10 - Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+  ---
+  duration_ms: 4.1637
+  type: 'test'
+  ...
+# Subtest: a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+ok 11 - a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+  ---
+  duration_ms: 1.8491
+  type: 'test'
+  ...
+# Subtest: a non-Slab physical BANG does not dispatch the Slab query
+ok 12 - a non-Slab physical BANG does not dispatch the Slab query
+  ---
+  duration_ms: 0.7054
+  type: 'test'
+  ...
+# Subtest: Beer rescue resumes after JSON persistence and records damage only after recovery
+ok 13 - Beer rescue resumes after JSON persistence and records damage only after recovery
+  ---
+  duration_ms: 3.5252
+  type: 'test'
+  ...
+# Subtest: Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+ok 14 - Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+  ---
+  duration_ms: 2.6513
+  type: 'test'
+  ...
+# Subtest: after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+ok 15 - after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+  ---
+  duration_ms: 4.1058
+  type: 'test'
+  ...
+# Subtest: Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+ok 16 - Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+  ---
+  duration_ms: 2.9034
+  type: 'test'
+  ...
+# Subtest: a single Beer rescues damage that leaves HP exactly zero
+ok 17 - a single Beer rescues damage that leaves HP exactly zero
+  ---
+  duration_ms: 1.3423
+  type: 'test'
+  ...
+# Subtest: Sid rescue spends the saved two-card pair before recovery continues
+ok 18 - Sid rescue spends the saved two-card pair before recovery continues
+  ---
+  duration_ms: 1.4276
+  type: 'test'
+  ...
+# Subtest: Stagecoach and equipment modules produce candidate card-zone changes through runtime
+ok 19 - Stagecoach and equipment modules produce candidate card-zone changes through runtime
+  ---
+  duration_ms: 1.4633
+  type: 'test'
+  ...
+# Subtest: Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+ok 20 - Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+  ---
+  duration_ms: 3.7957
+  type: 'test'
+  ...
+# Subtest: Duel prompt and sequential target resolution use the serialized module result
+ok 21 - Duel prompt and sequential target resolution use the serialized module result
+  ---
+  duration_ms: 2.1934
+  type: 'test'
+  ...
+# Subtest: Gatling resumes its clockwise queue after a public Barrel judgment
+ok 22 - Gatling resumes its clockwise queue after a public Barrel judgment
+  ---
+  duration_ms: 4.454
+  type: 'test'
+  ...
+# Subtest: Jail and Panic results apply their declared zone movements
+ok 23 - Jail and Panic results apply their declared zone movements
+  ---
+  duration_ms: 2.7576
+  type: 'test'
+  ...
+# Subtest: direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+ok 24 - direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+  ---
+  duration_ms: 0.9706
+  type: 'test'
+  ...
+# Subtest: Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+ok 25 - Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+  ---
+  duration_ms: 3.5298
+  type: 'test'
+  ...
+# Subtest: Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+ok 26 - Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+  ---
+  duration_ms: 2.7257
+  type: 'test'
+  ...
+# Subtest: Elimination rescue accept resumes R28 cleanup before the saved damage hook
+ok 27 - Elimination rescue accept resumes R28 cleanup before the saved damage hook
+  ---
+  duration_ms: 1.5515
+  type: 'test'
+  ...
+# Subtest: Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+ok 28 - Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+  ---
+  duration_ms: 2.3387
+  type: 'test'
+  ...
+# Subtest: Suzy does not make a completion draw when El Gringo leaves her with a card
+ok 29 - Suzy does not make a completion draw when El Gringo leaves her with a card
+  ---
+  duration_ms: 1.0678
+  type: 'test'
+  ...
+# Subtest: Sid ability module receives the caller-selected two-card cost and runtime applies it once
+ok 30 - Sid ability module receives the caller-selected two-card cost and runtime applies it once
+  ---
+  duration_ms: 1.0689
+  type: 'test'
+  ...
+1..30
+# tests 30
+# suites 0
+# pass 30
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 719.8551

@@ -10,7 +10,7 @@ import {
 } from "../../../../../packages/engine/src/commands/index.js";
 import type { EffectEventDraft } from "../../../../../packages/engine/src/effects/api.js";
 import { createEffectRegistry } from "../../../../../packages/engine/src/effects/registry.js";
-import { createEffectCommandHandlers, type InteractionIdentity } from "../../../../../packages/engine/src/effects/runtime/index.js";
+import { createEffectCommandHandlers, isConcurrentTablewideResponse, type InteractionIdentity } from "../../../../../packages/engine/src/effects/runtime/index.js";
 import type { GameState, JsonValue } from "../../../../../packages/engine/src/state/types.js";
 import { webCryptoRandomSource, opaqueId, sha256Hex } from "../auth/crypto.js";
 import {
@@ -334,7 +334,7 @@ export class D1MatchService {
         if (prior) return receiptAckOrReused(prior, command, requestHash);
       }
 
-      if (match.version !== command.expectedVersion) {
+      if (match.version !== command.expectedVersion && !(command.expectedVersion < match.version && isConcurrentTablewideResponse(match.state, actorPlayerId, command))) {
         const saved = await saveRejection(
           this.repository,
           actorPlayerId,
@@ -397,7 +397,7 @@ export class D1MatchService {
         if (!parseCommandAck(reply).ok) throw new D1StorageInvariantError("Committed viewer projection failed its contract.");
         const commit: MatchCommitInput = {
           matchId: command.matchId,
-          expectedVersion: command.expectedVersion,
+          expectedVersion: match.version,
           expectedEventSeq: match.eventSeq,
           markerId: opaqueId("commit", this.options.crypto),
           state: nextState,
@@ -419,6 +419,11 @@ export class D1MatchService {
         if (error instanceof CommandIdReusedError) return rejected(command.commandId, "COMMAND_ID_REUSED");
         if (error instanceof MatchNotFoundError) return rejected(command.commandId, "NOT_A_PLAYER");
         if (error instanceof StaleMatchVersionError) {
+          const latest = await this.repository.getMatchForPlayer(command.matchId, actorPlayerId, { supportedSchemaVersion: SUPPORTED_MATCH_SCHEMA_VERSION });
+          if (latest && command.expectedVersion <= latest.version && isConcurrentTablewideResponse(latest.state, actorPlayerId, command)) {
+            match = latest;
+            continue;
+          }
           const saved = await saveRejection(
             this.repository,
             actorPlayerId,

@@ -6,7 +6,7 @@ import { useGameExperience } from "./GameExperience.js";
 import "./choice-stage.css";
 
 /** Native modal focus containment, with a dock so observers can return to the table. */
-export function ChoiceStage({ interactionId, title, attentionKey, children }: { interactionId: string; title: string; attentionKey?: string; children: ReactNode }) {
+export function ChoiceStage({ interactionId, title, attentionKey, children, dockLabel = "카드 펼쳐 보기" }: { interactionId: string; title: string; attentionKey?: string; children: ReactNode; dockLabel?: string }) {
   const [expanded, setExpanded] = useState(true);
   const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -25,7 +25,7 @@ export function ChoiceStage({ interactionId, title, attentionKey, children }: { 
   useEffect(() => () => { if (originalFocus.current?.isConnected) originalFocus.current.focus(); }, []);
   function minimize() { setExpanded(false); }
   return <section className="choice-stage" aria-label={title}>
-    <div className="choice-stage__dock"><strong>{title}</strong><button ref={trigger} type="button" onClick={() => setExpanded(true)}>카드 펼쳐 보기</button></div>
+    <div className="choice-stage__dock"><strong>{title}</strong><button ref={trigger} type="button" onClick={() => setExpanded(true)}>{dockLabel}</button></div>
     <dialog ref={dialog} tabIndex={-1} className="choice-stage__dialog" aria-labelledby={titleId} aria-modal="true" onCancel={event => { event.preventDefault(); minimize(); }} onClose={minimize}>
       <header className="choice-stage__header"><h2 id={titleId}>{title}</h2><button type="button" onClick={minimize}>게임판 보기</button></header>
       {children}
