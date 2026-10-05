@@ -1,0 +1,34 @@
+{
+  "saved_version": {
+    "id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_959e85e05584819185b16c9089bf7fd8",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "version_number": 21,
+    "source": {
+      "commit_sha": "2cdbc441e9d7358728703e29570b13d1961913d7"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000968481fa9d18d26554b37809",
+      "content_hash": "sha256:04766521a8be6fb326be74f78a4537603433352c584df747743522a599c5dcd3",
+      "size_bytes": 7055360,
+      "file_count": 115
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ac3b1532d54819187609486c0478139",
+    "project_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+    "title": "뱅! 온라인",
+    "version_id": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_959e85e05584819185b16c9089bf7fd8",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://bang-online-ko.rkdwoals159.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6abacbd5c54c8191abdbb8c55b15de64",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-05T14:17:13.009733+00:00"
+  }
+}
