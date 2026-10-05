@@ -1,0 +1,67 @@
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2K
+transforming...✓ 290 modules transformed.
+rendering chunks...
+✓ built in 2.94s
+[2/5] analyze server references...
+[2K
+transforming...✓ 168 modules transformed.
+rendering chunks...
+✓ built in 1.30s
+[3/5] build rsc environment...
+[2K
+transforming...✓ 287 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (15%)
+  - rsc:virtual-client-package (13%)
+  - alias (12%)
+  - vinext:css-data-url (12%)
+  - vinext:middleware-server-only (8%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 3.26s
+[4/5] build client environment...
+[2K
+transforming...✓ 210 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (30%)
+  - vinext:css-data-url (11%)
+  - vinext:middleware-server-only (7%)
+  - vite-plugin-commonjs (7%)
+  - rsc:virtual-client-package (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 5.50s
+[5/5] build ssr environment...
+[2K
+transforming...✓ 182 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (25%)
+  - vinext:validate-middleware-exports (10%)
+  - vinext:css-data-url (7%)
+  - vinext:middleware-server-only (6%)
+  - vinext:jsx-in-js (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 3.75s
+[0m
+  Route (app)
+  ┌ ? /      
+  └ ƒ /:path+
+
+  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+  Build complete. Run `vinext start` to start the production server.
+

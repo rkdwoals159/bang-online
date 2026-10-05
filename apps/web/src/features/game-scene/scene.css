@@ -115,11 +115,11 @@
 .table-stage .tablewide-stage__players li{padding:6px;gap:4px;font-size:12px;min-width:0}
 .table-stage .tablewide-stage__players strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .table-stage .reaction-prompt__options{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0;padding:3px}
-.table-stage .reaction-prompt__option-row{display:flex;align-items:center;gap:8px}
-.table-stage .reaction-prompt__option{min-width:0;flex:1;padding:10px;font-size:14px}
+.game-scene .table-stage .reaction-prompt__option-row{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:8px;width:100%;min-width:0;padding:8px;border:1px solid #59705c;border-radius:8px;background:#13251c}
+.table-stage .reaction-prompt__option{min-width:0;flex:0 0 auto;padding:10px;font-size:14px}
 .table-stage .reaction-prompt__option span{font-size:12px}
-.table-stage .reaction-prompt__option-row .card-zoom{flex:0 0 48px}
-.table-stage .reaction-prompt__option-row .playing-card{width:48px}
+.game-scene .table-stage .reaction-prompt__option-row .card-zoom{order:-1;flex:0 0 auto;width:48px;max-width:100%;align-self:center}
+.game-scene .table-stage .reaction-prompt__option-row .playing-card{width:48px;max-width:100%}
 .table-stage .reaction-prompt__option-zoom-trigger{padding:0;border:0;background:none}
 .table-stage .reaction-prompt__option-row .card-zoom__trigger{padding:0;border:0;background:none;min-width:44px}
 .table-stage .reaction-prompt__judgment{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
@@ -150,15 +150,15 @@
 @media(max-height:760px) and (min-width:601px){.scene-center{inset:calc(54px + (100% - 279px)*.29) 27% 247px}}
 @media(max-width:600px){
   .scene-center{inset:188px 10px 289px}
-  .scene-center:has(.tablewide-stage__players):has(.reaction-prompt){bottom:184px}
-  .game-scene:has(.scene-center .tablewide-stage__players):has(.reaction-prompt) .scene-hand-dock{height:170px}
-  .game-scene:has(.scene-center .tablewide-stage__players):has(.reaction-prompt) .game-actions__cards{height:90px;padding-block:5px}
-  .game-scene:has(.scene-center .tablewide-stage__players):has(.reaction-prompt) .game-actions__cards>li{width:52px;flex-basis:52px}
-  .game-scene:has(.scene-center .tablewide-stage__players):has(.reaction-prompt) .game-actions__cards .playing-card{width:52px}
+  .scene-center:has(.reaction-prompt){bottom:184px}
+  .game-scene:has(.scene-center .reaction-prompt) .scene-hand-dock{height:170px}
+  .game-scene:has(.scene-center .reaction-prompt) .game-actions__cards{height:90px;padding-block:5px}
+  .game-scene:has(.scene-center .reaction-prompt) .game-actions__cards>li{width:52px;flex-basis:52px}
+  .game-scene:has(.scene-center .reaction-prompt) .game-actions__cards .playing-card{width:52px}
   .game-scene:has(.table-stage) .scene-seat--self{visibility:visible}
   .table-stage{padding:10px}
   .table-stage__header h2{font-size:18px}
-  .game-scene .table-stage .reaction-prompt__options{grid-template-columns:minmax(0,1fr)}
+  .game-scene .table-stage .reaction-prompt .reaction-prompt__options{grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr))}
   .game-scene:has(.table-stage) .scene-seats{position:absolute;inset:8px 10px auto;display:flex;gap:10px;padding:18px 4px 24px;overflow-x:auto;list-style:none;scrollbar-color:#ac985c #17251f}
   .game-scene:has(.table-stage) .scene-seats>.scene-seat{position:relative;left:auto!important;top:auto!important;transform:none;flex:0 0 96px;width:96px}
   .game-scene:has(.table-stage) .scene-seat--self article{grid-template-rows:20px 19px 16px 16px}

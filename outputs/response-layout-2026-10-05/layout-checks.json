@@ -1,0 +1,233 @@
+[
+  {
+    "width": 950,
+    "mode": "single",
+    "result": {
+      "panelWidth": 407,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 171
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 171
+        }
+      ],
+      "scrollWidth": 407
+    }
+  },
+  {
+    "width": 950,
+    "mode": "two",
+    "result": {
+      "panelWidth": 407,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            },
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 253
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 253
+        }
+      ],
+      "scrollWidth": 407
+    }
+  },
+  {
+    "width": 950,
+    "mode": "many",
+    "result": {
+      "panelWidth": 407,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 171
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 171
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 62
+        }
+      ],
+      "scrollWidth": 407
+    }
+  },
+  {
+    "width": 760,
+    "mode": "many",
+    "result": {
+      "panelWidth": 305,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 192
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 192
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 82
+        }
+      ],
+      "scrollWidth": 305
+    }
+  },
+  {
+    "width": 420,
+    "mode": "single",
+    "result": {
+      "panelWidth": 374,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 171
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 171
+        }
+      ],
+      "scrollWidth": 374
+    }
+  },
+  {
+    "width": 420,
+    "mode": "two",
+    "result": {
+      "panelWidth": 359,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            },
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 274
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 274
+        }
+      ],
+      "scrollWidth": 359
+    }
+  },
+  {
+    "width": 320,
+    "mode": "two",
+    "result": {
+      "panelWidth": 259,
+      "rows": [
+        {
+          "buttonMinHeight": true,
+          "cards": [
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            },
+            {
+              "aboveButton": true,
+              "inside": true,
+              "overlapsOtherButtons": false,
+              "width": 48
+            }
+          ],
+          "height": 253
+        },
+        {
+          "buttonMinHeight": true,
+          "cards": [],
+          "height": 62
+        }
+      ],
+      "scrollWidth": 259
+    }
+  }
+]

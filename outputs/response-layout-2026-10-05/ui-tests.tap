@@ -1,0 +1,160 @@
+TAP version 13
+# Subtest: 4–7 seats use explicit clockwise centers with self at the bottom
+ok 1 - 4–7 seats use explicit clockwise centers with self at the bottom
+  ---
+  duration_ms: 2815.7717
+  type: 'test'
+  ...
+# Subtest: one persistent scene has menu, public table and private hand without web page panels
+ok 2 - one persistent scene has menu, public table and private hand without web page panels
+  ---
+  duration_ms: 60.1842
+  type: 'test'
+  ...
+# Subtest: inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+ok 3 - inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+  ---
+  duration_ms: 21.5464
+  type: 'test'
+  ...
+# Subtest: scene never renders hidden opponent role, card identities or deck contents
+ok 4 - scene never renders hidden opponent role, card identities or deck contents
+  ---
+  duration_ms: 13.3558
+  type: 'test'
+  ...
+# Subtest: opponent hand back icons exactly reflect public counts, including more than 80
+ok 5 - opponent hand back icons exactly reflect public counts, including more than 80
+  ---
+  duration_ms: 26.9636
+  type: 'test'
+  ...
+# Subtest: public distance and role use authenticated projection while own HUD shows own role
+ok 6 - public distance and role use authenticated projection while own HUD shows own role
+  ---
+  duration_ms: 8.8744
+  type: 'test'
+  ...
+# Subtest: observer retains public scene without any private hand input
+ok 7 - observer retains public scene without any private hand input
+  ---
+  duration_ms: 17.0879
+  type: 'test'
+  ...
+# Subtest: zero healing beer retains confirmation and image selection uses legal candidates
+ok 8 - zero healing beer retains confirmation and image selection uses legal candidates
+  ---
+  duration_ms: 14.6632
+  type: 'test'
+  ...
+# Subtest: empty hand uses its own compact status and preserves the legal end-turn action
+ok 9 - empty hand uses its own compact status and preserves the legal end-turn action
+  ---
+  duration_ms: 17.1069
+  type: 'test'
+  ...
+# Subtest: every projected response uses the inline table area including ordered discard
+ok 10 - every projected response uses the inline table area including ordered discard
+  ---
+  duration_ms: 32.5015
+  type: 'test'
+  ...
+# Subtest: first scene render is silent and exposes no history animation
+ok 11 - first scene render is silent and exposes no history animation
+  ---
+  duration_ms: 14.5719
+  type: 'test'
+  ...
+# Subtest: scene store has a nonmodal shared table area for picker and observers
+ok 12 - scene store has a nonmodal shared table area for picker and observers
+  ---
+  duration_ms: 60.9448
+  type: 'test'
+  ...
+# Subtest: all projected request kinds use a visible inline region without a close or reopen step
+ok 13 - all projected request kinds use a visible inline region without a close or reopen step
+  ---
+  duration_ms: 194.6896
+  type: 'test'
+  ...
+# Subtest: tablewide response preserves private choices and shared progress without a dialog
+ok 14 - tablewide response preserves private choices and shared progress without a dialog
+  ---
+  duration_ms: 17.3832
+  type: 'test'
+  ...
+# Subtest: General Store selection shows public card names, suits, images and zoom while keeping exact commands
+ok 15 - General Store selection shows public card names, suits, images and zoom while keeping exact commands
+  ---
+  duration_ms: 1529.5275
+  type: 'test'
+  ...
+# Subtest: only the current responder's pending options are offered, with the server step
+ok 16 - only the current responder's pending options are offered, with the server step
+  ---
+  duration_ms: 3.296
+  type: 'test'
+  ...
+# Subtest: a non-responder sees progress only and no response options or card IDs
+ok 17 - a non-responder sees progress only and no response options or card IDs
+  ---
+  duration_ms: 0.8485
+  type: 'test'
+  ...
+# Subtest: death rescue presents only saved Beer and elimination choices
+ok 18 - death rescue presents only saved Beer and elimination choices
+  ---
+  duration_ms: 2.2482
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+ok 19 - Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+  ---
+  duration_ms: 4.9381
+  type: 'test'
+  ...
+# Subtest: creates a canonical RESPOND envelope from the exact saved option fields
+ok 20 - creates a canonical RESPOND envelope from the exact saved option fields
+  ---
+  duration_ms: 0.197
+  type: 'test'
+  ...
+# Subtest: does not turn an ORDER_CARDS option template into a command without user-entered order
+ok 21 - does not turn an ORDER_CARDS option template into a command without user-entered order
+  ---
+  duration_ms: 9.9528
+  type: 'test'
+  ...
+# Subtest: validates discard order against the server candidate IDs and required count
+ok 22 - validates discard order against the server candidate IDs and required count
+  ---
+  duration_ms: 0.5381
+  type: 'test'
+  ...
+# Subtest: sync projection restores the same pending prompt and response choices
+ok 23 - sync projection restores the same pending prompt and response choices
+  ---
+  duration_ms: 0.9535
+  type: 'test'
+  ...
+# Subtest: reports a response acknowledgement before waiting for the authoritative projection
+ok 24 - reports a response acknowledgement before waiting for the authoritative projection
+  ---
+  duration_ms: 0.6514
+  type: 'test'
+  ...
+# Subtest: a multi-target response sync opens only the next responder's new prompt
+ok 25 - a multi-target response sync opens only the next responder's new prompt
+  ---
+  duration_ms: 0.4107
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 10372.7368
