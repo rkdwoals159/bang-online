@@ -1,0 +1,11 @@
+/*! Adapted from Animista scale-in-center and swing-in-top-fwd.
+ * Copyright 2017 Ana Travas. FreeBSD/BSD-2-Clause license.
+ * Full notice: /licenses/animista.txt. Source: https://animista.net/ */
+@keyframes bang-scale-in {
+  from { transform: scale(.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes bang-swing-in-top-fwd {
+  from { transform: perspective(700px) rotateX(-28deg) translateY(-18px); transform-origin: top; opacity: 0; }
+  to { transform: perspective(700px) rotateX(0) translateY(0); transform-origin: top; opacity: 1; }
+}

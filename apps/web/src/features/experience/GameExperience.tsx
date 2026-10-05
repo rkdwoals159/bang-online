@@ -3,6 +3,7 @@ import type { MatchSnapshotView, PublicMatchEvent } from "../../../../../package
 import { PlayingCardFace } from "../cards/CardFaces.js";
 import { GameAudio } from "./audio.js";
 import { advancePresentation, cueDuration, MAX_QUEUED_CUES, type GameCue, type PresentationCursor } from "./model.js";
+import "./animista.css";
 import "./experience.css";
 
 export interface TableTargeting { version: number; playerIds: readonly string[]; selectedPlayerId?: string; choosePlayer: (playerId: string) => void }
@@ -12,6 +13,7 @@ interface ExperienceValue {
   setTargeting: (targeting: TableTargeting | null) => void;
   soundEnabled: boolean;
   motionEnabled: boolean;
+  motionAllowed: boolean;
   toggleSound: () => void;
   toggleMotion: () => void;
 }
@@ -26,9 +28,17 @@ export function GameExperience({ version, snapshot, visibleEvents, children }: {
   const [targeting, setTargeting] = useState<TableTargeting | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [motionEnabled, setMotionEnabled] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const motionAllowed = motionEnabled && !reducedMotion;
   const cue = queue[0] ?? null;
   const ownResponse = snapshot.pendingInteraction && "currentResponderPlayerId" in snapshot.pendingInteraction &&
     snapshot.pendingInteraction.currentResponderPlayerId === snapshot.viewer.playerId && snapshot.pendingInteraction.kind !== "GENERAL_STORE_PICK";
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(preference.matches);
+    update(); preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
   useEffect(() => {
     const engine = new GameAudio(); audio.current = engine;
     try { const sound = localStorage.getItem("bang:sound"), motion = localStorage.getItem("bang:motion"); setSoundEnabled(sound !== "off"); setMotionEnabled(motion !== "off"); engine.setEnabled(sound !== "off"); } catch { /* Preferences are optional. */ }
@@ -53,9 +63,9 @@ export function GameExperience({ version, snapshot, visibleEvents, children }: {
     try { localStorage.setItem("bang:sound", next ? "on" : "off"); } catch { /* Optional. */ }
   }, [soundEnabled]);
   const toggleMotion = useCallback(() => { const next = !motionEnabled; setMotionEnabled(next); try { localStorage.setItem("bang:motion", next ? "on" : "off"); } catch { /* Optional. */ } }, [motionEnabled]);
-  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, motionEnabled, toggleSound, toggleMotion }), [cue, targeting, version, soundEnabled, motionEnabled, toggleSound, toggleMotion]);
+  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, motionEnabled, motionAllowed, toggleSound, toggleMotion }), [cue, targeting, version, soundEnabled, motionEnabled, motionAllowed, toggleSound, toggleMotion]);
   return <ExperienceContext.Provider value={value}>
-    <div className={`game-experience${motionEnabled ? "" : " game-experience--still"}`} data-last-sound={lastSound || undefined}>{children}
+    <div className={`game-experience${motionAllowed ? "" : " game-experience--still"}`} data-last-sound={lastSound || undefined}>{children}
       {snapshot.status === "playing" && (snapshot.viewer.mode === "active" || ownResponse) ? <nav className="game-navigation" aria-label="게임 화면 바로가기"><a href="#game-table-title">테이블</a><a href={ownResponse ? "#reaction-prompt-title" : "#game-actions-title"}>{ownResponse ? "내 응답" : "내 손패"}</a></nav> : null}
       {cue ? <div key={cue.id} className={`game-cue game-cue--${cue.kind}`} role="status" aria-live="polite">
         <strong>{cue.label}</strong>
@@ -78,10 +88,11 @@ interface Point { x: number; y: number }
 /** Coordinates are measured from the visible public seat elements only. */
 export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | null> }) {
   const game = useGameExperience(), cue = game?.cue;
+  const motionAllowed = game?.motionAllowed ?? false;
   const [geometry, setGeometry] = useState<{ id: string; source?: Point; targets: Point[] } | null>(null);
   useEffect(() => {
     const table = surface.current;
-    if (!cue || !table) { setGeometry(null); return; }
+    if (!cue || !table || !motionAllowed) { setGeometry(null); return; }
     const measure = () => {
       const bounds = table.getBoundingClientRect();
       const seats = new Map(Array.from(table.querySelectorAll<HTMLElement>("[data-player-seat]")).map(e => [e.dataset.playerSeat, e]));
@@ -90,8 +101,8 @@ export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | 
     };
     measure(); const observer = new ResizeObserver(measure); observer.observe(table);
     return () => observer.disconnect();
-  }, [cue?.id, surface]);
-  if (!cue || geometry?.id !== cue.id) return null;
+  }, [cue?.id, surface, motionAllowed]);
+  if (!motionAllowed || !cue || geometry?.id !== cue.id) return null;
   const shooting = cue.kind === "shot" || cue.kind === "burst";
   return <div className={`table-effects table-effects--${cue.kind}`} key={cue.id} aria-hidden="true">
     {geometry.targets.map((target, index) => <div key={index}>

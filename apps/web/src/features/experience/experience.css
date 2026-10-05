@@ -4,19 +4,15 @@
 .game-experience__controls button[aria-pressed="false"] { color: var(--color-on-felt-muted); }
 .game-cue { position: fixed; z-index: 80; top: 84px; left: 50%; display: grid; justify-items: center; gap: 12px; width: max-content; max-width: min(90vw, 480px); padding: 14px 24px; border: 2px solid var(--color-brass); border-radius: 12px; background: #102b24; color: #fffdf7; box-shadow: 0 12px 40px #0004; text-align: center; pointer-events: none; animation: game-cue-enter 170ms ease-out both; }
 .game-cue strong { font-size: 17px; line-height: 1.5; overflow-wrap: anywhere; }
-.game-cue .playing-card { width: 108px; }
+.game-cue .playing-card { width: 108px; animation: bang-scale-in 240ms cubic-bezier(.25,.46,.45,.94) both; }
 .game-cue--shot, .game-cue--burst, .game-cue--explosion { border-color: #ffba54; }
 .game-cue--block { border-color: #a7d6ff; }
 .game-cue--hit, .game-cue--eliminated { border-color: #ff8b75; }
 .game-cue--heal { border-color: #98e7af; }
 .game-cue--victory { padding: 24px 36px; background: #533811; }
 .game-table__header { flex-wrap: wrap; }
-.game-table__seat-card[data-effect="source"] { animation: game-recoil 270ms ease-out; }
-.game-table__seat-card[data-effect="hit"], .game-table__seat-card[data-effect="explosion"] { animation: game-hit 460ms ease-out; }
 .game-table__seat-card[data-effect="block"] { box-shadow: 0 0 0 3px #80bddd, 0 0 24px #80bddd88; }
 .game-table__seat-card[data-effect="heal"] { box-shadow: 0 0 0 3px #71ba82, 0 0 24px #71ba8288; }
-.game-table__seat-card[data-effect="turn"] { animation: game-turn-focus 600ms ease-out; }
-.game-table__seat-card[data-effect="eliminated"] { animation: game-eliminate 600ms ease-out; }
 .game-table__seat-card[data-effect="draw"], .game-table__seat-card[data-effect="pick"], .game-table__seat-card[data-effect="equip"] { box-shadow: 0 0 0 3px var(--color-brass); }
 .game-table__seat-card[data-effect="victory"] { box-shadow: 0 0 0 3px var(--color-brass), 0 0 32px #e8bd6988; }
 .game-table__seat-card[data-target="available"] { border: 2px dashed var(--color-brass-ink); }
@@ -30,7 +26,7 @@
 .match-page__shared-choice { grid-column: 1 / -1; }
 .match-page__shared-choice .choice-stage__dock { position: fixed; bottom: 16px; right: 16px; z-index: 25; max-width: calc(100vw - 32px); box-shadow: 0 8px 24px #0003; }
 .match-page__shared-choice:has(+ .match-status__input-gate) { margin-bottom: 0; }
-.match-status__result { animation: choice-stage-enter 400ms ease-out; }
+.match-status__result { animation: bang-scale-in 280ms cubic-bezier(.25,.46,.45,.94); }
 .game-navigation { display: none; }
 .app-shell .match-page--observer { grid-template-columns: minmax(0, 1fr); grid-template-areas: "request" "table" "log"; }
 .table-effects { position: absolute; z-index: 5; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
@@ -49,10 +45,6 @@
 @keyframes game-projectile { from { opacity: 1; transform: translate(0, 0); } to { opacity: 0; transform: translate(var(--travel-x), var(--travel-y)); } }
 @keyframes game-trace { 40% { stroke-dashoffset: 0; opacity: .8; } to { stroke-dashoffset: 0; opacity: 0; } }
 @keyframes game-impact { from { opacity: 0; transform: scale(.4); } 30% { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.5); } }
-@keyframes game-recoil { 35% { transform: translateX(-4px) rotate(-1deg); } to { transform: none; } }
-@keyframes game-hit { 20%,60% { transform: translateX(-3px); background: #ffe5df; } 40% { transform: translateX(3px); } to { transform: none; } }
-@keyframes game-turn-focus { from { box-shadow: 0 0 0 7px #e8bd6966; } to { box-shadow: 0 0 0 0 transparent; } }
-@keyframes game-eliminate { from { opacity: 1; transform: rotate(0); } 50% { transform: rotate(-2deg); opacity: .6; } to { transform: none; opacity: 1; } }
 @media (max-width: 600px) { .game-cue { top: 76px; padding: 12px 16px; } .game-cue strong { font-size: 15px; } .game-experience__controls button { font-size: 12px; padding: 8px; } }
 @media (max-width: 600px) {
   .game-experience { padding-bottom: 64px; }

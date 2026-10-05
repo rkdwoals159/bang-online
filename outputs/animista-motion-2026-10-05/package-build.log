@@ -1,0 +1,4 @@
+Sites build staged:
+- Worker: dist\server\index.js
+- Client: dist\client
+- D1 binding: DB

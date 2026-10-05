@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { playSeatMotion } from "../experience/motion.js";
 import { GameExperienceControls, TableEffects, useGameExperience } from "../experience/GameExperience.js";
 import { cardName } from "../actions/model.js";
 import { CharacterPortrait } from "../cards/CardFaces.js";
@@ -119,6 +120,12 @@ function PlayerSeat({
 }) {
   const experience = useGameExperience();
   const cue = experience?.cue;
+  const seat = useRef<HTMLElement>(null);
+  const effect = cue?.targetIds.includes(player.playerId) ? cue.kind : cue?.actorId === player.playerId ? "source" : undefined;
+  const motionAllowed = experience?.motionAllowed ?? false;
+  useEffect(() => {
+    if (seat.current) return playSeatMotion(seat.current, effect, motionAllowed);
+  }, [cue?.id, effect, motionAllowed]);
   const target = experience?.targeting;
   const canTarget = target?.playerIds.includes(player.playerId) ?? false;
   const selected = canTarget && target?.selectedPlayerId === player.playerId;
@@ -147,9 +154,9 @@ function PlayerSeat({
         .filter(Boolean)
         .join(" ")}
     >
-      <article className="game-table__seat-card" aria-label={accessibleName}
+      <article ref={seat} className="game-table__seat-card" aria-label={accessibleName}
         data-player-seat={player.playerId}
-        data-effect={cue?.targetIds.includes(player.playerId) ? cue.kind : cue?.actorId === player.playerId ? "source" : undefined}
+        data-effect={effect}
         data-target={canTarget ? selected ? "selected" : "available" : undefined}>
         <CharacterPortrait characterId={player.characterId} />
         <div className="game-table__seat-heading">
