@@ -5,6 +5,8 @@ import { CharacterPortrait } from "../cards/CardFaces.js";
 import { CardInspectionHost } from "../cards/CardInspectionHost.js";
 import { getCharacterCardPresentation } from "../cards/assets.js";
 import { ReactionPrompt } from "../reactions/ReactionPrompt.js";
+import { TablewideAttackStage } from "../reactions/TablewideAttackStage.js";
+import { useTablewideSummary } from "../reactions/useTablewideSummary.js";
 import { interactionLabel } from "../reactions/model.js";
 import { StatusPanel, type ResultRoomTransport } from "../status/StatusPanel.js";
 import { ChoiceStage, TableStageHost } from "../experience/ChoiceStage.js";
@@ -23,6 +25,7 @@ export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersi
   const [inspectionHost,setInspectionHost]=useState<HTMLDivElement|null>(null);
   const [logOpen,setLogOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[fullscreenError,setFullscreenError]=useState("");
   const completed=snapshot.status==="completed", pending=snapshot.pendingInteraction;
+  const attackSummary=useTablewideSummary(version,snapshot,visibleEvents);
   const self=snapshot.publicTable.players.find(p=>p.playerId===snapshot.viewer.playerId);
   const turn=snapshot.publicTable.players.find(p=>p.playerId===snapshot.publicTable.turn.currentPlayerId);
   const mine=turn?.playerId===snapshot.viewer.playerId;
@@ -35,6 +38,7 @@ export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersi
     <SceneTable snapshot={snapshot} />
     <div className="scene-center" ref={setCenterHost} data-card-anchor="choice">
       {!completed&&pending?<ReactionPrompt variant="scene" matchId={matchId} version={version} snapshot={snapshot} transport={transport}/>:null}
+      {!completed&&!pending&&attackSummary?<ChoiceStage presentation="table" interactionId={`finished:${attackSummary.attackId}`} title={`${attackSummary.kind === "gatling" ? "개틀링!" : "인디언!"} 대응 결과`}><TablewideAttackStage attack={attackSummary} snapshot={snapshot} finished/></ChoiceStage>:null}
       {completed?<ChoiceStage presentation="table" interactionId={`result:${matchId}`} title="승부가 결정됐습니다"><div className="scene-result"><StatusPanel {...statusProps}/></div></ChoiceStage>:null}
     </div>
     <footer className="scene-hand-dock" data-card-anchor="hud">

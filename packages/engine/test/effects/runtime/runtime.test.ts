@@ -46,6 +46,7 @@ for (const cardType of ["gatling", "indians"] as const) {
       assert.equal(saved.resolution.pendingInteraction!.interactionId, firstInteractionId);
       assert.deepEqual(saved.seats.map(seat => seat.public.hp), hpBefore);
       assert.equal(projectTablewideAttack(saved)!.targets.find(item => item.playerId === target.public.playerId)!.status, "submitted");
+      assert.equal(projectTablewideAttack(saved)!.targets.find(item => item.playerId === target.public.playerId)!.response, choice);
       const duplicate = applyMatchCommand(saved, target.public.playerId, { type: "RESPOND", payload } as EngineCommand, commandContext(handlers));
       assert.equal(duplicate.ok, false);
       const observer = JSON.stringify(projectMatchSnapshot(saved, actor!.public.playerId, BASE_PHYSICAL_CARDS));
@@ -58,6 +59,20 @@ for (const cardType of ["gatling", "indians"] as const) {
     assert.equal(resolved.state.seats[1]!.public.hp, hpBefore[1]! - 1);
     for (const index of [0, 1]) assert.equal(resolved.state.seats[index + 2]!.private.handCardInstanceIds.includes(responseCards[index]!), false);
     assertCardZonesComplete(resolved.state);
+  });
+}
+
+for (const cardType of ["gatling", "indians"] as const) {
+  test(`${cardType}: public feedback retains applied damage while another target chooses`, () => {
+    const state=makeState();state.seats.forEach(seat=>{seat.public.characterId="willy_the_kid";seat.public.hp=seat.public.maxHp;});
+    const [actor,first,second]=state.seats;
+    const attackCard=moveCardToHand(state,cardType,actor!.public.playerId);
+    const handlers=createEffectCommandHandlers(registeredRuntimeOptions());
+    const opened=applyMatchCommand(state,actor!.public.playerId,playCard(state,actor!.public.playerId,attackCard),commandContext(handlers));assert.ok(opened.ok);if(!opened.ok)return;
+    const applied=applyMatchCommand(opened.state,first!.public.playerId,respond(opened.state,opened.state.resolution.pendingInteraction!.interactionId,"TAKE_HIT"),commandContext(handlers));assert.ok(applied.ok);if(!applied.ok)return;
+    const attack=projectTablewideAttack(applied.state)!;const target=attack.targets.find(target=>target.playerId === first!.public.playerId)!;
+    assert.equal(target.status,"resolved");assert.equal(target.response,"TAKE_HIT");assert.equal(applied.state.seats.find(seat=>seat.public.playerId === first!.public.playerId)!.public.hp,first!.public.hp-1);
+    assert.equal(attack.targets.find(target=>target.playerId === second!.public.playerId)!.response,undefined);
   });
 }
 

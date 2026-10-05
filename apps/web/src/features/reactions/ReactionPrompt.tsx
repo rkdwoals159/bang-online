@@ -10,6 +10,7 @@ import type {
 } from "../../../../../packages/contracts/src/protocol.js";
 import { getPlayingCardPresentation } from "../cards/assets.js";
 import { PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { TablewideAttackStage } from "./TablewideAttackStage.js";
 import { cardName } from "../actions/model.js";
 import {
   cardFaceLabel,
@@ -236,11 +237,11 @@ export function ReactionPrompt({
       ) : null}
       {isResponder && responderPrompt ? (
         <>
-          <p className="reaction-prompt__instruction">
+          {!["INDIANS_RESPONSE", "GATLING_RESPONSE"].includes(pending.kind) || !currentSnapshot.publicTable.tablewideAttack ? <p className="reaction-prompt__instruction">
             {discardOrder && currentSnapshot.publicTable.turn.phase === "discard"
               ? `${currentResponderName ?? "현재 참가자"} 님의 턴을 마치려면 ${discardOrder.requiredCount}장을 버려야 해요. 남은 체력만큼만 손패를 남길 수 있어요.`
               : `${currentResponderName ?? "현재 참가자"} 님이 선택해 주세요.`}
-          </p>
+          </p> : null}
           {orderTemplate ? (
             discardOrder ? (
               <fieldset className="reaction-prompt__discard-order">
@@ -357,13 +358,13 @@ export function ReactionPrompt({
               ))}
             </ul>
           ) : null}
-          <p className="reaction-prompt__progress" role="status" aria-live="polite">
+          {!currentSnapshot.publicTable.tablewideAttack ? <p className="reaction-prompt__progress" role="status" aria-live="polite">
           {currentResponderName
             ? pending.kind === "GENERAL_STORE_PICK"
               ? `${currentResponderName} 님이 잡화점 카드를 고르고 있어요.`
               : `${currentResponderName} 님이 응답 중이에요.`
             : "다른 참가자의 응답을 기다리고 있어요."}
-          </p>
+          </p> : null}
         </>
       )}
     </section>
@@ -371,15 +372,7 @@ export function ReactionPrompt({
   const usesStage = variant === "scene" || pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
   const attack = currentSnapshot.publicTable.tablewideAttack;
   if (attack) return <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
-    <p className="tablewide-stage__hint">각자 대응을 선택하세요. 모든 플레이어의 진행 상황이 함께 표시돼요.</p>
-    <ul className="tablewide-stage__players" aria-label="광역 공격 대응 상황" aria-live="polite">
-      {attack.targets.map(target => {
-        const player = currentSnapshot.publicTable.players.find(player => player.playerId === target.playerId);
-        const labels = { waiting: "대응 대기", submitted: "제출 완료", responding: "대응 중", resolved: "처리 완료", eliminated: "탈락" };
-        return <li key={target.playerId} data-response-status={target.status}><strong>{target.playerId === currentSnapshot.viewer.playerId ? "나" : player?.displayName ?? "플레이어"}</strong><span>{labels[target.status]}</span><span>체력 {player?.hp ?? 0}</span></li>;
-      })}
-    </ul>
-    {content}
+    <TablewideAttackStage attack={attack} snapshot={currentSnapshot}>{content}</TablewideAttackStage>
   </ChoiceStage>;
   return usesStage ? <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;
 }

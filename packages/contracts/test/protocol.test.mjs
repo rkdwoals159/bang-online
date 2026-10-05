@@ -20,6 +20,16 @@ import {
 } from "../src/validation.ts";
 const base = { protocolVersion: 1, commandId: "018f8e3d-1234-4123-8123-123456789abc", expectedVersion: 0 };
 const readFixture = (name) => JSON.parse(readFileSync(new URL(`../../test-fixtures/protocol/${name}`, import.meta.url), "utf8"));
+test('tablewide public response types are validated without accepting reserved hand identities',()=>{
+  const response=readFixture('match-sync.response.valid.json');
+  response.snapshot.publicTable.players.push({...response.snapshot.publicTable.players[0],playerId:'p2',seatIndex:1,role:null});
+  response.snapshot.publicTable.tablewideAttack={attackId:'attack',kind:'indians',sourcePlayerId:'p1',targets:[{playerId:'p2',status:'submitted',response:'USE_BANG'}]};
+  assert.equal(parseMatchSyncResponse(response).ok,true);
+  for(const patch of [{response:'USE_MISSED'},{response:'TAKE_HIT',cardInstanceId:'reserved-private'},{status:'waiting'},{response:'not-a-response'}]){
+    const invalid=structuredClone(response);Object.assign(invalid.snapshot.publicTable.tablewideAttack.targets[0],patch);assert.equal(parseMatchSyncResponse(invalid).ok,false);
+  }
+  response.snapshot.publicTable.tablewideAttack.kind='gatling';response.snapshot.publicTable.tablewideAttack.targets[0].response='USE_BARREL';assert.equal(parseMatchSyncResponse(response).ok,true);
+});
 
 test("public General Store faces are validated only in the matching interaction", () => {
   const response = readFixture("match-sync.response.valid.json");

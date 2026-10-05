@@ -47,5 +47,5 @@ test('all projected request kinds use a visible inline region without a close or
 test('tablewide response preserves private choices and shared progress without a dialog',()=>{
   const view=structuredClone(survivorSnapshot);view.pendingInteraction={kind:'GATLING_RESPONSE',interactionId:'attack:self',currentResponderPlayerId:view.viewer.playerId,step:{current:1,total:1},allowedChoices:['TAKE_HIT'],responseOptions:[{interactionId:'attack:self',choice:'TAKE_HIT'}]};
   view.publicTable.tablewideAttack={attackId:'attack',kind:'gatling',sourcePlayerId:'player-sheriff',targets:[{playerId:view.viewer.playerId,status:'waiting'},{playerId:'player-four',status:'submitted'}]};
-  const markup=render(view);assert.match(markup,/광역 공격 대응 상황/);assert.match(markup,/제출 완료/);assert.match(markup,/응답 선택지/);assert.doesNotMatch(markup,/choice-stage__dialog|aria-modal="true"/);
+  const markup=render(view);assert.match(markup,/광역 공격 대응 상황/);assert.match(markup,/선택함/);assert.match(markup,/응답 선택지/);assert.doesNotMatch(markup,/choice-stage__dialog|aria-modal="true"|대응 대기|제출 완료/);
 });

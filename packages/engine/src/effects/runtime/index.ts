@@ -109,6 +109,7 @@ export function projectTablewideAttack(state: GameState): TablewideAttackView | 
   if (!frame || !context || !Array.isArray(rawTargets) || typeof frame.payload[TABLEWIDE_ATTACK_ID_KEY] !== "string") return null;
   const pending = state.resolution.pendingInteraction;
   const reserved = earlyResponses(frame);
+  const completed = completedInteractions(frame) ?? [];
   return {
     attackId: frame.payload[TABLEWIDE_ATTACK_ID_KEY], kind: context.effectTypeId === "gatling" ? "gatling" : "indians", sourcePlayerId: context.actorPlayerId,
     targets: rawTargets.flatMap(id => {
@@ -118,7 +119,13 @@ export function projectTablewideAttack(state: GameState): TablewideAttackView | 
       const status = seat.public.eliminated ? "eliminated" : pending?.actorPlayerIds.includes(id) ? "responding" :
         state.resolution.effectQueue.some(step => step.targetPlayerId === id) ?
           reserved.some(response => response.responses.some(answer => answer.playerId === id)) ? "submitted" : "waiting" : "resolved";
-      return [{ playerId: id, status }];
+      const interactionKind = context.effectTypeId === "gatling" ? "GATLING_RESPONSE" : "INDIANS_RESPONSE";
+      const matches = (interaction: CompletedEffectInteraction) => interaction.kind === interactionKind &&
+        interaction.context.sourcePlayerId === context.actorPlayerId && interaction.context.targetPlayerId === id;
+      const answer = ([...completed].reverse().find(matches) ?? [...reserved].reverse().find(matches))?.responses.find(response => response.playerId === id);
+      const choice = answer?.choice;
+      const response = choice === "USE_BANG" || choice === "USE_MISSED" || choice === "USE_BARREL" || choice === "USE_JOURDONNAIS" || choice === "TAKE_HIT" ? choice : undefined;
+      return [{ playerId: id, status, ...(response && status !== "waiting" ? { response } : {}) }];
     }),
   };
 }

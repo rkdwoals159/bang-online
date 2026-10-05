@@ -314,7 +314,9 @@ function validMatchSnapshot(input: unknown): input is MatchSnapshotView {
         !isText(attack.attackId) || !["gatling", "indians"].includes(String(attack.kind)) || !isText(attack.sourcePlayerId) ||
         !Array.isArray(attack.targets) || attack.targets.length > 6 || attack.targets.length === 0 ||
         new Set(attack.targets.map(target => isRecord(target) ? target.playerId : null)).size !== attack.targets.length ||
-        !attack.targets.every(target => isRecord(target) && exactKeys(target, ["playerId", "status"]) && isText(target.playerId) &&
+        !attack.targets.every(target => isRecord(target) && exactShape(target, ["playerId", "status"], ["response"]) && isText(target.playerId) &&
+          (!Object.hasOwn(target, "response") || (target.status !== "waiting" &&
+            (attack.kind === "indians" ? ["USE_BANG", "TAKE_HIT"] : ["USE_MISSED", "USE_BARREL", "USE_JOURDONNAIS", "TAKE_HIT"]).includes(String(target.response)))) &&
           target.playerId !== attack.sourcePlayerId && publicPlayers.some(player => isRecord(player) && player.playerId === target.playerId) &&
           ["waiting", "submitted", "responding", "resolved", "eliminated"].includes(String(target.status))) ||
         !publicPlayers.some(player => isRecord(player) && player.playerId === attack.sourcePlayerId)) return false;

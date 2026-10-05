@@ -1,0 +1,3 @@
+node node_modules/typescript/bin/tsc --noEmit -p apps/web/tsconfig.json: exit 0
+node node_modules/typescript/bin/tsc --noEmit -p packages/engine/tsconfig.json: exit 0
+node node_modules/typescript/bin/tsc --noEmit -p packages/contracts/tsconfig.json: exit 0

@@ -47,6 +47,9 @@
 .app-shell .reaction-prompt .reaction-prompt__options:has(.playing-card + .playing-card) { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 600px) { .reaction-prompt { padding: 16px; } .reaction-prompt__header h2 { font-size: 20px; } .reaction-prompt__option .playing-card { width: 72px; } }
 .tablewide-stage__hint { margin: 0; font-size: 16px; line-height: 1.5; }
+.tablewide-stage__effect { padding:10px 12px; margin:0 0 10px; border:1px solid var(--color-border); border-radius:8px; }
+.tablewide-stage__effect p { margin:0; font-size:14px; line-height:1.6; word-break:keep-all; overflow-wrap:anywhere; }
+.tablewide-stage__response { font-weight:750; }
 .tablewide-stage__players { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 16px 0; }
 .tablewide-stage__players li { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface-soft); font-size: 14px; }
 .tablewide-stage__players li[data-response-status="submitted"], .tablewide-stage__players li[data-response-status="resolved"] { border-color: var(--color-positive); }

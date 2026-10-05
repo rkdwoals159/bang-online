@@ -1,0 +1,946 @@
+TAP version 13
+# Subtest: HTTP readiness does not wait for a failed notification stream
+ok 1 - HTTP readiness does not wait for a failed notification stream
+  ---
+  duration_ms: 9535.1855
+  type: 'test'
+  ...
+# Subtest: expired sessions remain rejected even for independent HTTP writes
+ok 2 - expired sessions remain rejected even for independent HTTP writes
+  ---
+  duration_ms: 10.7354
+  type: 'test'
+  ...
+# Subtest: Socket.IO readiness still awaits connection
+ok 3 - Socket.IO readiness still awaits connection
+  ---
+  duration_ms: 0.5156
+  type: 'test'
+  ...
+# Subtest: direct room, role, game, result and invite URLs resolve to the expected path state
+ok 4 - direct room, role, game, result and invite URLs resolve to the expected path state
+  ---
+  duration_ms: 19957.2728
+  type: 'test'
+  ...
+# Subtest: popstate refreshes the route key for back/forward and invite query changes
+ok 5 - popstate refreshes the route key for back/forward and invite query changes
+  ---
+  duration_ms: 0.6204
+  type: 'test'
+  ...
+# Subtest: RoomView activeMatchId drives lobby, sync, game and result projections
+ok 6 - RoomView activeMatchId drives lobby, sync, game and result projections
+  ---
+  duration_ms: 6.7092
+  type: 'test'
+  ...
+# Subtest: room connection notice is accessible and stays until authoritative route sync succeeds
+ok 7 - room connection notice is accessible and stays until authoritative route sync succeeds
+  ---
+  duration_ms: 41.5532
+  type: 'test'
+  ...
+# Subtest: connected CONNECTION errors trigger one route resync attempt without an effect loop
+ok 8 - connected CONNECTION errors trigger one route resync attempt without an effect loop
+  ---
+  duration_ms: 0.3227
+  type: 'test'
+  ...
+# Subtest: reconnect sync waits for the current RoomView and then its active match projection
+ok 9 - reconnect sync waits for the current RoomView and then its active match projection
+  ---
+  duration_ms: 9.504
+  type: 'test'
+  ...
+# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+ok 10 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+  ---
+  duration_ms: 0.8302
+  type: 'test'
+  ...
+# Subtest: post-start role reveal redirects to the registered canonical role route
+ok 11 - post-start role reveal redirects to the registered canonical role route
+  ---
+  duration_ms: 6.0849
+  type: 'test'
+  ...
+# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately
+ok 12 - role confirmation stays in one tab session and a fresh tab must confirm separately
+  ---
+  duration_ms: 0.7545
+  type: 'test'
+  ...
+# Subtest: role and character face copy is supplied for every canonical base-game entry
+ok 13 - role and character face copy is supplied for every canonical base-game entry
+  ---
+  duration_ms: 5.226
+  type: 'test'
+  ...
+# Subtest: role reveal renders only the viewer's role and character with canonical rule copy
+ok 14 - role reveal renders only the viewer's role and character with canonical rule copy
+  ---
+  duration_ms: 46.6675
+  type: 'test'
+  ...
+# Subtest: match route composition passes private hand, legalActions, pending and result projection to features
+ok 15 - match route composition passes private hand, legalActions, pending and result projection to features
+  ---
+  duration_ms: 300.0003
+  type: 'test'
+  ...
+# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection
+ok 16 - result return uses one exact empty command then waits for a newer lobby sync projection
+  ---
+  duration_ms: 1.3484
+  type: 'test'
+  ...
+# Subtest: rejected or thrown return transport keeps the result operation retryable
+ok 17 - rejected or thrown return transport keeps the result operation retryable
+  ---
+  duration_ms: 0.4077
+  type: 'test'
+  ...
+# Subtest: room operations can wait for the new cookie-authenticated socket connection
+ok 18 - room operations can wait for the new cookie-authenticated socket connection
+  ---
+  duration_ms: 10.1721
+  type: 'test'
+  ...
+# Subtest: role introduction assigns the interactive portrait and text to explicit grid columns
+ok 19 - role introduction assigns the interactive portrait and text to explicit grid columns
+  ---
+  duration_ms: 3.0565
+  type: 'test'
+  ...
+# Subtest: keyboard controls receive a visible focus indicator
+ok 20 - keyboard controls receive a visible focus indicator
+  ---
+  duration_ms: 2.7302
+  type: 'test'
+  ...
+# Subtest: narrow hand and response rows can scroll horizontally
+ok 21 - narrow hand and response rows can scroll horizontally
+  ---
+  duration_ms: 0.3654
+  type: 'test'
+  ...
+# Subtest: AccessibleButton renders a named native keyboard control
+ok 22 - AccessibleButton renders a named native keyboard control
+  ---
+  duration_ms: 7243.716
+  type: 'test'
+  ...
+# Subtest: P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+ok 23 - P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+  ---
+  duration_ms: 10700.93
+  type: 'test'
+  ...
+# Subtest: offers only card and target candidates from legalActions
+ok 24 - offers only card and target candidates from legalActions
+  ---
+  duration_ms: 24.1701
+  type: 'test'
+  ...
+# Subtest: self-use candidates omit generic guidance and preserve conversion context
+ok 25 - self-use candidates omit generic guidance and preserve conversion context
+  ---
+  duration_ms: 1.4797
+  type: 'test'
+  ...
+# Subtest: explains only the two public no-recovery Beer conditions
+ok 26 - explains only the two public no-recovery Beer conditions
+  ---
+  duration_ms: 19.3508
+  type: 'test'
+  ...
+# Subtest: maps a distinct Sid cost pair only to its exact projected ability proposal
+ok 27 - maps a distinct Sid cost pair only to its exact projected ability proposal
+  ---
+  duration_ms: 0.4685
+  type: 'test'
+  ...
+# Subtest: keeps server-approved self table targets and never exposes a target hand card ID
+ok 28 - keeps server-approved self table targets and never exposes a target hand card ID
+  ---
+  duration_ms: 1.1286
+  type: 'test'
+  ...
+# Subtest: wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+ok 29 - wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+  ---
+  duration_ms: 0.322
+  type: 'test'
+  ...
+# Subtest: syncs the latest projection after server rejection so selection can be rebuilt
+ok 30 - syncs the latest projection after server rejection so selection can be rebuilt
+  ---
+  duration_ms: 12.6589
+  type: 'test'
+  ...
+# Subtest: shows the acknowledgement phase before awaiting the authoritative projection
+ok 31 - shows the acknowledgement phase before awaiting the authoritative projection
+  ---
+  duration_ms: 1.7125
+  type: 'test'
+  ...
+# Subtest: keeps a timed-out retry on the same command ID and payload
+ok 32 - keeps a timed-out retry on the same command ID and payload
+  ---
+  duration_ms: 0.6477
+  type: 'test'
+  ...
+# Subtest: renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+ok 33 - renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+  ---
+  duration_ms: 486.9774
+  type: 'test'
+  ...
+# Subtest: shows turn ownership and pending response without making card actions available
+ok 34 - shows turn ownership and pending response without making card actions available
+  ---
+  duration_ms: 193.9617
+  type: 'test'
+  ...
+# Subtest: renders two linear Sid cost selectors instead of one button per card pair
+ok 35 - renders two linear Sid cost selectors instead of one button per card pair
+  ---
+  duration_ms: 906.6437
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:275
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\catalog\\src\\cards\\index.js' imported from C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\cards\\assets.ts
+#     at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:861:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:985:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:747:20)
+#     at ModuleLoader.resolve (node:internal/modules/esm/loader:724:38)
+#     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:320:38)
+#     at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/catalog/src/cards/index.js'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\web\\src\\features\\cards\\assets.test.mjs
+not ok 5 - apps\\web\\src\\features\\cards\\assets.test.mjs
+  ---
+  duration_ms: 2310.5864
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\cards\\assets.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+ok 37 - R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+  ---
+  duration_ms: 10508.1973
+  type: 'test'
+  ...
+# Subtest: every base playing card has Korean detail text from the ruleset summaries
+ok 38 - every base playing card has Korean detail text from the ruleset summaries
+  ---
+  duration_ms: 1.236
+  type: 'test'
+  ...
+# Subtest: hand zoom keeps named triggers and mounts detail content only when opened
+ok 39 - hand zoom keeps named triggers and mounts detail content only when opened
+  ---
+  duration_ms: 46.83
+  type: 'test'
+  ...
+# Subtest: card images are detail triggers and use buttons contain no image or duplicate detail text
+ok 40 - card images are detail triggers and use buttons contain no image or duplicate detail text
+  ---
+  duration_ms: 83.5138
+  type: 'test'
+  ...
+# Subtest: all public character portraits have accessible image triggers without mounting dialogs eagerly
+ok 41 - all public character portraits have accessible image triggers without mounting dialogs eagerly
+  ---
+  duration_ms: 135.1414
+  type: 'test'
+  ...
+# Subtest: turn-end discard copy states the required count and current-health rule
+ok 42 - turn-end discard copy states the required count and current-health rule
+  ---
+  duration_ms: 29.1115
+  type: 'test'
+  ...
+# Subtest: response zoom is limited to card faces named by the current responder options
+ok 43 - response zoom is limited to card faces named by the current responder options
+  ---
+  duration_ms: 34.1679
+  type: 'test'
+  ...
+# Subtest: discard-order zoom uses only the responder's projected allowedCards
+ok 44 - discard-order zoom uses only the responder's projected allowedCards
+  ---
+  duration_ms: 21.8172
+  type: 'test'
+  ...
+# Subtest: sound stays silent before a user gesture unlocks one reusable context
+ok 45 - sound stays silent before a user gesture unlocks one reusable context
+  ---
+  duration_ms: 7.2916
+  type: 'test'
+  ...
+# Subtest: Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+ok 46 - Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+  ---
+  duration_ms: 0.8575
+  type: 'test'
+  ...
+# Subtest: mute immediately silences the output; hidden tabs and unsupported audio are harmless
+ok 47 - mute immediately silences the output; hidden tabs and unsupported audio are harmless
+  ---
+  duration_ms: 0.5293
+  type: 'test'
+  ...
+# Subtest: hiding a tab stops scheduled sources and cannot resume the old burst on return
+ok 48 - hiding a tab stops scheduled sources and cannot resume the old burst on return
+  ---
+  duration_ms: 0.7424
+  type: 'test'
+  ...
+# Subtest: all 26 gameplay effects have distinct scheduled audio recipes
+ok 49 - all 26 gameplay effects have distinct scheduled audio recipes
+  ---
+  duration_ms: 5.4131
+  type: 'test'
+  ...
+# Subtest: receiving several cards schedules a capped, staggered paper sound
+ok 50 - receiving several cards schedules a capped, staggered paper sound
+  ---
+  duration_ms: 1.1299
+  type: 'test'
+  ...
+# Subtest: volume is clamped, mute stops sources, and invalid levels leave output unchanged
+ok 51 - volume is clamped, mute stops sources, and invalid levels leave output unchanged
+  ---
+  duration_ms: 0.6211
+  type: 'test'
+  ...
+# Subtest: source budget stops allocating nodes when a large sound batch fills it
+ok 52 - source budget stops allocating nodes when a large sound batch fills it
+  ---
+  duration_ms: 0.382
+  type: 'test'
+  ...
+# Subtest: first connection and hidden-tab replay do not play historical attacks
+ok 53 - first connection and hidden-tab replay do not play historical attacks
+  ---
+  duration_ms: 10.2227
+  type: 'test'
+  ...
+# Subtest: shots connect authenticated actor and public target; replay is silent
+ok 54 - shots connect authenticated actor and public target; replay is silent
+  ---
+  duration_ms: 0.8521
+  type: 'test'
+  ...
+# Subtest: Gatling targets every projected opponent and a blocked player gets a separate ping
+ok 55 - Gatling targets every projected opponent and a blocked player gets a separate ping
+  ---
+  duration_ms: 1.2776
+  type: 'test'
+  ...
+# Subtest: barrel failure never sounds like a successful block; success is not double counted
+ok 56 - barrel failure never sounds like a successful block; success is not double counted
+  ---
+  duration_ms: 0.7414
+  type: 'test'
+  ...
+# Subtest: stale, malformed, private and unknown event data cannot create effects
+ok 57 - stale, malformed, private and unknown event data cannot create effects
+  ---
+  duration_ms: 0.4412
+  type: 'test'
+  ...
+# Subtest: older versions cannot move the effect cursor backwards
+ok 58 - older versions cannot move the effect cursor backwards
+  ---
+  duration_ms: 0.3565
+  type: 'test'
+  ...
+# Subtest: HP deltas show hit/heal once and zero-healing beer does not fake a heal
+ok 59 - HP deltas show hit/heal once and zero-healing beer does not fake a heal
+  ---
+  duration_ms: 3.3705
+  type: 'test'
+  ...
+# Subtest: draw, equipment, turn, elimination and victory use public snapshot changes
+ok 60 - draw, equipment, turn, elimination and victory use public snapshot changes
+  ---
+  duration_ms: 8.1264
+  type: 'test'
+  ...
+# Subtest: store pick moves only one publicly revealed card to its known previous chooser
+ok 61 - store pick moves only one publicly revealed card to its known previous chooser
+  ---
+  duration_ms: 1.4546
+  type: 'test'
+  ...
+# Subtest: short bounded queue prevents unbounded animation backlog
+ok 62 - short bounded queue prevents unbounded animation backlog
+  ---
+  duration_ms: 0.9712
+  type: 'test'
+  ...
+# Subtest: elimination precedes victory and simultaneous equipment cues have unique identities
+ok 63 - elimination precedes victory and simultaneous equipment cues have unique identities
+  ---
+  duration_ms: 0.6266
+  type: 'test'
+  ...
+# Subtest: public card use gets one flight only for an adjacent update on the same turn
+ok 64 - public card use gets one flight only for an adjacent update on the same turn
+  ---
+  duration_ms: 0.3139
+  type: 'test'
+  ...
+# Subtest: dynamite passing preserves public source and avoids a false equip cue
+ok 65 - dynamite passing preserves public source and avoids a false equip cue
+  ---
+  duration_ms: 0.2593
+  type: 'test'
+  ...
+# Subtest: draw cues retain count without exposing cards, and zero-healing beer has a drink sound
+ok 66 - draw cues retain count without exposing cards, and zero-healing beer has a drink sound
+  ---
+  duration_ms: 0.276
+  type: 'test'
+  ...
+# Subtest: a used draw card still counts both incoming private cards instead of just the net hand gain
+ok 67 - a used draw card still counts both incoming private cards instead of just the net hand gain
+  ---
+  duration_ms: 0.3117
+  type: 'test'
+  ...
+# Subtest: all seat presets are finite and finish at the untransformed seat
+ok 68 - all seat presets are finite and finish at the untransformed seat
+  ---
+  duration_ms: 2.3381
+  type: 'test'
+  ...
+# Subtest: consecutive identical hits create distinct animations and clean up the old one
+ok 69 - consecutive identical hits create distinct animations and clean up the old one
+  ---
+  duration_ms: 0.6953
+  type: 'test'
+  ...
+# Subtest: disabled/reduced motion and hidden documents never start seat effects
+ok 70 - disabled/reduced motion and hidden documents never start seat effects
+  ---
+  duration_ms: 13.8933
+  type: 'test'
+  ...
+# Subtest: hiding a tab cancels active motion, and cleanup removes its listener
+ok 71 - hiding a tab cancels active motion, and cleanup removes its listener
+  ---
+  duration_ms: 1.6999
+  type: 'test'
+  ...
+# Subtest: missing, unrelated or unsupported motion does not interfere with gameplay
+ok 72 - missing, unrelated or unsupported motion does not interfere with gameplay
+  ---
+  duration_ms: 1.2687
+  type: 'test'
+  ...
+# Subtest: adapted shake preserves Animista offsets with small game-specific amplitude
+ok 73 - adapted shake preserves Animista offsets with small game-specific amplitude
+  ---
+  duration_ms: 7.8892
+  type: 'test'
+  ...
+# Subtest: selected CSS and the distributable license retain Animista attribution
+ok 74 - selected CSS and the distributable license retain Animista attribution
+  ---
+  duration_ms: 2.0457
+  type: 'test'
+  ...
+# Subtest: card sounds distinguish draw, play, discard and equipment in one prompt score
+ok 75 - card sounds distinguish draw, play, discard and equipment in one prompt score
+  ---
+  duration_ms: 13.3577
+  type: 'test'
+  ...
+# Subtest: draw packets use public counts but never schedule more than four paper slips
+ok 76 - draw packets use public counts but never schedule more than four paper slips
+  ---
+  duration_ms: 0.568
+  type: 'test'
+  ...
+# Subtest: repeated cue identities and same-kind public responses are coalesced
+ok 77 - repeated cue identities and same-kind public responses are coalesced
+  ---
+  duration_ms: 0.2398
+  type: 'test'
+  ...
+# Subtest: weapon reload, jail latch and dynamite fuse derive only from projected equipment
+ok 78 - weapon reload, jail latch and dynamite fuse derive only from projected equipment
+  ---
+  duration_ms: 0.2959
+  type: 'test'
+  ...
+# Subtest: explicit beer and jail result sounds preserve their visual cue kind
+ok 79 - explicit beer and jail result sounds preserve their visual cue kind
+  ---
+  duration_ms: 0.3221
+  type: 'test'
+  ...
+# Subtest: large syncs have a bounded score and always retain the victory ending
+ok 80 - large syncs have a bounded score and always retain the victory ending
+  ---
+  duration_ms: 0.3662
+  type: 'test'
+  ...
+# Subtest: Indians explains its effect and shows public damage/card choices without ordered waiting copy
+ok 81 - Indians explains its effect and shows public damage/card choices without ordered waiting copy
+  ---
+  duration_ms: 12681.2043
+  type: 'test'
+  ...
+# Subtest: shared store offers only the current picker a take button; observers see public cards
+ok 82 - shared store offers only the current picker a take button; observers see public cards
+  ---
+  duration_ms: 80.3857
+  type: 'test'
+  ...
+# Subtest: Kit private choice opens a stage only for its authenticated picker
+ok 83 - Kit private choice opens a stage only for its authenticated picker
+  ---
+  duration_ms: 9.53
+  type: 'test'
+  ...
+# Subtest: Lucky judgments are public while response options stay with Lucky
+ok 84 - Lucky judgments are public while response options stay with Lucky
+  ---
+  duration_ms: 14.1037
+  type: 'test'
+  ...
+# Subtest: the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+ok 85 - the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+  ---
+  duration_ms: 27.0637
+  type: 'test'
+  ...
+# Subtest: mobile navigation points to my response only when I am the responder and is absent for observers
+ok 86 - mobile navigation points to my response only when I am the responder and is absent for observers
+  ---
+  duration_ms: 8.2172
+  type: 'test'
+  ...
+# Subtest: observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+ok 87 - observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+  ---
+  duration_ms: 292.6124
+  type: 'test'
+  ...
+# Subtest: 4–7 seats use explicit clockwise centers with self at the bottom
+ok 88 - 4–7 seats use explicit clockwise centers with self at the bottom
+  ---
+  duration_ms: 11544.9929
+  type: 'test'
+  ...
+# Subtest: one persistent scene has menu, public table and private hand without web page panels
+ok 89 - one persistent scene has menu, public table and private hand without web page panels
+  ---
+  duration_ms: 127.8546
+  type: 'test'
+  ...
+# Subtest: inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+ok 90 - inspection host is outside compact seats, hand and action regions with no eagerly mounted dialogs
+  ---
+  duration_ms: 147.631
+  type: 'test'
+  ...
+# Subtest: scene never renders hidden opponent role, card identities or deck contents
+ok 91 - scene never renders hidden opponent role, card identities or deck contents
+  ---
+  duration_ms: 72.8404
+  type: 'test'
+  ...
+# Subtest: opponent hand back icons exactly reflect public counts, including more than 80
+ok 92 - opponent hand back icons exactly reflect public counts, including more than 80
+  ---
+  duration_ms: 65.8816
+  type: 'test'
+  ...
+# Subtest: public distance and role use authenticated projection while own HUD shows own role
+ok 93 - public distance and role use authenticated projection while own HUD shows own role
+  ---
+  duration_ms: 41.0011
+  type: 'test'
+  ...
+# Subtest: observer retains public scene without any private hand input
+ok 94 - observer retains public scene without any private hand input
+  ---
+  duration_ms: 27.2673
+  type: 'test'
+  ...
+# Subtest: zero healing beer retains confirmation and image selection uses legal candidates
+ok 95 - zero healing beer retains confirmation and image selection uses legal candidates
+  ---
+  duration_ms: 33.6597
+  type: 'test'
+  ...
+# Subtest: every projected response uses the inline table area including ordered discard
+ok 96 - every projected response uses the inline table area including ordered discard
+  ---
+  duration_ms: 32.1563
+  type: 'test'
+  ...
+# Subtest: first scene render is silent and exposes no history animation
+ok 97 - first scene render is silent and exposes no history animation
+  ---
+  duration_ms: 29.0082
+  type: 'test'
+  ...
+# Subtest: scene store has a nonmodal shared table area for picker and observers
+ok 98 - scene store has a nonmodal shared table area for picker and observers
+  ---
+  duration_ms: 153.4485
+  type: 'test'
+  ...
+# Subtest: all projected request kinds use a visible inline region without a close or reopen step
+ok 99 - all projected request kinds use a visible inline region without a close or reopen step
+  ---
+  duration_ms: 583.1232
+  type: 'test'
+  ...
+# Subtest: tablewide response preserves private choices and shared progress without a dialog
+ok 100 - tablewide response preserves private choices and shared progress without a dialog
+  ---
+  duration_ms: 97.4282
+  type: 'test'
+  ...
+# Subtest: viewer sits at the bottom and later seats proceed clockwise
+ok 101 - viewer sits at the bottom and later seats proceed clockwise
+  ---
+  duration_ms: 2.3584
+  type: 'test'
+  ...
+# Subtest: public distance excludes eliminated players and applies directional modifiers
+ok 102 - public distance excludes eliminated players and applies directional modifiers
+  ---
+  duration_ms: 4.8766
+  type: 'test'
+  ...
+# Subtest: renders HTML-like server guest names as text without readiness controls and with explicit room status
+ok 103 - renders HTML-like server guest names as text without readiness controls and with explicit room status
+  ---
+  duration_ms: 8710.8666
+  type: 'test'
+  ...
+# Subtest: renders disabled start and locked seat actions once the server room has started
+ok 104 - renders disabled start and locked seat actions once the server room has started
+  ---
+  duration_ms: 17.5403
+  type: 'test'
+  ...
+# Subtest: shows owner controls only to the owner and keeps full rooms closed to invites
+ok 105 - shows owner controls only to the owner and keeps full rooms closed to invites
+  ---
+  duration_ms: 30.1371
+  type: 'test'
+  ...
+# Subtest: shows explicit presence and never treats a missing status as connected
+ok 106 - shows explicit presence and never treats a missing status as connected
+  ---
+  duration_ms: 38.0131
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:275
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\src\\protocol.js' imported from C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\lobby\\model.ts
+#     at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:861:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:985:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:747:20)
+#     at ModuleLoader.resolve (node:internal/modules/esm/loader:724:38)
+#     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:320:38)
+#     at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/contracts/src/protocol.js'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\web\\src\\features\\lobby\\model.test.mjs
+not ok 15 - apps\\web\\src\\features\\lobby\\model.test.mjs
+  ---
+  duration_ms: 595.1767
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\lobby\\model.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: General Store selection shows public card names, suits, images and zoom while keeping exact commands
+ok 108 - General Store selection shows public card names, suits, images and zoom while keeping exact commands
+  ---
+  duration_ms: 2277.1939
+  type: 'test'
+  ...
+# Subtest: only the current responder's pending options are offered, with the server step
+ok 109 - only the current responder's pending options are offered, with the server step
+  ---
+  duration_ms: 4.5249
+  type: 'test'
+  ...
+# Subtest: a non-responder sees progress only and no response options or card IDs
+ok 110 - a non-responder sees progress only and no response options or card IDs
+  ---
+  duration_ms: 1.0987
+  type: 'test'
+  ...
+# Subtest: death rescue presents only saved Beer and elimination choices
+ok 111 - death rescue presents only saved Beer and elimination choices
+  ---
+  duration_ms: 10.8664
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+ok 112 - Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+  ---
+  duration_ms: 5.7085
+  type: 'test'
+  ...
+# Subtest: creates a canonical RESPOND envelope from the exact saved option fields
+ok 113 - creates a canonical RESPOND envelope from the exact saved option fields
+  ---
+  duration_ms: 2.2311
+  type: 'test'
+  ...
+# Subtest: does not turn an ORDER_CARDS option template into a command without user-entered order
+ok 114 - does not turn an ORDER_CARDS option template into a command without user-entered order
+  ---
+  duration_ms: 0.6451
+  type: 'test'
+  ...
+# Subtest: validates discard order against the server candidate IDs and required count
+ok 115 - validates discard order against the server candidate IDs and required count
+  ---
+  duration_ms: 0.9145
+  type: 'test'
+  ...
+# Subtest: sync projection restores the same pending prompt and response choices
+ok 116 - sync projection restores the same pending prompt and response choices
+  ---
+  duration_ms: 1.5968
+  type: 'test'
+  ...
+# Subtest: reports a response acknowledgement before waiting for the authoritative projection
+ok 117 - reports a response acknowledgement before waiting for the authoritative projection
+  ---
+  duration_ms: 0.7552
+  type: 'test'
+  ...
+# Subtest: a multi-target response sync opens only the next responder's new prompt
+ok 118 - a multi-target response sync opens only the next responder's new prompt
+  ---
+  duration_ms: 0.4317
+  type: 'test'
+  ...
+# Subtest: waiting and responding both mean choosing, without imposing an input order
+ok 119 - waiting and responding both mean choosing, without imposing an input order
+  ---
+  duration_ms: 1.415
+  type: 'test'
+  ...
+# Subtest: submitted damage is a choice and never presented as applied damage
+ok 120 - submitted damage is a choice and never presented as applied damage
+  ---
+  duration_ms: 0.2391
+  type: 'test'
+  ...
+# Subtest: bang, missed and barrel results stay distinct from pending judgments
+ok 121 - bang, missed and barrel results stay distinct from pending judgments
+  ---
+  duration_ms: 0.2726
+  type: 'test'
+  ...
+# Subtest: unknown legacy responses never invent a card or damage outcome
+ok 122 - unknown legacy responses never invent a card or damage outcome
+  ---
+  duration_ms: 0.162
+  type: 'test'
+  ...
+# Subtest: final feedback uses only fresh matching public outcomes and preserves prior accepted choices
+ok 123 - final feedback uses only fresh matching public outcomes and preserves prior accepted choices
+  ---
+  duration_ms: 0.6341
+  type: 'test'
+  ...
+# Subtest: a failed barrel followed by Missed is not falsely reported as barrel success
+ok 124 - a failed barrel followed by Missed is not falsely reported as barrel success
+  ---
+  duration_ms: 0.1998
+  type: 'test'
+  ...
+# Subtest: direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+ok 125 - direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+  ---
+  duration_ms: 12.1221
+  type: 'test'
+  ...
+# Subtest: direct entry: parses the current invite URL and retains legacy internal token compatibility
+ok 126 - direct entry: parses the current invite URL and retains legacy internal token compatibility
+  ---
+  duration_ms: 10.6907
+  type: 'test'
+  ...
+# Subtest: direct entry: one request from the UI performs lookup then JOIN with authoritative version
+ok 127 - direct entry: one request from the UI performs lookup then JOIN with authoritative version
+  ---
+  duration_ms: 1.5703
+  type: 'test'
+  ...
+# Subtest: direct entry: same-link double submissions share one in-flight transaction
+ok 128 - direct entry: same-link double submissions share one in-flight transaction
+  ---
+  duration_ms: 0.9483
+  type: 'test'
+  ...
+# Subtest: direct entry: transport ambiguity retries the exact command without a new lookup or ID
+ok 129 - direct entry: transport ambiguity retries the exact command without a new lookup or ID
+  ---
+  duration_ms: 1.12
+  type: 'test'
+  ...
+# Subtest: direct entry: a definitive stale version refreshes and obtains a new command ID
+ok 130 - direct entry: a definitive stale version refreshes and obtains a new command ID
+  ---
+  duration_ms: 0.5526
+  type: 'test'
+  ...
+# Subtest: direct entry: version races have a finite retry budget
+ok 131 - direct entry: version races have a finite retry budget
+  ---
+  duration_ms: 0.8023
+  type: 'test'
+  ...
+# Subtest: direct entry: full, closed and invalid invites report safe errors and stop
+ok 132 - direct entry: full, closed and invalid invites report safe errors and stop
+  ---
+  duration_ms: 5.7998
+  type: 'test'
+  ...
+# Subtest: direct entry: an existing authenticated seat can resume a waiting or started room
+ok 133 - direct entry: an existing authenticated seat can resume a waiting or started room
+  ---
+  duration_ms: 0.9937
+  type: 'test'
+  ...
+# Subtest: direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+ok 134 - direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+  ---
+  duration_ms: 1.1051
+  type: 'test'
+  ...
+# Subtest: direct entry: UI has no preview confirmation or separate raw-code input
+ok 135 - direct entry: UI has no preview confirmation or separate raw-code input
+  ---
+  duration_ms: 35.1962
+  type: 'test'
+  ...
+# Subtest: normalizes a guest name and uses the 1–20 Unicode code point rule
+ok 136 - normalizes a guest name and uses the 1–20 Unicode code point rule
+  ---
+  duration_ms: 2.6446
+  type: 'test'
+  ...
+# Subtest: builds guest and room commands from public DTOs without a credential field
+ok 137 - builds guest and room commands from public DTOs without a credential field
+  ---
+  duration_ms: 8.1834
+  type: 'test'
+  ...
+# Subtest: previews before join and sends the exact preview version with JOIN
+ok 138 - previews before join and sends the exact preview version with JOIN
+  ---
+  duration_ms: 0.7122
+  type: 'test'
+  ...
+# Subtest: invalid code preview and JOIN errors share one safe message
+ok 139 - invalid code preview and JOIN errors share one safe message
+  ---
+  duration_ms: 0.7439
+  type: 'test'
+  ...
+# Subtest: invite links contain only the invite code and can be read without session data
+ok 140 - invite links contain only the invite code and can be read without session data
+  ---
+  duration_ms: 0.9641
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:275
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\actions\\model.js' imported from C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\status\\model.ts
+#     at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:861:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:985:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:747:20)
+#     at ModuleLoader.resolve (node:internal/modules/esm/loader:724:38)
+#     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:320:38)
+#     at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/src/features/actions/model.js'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\web\\src\\features\\status\\status.test.mjs
+not ok 20 - apps\\web\\src\\features\\status\\status.test.mjs
+  ---
+  duration_ms: 933.5147
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\status\\status.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/esm/resolve:275
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\packages\\contracts\\src\\validation.js' imported from C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\transport\\client.ts
+#     at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:861:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:985:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:747:20)
+#     at ModuleLoader.resolve (node:internal/modules/esm/loader:724:38)
+#     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:320:38)
+#     at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/packages/contracts/src/validation.js'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\web\\src\\transport\\client.test.mjs
+not ok 21 - apps\\web\\src\\transport\\client.test.mjs
+  ---
+  duration_ms: 819.3564
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\transport\\client.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..142
+# tests 142
+# suites 0
+# pass 138
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 43828.9519

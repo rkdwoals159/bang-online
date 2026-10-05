@@ -1,0 +1,328 @@
+TAP version 13
+# Subtest: waiting and responding both mean choosing, without imposing an input order
+ok 1 - waiting and responding both mean choosing, without imposing an input order
+  ---
+  duration_ms: 4.5111
+  type: 'test'
+  ...
+# Subtest: submitted damage is a choice and never presented as applied damage
+ok 2 - submitted damage is a choice and never presented as applied damage
+  ---
+  duration_ms: 0.267
+  type: 'test'
+  ...
+# Subtest: bang, missed and barrel results stay distinct from pending judgments
+ok 3 - bang, missed and barrel results stay distinct from pending judgments
+  ---
+  duration_ms: 0.2242
+  type: 'test'
+  ...
+# Subtest: unknown legacy responses never invent a card or damage outcome
+ok 4 - unknown legacy responses never invent a card or damage outcome
+  ---
+  duration_ms: 0.3028
+  type: 'test'
+  ...
+# Subtest: final feedback uses only fresh matching public outcomes and preserves prior accepted choices
+ok 5 - final feedback uses only fresh matching public outcomes and preserves prior accepted choices
+  ---
+  duration_ms: 3.5957
+  type: 'test'
+  ...
+# Subtest: tablewide public response types are validated without accepting reserved hand identities
+ok 6 - tablewide public response types are validated without accepting reserved hand identities
+  ---
+  duration_ms: 9.295
+  type: 'test'
+  ...
+# Subtest: public General Store faces are validated only in the matching interaction
+ok 7 - public General Store faces are validated only in the matching interaction
+  ---
+  duration_ms: 1.4593
+  type: 'test'
+  ...
+# Subtest: parses the documented match command and rejects a missing protocol version
+ok 8 - parses the documented match command and rejects a missing protocol version
+  ---
+  duration_ms: 68.1716
+  type: 'test'
+  ...
+# Subtest: rejects client supplied identity, unknown fields and malformed response card selection
+ok 9 - rejects client supplied identity, unknown fields and malformed response card selection
+  ---
+  duration_ms: 0.4373
+  type: 'test'
+  ...
+# Subtest: parses the runtime-backed Jesse, Pedro and Lucky responses with strict payloads
+ok 10 - parses the runtime-backed Jesse, Pedro and Lucky responses with strict payloads
+  ---
+  duration_ms: 0.5192
+  type: 'test'
+  ...
+# Subtest: pending views accept current runtime options and ORDER_CARDS template separately from command payload
+ok 11 - pending views accept current runtime options and ORDER_CARDS template separately from command payload
+  ---
+  duration_ms: 76.8337
+  type: 'test'
+  ...
+# Subtest: validates room creation and readiness
+ok 12 - validates room creation and readiness
+  ---
+  duration_ms: 25.7265
+  type: 'test'
+  ...
+# Subtest: strictly parses room:preview requests and keeps preview replies free of invite/session secrets
+ok 13 - strictly parses room:preview requests and keeps preview replies free of invite/session secrets
+  ---
+  duration_ms: 430.0928
+  type: 'test'
+  ...
+# Subtest: strictly parses room:sync requests with exact keys and non-negative versions
+ok 14 - strictly parses room:sync requests with exact keys and non-negative versions
+  ---
+  duration_ms: 40.7009
+  type: 'test'
+  ...
+# Subtest: strictly parses RoomView and room:sync responses with active-match routing and consistent viewer
+ok 15 - strictly parses RoomView and room:sync responses with active-match routing and consistent viewer
+  ---
+  duration_ms: 90.1292
+  type: 'test'
+  ...
+# Subtest: strictly parses match:sync requests and shares non-disclosing sync rejection DTOs
+ok 16 - strictly parses match:sync requests and shares non-disclosing sync rejection DTOs
+  ---
+  duration_ms: 189.3392
+  type: 'test'
+  ...
+# Subtest: strictly parses accepted/rejected command acknowledgements and excludes extra fields
+ok 17 - strictly parses accepted/rejected command acknowledgements and excludes extra fields
+  ---
+  duration_ms: 244.2066
+  type: 'test'
+  ...
+# Subtest: strictly parses viewer-scoped match:sync responses and ordered visible event cursors
+ok 18 - strictly parses viewer-scoped match:sync responses and ordered visible event cursors
+  ---
+  duration_ms: 127.0725
+  type: 'test'
+  ...
+# Subtest: legal action proposals contain only canonical command types and payloads
+ok 19 - legal action proposals contain only canonical command types and payloads
+  ---
+  duration_ms: 69.1195
+  type: 'test'
+  ...
+# Subtest: pending response options are exclusive to the current responder and progress contains no choices
+ok 20 - pending response options are exclusive to the current responder and progress contains no choices
+  ---
+  duration_ms: 147.2119
+  type: 'test'
+  ...
+# Subtest: winner summary is public only for completed snapshots and rejects unrelated state
+ok 21 - winner summary is public only for completed snapshots and rejects unrelated state
+  ---
+  duration_ms: 39.4244
+  type: 'test'
+  ...
+# Subtest: gatling: future targets submit in reverse order, privately and durably, without blocking
+ok 22 - gatling: future targets submit in reverse order, privately and durably, without blocking
+  ---
+  duration_ms: 44.1174
+  type: 'test'
+  ...
+# Subtest: indians: future targets submit in reverse order, privately and durably, without blocking
+ok 23 - indians: future targets submit in reverse order, privately and durably, without blocking
+  ---
+  duration_ms: 5.5358
+  type: 'test'
+  ...
+# Subtest: gatling: public feedback retains applied damage while another target chooses
+ok 24 - gatling: public feedback retains applied damage while another target chooses
+  ---
+  duration_ms: 8.7996
+  type: 'test'
+  ...
+# Subtest: indians: public feedback retains applied damage while another target chooses
+ok 25 - indians: public feedback retains applied damage while another target chooses
+  ---
+  duration_ms: 21.2863
+  type: 'test'
+  ...
+# Subtest: early Gatling defense triggers Suzy once at actual card consumption
+ok 26 - early Gatling defense triggers Suzy once at actual card consumption
+  ---
+  duration_ms: 7.8071
+  type: 'test'
+  ...
+# Subtest: a future target can reserve defense during another player's death rescue
+ok 27 - a future target can reserve defense during another player's death rescue
+  ---
+  duration_ms: 3.0926
+  type: 'test'
+  ...
+# Subtest: an early Barrel failure opens a fresh response and cannot reuse its old choice
+ok 28 - an early Barrel failure opens a fresh response and cannot reuse its old choice
+  ---
+  duration_ms: 5.8268
+  type: 'test'
+  ...
+# Subtest: BANG response persists as JSON, applies the hit, and closes its continuation
+ok 29 - BANG response persists as JSON, applies the hit, and closes its continuation
+  ---
+  duration_ms: 14.4113
+  type: 'test'
+  ...
+# Subtest: Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+ok 30 - Slab physical BANG saves a second response after one Missed and applies TAKE_HIT after JSON resume
+  ---
+  duration_ms: 4.068
+  type: 'test'
+  ...
+# Subtest: Suzy draws after the first Slab Missed before the second defense prompt opens
+ok 31 - Suzy draws after the first Slab Missed before the second defense prompt opens
+  ---
+  duration_ms: 9.9384
+  type: 'test'
+  ...
+# Subtest: Suzy waits until an initiated Duel fully resolves before drawing
+ok 32 - Suzy waits until an initiated Duel fully resolves before drawing
+  ---
+  duration_ms: 3.9616
+  type: 'test'
+  ...
+# Subtest: Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+ok 33 - Slab BANG counts successful Barrel and Jourdonnais judgments once each across JSON resume
+  ---
+  duration_ms: 13.4273
+  type: 'test'
+  ...
+# Subtest: a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+ok 34 - a Calamity physical Missed used as BANG stays at the ordinary one-card defense quota
+  ---
+  duration_ms: 3.7787
+  type: 'test'
+  ...
+# Subtest: a non-Slab physical BANG does not dispatch the Slab query
+ok 35 - a non-Slab physical BANG does not dispatch the Slab query
+  ---
+  duration_ms: 1.6236
+  type: 'test'
+  ...
+# Subtest: Beer rescue resumes after JSON persistence and records damage only after recovery
+ok 36 - Beer rescue resumes after JSON persistence and records damage only after recovery
+  ---
+  duration_ms: 10.5764
+  type: 'test'
+  ...
+# Subtest: Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+ok 37 - Dynamite overkill keeps the rescue HP deficit through repeated Beer and runs Bart after survival
+  ---
+  duration_ms: 6.579
+  type: 'test'
+  ...
+# Subtest: after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+ok 38 - after one partial Beer rescue, accepting elimination follows normal R28 cleanup
+  ---
+  duration_ms: 12.6675
+  type: 'test'
+  ...
+# Subtest: Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+ok 39 - Sid healing also keeps an overkill rescue open until HP becomes positive after JSON resume
+  ---
+  duration_ms: 13.5424
+  type: 'test'
+  ...
+# Subtest: a single Beer rescues damage that leaves HP exactly zero
+ok 40 - a single Beer rescues damage that leaves HP exactly zero
+  ---
+  duration_ms: 4.825
+  type: 'test'
+  ...
+# Subtest: Sid rescue spends the saved two-card pair before recovery continues
+ok 41 - Sid rescue spends the saved two-card pair before recovery continues
+  ---
+  duration_ms: 11.1878
+  type: 'test'
+  ...
+# Subtest: Stagecoach and equipment modules produce candidate card-zone changes through runtime
+ok 42 - Stagecoach and equipment modules produce candidate card-zone changes through runtime
+  ---
+  duration_ms: 3.8398
+  type: 'test'
+  ...
+# Subtest: Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+ok 43 - Suzy does not draw again after General Store, Stagecoach, or Wells Fargo provides cards
+  ---
+  duration_ms: 20.811
+  type: 'test'
+  ...
+# Subtest: Duel prompt and sequential target resolution use the serialized module result
+ok 44 - Duel prompt and sequential target resolution use the serialized module result
+  ---
+  duration_ms: 10.9885
+  type: 'test'
+  ...
+# Subtest: Gatling resumes its clockwise queue after a public Barrel judgment
+ok 45 - Gatling resumes its clockwise queue after a public Barrel judgment
+  ---
+  duration_ms: 9.4016
+  type: 'test'
+  ...
+# Subtest: Jail and Panic results apply their declared zone movements
+ok 46 - Jail and Panic results apply their declared zone movements
+  ---
+  duration_ms: 5.6062
+  type: 'test'
+  ...
+# Subtest: direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+ok 47 - direct phase-effect entrypoint runs Dynamite under an explicit continuation ID
+  ---
+  duration_ms: 1.449
+  type: 'test'
+  ...
+# Subtest: Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+ok 48 - Lucky's Dynamite judgment choice persists its two candidates and selected safe result across JSON resume
+  ---
+  duration_ms: 17.5464
+  type: 'test'
+  ...
+# Subtest: Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+ok 49 - Lucky's actual Barrel Draw! saves selection and chosen discard order through the runtime queue
+  ---
+  duration_ms: 4.9426
+  type: 'test'
+  ...
+# Subtest: Elimination rescue accept resumes R28 cleanup before the saved damage hook
+ok 50 - Elimination rescue accept resumes R28 cleanup before the saved damage hook
+  ---
+  duration_ms: 5.5579
+  type: 'test'
+  ...
+# Subtest: Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+ok 51 - Suzy draws after R27 rescue before El Gringo steals, then checks again at resolution completion
+  ---
+  duration_ms: 4.5477
+  type: 'test'
+  ...
+# Subtest: Suzy does not make a completion draw when El Gringo leaves her with a card
+ok 52 - Suzy does not make a completion draw when El Gringo leaves her with a card
+  ---
+  duration_ms: 2.109
+  type: 'test'
+  ...
+# Subtest: Sid ability module receives the caller-selected two-card cost and runtime applies it once
+ok 53 - Sid ability module receives the caller-selected two-card cost and runtime applies it once
+  ---
+  duration_ms: 2.4089
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3645.2404

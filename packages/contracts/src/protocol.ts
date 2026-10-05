@@ -256,7 +256,10 @@ export interface TablewideAttackView {
   attackId: string;
   kind: "gatling" | "indians";
   sourcePlayerId: string;
-  targets: readonly { playerId: string; status: "waiting" | "submitted" | "responding" | "resolved" | "eliminated" }[];
+  targets: readonly { playerId: string; status: "waiting" | "submitted" | "responding" | "resolved" | "eliminated";
+    /** Accepted public response type only; never the reserved hand card's identity. */
+    response?: "USE_BANG" | "USE_MISSED" | "USE_BARREL" | "USE_JOURDONNAIS" | "TAKE_HIT";
+  }[];
 }
 export interface PublicMatchEvent {
   eventSeq: number;

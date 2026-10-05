@@ -15,6 +15,11 @@ after(async () => { await vite?.close(); });
 const card = { cardInstanceId: 'public-choice', typeId: 'beer', rank: '6', suit: 'HEARTS' };
 const pending = (view, kind, options = []) => ({ interactionId: 'test-choice', kind, currentResponderPlayerId: view.viewer.playerId, allowedChoices: options.map(o => o.choice), responseOptions: options, step: { current: 1, total: 1 } });
 const render = view => renderToStaticMarkup(createElement(ReactionPrompt, { matchId: 'experience-test', version: 8, snapshot: view, transport: {} }));
+test('Indians explains its effect and shows public damage/card choices without ordered waiting copy',()=>{
+  const view=structuredClone(survivorSnapshot);view.pendingInteraction=pending(view,'INDIANS_RESPONSE',[]);
+  view.publicTable.tablewideAttack={attackId:'indians-test',kind:'indians',sourcePlayerId:'player-sheriff',targets:[{playerId:view.viewer.playerId,status:'submitted',response:'USE_BANG'},{playerId:'player-four',status:'resolved',response:'TAKE_HIT'}]};
+  const markup=render(view);assert.match(markup,/카드 효과/);assert.match(markup,/각 생존자는 뱅 1장을 버리거나 피해 1/);assert.match(markup,/뱅! 선택/);assert.match(markup,/♥ −1/);assert.match(markup,/순서를 기다리지 않고/);assert.doesNotMatch(markup,/제출 완료|대응 대기|님이 응답 중/);
+});
 
 test('shared store offers only the current picker a take button; observers see public cards', () => {
   const view = structuredClone(survivorSnapshot);
