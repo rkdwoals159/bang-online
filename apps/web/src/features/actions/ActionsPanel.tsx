@@ -436,7 +436,7 @@ export function ActionsPanel({
                 })}
               </ul>
             ) : (
-              <p className="game-actions__empty">선택할 손패가 없습니다.</p>
+              <p className="game-actions__empty game-actions__empty-hand">손패가 없어요</p>
             )}
           </fieldset>
 
