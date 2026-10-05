@@ -118,12 +118,14 @@ const inviteFailureCodes = new Set([
   "STALE_VERSION",
 ]);
 
-export const INVALID_INVITE_MESSAGE = "초대 코드를 확인할 수 없거나 이 방에 입장할 수 없어요. 방장에게 새 코드를 요청해 주세요.";
+export const INVALID_INVITE_MESSAGE = "초대 링크를 확인할 수 없거나 이 방에 입장할 수 없어요. 방장에게 새 링크를 요청해 주세요.";
 export const CONNECTION_ERROR_MESSAGE = "서버에 연결하지 못했어요. 연결을 확인하고 다시 시도해 주세요.";
 
 function errorCode(error: unknown): string | null {
   if (typeof error !== "object" || error === null || !("code" in error)) return null;
   const code = error.code;
+  // Both browser adapters wrap the server rejection in REQUEST_REJECTED.
+  if (code === "REQUEST_REJECTED" && "message" in error && typeof error.message === "string") return error.message;
   return typeof code === "string" ? code : null;
 }
 
@@ -162,4 +164,76 @@ export async function joinPreviewedInvite(
   } catch (error) {
     throw new Error(inviteErrorMessage(error));
   }
+}
+
+/** The link is UI input; the opaque token remains internal to the existing protocol. */
+export function extractInviteCode(input: string, origin?: string): string {
+  const value = input.trim();
+  if (/^[A-Za-z0-9_-]{1,512}$/.test(value)) return value;
+  try {
+    const url = new URL(value);
+    const codes = url.searchParams.getAll("code");
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password ||
+        (origin && url.origin !== new URL(origin).origin) ||
+        url.pathname.replace(/\/+$/, "") !== "/rooms/join" || codes.length !== 1 ||
+        !/^[A-Za-z0-9_-]{1,512}$/.test(codes[0] ?? "")) throw invalidInviteError();
+    return codes[0]!;
+  } catch {
+    throw invalidInviteError();
+  }
+}
+
+/** One UI action resolves the invite and joins; no intermediate confirmation screen.
+ * Ambiguous failures retain the exact command for idempotent retry. A definitive
+ * version rejection can obtain a fresh version and command (at most two retries).
+ */
+export function createInviteJoiner(
+  transport: Pick<RoomEntryTransport, "previewInvite" | "joinRoom" | "recoverAssignedSeats">,
+  createCommandId: () => string,
+) {
+  let inFlight: Promise<RoomView> | null = null;
+  let activeCode: string | null = null;
+  let intent: { code: string; command: JoinRoomCommand } | null = null;
+
+  async function run(code: string): Promise<RoomView> {
+    if (intent?.code !== code) intent = null;
+    try {
+      for (let retry = 0; ; retry++) {
+        if (!intent) {
+          const preview = await transport.previewInvite(code);
+          if (!preview) throw invalidInviteError();
+          intent = { code, command: makeJoinRoomCommand(preview, code, createCommandId()) };
+        }
+        const command = intent.command;
+        try {
+          const room = await transport.joinRoom(command);
+          intent = null;
+          return room;
+        } catch (error) {
+          const failure = errorCode(error);
+          if (failure === "ALREADY_JOINED" || failure === "ROOM_LOCKED") {
+            const targetRoomId = command.roomId;
+            const rooms = await transport.recoverAssignedSeats();
+            const assigned = rooms.find(room => room.roomId === targetRoomId && room.status !== "closed");
+            if (assigned) { intent = null; return assigned; }
+          }
+          if (failure === "STALE_VERSION" && retry < 2) { intent = null; continue; }
+          if (failure !== null && inviteFailureCodes.has(failure)) intent = null;
+          throw error;
+        }
+      }
+    } catch (error) {
+      throw new Error(inviteErrorMessage(error));
+    }
+  }
+
+  return (input: string, origin?: string): Promise<RoomView> => {
+    let code: string;
+    try { code = extractInviteCode(input, origin); }
+    catch (error) { return Promise.reject(error); }
+    if (inFlight) return code === activeCode ? inFlight : Promise.reject(new Error("입장이 진행 중이에요. 잠시 기다려 주세요."));
+    activeCode = code;
+    inFlight = run(code).finally(() => { inFlight = null; activeCode = null; });
+    return inFlight;
+  };
 }

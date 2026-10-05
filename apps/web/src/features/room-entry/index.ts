@@ -11,6 +11,8 @@ export {
   previewInvite,
   joinPreviewedInvite,
   readInviteCode,
+  extractInviteCode,
+  createInviteJoiner,
   type CreateRoomCommand,
   type JoinRoomCommand,
   type RoomCapacity,

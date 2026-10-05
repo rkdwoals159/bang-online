@@ -224,7 +224,6 @@ function RoomEntryPage({ initialMode }: { initialMode: "create" | "join" }) {
   const {
     roomEntryTransport,
     rememberCreatedRoom,
-    lastCreatedRoomId,
     clearCreatedRoom,
   } = useAppState();
 
@@ -237,22 +236,12 @@ function RoomEntryPage({ initialMode }: { initialMode: "create" | "join" }) {
       <RoomEntry
         transport={roomEntryTransport}
         initialMode={initialMode}
-        onRoomCreated={rememberCreatedRoom}
+        onRoomCreated={(room) => {
+          rememberCreatedRoom(room);
+          navigateTo(`/rooms/${encodeURIComponent(room.roomId)}`);
+        }}
         onRoomReady={(room) => navigateTo(`/rooms/${encodeURIComponent(room.roomId)}`)}
       />
-      {initialMode === "create" && lastCreatedRoomId ? (
-        <section className="page-card room-entry-next" aria-label="대기실 이동">
-          <p className="eyebrow">방 준비 완료</p>
-          <h2>이제 대기실에서 참가자를 기다릴 수 있어요.</h2>
-          <AppLink
-            className="button button-primary"
-            to={`/rooms/${encodeURIComponent(lastCreatedRoomId)}`}
-            ariaLabel="만든 방 대기실 열기"
-          >
-            대기실 열기
-          </AppLink>
-        </section>
-      ) : null}
     </>
   );
 }
@@ -379,7 +368,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
   if (!sessionRecovery.guest) return <GuestRequiredPage />;
   if (transportState.connection === "expired") {
     return <SessionRecoveryError
-      recovery={{ kind: "error", expired: true, message: "참여 정보가 만료됐어요. 초대 코드로 다시 참가하거나 새 방을 만들어 주세요." }}
+      recovery={{ kind: "error", expired: true, message: "참여 정보가 만료됐어요. 초대 링크로 다시 참가하거나 새 방을 만들어 주세요." }}
       retry={retrySessionRecovery}
     />;
   }
@@ -644,7 +633,7 @@ function SessionRecoveryError({ recovery, retry }: { recovery: Extract<SessionRe
       <p>{recovery.message}</p>
       <div className="state-actions">
         <button className="button button-primary" onClick={() => void retry()}>다시 확인</button>
-        <AppLink className="button button-secondary" to="/rooms/join">초대 코드로 참가</AppLink>
+        <AppLink className="button button-secondary" to="/rooms/join">초대 링크로 참가</AppLink>
         <AppLink className="button button-secondary" to="/rooms/new">새 방 만들기</AppLink>
       </div>
     </section>
@@ -656,9 +645,9 @@ function GuestRequiredPage() {
     <section className="state-frame" role="status">
       <span className="state-icon" aria-hidden="true">?</span>
       <h1>참여 정보가 필요해요</h1>
-      <p>이 방에서 내 참여 정보를 찾을 수 없어요. 초대 코드로 다시 참가하거나 새 방을 만들어 주세요.</p>
+      <p>이 방에서 내 참여 정보를 찾을 수 없어요. 초대 링크로 다시 참가하거나 새 방을 만들어 주세요.</p>
       <div className="state-actions">
-        <AppLink className="button button-primary" to="/rooms/join">초대 코드로 참가</AppLink>
+        <AppLink className="button button-primary" to="/rooms/join">초대 링크로 참가</AppLink>
         <AppLink className="button button-secondary" to="/rooms/new">새 방 만들기</AppLink>
       </div>
     </section>
@@ -670,9 +659,9 @@ function RoomUnavailablePage() {
     <section className="state-frame" role="alert">
       <span className="state-icon state-icon-error" aria-hidden="true">!</span>
       <h1>방을 불러올 수 없어요</h1>
-      <p>참가한 방을 찾을 수 없어요. 초대 코드를 확인하거나 첫 화면으로 돌아가 주세요.</p>
+      <p>참가한 방을 찾을 수 없어요. 초대 링크를 확인하거나 첫 화면으로 돌아가 주세요.</p>
       <div className="state-actions">
-        <AppLink className="button button-primary" to="/rooms/join">초대 코드로 참가</AppLink>
+        <AppLink className="button button-primary" to="/rooms/join">초대 링크로 참가</AppLink>
         <AppLink className="button button-secondary" to="/">첫 화면으로</AppLink>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { GuestSessionResponse, RoomView } from "../../../../../packages/contracts/src/protocol.js";
 import {
   CONNECTION_ERROR_MESSAGE,
@@ -6,12 +6,9 @@ import {
   makeCreateRoomCommand,
   makeGuestSessionRequest,
   makeInviteUrl,
-  normalizeDisplayName,
-  previewInvite,
-  joinPreviewedInvite,
+  createInviteJoiner,
   type RoomCapacity,
   type RoomEntryCreateResult,
-  type RoomEntryPreview,
   type RoomEntryTransport,
 } from "./model";
 import "./room-entry.css";
@@ -26,7 +23,7 @@ export interface RoomEntryProps {
 }
 
 type EntryMode = "choose" | "create" | "join";
-type BusyOperation = "session" | "create" | "preview" | "join" | null;
+type BusyOperation = "session" | "create" | "join" | null;
 
 const capacityOptions: readonly RoomCapacity[] = [4, 5, 6, 7];
 const statusLabels: Record<RoomView["status"], string> = {
@@ -66,23 +63,50 @@ export function RoomEntry({
   const [displayName, setDisplayName] = useState("");
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
   const [capacity, setCapacity] = useState<RoomCapacity>(4);
-  const [inviteCode, setInviteCode] = useState(() => initialCode(initialInviteCode));
-  const [preview, setPreview] = useState<RoomEntryPreview | null>(null);
+  const linkedInviteCode = useRef(initialCode(initialInviteCode));
+  const [inviteInput, setInviteInput] = useState(() => linkedInviteCode.current && typeof window !== "undefined"
+    ? makeInviteUrl(linkedInviteCode.current, window.location.origin) : "");
   const [createdRoom, setCreatedRoom] = useState<RoomEntryCreateResult | null>(null);
   const [joinedRoom, setJoinedRoom] = useState<RoomView | null>(null);
   const [busy, setBusy] = useState<BusyOperation>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const createIntent = useRef<{ capacity: RoomCapacity; commandId: string } | null>(null);
+  const autoJoinAttempted = useRef(false);
+  const joinBusy = useRef(false);
+  const mounted = useRef(true);
+  const joinInvite = useMemo(() => createInviteJoiner(transport, createCommandId), [transport, createCommandId]);
+
+  const enterRoom = useCallback(async (input: string) => {
+    if (joinBusy.current) return;
+    joinBusy.current = true;
+    setJoinedRoom(null);
+    setErrorMessage(null);
+    setNotice(null);
+    setBusy("join");
+    try {
+      const room = await joinInvite(input, typeof window === "undefined" ? undefined : window.location.origin);
+      if (!mounted.current) return;
+      setJoinedRoom(room);
+      setNotice("대기실에 입장했어요.");
+      onRoomReady?.(room);
+    } catch (error) {
+      if (mounted.current) setErrorMessage(messageFrom(error, INVALID_INVITE_MESSAGE));
+    } finally {
+      joinBusy.current = false;
+      if (mounted.current) setBusy(null);
+    }
+  }, [joinInvite, onRoomReady]);
 
   useEffect(() => {
     let active = true;
+    mounted.current = true;
     async function restore() {
       try {
         const restored = await transport.restoreGuestSession();
         if (!active) return;
         setGuest(restored);
-        if (restored) {
+        if (restored && !(initialMode === "join" && linkedInviteCode.current)) {
           try {
             const rooms = await transport.recoverAssignedSeats();
             if (active) setAssignedRooms(rooms);
@@ -99,8 +123,16 @@ export function RoomEntry({
     void restore();
     return () => {
       active = false;
+      mounted.current = false;
     };
-  }, [transport]);
+  }, [transport, initialMode]);
+
+  useEffect(() => {
+    if (guest && !restoringSession && mode === "join" && busy === null && linkedInviteCode.current && !autoJoinAttempted.current) {
+      autoJoinAttempted.current = true;
+      void enterRoom(linkedInviteCode.current);
+    }
+  }, [guest, restoringSession, mode, busy, enterRoom]);
 
   async function handleGuestSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -117,10 +149,13 @@ export function RoomEntry({
     setBusy("session");
     try {
       const created = await transport.createGuestSession(request);
+      const shouldJoin = mode === "join" && (linkedInviteCode.current || inviteInput.trim());
+      if (shouldJoin) autoJoinAttempted.current = true;
       setGuest(created);
       setAssignedRooms([]);
       setErrorMessage(null);
-      setNotice("참여 준비가 됐어요. 방을 만들거나 초대 코드로 참가할 수 있어요.");
+      if (shouldJoin) await enterRoom(linkedInviteCode.current || inviteInput);
+      else setNotice("참여 준비가 됐어요. 방을 만들거나 초대 링크로 참가할 수 있어요.");
     } catch (error) {
       setErrorMessage(messageFrom(error, CONNECTION_ERROR_MESSAGE));
     } finally {
@@ -148,9 +183,9 @@ export function RoomEntry({
       setCreatedRoom(safeResult);
       createIntent.current = null;
       if (safeResult.inviteCode === null) {
-        setErrorMessage("방 만들기 요청은 이미 처리됐지만 초대 코드는 다시 받을 수 없어요. 새 방을 만들어 초대 코드를 발급해 주세요.");
+        setErrorMessage("방은 이미 만들어졌지만 초대 링크는 다시 받을 수 없어요. 새 초대가 필요하면 새 방을 만들어 주세요.");
       } else {
-        setNotice("방이 만들어졌어요. 초대 코드와 링크를 친구에게 공유해 주세요.");
+        setNotice("방이 만들어졌어요. 초대 링크를 친구에게 공유해 주세요.");
       }
       onRoomCreated?.(safeResult);
     } catch (error) {
@@ -160,45 +195,11 @@ export function RoomEntry({
     }
   }
 
-  async function handlePreview(event: FormEvent<HTMLFormElement>) {
+  async function handleJoinSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!guest) return;
-    setPreview(null);
-    setJoinedRoom(null);
-    setErrorMessage(null);
-    setNotice(null);
-    setBusy("preview");
-    try {
-      const found = await previewInvite(transport, inviteCode);
-      setPreview(found);
-      setInviteCode(inviteCode.trim());
-      setNotice("방 정보를 확인했어요. 입장할 방이 맞는지 확인해 주세요.");
-    } catch (error) {
-      setErrorMessage(messageFrom(error, INVALID_INVITE_MESSAGE));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function handleJoin() {
-    if (!guest || !preview) return;
-    setErrorMessage(null);
-    setNotice(null);
-    setBusy("join");
-    try {
-      const room = await joinPreviewedInvite(transport, preview, inviteCode, createCommandId());
-      setJoinedRoom(room);
-      setAssignedRooms((current) => current.some(({ roomId }) => roomId === room.roomId)
-        ? current.map((item) => item.roomId === room.roomId ? room : item)
-        : [...current, room]);
-      setNotice("방에 입장했어요.");
-      onRoomReady?.(room);
-    } catch (error) {
-      setPreview(null);
-      setErrorMessage(messageFrom(error, INVALID_INVITE_MESSAGE));
-    } finally {
-      setBusy(null);
-    }
+    autoJoinAttempted.current = true;
+    await enterRoom(inviteInput);
   }
 
   async function copyInviteLink() {
@@ -216,7 +217,6 @@ export function RoomEntry({
     setMode(nextMode);
     setErrorMessage(null);
     setNotice(null);
-    setPreview(null);
     setCreatedRoom(null);
     setJoinedRoom(null);
   }
@@ -226,7 +226,7 @@ export function RoomEntry({
       <header className="room-entry__header">
         <p className="room-entry__eyebrow">기본판 · 4–7명</p>
         <h1 id="room-entry-title">친구와 뱅! 시작하기</h1>
-        <p>이름을 정한 뒤 방을 만들거나 초대 코드로 참가하세요.</p>
+        <p>이름을 정한 뒤 방을 만들거나 초대 링크로 바로 참가하세요.</p>
       </header>
 
       {errorMessage && <p className="room-entry__message room-entry__message--error" role="alert">{errorMessage}</p>}
@@ -276,12 +276,12 @@ export function RoomEntry({
             <section className="room-entry__choices" aria-label="방 선택">
               <button className="room-entry__choice" onClick={() => selectMode("create")}>
                 <span className="room-entry__choice-icon" aria-hidden="true">＋</span>
-                <span><strong>새 비공개 방 만들기</strong><small>방을 만들고 초대 코드를 공유합니다.</small></span>
+                <span><strong>새 비공개 방 만들기</strong><small>방을 만들고 초대 링크를 공유합니다.</small></span>
                 <span className="room-entry__choice-arrow" aria-hidden="true">→</span>
               </button>
               <button className="room-entry__choice" onClick={() => selectMode("join")}>
                 <span className="room-entry__choice-icon" aria-hidden="true">↗</span>
-                <span><strong>초대 코드로 참가</strong><small>코드를 확인한 뒤 입장할 방을 선택합니다.</small></span>
+                <span><strong>초대 링크로 참가</strong><small>링크를 열면 대기실로 바로 입장합니다.</small></span>
                 <span className="room-entry__choice-arrow" aria-hidden="true">→</span>
               </button>
             </section>
@@ -312,10 +312,8 @@ export function RoomEntry({
 
               {createdRoom?.inviteCode ? (
                 <div className="room-entry__invite-result" aria-live="polite">
-                  <p className="room-entry__eyebrow">초대 정보 · 한 번만 표시</p>
+                  <p className="room-entry__eyebrow">친구 초대</p>
                   <h3>친구를 초대하세요</h3>
-                  <label htmlFor="room-entry-invite-code">초대 코드</label>
-                  <input id="room-entry-invite-code" value={createdRoom.inviteCode} readOnly />
                   <label htmlFor="room-entry-invite-link">초대 링크</label>
                   <input id="room-entry-invite-link" value={makeInviteUrl(createdRoom.inviteCode, window.location.origin)} readOnly />
                   <button type="button" className="room-entry__button room-entry__button--secondary" onClick={() => void copyInviteLink()}>
@@ -325,7 +323,7 @@ export function RoomEntry({
               ) : createdRoom?.duplicate ? (
                 <div className="room-entry__invite-result" role="status">
                   <h3>생성 결과를 다시 확인했어요</h3>
-                  <p>방은 이미 만들어졌어요. 초대 코드는 다시 표시할 수 없으니 새 초대가 필요하면 새 방을 만들어 주세요.</p>
+                  <p>방은 이미 만들어졌어요. 초대 링크를 다시 표시할 수 없으니 새 초대가 필요하면 새 방을 만들어 주세요.</p>
                 </div>
               ) : null}
             </section>
@@ -334,47 +332,29 @@ export function RoomEntry({
               <div className="room-entry__section-heading">
                 <div>
                   <p className="room-entry__eyebrow">초대받으셨나요?</p>
-                  <h2 id="room-entry-join-title">초대 코드로 참가</h2>
+                  <h2 id="room-entry-join-title">초대 링크로 참가</h2>
                 </div>
                 <button className="room-entry__text-button" onClick={() => selectMode("choose")}>뒤로</button>
               </div>
-              <form className="room-entry__form" onSubmit={handlePreview}>
-                <label htmlFor="room-entry-code">초대 코드</label>
+              <form className="room-entry__form" onSubmit={handleJoinSubmit}>
+                <label htmlFor="room-entry-link">초대 링크</label>
                 <input
-                  id="room-entry-code"
+                  id="room-entry-link"
+                  type="url"
+                  required
                   autoComplete="off"
-                  value={inviteCode}
+                  value={inviteInput}
                   onChange={(event) => {
-                    setInviteCode(event.currentTarget.value);
-                    setPreview(null);
+                    setInviteInput(event.currentTarget.value);
                     setErrorMessage(null);
                   }}
-                  placeholder="친구에게 받은 코드를 붙여 넣으세요"
+                  placeholder="친구에게 받은 초대 링크를 붙여 넣으세요"
                   disabled={busy !== null}
                 />
-                <button className="room-entry__button room-entry__button--secondary" disabled={busy !== null || inviteCode.trim().length === 0}>
-                  {busy === "preview" ? "방을 확인하고 있어요…" : "방 미리 보기"}
+                <button className="room-entry__button room-entry__button--primary" disabled={busy !== null || inviteInput.trim().length === 0}>
+                  {busy === "join" ? "입장하고 있어요…" : "대기실 입장"}
                 </button>
               </form>
-
-              {preview && (
-                <div className="room-entry__preview" aria-live="polite">
-                  <p className="room-entry__eyebrow">입장 전 확인</p>
-                  <h3>이 방에 참가할까요?</h3>
-                  <dl>
-                    <div><dt>현재 인원</dt><dd>{preview.occupancy}명</dd></div>
-                    <div><dt>방 상태</dt><dd>{statusLabels[preview.status]}</dd></div>
-                  </dl>
-                  <button
-                    className="room-entry__button room-entry__button--primary"
-                    onClick={() => void handleJoin()}
-                    disabled={busy !== null || preview.status !== "waiting"}
-                  >
-                    {busy === "join" ? "입장하고 있어요…" : "이 방에 참가하기"}
-                  </button>
-                  <p className="room-entry__hint">방 상태와 남은 자리는 입장할 때 다시 확인해요.</p>
-                </div>
-              )}
             </section>
           )}
 
@@ -411,8 +391,12 @@ export function RoomEntry({
             />
             <p id="room-entry-name-help" className="room-entry__hint">앞뒤 공백을 뺀 1–20자예요. 같은 이름도 사용할 수 있어요.</p>
             {displayNameError && <p id="room-entry-name-error" className="room-entry__field-error" role="alert">{displayNameError}</p>}
+            {mode === "join" && !linkedInviteCode.current ? <>
+              <label htmlFor="room-entry-guest-link">초대 링크</label>
+              <input id="room-entry-guest-link" type="url" required value={inviteInput} onChange={event => setInviteInput(event.currentTarget.value)} placeholder="친구에게 받은 초대 링크를 붙여 넣으세요" disabled={busy !== null} />
+            </> : null}
             <button className="room-entry__button room-entry__button--primary" disabled={busy !== null}>
-              {busy === "session" ? "게스트 세션을 만들고 있어요…" : "게스트로 계속"}
+              {busy === "session" ? "참여 준비 중…" : busy === "join" ? "입장하고 있어요…" : mode === "join" ? "대기실 입장" : "게스트로 계속"}
             </button>
           </form>
         </section>
