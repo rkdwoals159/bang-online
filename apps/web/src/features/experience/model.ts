@@ -1,6 +1,7 @@
 import type { CardFaceView, MatchSnapshotView, PublicMatchEvent } from "../../../../../packages/contracts/src/protocol.js";
 
 export type CueKind = "shot" | "burst" | "block" | "hit" | "heal" | "judgment" | "explosion" | "duel" | "threat" | "draw" | "discard" | "equip" | "turn" | "eliminated" | "victory" | "store" | "pick" | "ability" | "pass" | "play";
+export type SoundKind = CueKind | "drink" | "reload" | "fuse" | "jail" | "escape" | "jail_skip";
 export interface GameCue {
   id: string;
   kind: CueKind;
@@ -8,6 +9,8 @@ export interface GameCue {
   actorId?: string;
   targetIds: readonly string[];
   card?: CardFaceView;
+  sound?: SoundKind;
+  count?: number;
 }
 export interface PresentationCursor { version: number; eventSeq: number; snapshot: MatchSnapshotView }
 export const MAX_QUEUED_CUES = 12;
@@ -46,7 +49,7 @@ export function advancePresentation(previous: PresentationCursor | null, version
       case "BANG_HIT": case "GATLING_HIT": case "INDIANS_HIT":
         if (targetId) cue("hit", `${name(targetId)} · 피해 ${typeof p.damage === "number" ? p.damage : "적용"}`); break;
       case "PLAYER_HEALED": if (targetId) cue("heal", `${name(targetId)} · 체력 +${typeof p.amount === "number" ? p.amount : 1}`); break;
-      case "BEER_USED": cue("ability", `${name(actorId)} · 맥주${p.healed === 0 ? " (회복 없음)" : ""}`, actorId ? [actorId] : []); break;
+      case "BEER_USED": cue("ability", `${name(actorId)} · 맥주${p.healed === 0 ? " (회복 없음)" : ""}`, actorId ? [actorId] : []); cues[cues.length-1].sound="drink"; break;
       case "SALOON_USED": cue("heal", "술집 · 함께 회복", Array.isArray(p.healedPlayerIds) ? p.healedPlayerIds.flatMap(id => knownId(id) ? [id as string] : []) : []); break;
       case "INDIANS_STARTED": if (targets.length) cue("threat", "인디언! · 각자 대응하세요"); break;
       case "INDIANS_DEFENDED": if (targetId) cue("block", `${name(targetId)} · 대응 성공`); break;
@@ -65,7 +68,7 @@ export function advancePresentation(previous: PresentationCursor | null, version
         const card = publicCard(p.card);
         if (card) cue("judgment", e.type.startsWith("JAIL") ? "감옥 판정" : e.type.startsWith("DYNAMITE") ? "다이너마이트 판정" : "술통 판정", actorId ? [actorId] : [], card); break;
       }
-      case "JAIL_JUDGMENT_RESOLVED": cue("judgment", p.turnSkipped === true ? "감옥 · 차례 건너뛰기" : "감옥 · 탈출!", actorId ? [actorId] : []); break;
+      case "JAIL_JUDGMENT_RESOLVED": cue("judgment", p.turnSkipped === true ? "감옥 · 차례 건너뛰기" : "감옥 · 탈출!", actorId ? [actorId] : []); cues[cues.length-1].sound=p.turnSkipped===true?"jail_skip":"escape"; break;
       case "BLACK_JACK_CARD_REVEALED": { const card = publicCard(p.card); if (card) cue("judgment", `${name(actorId)} · 블랙 잭 공개`, actorId ? [actorId] : [], card); break; }
     }
   }
@@ -79,7 +82,10 @@ export function advancePresentation(previous: PresentationCursor | null, version
       if (p.eliminated && !before.eliminated) { add("eliminated", `${p.displayName} · 탈락`, [p.playerId]); continue; }
       if (p.hp !== before.hp && !cues.some(c => c.targetIds.includes(p.playerId) && ["hit", "heal", "explosion"].includes(c.kind))) add(p.hp > before.hp ? "heal" : "hit", `${p.displayName} · 체력 ${p.hp > before.hp ? "+" : ""}${p.hp - before.hp}`, [p.playerId]);
       for (const card of p.inPlay) if (!before.inPlay.some(c => c.cardInstanceId === card.cardInstanceId) && !cues.some(c => c.kind === "pass" && c.targetIds.includes(p.playerId))) { add("equip", `${p.displayName} · 카드 장착`, [p.playerId], card); cues[cues.length - 1].id += `:${card.cardInstanceId}`; cues[cues.length-1].actorId = old.publicTable.turn.currentPlayerId; }
-      if (p.handCount > before.handCount && old.pendingInteraction?.kind !== "GENERAL_STORE_PICK") add("draw", `${p.displayName} · 카드 +${p.handCount - before.handCount}`, [p.playerId]);
+      const ownIncoming = p.playerId === snapshot.viewer.playerId && old.viewer.playerId === snapshot.viewer.playerId && old.selfPrivate && snapshot.selfPrivate
+        ? snapshot.selfPrivate.hand.filter(card => !old.selfPrivate!.hand.some(previousCard => previousCard.cardInstanceId === card.cardInstanceId)).length : 0;
+      const receivedCount = Math.max(0, p.handCount - before.handCount, ownIncoming);
+      if (receivedCount > 0 && old.pendingInteraction?.kind !== "GENERAL_STORE_PICK") { add("draw", `${p.displayName} · 카드 +${receivedCount}`, [p.playerId]); cues[cues.length-1].count=receivedCount; }
     }
     const oldPending = old.pendingInteraction;
     const played = snapshot.publicTable.publicDiscard.topCard;

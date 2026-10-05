@@ -21,3 +21,12 @@ test('elimination precedes victory and simultaneous equipment cues have unique i
 
 test('public card use gets one flight only for an adjacent update on the same turn',()=>{const old=state(),s=structuredClone(old);s.publicTable.publicDiscard={topCard:card,count:1};const result=advancePresentation(baseline(old),2,s,[],now);assert.equal(result.cues.find(c=>c.kind==='play').card.cardInstanceId,'public-card');assert.equal(result.cues.find(c=>c.kind==='play').actorId,'a');assert.equal(advancePresentation(baseline(old),4,s,[],now).cues.some(c=>c.kind==='play'),false);s.publicTable.turn.currentPlayerId='b';assert.equal(advancePresentation(baseline(old),2,s,[],now).cues.some(c=>c.kind==='play'),false);});
 test('dynamite passing preserves public source and avoids a false equip cue',()=>{const old=state(),s=structuredClone(old);s.publicTable.players[1].inPlay=[{...card,typeId:'dynamite'}];const result=advancePresentation(baseline(old),2,s,[event(1,'DYNAMITE_PASSED',{fromPlayerId:'a',toPlayerId:'b'})],now);assert.equal(result.cues[0].actorId,'a');assert.equal(result.cues.filter(c=>c.kind==='equip').length,0);});
+test('draw cues retain count without exposing cards, and zero-healing beer has a drink sound',()=>{
+  const old=state(),s=structuredClone(old);s.publicTable.players[0].handCount=7;
+  const result=advancePresentation(baseline(old),2,s,[event(1,'BEER_USED',{actorPlayerId:'a',healed:0})],now);
+  assert.equal(result.cues.find(c=>c.kind==='draw').count,3);assert.equal(result.cues.find(c=>c.kind==='ability').sound,'drink');assert.equal(result.cues.some(c=>c.kind==='heal'),false);assert.doesNotMatch(JSON.stringify(result.cues),/public-card/);
+});
+test('a used draw card still counts both incoming private cards instead of just the net hand gain',()=>{
+  const old=state(),s=structuredClone(old);old.selfPrivate.hand=[{...card,typeId:'stagecoach'}];s.selfPrivate.hand=[{...card,cardInstanceId:'new-one'},{...card,cardInstanceId:'new-two'}];s.publicTable.players[0].handCount=5;
+  const result=advancePresentation(baseline(old),2,s,[],now);assert.equal(result.cues.find(c=>c.kind==='draw').count,2);assert.doesNotMatch(JSON.stringify(result.cues),/new-one|new-two/);
+});

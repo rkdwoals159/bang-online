@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { MatchSnapshotView, PublicMatchEvent } from "../../../../../packages/contracts/src/protocol.js";
 import { PlayingCardFace } from "../cards/CardFaces.js";
 import { GameAudio } from "./audio.js";
+import { planSounds } from "./sound-plan.js";
 import { advancePresentation, cueDuration, MAX_QUEUED_CUES, type GameCue, type PresentationCursor } from "./model.js";
 import "./animista.css";
 import "./experience.css";
@@ -12,6 +13,8 @@ interface ExperienceValue {
   targeting: TableTargeting | null;
   setTargeting: (targeting: TableTargeting | null) => void;
   soundEnabled: boolean;
+  soundVolume: number;
+  changeSoundVolume: (value: number) => void;
   motionEnabled: boolean;
   motionAllowed: boolean;
   toggleSound: () => void;
@@ -23,11 +26,11 @@ export const useGameExperience = () => useContext(ExperienceContext);
 export function GameExperience({ version, snapshot, visibleEvents, children, scene = false }: { version: number; snapshot: MatchSnapshotView; visibleEvents: readonly PublicMatchEvent[]; children: ReactNode; scene?: boolean }) {
   const cursor = useRef<PresentationCursor | null>(null);
   const audio = useRef<GameAudio | null>(null);
-  const attemptedSound = useRef<string | null>(null);
   const [lastSound, setLastSound] = useState("");
   const [queue, setQueue] = useState<GameCue[]>([]);
   const [targeting, setTargeting] = useState<TableTargeting | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundVolume, setSoundVolume] = useState(.7);
   const [motionEnabled, setMotionEnabled] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
   const motionAllowed = motionEnabled && !reducedMotion;
@@ -44,6 +47,8 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
     const engine = new GameAudio(); audio.current = engine;
     engine.setEnabled(false);
     try { const sound = localStorage.getItem("bang:sound"), motion = localStorage.getItem("bang:motion"); setSoundEnabled(sound === "on"); setMotionEnabled(motion !== "off"); engine.setEnabled(sound === "on"); } catch { /* Preferences are optional. */ }
+    try { const saved=localStorage.getItem("bang:sound-volume"); const volume=saved === null ? .7 : Number(saved); if(Number.isFinite(volume)&&volume>=0&&volume<=1){setSoundVolume(volume);engine.setVolume(volume);} } catch { /* Preferences are optional. */ }
+    engine.setVisible(!document.hidden);
     const unlock = () => engine.unlock();
     const hide = () => { engine.setVisible(!document.hidden); if (document.hidden) setQueue([]); };
     window.addEventListener("pointerdown", unlock, { capture: true }); window.addEventListener("keydown", unlock, { capture: true }); document.addEventListener("visibilitychange", hide);
@@ -52,14 +57,13 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
   useEffect(() => {
     const next = advancePresentation(cursor.current, version, snapshot, visibleEvents, Date.now(), !document.hidden);
     cursor.current = next.cursor;
-    if (next.cues.length) setQueue(current => [...current, ...next.cues].slice(-MAX_QUEUED_CUES));
+    if (next.cues.length) {
+      for (const step of planSounds(next.cues)) if (audio.current?.play(step.kind, step.offset, step.count)) setLastSound(step.id);
+      setQueue(current => [...current, ...next.cues].slice(-MAX_QUEUED_CUES));
+    }
   }, [version, snapshot, visibleEvents]);
   useEffect(() => {
     if (!cue) return;
-    if (attemptedSound.current !== cue.id) {
-      attemptedSound.current = cue.id;
-      if (audio.current?.play(cue.kind)) setLastSound(cue.id);
-    }
     const timer = window.setTimeout(() => setQueue(current => current.filter(c => c.id !== cue.id)), cueDuration(cue.kind));
     return () => window.clearTimeout(timer);
   }, [cue]);
@@ -67,8 +71,13 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
     const next = !soundEnabled; setSoundEnabled(next); audio.current?.setEnabled(next); if (next) audio.current?.unlock();
     try { localStorage.setItem("bang:sound", next ? "on" : "off"); } catch { /* Optional. */ }
   }, [soundEnabled]);
+  const changeSoundVolume = useCallback((value: number) => {
+    if(!Number.isFinite(value))return;
+    const volume=Math.max(0,Math.min(1,value));setSoundVolume(volume);audio.current?.setVolume(volume);
+    try{localStorage.setItem("bang:sound-volume",String(volume));}catch{ /* Preferences are optional. */ }
+  },[]);
   const toggleMotion = useCallback(() => { const next = !motionEnabled; setMotionEnabled(next); try { localStorage.setItem("bang:motion", next ? "on" : "off"); } catch { /* Optional. */ } }, [motionEnabled]);
-  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, motionEnabled, motionAllowed, toggleSound, toggleMotion }), [cue, targeting, version, soundEnabled, motionEnabled, motionAllowed, toggleSound, toggleMotion]);
+  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion }), [cue, targeting, version, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion]);
   return <ExperienceContext.Provider value={value}>
     <div className={`game-experience${scene ? " game-experience--scene" : ""}${motionAllowed ? "" : " game-experience--still"}`} data-last-sound={lastSound || undefined}>{children}
       {!scene && snapshot.status === "playing" && (snapshot.viewer.mode === "active" || ownResponse) ? <nav className="game-navigation" aria-label="게임 화면 바로가기"><a href="#game-table-title">테이블</a><a href={ownResponse ? "#reaction-prompt-title" : "#game-actions-title"}>{ownResponse ? "내 응답" : "내 손패"}</a></nav> : null}
@@ -85,6 +94,7 @@ export function GameExperienceControls() {
   if (!game) return null;
   return <div className="game-experience__controls" aria-label="게임 연출 설정">
     <button type="button" aria-pressed={game.soundEnabled} onClick={game.toggleSound}>효과음 {game.soundEnabled ? "켜짐" : "꺼짐"}</button>
+    <label className="game-experience__volume">음량 <input aria-label="효과음 음량" type="range" min="0" max="100" step="5" value={Math.round(game.soundVolume*100)} onChange={event=>game.changeSoundVolume(Number(event.target.value)/100)}/><span>{Math.round(game.soundVolume*100)}%</span></label>
     <button type="button" aria-pressed={game.motionEnabled} onClick={game.toggleMotion}>연출 {game.motionEnabled ? "켜짐" : "꺼짐"}</button>
   </div>;
 }

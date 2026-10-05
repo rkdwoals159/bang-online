@@ -1,5 +1,9 @@
 .game-experience { position: relative; width: 100%; min-width: 0; }
 .game-experience__controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.game-experience__volume { display:flex; align-items:center; gap:8px; min-height:44px; color:var(--color-on-felt); font-size:14px; }
+.game-experience__volume input { width:clamp(90px,20vw,150px); min-height:44px; accent-color:var(--color-brass); cursor:pointer; }
+.game-experience__volume input:focus-visible { outline:3px solid var(--color-brass); outline-offset:2px; }
+.game-experience__volume span { min-width:3ch; font-variant-numeric:tabular-nums; }
 .game-experience__controls button { min-height: 44px; padding: 8px 12px; border: 1px solid rgb(184 204 191 / 35%); border-radius: 8px; background: transparent; color: var(--color-on-felt); font: inherit; font-size: 13px; cursor: pointer; }
 .game-experience__controls button[aria-pressed="false"] { color: var(--color-on-felt-muted); }
 .game-cue { position: fixed; z-index: 80; top: 84px; left: 50%; display: grid; justify-items: center; gap: 12px; width: max-content; max-width: min(90vw, 480px); padding: 14px 24px; border: 2px solid var(--color-brass); border-radius: 12px; background: #102b24; color: #fffdf7; box-shadow: 0 12px 40px #0004; text-align: center; pointer-events: none; animation: game-cue-enter 170ms ease-out both; }
