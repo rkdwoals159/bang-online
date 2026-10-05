@@ -1,0 +1,14 @@
+{
+  "projectId": "appgprj_6abacbd5c54c8191abdbb8c55b15de64",
+  "versionNumber": 8,
+  "versionId": "appgprj_6abacbd5c54c8191abdbb8c55b15de64~appgver_1d449cf063f481918ae66e6d858541e9",
+  "sourceCommit": "3918f3c28bcbc629c32fe8ad32be127a379f04c1",
+  "deploymentId": "appgdep_6ac3250671ec8191bac8b898141c1282",
+  "status": "succeeded",
+  "url": "https://bang-online-ko.rkdwoals159.chatgpt.site",
+  "updatedAt": "2026-10-05T04:18:29.864106+00:00",
+  "archiveSha256": "d822bda19731ce210c025db207a5f9d011da1d458979b45e5b9b8fbde49289d2",
+  "githubRepository": "https://github.com/rkdwoals159/bang-online",
+  "githubBranch": "main",
+  "S09": "NOT RUN"
+}
