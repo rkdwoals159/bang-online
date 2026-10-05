@@ -14,6 +14,6 @@
   "browser": { "environment": "local Sites", "controlledFixtures": true, "normalCompleteGame": "NOT RUN", "beerNoHealConfirmationAndConsumption": "PASS", "generalStoreNamesAndActualPick": "PASS", "mobileCardDetailAndEscape": "PASS", "observerAndResultProjection": "PASS", "returnToLobby": "PASS", "fourAndSevenPlayerStart": "PASS" },
   "cssSourceMeasurement": { "scope": "Concatenated shared CSS source, not deployment bundle or API latency", "beforeBytes": 67518, "afterBytes": 63197, "beforeGzipBytes": 13289, "afterGzipBytes": 11680, "gzipReductionPercent": 12.1 },
   "acceptance": { "passed": 95, "total": 97, "D06": "NOT RUN", "D18": "NOT RUN", "S09": "NOT RUN", "promotedByDesignWork": false },
-  "knownDevelopmentWarning": "Existing vinext/React flushSync lifecycle warning observed once",
+  "knownDevelopmentWarning": "Existing vinext/React flushSync lifecycle warning repeated during route transitions",
   "deployment": "Recorded separately in DEPLOYMENT.md and deployment-result.json"
 }
