@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: same-version tablewide responses all commit and preserve private reservations
+ok 1 - same-version tablewide responses all commit and preserve private reservations
+  ---
+  duration_ms: 28087.823
+  type: 'test'
+  ...
+# Subtest: D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+ok 2 - D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+  ---
+  duration_ms: 20684.3322
+  type: 'test'
+  ...
+# Subtest: D02: reusing a command ID with another payload fails before engine evaluation
+ok 3 - D02: reusing a command ID with another payload fails before engine evaluation
+  ---
+  duration_ms: 18161.6857
+  type: 'test'
+  ...
+# Subtest: D03: same-version concurrent valid commands commit once and save the losing stale outcome
+ok 4 - D03: same-version concurrent valid commands commit once and save the losing stale outcome
+  ---
+  duration_ms: 14842.2697
+  type: 'test'
+  ...
+# Subtest: D04: actor spoofing fails strict validation and another player's card fails ownership checks
+ok 5 - D04: actor spoofing fails strict validation and another player's card fails ownership checks
+  ---
+  duration_ms: 11083.9627
+  type: 'test'
+  ...
+# Subtest: known-match rule rejection is saved and replayed without another engine evaluation
+ok 6 - known-match rule rejection is saved and replayed without another engine evaluation
+  ---
+  duration_ms: 9073.7515
+  type: 'test'
+  ...
+# Subtest: known-match stale version rejection is stored and replayed before engine evaluation
+ok 7 - known-match stale version rejection is stored and replayed before engine evaluation
+  ---
+  duration_ms: 7105.6669
+  type: 'test'
+  ...
+# Subtest: rejection receipt version race reloads state and records the revalidated stale result
+ok 8 - rejection receipt version race reloads state and records the revalidated stale result
+  ---
+  duration_ms: 4543.9881
+  type: 'test'
+  ...
+# Subtest: stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+ok 9 - stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+  ---
+  duration_ms: 7784.1657
+  type: 'test'
+  ...
+# Subtest: a non-member cannot obtain or persist a command receipt
+ok 10 - a non-member cannot obtain or persist a command receipt
+  ---
+  duration_ms: 5418.7867
+  type: 'test'
+  ...
+# Subtest: T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+ok 11 - T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+  ---
+  duration_ms: 5616.7812
+  type: 'test'
+  ...
+# Subtest: a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+ok 12 - a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+  ---
+  duration_ms: 6391.5612
+  type: 'test'
+  ...
+# Subtest: the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+ok 13 - the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+  ---
+  duration_ms: 12518.2812
+  type: 'test'
+  ...
+# Subtest: a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+ok 14 - a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+  ---
+  duration_ms: 5389.7325
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 162208.361

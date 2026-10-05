@@ -1,0 +1,2 @@
+apps/web/src/features/reactions/ReactionPrompt.tsx(254,158): error TS2304: Cannot find name 'cardName'.
+apps/web/src/features/reactions/ReactionPrompt.tsx(264,58): error TS2304: Cannot find name 'cardName'.

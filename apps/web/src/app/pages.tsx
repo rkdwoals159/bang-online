@@ -2,13 +2,9 @@ import { GameExperience } from "../features/experience/GameExperience.js";
 import { characterDescriptions } from "../features/cards/character-descriptions.js";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { MatchSnapshotView, RoomView, PublicMatchEvent } from "../../../../packages/contracts/src/protocol.js";
-import { ActionsPanel } from "../features/actions/ActionsPanel.js";
+import { GameScene } from "../features/game-scene/GameScene.js";
 import { CharacterCardFace, RoleCardFace } from "../features/cards/CardFaces.js";
-import { GameTable } from "../features/game-table/GameTable.js";
 import { Lobby } from "../features/lobby/Lobby.js";
-import { ReactionPrompt } from "../features/reactions/ReactionPrompt.js";
-import { interactionLabel } from "../features/reactions/model.js";
-import { MatchInputGate, StatusPanel } from "../features/status/StatusPanel.js";
 import { RoomEntry } from "../features/room-entry/RoomEntry.js";
 import type { BrowserTransportState, MatchProjectionState, TransportConnectionState } from "../transport/types.js";
 import { AppLink, navigateTo, replaceTo, type AppRoute } from "./router.js";
@@ -507,96 +503,9 @@ export function MatchPage({
   transport: ReturnType<typeof useAppState>["transport"];
   showActions: boolean;
 }) {
-  const statusSync = { version, snapshot, visibleEvents };
-  const completed = snapshot.status === "completed";
-  const pending = snapshot.pendingInteraction;
-  const sharedStore = pending?.kind === "GENERAL_STORE_PICK";
-  const choosingDiscards = pending && "discardOrder" in pending && pending.discardOrder &&
-    "currentResponderPlayerId" in pending && pending.currentResponderPlayerId === snapshot.viewer.playerId;
-  const showControls = showActions && !completed &&
-    (snapshot.viewer.mode === "active" || choosingDiscards || pending?.kind === "LUCKY_DRAW");
-  return (
-    <GameExperience key={matchId} version={version} snapshot={snapshot} visibleEvents={visibleEvents}>
-    <div className={`match-page${completed ? " match-page--result" : " match-page--playing"}${snapshot.viewer.mode !== "active" && !showControls ? " match-page--observer" : ""}`}>
-      {!completed ? <MatchRequestBanner snapshot={snapshot} /> : null}
-      {completed ? (
-        <StatusPanel
-          sync={statusSync}
-          room={room}
-          roomVersion={roomVersion}
-          matchId={matchId}
-          transport={transport}
-        />
-      ) : null}
-      {sharedStore && !completed ? <div className="match-page__shared-choice"><ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} /></div> : null}
-      {showControls ? (
-        <MatchInputGate status={snapshot.status}>
-          {!sharedStore ? <ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
-          {!choosingDiscards && snapshot.viewer.mode === "active" ? <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
-        </MatchInputGate>
-      ) : null}
-      {completed ? (
-        <details className="match-page__history">
-          <summary>게임판과 진행 기록 보기</summary>
-          <GameTable snapshot={snapshot} />
-        </details>
-      ) : (
-        <>
-          <GameTable snapshot={snapshot} />
-          <StatusPanel
-            sync={statusSync}
-            room={room}
-            roomVersion={roomVersion}
-            matchId={matchId}
-            transport={transport}
-          />
-        </>
-      )}
-    </div>
-    </GameExperience>
-  );
-}
-
-function MatchRequestBanner({ snapshot }: { snapshot: MatchSnapshotView }) {
-  const turnOwner = snapshot.publicTable.players.find(
-    (player) => player.playerId === snapshot.publicTable.turn.currentPlayerId,
-  );
-  const pending = snapshot.pendingInteraction;
-  const responderId = pending && "currentResponderPlayerId" in pending
-    ? pending.currentResponderPlayerId
-    : null;
-  const responder = responderId
-    ? snapshot.publicTable.players.find((player) => player.playerId === responderId)
-    : undefined;
-  const myTurn = turnOwner?.playerId === snapshot.viewer.playerId;
-  const request = pending ? pending.kind === "DISCARDS_ORDER" && snapshot.publicTable.turn.phase === "discard" ? "초과 카드 버리기" : interactionLabel(pending.kind) : null;
-  const instruction = snapshot.status === "paused"
-    ? "게임이 잠시 멈춰 있어요. 다시 진행되면 행동을 고를 수 있어요."
-    : snapshot.status === "recovery_required"
-      ? "게임 정보를 확인하고 있어요. 최신 상태를 기다려 주세요."
-      : snapshot.viewer.mode !== "active"
-        ? "탈락한 상태예요. 공개된 진행을 볼 수 있어요."
-        : myTurn
-          ? "내 차례예요. 아래에서 카드를 고를 수 있어요."
-          : turnOwner ? `${turnOwner.displayName} 님 차례예요.` : "현재 차례를 확인하고 있어요.";
-
-  return (
-    <section className="match-request" aria-label="현재 차례와 응답" role="status" aria-live="polite">
-      <div className="match-request__turn" key={snapshot.publicTable.turn.currentPlayerId}>
-        <span>현재 차례</span>
-        <strong>{turnOwner?.displayName ?? "확인 중"}</strong>
-      </div>
-      {pending ? (
-        <div className="match-request__response">
-          <span>{request}</span>
-          <strong>{responder?.displayName ?? (responderId ? "응답자 확인 중" : "응답 처리 중")}</strong>
-          {"step" in pending && pending.step.total > 1 ? <span>{pending.step.current}/{pending.step.total}</span> : null}
-        </div>
-      ) : (
-        <p className="match-request__instruction">{instruction}</p>
-      )}
-    </section>
-  );
+  return <GameExperience key={matchId} scene version={version} snapshot={snapshot} visibleEvents={visibleEvents}>
+    <GameScene {...{matchId,version,snapshot,visibleEvents,room,roomVersion,transport,showActions}} />
+  </GameExperience>;
 }
 
 function SessionRecoveryError({ recovery, retry }: { recovery: Extract<SessionRecovery, { kind: "error" }>; retry: () => Promise<void> }) {

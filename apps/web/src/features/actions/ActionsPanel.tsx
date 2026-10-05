@@ -20,6 +20,7 @@ import {
   type ActionsProjection,
 } from "./model.js";
 import "./actions.css";
+import { ChoiceStage } from "../experience/ChoiceStage.js";
 
 export interface ActionTransport {
   sendMatchCommand(command: MatchCommand): Promise<CommandAck>;
@@ -27,6 +28,7 @@ export interface ActionTransport {
 }
 
 export interface ActionsPanelProps {
+  readonly variant?: "panel" | "scene";
   readonly matchId: string;
   /** Version accompanying the supplied server projection. */
   readonly version: number;
@@ -61,7 +63,9 @@ export function ActionsPanel({
   snapshot,
   transport,
   createCommandId = createDefaultCommandId,
+  variant = "panel",
 }: ActionsPanelProps) {
+  const [abilityOpen, setAbilityOpen] = useState(false);
   const experience = useGameExperience();
   const [syncedProjection, setSyncedProjection] = useState<(ActionsProjection & { readonly matchId: string }) | null>(null);
   const [selection, setSelection] = useState<ActionSelection | null>(null);
@@ -184,6 +188,7 @@ export function ActionsPanel({
           ? rejectionMessage(result.acknowledgement.error.code)
           : "지금은 사용할 수 없어요. 다시 골라 주세요.");
       } else {
+        setAbilityOpen(false);
         setNotice(result.projection
           ? ""
           : "연결이 지연되고 있어요. 다시 확인해 주세요.");
@@ -331,7 +336,7 @@ export function ActionsPanel({
   );
 
   return (
-    <section className="game-actions" aria-labelledby="game-actions-title" aria-busy={busy}>
+    <section className={`game-actions${variant === "scene" ? " game-actions--scene" : ""}`} aria-labelledby="game-actions-title" aria-busy={busy}>
       <header className="game-actions__header">
         <div>
           <h2 id="game-actions-title">내 손패</h2>
@@ -340,7 +345,7 @@ export function ActionsPanel({
       </header>
 
       {notice ? <p className="game-actions__notice" role="status" aria-live="polite">{notice}</p> : null}
-      {selectionExpired ? (
+      {selectionExpired && variant !== "scene" ? (
         <p className="game-actions__notice" role="status" aria-live="polite">
           판이 업데이트되어 이전 선택을 지웠어요. 최신 선택지에서 다시 골라 주세요.
         </p>
@@ -394,8 +399,8 @@ export function ActionsPanel({
           <fieldset className="game-actions__fieldset">
             <legend className="sr-only">손패 카드</legend>
             {hand.length > 0 ? (
-              <ul className="game-actions__cards" aria-label="내 손패에서 카드 선택">
-                {hand.map((card) => {
+              <ul className="game-actions__cards" data-card-anchor={variant === "scene" ? "hand" : undefined} aria-label="내 손패에서 카드 선택">
+                {hand.map((card, handIndex) => {
                   const indexes = proposalIndexesByCardId.get(card.cardInstanceId) ?? [];
                   const selected = visibleSelection?.kind === "card" && visibleSelection.cardInstanceId === card.cardInstanceId;
                   const isLegal = indexes.length > 0;
@@ -411,10 +416,10 @@ export function ActionsPanel({
                     ? getTargetOptions(currentSnapshot, actions, indexes).map((option) => option.label).filter(Boolean)
                     : [disabledReason];
                   return (
-                    <li key={card.cardInstanceId}>
+                    <li key={card.cardInstanceId} className={selected ? "is-selected" : ""} style={variant === "scene" ? { "--card-angle": `${Math.max(-14, Math.min(14, (handIndex - (hand.length - 1) / 2) * 3))}deg` } as import("react").CSSProperties : undefined}>
                       <div className="game-actions__card-entry">
-                        <PlayingCardZoomButton card={card} details={actionDetails} detailHeading={canUseCard ? "사용 대상과 방식" : "카드 사용 상태"} triggerClassName="game-actions__card-zoom-trigger" />
-                        <button
+                        <PlayingCardZoomButton card={card} details={actionDetails} detailHeading={canUseCard ? "사용 대상과 방식" : "카드 사용 상태"} triggerClassName="game-actions__card-zoom-trigger" triggerLabel={variant === "scene" ? `${cardName(card.typeId)}${selected ? " 상세 보기" : canAct && isLegal ? " 선택" : " 상세 보기"}` : undefined} onInspect={variant === "scene" ? () => { if (canAct && isLegal && !selected) { chooseCard(card.cardInstanceId); return false; } return true; } : undefined} />
+                        {variant === "scene" ? <span className="game-actions__card-name">{cardName(card.typeId)}</span> : <button
                           className={`game-actions__card${selected ? " is-selected" : ""}`}
                           type="button"
                           aria-pressed={selected}
@@ -424,7 +429,7 @@ export function ActionsPanel({
                         >
                           <span className="game-actions__card-name">{cardName(card.typeId)}</span>
                           <span className="game-actions__card-state">{canUseCard ? "사용" : pendingInteraction ? "응답 대기" : !viewerIsTurnOwner ? "상대 차례" : currentSnapshot.publicTable.turn.phase === "discard" ? "카드 버리기" : "사용 불가"}</span>
-                        </button>
+                        </button>}
                       </div>
                     </li>
                   );
@@ -447,7 +452,7 @@ export function ActionsPanel({
                 <p className="game-actions__card-description">{getPlayingCardDescription(selectedCard.typeId)}</p>
               ) : null}
               {activeTargetOptions.length > 1 ? (
-                <fieldset className="game-actions__targets" disabled={!canAct}>
+                <TargetChoices scene={variant === "scene"} hasSelection={visibleSelection.proposalIndex !== null}><fieldset className="game-actions__targets" disabled={!canAct}>
                 <legend>사용할 대상과 방식을 선택하세요</legend>
                   {activeTargetOptions.map((option) => (
                     <button
@@ -460,7 +465,7 @@ export function ActionsPanel({
                       {option.label || "카드 사용"}
                     </button>
                   ))}
-                </fieldset>
+                </fieldset></TargetChoices>
               ) : activeTargetOptions.length === 0 || activeTargetOptions[0]?.label ? (
                 <p className="game-actions__selected-target">
                   {activeTargetOptions[0]?.label ?? "지금은 선택할 수 있는 행동이 없어요."}
@@ -512,6 +517,7 @@ export function ActionsPanel({
           ) : null}
 
           {abilityIndexes.length > 0 && viewerIsTurnOwner && !pendingInteraction ? (
+            <><button className="scene-ability-trigger" type="button" disabled={!canAct} onClick={() => setAbilityOpen(true)} hidden={variant !== "scene"}>인물 능력</button>{variant !== "scene" || abilityOpen ? <AbilityStage scene={variant === "scene"} close={() => setAbilityOpen(false)}>
             <fieldset className="game-actions__abilities" disabled={!canAct}>
               <legend>시드 케첨 · 손패 카드 2장 사용</legend>
               <p className="game-actions__sid-hint" id="sid-ability-cost-help">
@@ -597,6 +603,7 @@ export function ActionsPanel({
                 능력 사용
               </button>
             </fieldset>
+            </AbilityStage> : null}</>
           ) : null}
 
           {endTurnIndexes.length > 0 && viewerIsTurnOwner && !pendingInteraction ? (
@@ -609,7 +616,7 @@ export function ActionsPanel({
                   disabled={!canAct}
                   onClick={() => submitProposal(index)}
                 >
-                  {busy ? "처리 중…" : "턴 종료"}
+                  {busy ? "처리 중…" : variant === "scene" ? "차례 마치기" : "턴 종료"}
                 </button>
               ))}
             </div>
@@ -639,3 +646,7 @@ function suitName(suit: CardSuit): string {
   }
 }
 
+
+function AbilityStage({scene,close,children}:{scene:boolean;close:()=>void;children:import("react").ReactNode}) { return scene ? <ChoiceStage interactionId="sid-ability" title="시드 케첨 · 생명력 회복" dockLabel="능력 선택">{children}<button type="button" onClick={close}>닫기</button></ChoiceStage> : <>{children}</>; }
+
+function TargetChoices({scene,hasSelection,children}:{scene:boolean;hasSelection:boolean;children:import("react").ReactNode}) { return scene ? <details className="scene-target-menu"><summary>{hasSelection ? "대상 변경" : "대상 선택"}</summary>{children}</details> : <>{children}</>; }

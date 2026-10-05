@@ -77,7 +77,7 @@ test('mobile navigation points to my response only when I am the responder and i
 test('observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store', () => {
   const markup = view => renderToStaticMarkup(createElement(MatchPage, { matchId: 'experience-test', version: 8, snapshot: view, visibleEvents: [], showActions: true, transport: {} }));
   const observer = structuredClone(eliminatedSnapshot);
-  assert.match(markup(observer), /match-page--observer/);
+  assert.match(markup(observer), /탈락 · 경기를 지켜보고 있어요/);
   assert.doesNotMatch(markup(observer), /id="game-actions-title"|행동 입력/);
   observer.pendingInteraction = { ...pending(observer, 'DISCARDS_ORDER', [{ interactionId: 'test-choice', choice: 'ORDER_CARDS' }]), discardOrder: { requiredCount: 1, allowedCards: [card] } };
   assert.match(markup(observer), /버릴 카드 후보/);

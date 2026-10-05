@@ -1,6 +1,6 @@
 # 게임 씬 설계 방향
 
-상태: 설계·체험 시안 완료, 실제 경기 화면으로 연결하는 G01–G09는 구현 예정.
+상태: 승인된 시안을 실제 경기 화면으로 연결 완료. 구현·회귀 검증은 `outputs/game-scene-implementation-2026-10-05/IMPLEMENTATION.md` 참고. 전체 자연 대국과 미실행 수락 항목은 미검증을 유지한다.
 
 정본: `outputs/game-scene-design-2026-10-05/DESIGN.md`.
 

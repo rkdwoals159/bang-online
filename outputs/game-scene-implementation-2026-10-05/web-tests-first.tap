@@ -1,0 +1,1118 @@
+TAP version 13
+# Subtest: HTTP readiness does not wait for a failed notification stream
+ok 1 - HTTP readiness does not wait for a failed notification stream
+  ---
+  duration_ms: 3691.067
+  type: 'test'
+  ...
+# Subtest: expired sessions remain rejected even for independent HTTP writes
+ok 2 - expired sessions remain rejected even for independent HTTP writes
+  ---
+  duration_ms: 0.9231
+  type: 'test'
+  ...
+# Subtest: Socket.IO readiness still awaits connection
+ok 3 - Socket.IO readiness still awaits connection
+  ---
+  duration_ms: 0.6183
+  type: 'test'
+  ...
+# Subtest: direct room, role, game, result and invite URLs resolve to the expected path state
+ok 4 - direct room, role, game, result and invite URLs resolve to the expected path state
+  ---
+  duration_ms: 5424.9919
+  type: 'test'
+  ...
+# Subtest: popstate refreshes the route key for back/forward and invite query changes
+ok 5 - popstate refreshes the route key for back/forward and invite query changes
+  ---
+  duration_ms: 0.6102
+  type: 'test'
+  ...
+# Subtest: RoomView activeMatchId drives lobby, sync, game and result projections
+ok 6 - RoomView activeMatchId drives lobby, sync, game and result projections
+  ---
+  duration_ms: 0.4797
+  type: 'test'
+  ...
+# Subtest: room connection notice is accessible and stays until authoritative route sync succeeds
+ok 7 - room connection notice is accessible and stays until authoritative route sync succeeds
+  ---
+  duration_ms: 17.5182
+  type: 'test'
+  ...
+# Subtest: connected CONNECTION errors trigger one route resync attempt without an effect loop
+ok 8 - connected CONNECTION errors trigger one route resync attempt without an effect loop
+  ---
+  duration_ms: 0.2224
+  type: 'test'
+  ...
+# Subtest: reconnect sync waits for the current RoomView and then its active match projection
+ok 9 - reconnect sync waits for the current RoomView and then its active match projection
+  ---
+  duration_ms: 0.6564
+  type: 'test'
+  ...
+# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+ok 10 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+  ---
+  duration_ms: 0.4816
+  type: 'test'
+  ...
+# Subtest: post-start role reveal redirects to the registered canonical role route
+ok 11 - post-start role reveal redirects to the registered canonical role route
+  ---
+  duration_ms: 11.6729
+  type: 'test'
+  ...
+# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately
+ok 12 - role confirmation stays in one tab session and a fresh tab must confirm separately
+  ---
+  duration_ms: 0.8909
+  type: 'test'
+  ...
+# Subtest: role and character face copy is supplied for every canonical base-game entry
+ok 13 - role and character face copy is supplied for every canonical base-game entry
+  ---
+  duration_ms: 0.5506
+  type: 'test'
+  ...
+# Subtest: role reveal renders only the viewer's role and character with canonical rule copy
+ok 14 - role reveal renders only the viewer's role and character with canonical rule copy
+  ---
+  duration_ms: 6.3065
+  type: 'test'
+  ...
+# Subtest: match route composition passes private hand, legalActions, pending and result projection to features
+not ok 15 - match route composition passes private hand, legalActions, pending and result projection to features
+  ---
+  duration_ms: 58.9776
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\app\\routes.test.mjs:312:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /빗나감! 8 하트/. Input:
+    
+    '<div class="game-experience game-experience--scene"><div class="game-scene" data-match-id="match-a" data-viewer-id="player-a"><header class="scene-hud"><strong class="scene-brand" aria-label="뱅 온라인">BANG!</strong><span class="scene-turn" role="status" aria-live="polite" title="뱅! 응답">뱅! 응답</span><nav aria-label="경기 메뉴"><button type="button" aria-pressed="false">기록</button><button type="button">설정</button><button class="scene-fullscreen" type="button">전체 화면</button></nav></header><section class="scene-board" aria-label="시계 방향 게임 테이블"><div class="scene-rail" aria-hidden="true"></div><div class="scene-felt" aria-hidden="true"></div><div class="scene-mark" aria-hidden="true"><strong>BANG!</strong><span>THE SALOON</span></div><div class="scene-piles"><div class="scene-deck" data-card-anchor="deck" aria-label="카드 뽑기 더미"><span aria-hidden="true">B!</span></div><div data-card-anchor="discard" class="scene-discard"><span aria-hidden="true"></span></div></div><ol class="scene-seats" aria-label="플레이어 좌석"><li style="left:50%;top:87%" class="scene-seat scene-seat--self scene-seat--turn"><article data-player-seat="player-a" aria-label="내 자리, 바트 캐시디, 생명력 4/4, 보안관, 손패 1장, 현재 차례"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="초원 별">나</strong><span class="scene-seat__role">보안관</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 1장" style="--hand-count:1"><i aria-hidden="true"></i></span></article></li><li style="left:49.99999999999999%;top:13%" class="scene-seat"><article data-player-seat="player-b" aria-label="바람, 블랙 잭, 생명력 4/4, 역할 비공개, 손패 2장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 블랙 잭" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_blackjack.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="바람">바람</strong><span class="scene-seat__role">블랙 잭</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 2장" style="--hand-count:2"><i aria-hidden="true"></i><i aria-hidden="true"></i></span><span class="scene-seat__distance" aria-label="나에게서 거리 1">1</span></article></li></ol></section><footer class="scene-hand-dock" data-card-anchor="hand"><div class="scene-self"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><div><strong title="초원 별">초원 별</strong><span class="scene-self__role">보안관</span><p>바트 캐시디</p><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span></div></div><section class="game-actions game-actions--scene" aria-labelledby="game-actions-title" aria-busy="false"><header class="game-actions__header"><div><h2 id="game-actions-title">내 손패</h2></div><span class="game-actions__version">손패 1장</span></header><fieldset class="game-actions__fieldset"><legend class="sr-only">손패 카드</legend><ul class="game-actions__cards" aria-label="내 손패에서 카드 선택"><li class="" style="--card-angle:0deg"><div class="game-actions__card-entry"><div class="card-zoom game-actions__card-zoom-trigger"><button class="card-zoom__trigger" type="button" aria-label="빗나감! 상세 보기" aria-haspopup="dialog"><div class="playing-card" role="group" aria-label="빗나감!, 8 하트"><div class="playing-card__artwork"><img src="/assets/cards/playing/01_mancato.png" alt="빗나감! 카드 그림" loading="lazy" decoding="async"/></div><span class="playing-card__printed-corner-cover" aria-hidden="true"></span><span class="playing-card__rank" aria-label="숫자 8">8</span><span class="playing-card__suit" aria-label="하트"><span aria-hidden="true" style="color:#bd3130">♥</span></span></div></button></div><span class="game-actions__card-name">빗나감!</span></div></li></ul></fieldset></section></footer><section class="choice-stage" aria-label="뱅! 응답"><div class="choice-stage__dock"><strong>뱅! 응답</strong><button type="button">카드 펼쳐 보기</button></div><dialog tabindex="-1" class="choice-stage__dialog" aria-labelledby="_R_h_" aria-modal="true"><header class="choice-stage__header"><h2 id="_R_h_">뱅! 응답</h2><button type="button">게임판 보기</button></header><section class="reaction-prompt reaction-prompt--bang_response" aria-labelledby="reaction-prompt-title" aria-busy="false"><header class="reaction-prompt__header"><div><h2 id="reaction-prompt-title">뱅! 응답</h2></div></header><p class="reaction-prompt__instruction">초원 별 님이 선택해 주세요.</p><ul class="reaction-prompt__options" aria-label="응답 선택지"><li><div class="reaction-prompt__option-row"><button class="reaction-prompt__option" type="button"><strong>빗나감! 사용</strong><span>빗나감!</span></button><div class="card-zoom reaction-prompt__option-zoom-trigger"><button class="card-zoom__trigger" type="button" aria-label="카드 상세 보기: 빗나감!, 8 하트" aria-haspopup="dialog"><div class="playing-card" role="group" aria-label="빗나감!, 8 하트"><div class="playing-card__artwork"><img src="/assets/cards/playing/01_mancato.png" alt="빗나감! 카드 그림" loading="lazy" decoding="async"/></div><span class="playing-card__printed-corner-cover" aria-hidden="true"></span><span class="playing-card__rank" aria-label="숫자 8">8</span><span class="playing-card__suit" aria-label="하트"><span aria-hidden="true" style="color:#bd3130">♥</span></span></div></button></div></div></li></ul></section></dialog></section></div></div>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<div class="game-experience game-experience--scene"><div class="game-scene" data-match-id="match-a" data-viewer-id="player-a"><header class="scene-hud"><strong class="scene-brand" aria-label="뱅 온라인">BANG!</strong><span class="scene-turn" role="status" aria-live="polite" title="뱅! 응답">뱅! 응답</span><nav aria-label="경기 메뉴"><button type="button" aria-pressed="false">기록</button><button type="button">설정</button><button class="scene-fullscreen" type="button">전체 화면</button></nav></header><section class="scene-board" aria-label="시계 방향 게임 테이블"><div class="scene-rail" aria-hidden="true"></div><div class="scene-felt" aria-hidden="true"></div><div class="scene-mark" aria-hidden="true"><strong>BANG!</strong><span>THE SALOON</span></div><div class="scene-piles"><div class="scene-deck" data-card-anchor="deck" aria-label="카드 뽑기 더미"><span aria-hidden="true">B!</span></div><div data-card-anchor="discard" class="scene-discard"><span aria-hidden="true"></span></div></div><ol class="scene-seats" aria-label="플레이어 좌석"><li style="left:50%;top:87%" class="scene-seat scene-seat--self scene-seat--turn"><article data-player-seat="player-a" aria-label="내 자리, 바트 캐시디, 생명력 4/4, 보안관, 손패 1장, 현재 차례"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="초원 별">나</strong><span class="scene-seat__role">보안관</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 1장" style="--hand-count:1"><i aria-hidden="true"></i></span></article></li><li style="left:49.99999999999999%;top:13%" class="scene-seat"><article data-player-seat="player-b" aria-label="바람, 블랙 잭, 생명력 4/4, 역할 비공개, 손패 2장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 블랙 잭" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_blackjack.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="바람">바람</strong><span class="scene-seat__role">블랙 잭</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 2장" style="--hand-count:2"><i aria-hidden="true"></i><i aria-hidden="true"></i></span><span class="scene-seat__distance" aria-label="나에게서 거리 1">1</span></article></li></ol></section><footer class="scene-hand-dock" data-card-anchor="hand"><div class="scene-self"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><div><strong title="초원 별">초원 별</strong><span class="scene-self__role">보안관</span><p>바트 캐시디</p><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span></div></div><section class="game-actions game-actions--scene" aria-labelledby="game-actions-title" aria-busy="false"><header class="game-actions__header"><div><h2 id="game-actions-title">내 손패</h2></div><span class="game-actions__version">손패 1장</span></header><fieldset class="game-actions__fieldset"><legend class="sr-only">손패 카드</legend><ul class="game-actions__cards" aria-label="내 손패에서 카드 선택"><li class="" style="--card-angle:0deg"><div class="game-actions__card-entry"><div class="card-zoom game-actions__card-zoom-trigger"><button class="card-zoom__trigger" type="button" aria-label="빗나감! 상세 보기" aria-haspopup="dialog"><div class="playing-card" role="group" aria-label="빗나감!, 8 하트"><div class="playing-card__artwork"><img src="/assets/cards/playing/01_mancato.png" alt="빗나감! 카드 그림" loading="lazy" decoding="async"/></div><span class="playing-card__printed-corner-cover" aria-hidden="true"></span><span class="playing-card__rank" aria-label="숫자 8">8</span><span class="playing-card__suit" aria-label="하트"><span aria-hidden="true" style="color:#bd3130">♥</span></span></div></button></div><span class="game-actions__card-name">빗나감!</span></div></li></ul></fieldset></section></footer><section class="choice-stage" aria-label="뱅! 응답"><div class="choice-stage__dock"><strong>뱅! 응답</strong><button type="button">카드 펼쳐 보기</button></div><dialog tabindex="-1" class="choice-stage__dialog" aria-labelledby="_R_h_" aria-modal="true"><header class="choice-stage__header"><h2 id="_R_h_">뱅! 응답</h2><button type="button">게임판 보기</button></header><section class="reaction-prompt reaction-prompt--bang_response" aria-labelledby="reaction-prompt-title" aria-busy="false"><header class="reaction-prompt__header"><div><h2 id="reaction-prompt-title">뱅! 응답</h2></div></header><p class="reaction-prompt__instruction">초원 별 님이 선택해 주세요.</p><ul class="reaction-prompt__options" aria-label="응답 선택지"><li><div class="reaction-prompt__option-row"><button class="reaction-prompt__option" type="button"><strong>빗나감! 사용</strong><span>빗나감!</span></button><div class="card-zoom reaction-prompt__option-zoom-trigger"><button class="card-zoom__trigger" type="button" aria-label="카드 상세 보기: 빗나감!, 8 하트" aria-haspopup="dialog"><div class="playing-card" role="group" aria-label="빗나감!, 8 하트"><div class="playing-card__artwork"><img src="/assets/cards/playing/01_mancato.png" alt="빗나감! 카드 그림" loading="lazy" decoding="async"/></div><span class="playing-card__printed-corner-cover" aria-hidden="true"></span><span class="playing-card__rank" aria-label="숫자 8">8</span><span class="playing-card__suit" aria-label="하트"><span aria-hidden="true" style="color:#bd3130">♥</span></span></div></button></div></div></li></ul></section></dialog></section></div></div>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/src/app/routes.test.mjs:350:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection
+ok 16 - result return uses one exact empty command then waits for a newer lobby sync projection
+  ---
+  duration_ms: 1.1927
+  type: 'test'
+  ...
+# Subtest: rejected or thrown return transport keeps the result operation retryable
+ok 17 - rejected or thrown return transport keeps the result operation retryable
+  ---
+  duration_ms: 1.8498
+  type: 'test'
+  ...
+# Subtest: room operations can wait for the new cookie-authenticated socket connection
+ok 18 - room operations can wait for the new cookie-authenticated socket connection
+  ---
+  duration_ms: 4.2966
+  type: 'test'
+  ...
+# Subtest: role introduction assigns the interactive portrait and text to explicit grid columns
+ok 19 - role introduction assigns the interactive portrait and text to explicit grid columns
+  ---
+  duration_ms: 1.8099
+  type: 'test'
+  ...
+# Subtest: keyboard controls receive a visible focus indicator
+ok 20 - keyboard controls receive a visible focus indicator
+  ---
+  duration_ms: 1.3028
+  type: 'test'
+  ...
+# Subtest: narrow hand and response rows can scroll horizontally
+ok 21 - narrow hand and response rows can scroll horizontally
+  ---
+  duration_ms: 0.3722
+  type: 'test'
+  ...
+# Subtest: AccessibleButton renders a named native keyboard control
+ok 22 - AccessibleButton renders a named native keyboard control
+  ---
+  duration_ms: 2840.9981
+  type: 'test'
+  ...
+# Subtest: P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+ok 23 - P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+  ---
+  duration_ms: 2193.1986
+  type: 'test'
+  ...
+# Subtest: offers only card and target candidates from legalActions
+ok 24 - offers only card and target candidates from legalActions
+  ---
+  duration_ms: 1.2947
+  type: 'test'
+  ...
+# Subtest: self-use candidates omit generic guidance and preserve conversion context
+ok 25 - self-use candidates omit generic guidance and preserve conversion context
+  ---
+  duration_ms: 0.7628
+  type: 'test'
+  ...
+# Subtest: explains only the two public no-recovery Beer conditions
+ok 26 - explains only the two public no-recovery Beer conditions
+  ---
+  duration_ms: 0.4245
+  type: 'test'
+  ...
+# Subtest: maps a distinct Sid cost pair only to its exact projected ability proposal
+ok 27 - maps a distinct Sid cost pair only to its exact projected ability proposal
+  ---
+  duration_ms: 0.4902
+  type: 'test'
+  ...
+# Subtest: keeps server-approved self table targets and never exposes a target hand card ID
+ok 28 - keeps server-approved self table targets and never exposes a target hand card ID
+  ---
+  duration_ms: 0.434
+  type: 'test'
+  ...
+# Subtest: wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+ok 29 - wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+  ---
+  duration_ms: 0.89
+  type: 'test'
+  ...
+# Subtest: syncs the latest projection after server rejection so selection can be rebuilt
+ok 30 - syncs the latest projection after server rejection so selection can be rebuilt
+  ---
+  duration_ms: 0.8777
+  type: 'test'
+  ...
+# Subtest: shows the acknowledgement phase before awaiting the authoritative projection
+ok 31 - shows the acknowledgement phase before awaiting the authoritative projection
+  ---
+  duration_ms: 0.8007
+  type: 'test'
+  ...
+# Subtest: keeps a timed-out retry on the same command ID and payload
+ok 32 - keeps a timed-out retry on the same command ID and payload
+  ---
+  duration_ms: 0.5284
+  type: 'test'
+  ...
+# Subtest: renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+ok 33 - renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+  ---
+  duration_ms: 31.9461
+  type: 'test'
+  ...
+# Subtest: shows turn ownership and pending response without making card actions available
+ok 34 - shows turn ownership and pending response without making card actions available
+  ---
+  duration_ms: 12.6059
+  type: 'test'
+  ...
+# Subtest: renders two linear Sid cost selectors instead of one button per card pair
+ok 35 - renders two linear Sid cost selectors instead of one button per card pair
+  ---
+  duration_ms: 255.2672
+  type: 'test'
+  ...
+# Subtest: prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+ok 36 - prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+  ---
+  duration_ms: 160.4333
+  type: 'test'
+  ...
+# Subtest: all 80 physical card records keep their own rank and suit over one type image
+ok 37 - all 80 physical card records keep their own rank and suit over one type image
+  ---
+  duration_ms: 1.0043
+  type: 'test'
+  ...
+# Subtest: missing images have visible fallback labels and nonempty alternative text
+ok 38 - missing images have visible fallback labels and nonempty alternative text
+  ---
+  duration_ms: 4.9191
+  type: 'test'
+  ...
+# Subtest: opponent hand back accessibility text exposes no rank, suit, or card identity
+ok 39 - opponent hand back accessibility text exposes no rank, suit, or card identity
+  ---
+  duration_ms: 0.5311
+  type: 'test'
+  ...
+# Subtest: R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+ok 40 - R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+  ---
+  duration_ms: 2547.496
+  type: 'test'
+  ...
+# Subtest: every base playing card has Korean detail text from the ruleset summaries
+ok 41 - every base playing card has Korean detail text from the ruleset summaries
+  ---
+  duration_ms: 0.5853
+  type: 'test'
+  ...
+# Subtest: hand zoom keeps named triggers and mounts detail content only when opened
+ok 42 - hand zoom keeps named triggers and mounts detail content only when opened
+  ---
+  duration_ms: 12.6755
+  type: 'test'
+  ...
+# Subtest: card images are detail triggers and use buttons contain no image or duplicate detail text
+ok 43 - card images are detail triggers and use buttons contain no image or duplicate detail text
+  ---
+  duration_ms: 6.0373
+  type: 'test'
+  ...
+# Subtest: all public character portraits have accessible image triggers without mounting dialogs eagerly
+ok 44 - all public character portraits have accessible image triggers without mounting dialogs eagerly
+  ---
+  duration_ms: 18.7722
+  type: 'test'
+  ...
+# Subtest: turn-end discard copy states the required count and current-health rule
+ok 45 - turn-end discard copy states the required count and current-health rule
+  ---
+  duration_ms: 14.5614
+  type: 'test'
+  ...
+# Subtest: response zoom is limited to card faces named by the current responder options
+ok 46 - response zoom is limited to card faces named by the current responder options
+  ---
+  duration_ms: 2.9806
+  type: 'test'
+  ...
+# Subtest: discard-order zoom uses only the responder's projected allowedCards
+ok 47 - discard-order zoom uses only the responder's projected allowedCards
+  ---
+  duration_ms: 8.4356
+  type: 'test'
+  ...
+# Subtest: sound stays silent before a user gesture unlocks one reusable context
+ok 48 - sound stays silent before a user gesture unlocks one reusable context
+  ---
+  duration_ms: 2.2094
+  type: 'test'
+  ...
+# Subtest: Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+ok 49 - Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+  ---
+  duration_ms: 0.6652
+  type: 'test'
+  ...
+# Subtest: mute immediately silences the output; hidden tabs and unsupported audio are harmless
+ok 50 - mute immediately silences the output; hidden tabs and unsupported audio are harmless
+  ---
+  duration_ms: 0.5264
+  type: 'test'
+  ...
+# Subtest: first connection and hidden-tab replay do not play historical attacks
+ok 51 - first connection and hidden-tab replay do not play historical attacks
+  ---
+  duration_ms: 4.2232
+  type: 'test'
+  ...
+# Subtest: shots connect authenticated actor and public target; replay is silent
+ok 52 - shots connect authenticated actor and public target; replay is silent
+  ---
+  duration_ms: 0.7103
+  type: 'test'
+  ...
+# Subtest: Gatling targets every projected opponent and a blocked player gets a separate ping
+ok 53 - Gatling targets every projected opponent and a blocked player gets a separate ping
+  ---
+  duration_ms: 1.122
+  type: 'test'
+  ...
+# Subtest: barrel failure never sounds like a successful block; success is not double counted
+ok 54 - barrel failure never sounds like a successful block; success is not double counted
+  ---
+  duration_ms: 3.0511
+  type: 'test'
+  ...
+# Subtest: stale, malformed, private and unknown event data cannot create effects
+ok 55 - stale, malformed, private and unknown event data cannot create effects
+  ---
+  duration_ms: 0.6166
+  type: 'test'
+  ...
+# Subtest: older versions cannot move the effect cursor backwards
+ok 56 - older versions cannot move the effect cursor backwards
+  ---
+  duration_ms: 0.2697
+  type: 'test'
+  ...
+# Subtest: HP deltas show hit/heal once and zero-healing beer does not fake a heal
+ok 57 - HP deltas show hit/heal once and zero-healing beer does not fake a heal
+  ---
+  duration_ms: 0.6937
+  type: 'test'
+  ...
+# Subtest: draw, equipment, turn, elimination and victory use public snapshot changes
+ok 58 - draw, equipment, turn, elimination and victory use public snapshot changes
+  ---
+  duration_ms: 0.9107
+  type: 'test'
+  ...
+# Subtest: store pick moves only one publicly revealed card to its known previous chooser
+ok 59 - store pick moves only one publicly revealed card to its known previous chooser
+  ---
+  duration_ms: 0.8728
+  type: 'test'
+  ...
+# Subtest: short bounded queue prevents unbounded animation backlog
+ok 60 - short bounded queue prevents unbounded animation backlog
+  ---
+  duration_ms: 2.2167
+  type: 'test'
+  ...
+# Subtest: elimination precedes victory and simultaneous equipment cues have unique identities
+ok 61 - elimination precedes victory and simultaneous equipment cues have unique identities
+  ---
+  duration_ms: 0.5738
+  type: 'test'
+  ...
+# Subtest: all seat presets are finite and finish at the untransformed seat
+ok 62 - all seat presets are finite and finish at the untransformed seat
+  ---
+  duration_ms: 2.4856
+  type: 'test'
+  ...
+# Subtest: consecutive identical hits create distinct animations and clean up the old one
+ok 63 - consecutive identical hits create distinct animations and clean up the old one
+  ---
+  duration_ms: 0.4908
+  type: 'test'
+  ...
+# Subtest: disabled/reduced motion and hidden documents never start seat effects
+ok 64 - disabled/reduced motion and hidden documents never start seat effects
+  ---
+  duration_ms: 0.2295
+  type: 'test'
+  ...
+# Subtest: hiding a tab cancels active motion, and cleanup removes its listener
+ok 65 - hiding a tab cancels active motion, and cleanup removes its listener
+  ---
+  duration_ms: 0.3944
+  type: 'test'
+  ...
+# Subtest: missing, unrelated or unsupported motion does not interfere with gameplay
+ok 66 - missing, unrelated or unsupported motion does not interfere with gameplay
+  ---
+  duration_ms: 0.7574
+  type: 'test'
+  ...
+# Subtest: adapted shake preserves Animista offsets with small game-specific amplitude
+ok 67 - adapted shake preserves Animista offsets with small game-specific amplitude
+  ---
+  duration_ms: 3.7952
+  type: 'test'
+  ...
+# Subtest: selected CSS and the distributable license retain Animista attribution
+ok 68 - selected CSS and the distributable license retain Animista attribution
+  ---
+  duration_ms: 2.6852
+  type: 'test'
+  ...
+# Subtest: shared store offers only the current picker a take button; observers see public cards
+ok 69 - shared store offers only the current picker a take button; observers see public cards
+  ---
+  duration_ms: 3183.8006
+  type: 'test'
+  ...
+# Subtest: Kit private choice opens a stage only for its authenticated picker
+ok 70 - Kit private choice opens a stage only for its authenticated picker
+  ---
+  duration_ms: 4.743
+  type: 'test'
+  ...
+# Subtest: Lucky judgments are public while response options stay with Lucky
+ok 71 - Lucky judgments are public while response options stay with Lucky
+  ---
+  duration_ms: 7.1864
+  type: 'test'
+  ...
+# Subtest: the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+ok 72 - the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+  ---
+  duration_ms: 5.7034
+  type: 'test'
+  ...
+# Subtest: mobile navigation points to my response only when I am the responder and is absent for observers
+ok 73 - mobile navigation points to my response only when I am the responder and is absent for observers
+  ---
+  duration_ms: 3.16
+  type: 'test'
+  ...
+# Subtest: observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+not ok 74 - observer page has a full public table without empty hand/actions, but keeps authorized final discards and shared store
+  ---
+  duration_ms: 46.4843
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\features\\experience\\stages.test.mjs:77:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /match-page--observer/. Input:
+    
+    '<div class="game-experience game-experience--scene"><div class="game-scene" data-match-id="experience-test" data-viewer-id="player-eliminated"><header class="scene-hud"><strong class="scene-brand" aria-label="뱅 온라인">BANG!</strong><span class="scene-turn" role="status" aria-live="polite" title="은하 님 차례">은하 님 차례</span><nav aria-label="경기 메뉴"><button type="button" aria-pressed="false">기록</button><button type="button">설정</button><button class="scene-fullscreen" type="button">전체 화면</button></nav></header><section class="scene-board" aria-label="시계 방향 게임 테이블"><div class="scene-rail" aria-hidden="true"></div><div class="scene-felt" aria-hidden="true"></div><div class="scene-mark" aria-hidden="true"><strong>BANG!</strong><span>THE SALOON</span></div><div class="scene-piles"><div class="scene-deck" data-card-anchor="deck" aria-label="카드 뽑기 더미"><span aria-hidden="true">B!</span></div><div data-card-anchor="discard" class="scene-discard"><span aria-hidden="true"></span></div></div><ol class="scene-seats" aria-label="플레이어 좌석"><li style="left:50%;top:87%" class="scene-seat"><article data-player-seat="player-private" aria-label="단풍, 바트 캐시디, 생명력 3/4, 역할 비공개, 손패 2장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="단풍">단풍</strong><span class="scene-seat__role">바트 캐시디</span><span class="scene-hearts" role="img" aria-label="생명력 3/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="is-empty">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 2장" style="--hand-count:2"><i aria-hidden="true"></i><i aria-hidden="true"></i></span></article></li><li style="left:18.823085463760208%;top:31.500000000000007%" class="scene-seat"><article data-player-seat="player-four" aria-label="노을, 킷 칼슨, 생명력 4/4, 역할 비공개, 손패 0장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 킷 칼슨" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_kitcarlson.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="노을">노을</strong><span class="scene-seat__role">킷 칼슨</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 0장" style="--hand-count:1"></span></article></li><li style="left:81.17691453623979%;top:31.499999999999982%" class="scene-seat scene-seat--turn"><article data-player-seat="player-sheriff" aria-label="은하, 로즈 둘런, 생명력 4/4, 보안관, 손패 3장, 현재 차례"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 로즈 둘런" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_rosedoolan.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="은하">은하</strong><span class="scene-seat__role">보안관</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 3장" style="--hand-count:3"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span></article></li></ol><details class="scene-observers"><summary>탈락 1명</summary><ul><li>바람 · 부관</li></ul></details></section><footer class="scene-hand-dock" data-card-anchor="hand"><div class="scene-self"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 시드 케첨" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_sidketchum.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><div><strong title="바람">바람</strong><span class="scene-self__role">부관</span><p>시드 케첨</p><span class="scene-hearts" role="img" aria-label="생명력 0/4"><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i></span></div></div><div class="scene-spectating">탈락 · 경기를 지켜보고 있어요.</div></footer></div></div>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<div class="game-experience game-experience--scene"><div class="game-scene" data-match-id="experience-test" data-viewer-id="player-eliminated"><header class="scene-hud"><strong class="scene-brand" aria-label="뱅 온라인">BANG!</strong><span class="scene-turn" role="status" aria-live="polite" title="은하 님 차례">은하 님 차례</span><nav aria-label="경기 메뉴"><button type="button" aria-pressed="false">기록</button><button type="button">설정</button><button class="scene-fullscreen" type="button">전체 화면</button></nav></header><section class="scene-board" aria-label="시계 방향 게임 테이블"><div class="scene-rail" aria-hidden="true"></div><div class="scene-felt" aria-hidden="true"></div><div class="scene-mark" aria-hidden="true"><strong>BANG!</strong><span>THE SALOON</span></div><div class="scene-piles"><div class="scene-deck" data-card-anchor="deck" aria-label="카드 뽑기 더미"><span aria-hidden="true">B!</span></div><div data-card-anchor="discard" class="scene-discard"><span aria-hidden="true"></span></div></div><ol class="scene-seats" aria-label="플레이어 좌석"><li style="left:50%;top:87%" class="scene-seat"><article data-player-seat="player-private" aria-label="단풍, 바트 캐시디, 생명력 3/4, 역할 비공개, 손패 2장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 바트 캐시디" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_bartcassidy.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="단풍">단풍</strong><span class="scene-seat__role">바트 캐시디</span><span class="scene-hearts" role="img" aria-label="생명력 3/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="is-empty">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 2장" style="--hand-count:2"><i aria-hidden="true"></i><i aria-hidden="true"></i></span></article></li><li style="left:18.823085463760208%;top:31.500000000000007%" class="scene-seat"><article data-player-seat="player-four" aria-label="노을, 킷 칼슨, 생명력 4/4, 역할 비공개, 손패 0장"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 킷 칼슨" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_kitcarlson.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="노을">노을</strong><span class="scene-seat__role">킷 칼슨</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 0장" style="--hand-count:1"></span></article></li><li style="left:81.17691453623979%;top:31.499999999999982%" class="scene-seat scene-seat--turn"><article data-player-seat="player-sheriff" aria-label="은하, 로즈 둘런, 생명력 4/4, 보안관, 손패 3장, 현재 차례"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 로즈 둘런" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_rosedoolan.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><strong class="scene-seat__name" title="은하">은하</strong><span class="scene-seat__role">보안관</span><span class="scene-hearts" role="img" aria-label="생명력 4/4"><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i><i aria-hidden="true" class="">♥</i></span><span class="scene-seat__hand" role="img" aria-label="손패 3장" style="--hand-count:3"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span></article></li></ol><details class="scene-observers"><summary>탈락 1명</summary><ul><li>바람 · 부관</li></ul></details></section><footer class="scene-hand-dock" data-card-anchor="hand"><div class="scene-self"><div class="card-zoom character-detail"><button class="card-zoom__trigger" type="button" aria-label="캐릭터 상세 보기: 시드 케첨" aria-haspopup="dialog"><span class="character-portrait" aria-hidden="true"><div class="character-portrait__artwork"><img src="/assets/cards/characters/01_sidketchum.png" alt="" loading="lazy" decoding="async"/></div></span></button></div><div><strong title="바람">바람</strong><span class="scene-self__role">부관</span><p>시드 케첨</p><span class="scene-hearts" role="img" aria-label="생명력 0/4"><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i><i aria-hidden="true" class="is-empty">♥</i></span></div></div><div class="scene-spectating">탈락 · 경기를 지켜보고 있어요.</div></footer></div></div>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/src/features/experience/stages.test.mjs:80:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: viewer sits at the bottom and later seats proceed clockwise
+ok 75 - viewer sits at the bottom and later seats proceed clockwise
+  ---
+  duration_ms: 1.9611
+  type: 'test'
+  ...
+# Subtest: public distance excludes eliminated players and applies directional modifiers
+ok 76 - public distance excludes eliminated players and applies directional modifiers
+  ---
+  duration_ms: 0.536
+  type: 'test'
+  ...
+# Subtest: renders HTML-like server guest names as text without readiness controls and with explicit room status
+ok 77 - renders HTML-like server guest names as text without readiness controls and with explicit room status
+  ---
+  duration_ms: 2038.2386
+  type: 'test'
+  ...
+# Subtest: renders disabled start and locked seat actions once the server room has started
+ok 78 - renders disabled start and locked seat actions once the server room has started
+  ---
+  duration_ms: 4.3657
+  type: 'test'
+  ...
+# Subtest: shows owner controls only to the owner and keeps full rooms closed to invites
+ok 79 - shows owner controls only to the owner and keeps full rooms closed to invites
+  ---
+  duration_ms: 11.8668
+  type: 'test'
+  ...
+# Subtest: shows explicit presence and never treats a missing status as connected
+ok 80 - shows explicit presence and never treats a missing status as connected
+  ---
+  duration_ms: 21.3926
+  type: 'test'
+  ...
+# Subtest: arrival is sufficient: legacy unready flags do not block the owner
+ok 81 - arrival is sufficient: legacy unready flags do not block the owner
+  ---
+  duration_ms: 5.2545
+  type: 'test'
+  ...
+# Subtest: leaves unoccupied room seats visible and blocks starting before four guests
+ok 82 - leaves unoccupied room seats visible and blocks starting before four guests
+  ---
+  duration_ms: 0.4983
+  type: 'test'
+  ...
+# Subtest: only the server-designated owner can start or remove another waiting guest
+ok 83 - only the server-designated owner can start or remove another waiting guest
+  ---
+  duration_ms: 0.3774
+  type: 'test'
+  ...
+# Subtest: a full seven-seat room has no invitation capacity for an eighth guest
+ok 84 - a full seven-seat room has no invitation capacity for an eighth guest
+  ---
+  duration_ms: 0.2055
+  type: 'test'
+  ...
+# Subtest: started rooms disable start, invitations and kick actions
+ok 85 - started rooms disable start, invitations and kick actions
+  ---
+  duration_ms: 0.6875
+  type: 'test'
+  ...
+# Subtest: builds only the shared room command envelopes with the current version
+ok 86 - builds only the shared room command envelopes with the current version
+  ---
+  duration_ms: 0.4199
+  type: 'test'
+  ...
+# Subtest: General Store selection shows public card names, suits, images and zoom while keeping exact commands
+ok 87 - General Store selection shows public card names, suits, images and zoom while keeping exact commands
+  ---
+  duration_ms: 2262.4367
+  type: 'test'
+  ...
+# Subtest: only the current responder's pending options are offered, with the server step
+ok 88 - only the current responder's pending options are offered, with the server step
+  ---
+  duration_ms: 3.7621
+  type: 'test'
+  ...
+# Subtest: a non-responder sees progress only and no response options or card IDs
+ok 89 - a non-responder sees progress only and no response options or card IDs
+  ---
+  duration_ms: 1.6132
+  type: 'test'
+  ...
+# Subtest: death rescue presents only saved Beer and elimination choices
+ok 90 - death rescue presents only saved Beer and elimination choices
+  ---
+  duration_ms: 78.7166
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+ok 91 - Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+  ---
+  duration_ms: 5.064
+  type: 'test'
+  ...
+# Subtest: creates a canonical RESPOND envelope from the exact saved option fields
+ok 92 - creates a canonical RESPOND envelope from the exact saved option fields
+  ---
+  duration_ms: 0.5592
+  type: 'test'
+  ...
+# Subtest: does not turn an ORDER_CARDS option template into a command without user-entered order
+ok 93 - does not turn an ORDER_CARDS option template into a command without user-entered order
+  ---
+  duration_ms: 0.5032
+  type: 'test'
+  ...
+# Subtest: validates discard order against the server candidate IDs and required count
+ok 94 - validates discard order against the server candidate IDs and required count
+  ---
+  duration_ms: 0.5183
+  type: 'test'
+  ...
+# Subtest: sync projection restores the same pending prompt and response choices
+ok 95 - sync projection restores the same pending prompt and response choices
+  ---
+  duration_ms: 3.498
+  type: 'test'
+  ...
+# Subtest: reports a response acknowledgement before waiting for the authoritative projection
+ok 96 - reports a response acknowledgement before waiting for the authoritative projection
+  ---
+  duration_ms: 0.7442
+  type: 'test'
+  ...
+# Subtest: a multi-target response sync opens only the next responder's new prompt
+ok 97 - a multi-target response sync opens only the next responder's new prompt
+  ---
+  duration_ms: 0.5359
+  type: 'test'
+  ...
+# Subtest: direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+ok 98 - direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+  ---
+  duration_ms: 4.878
+  type: 'test'
+  ...
+# Subtest: direct entry: parses the current invite URL and retains legacy internal token compatibility
+ok 99 - direct entry: parses the current invite URL and retains legacy internal token compatibility
+  ---
+  duration_ms: 3.0761
+  type: 'test'
+  ...
+# Subtest: direct entry: one request from the UI performs lookup then JOIN with authoritative version
+ok 100 - direct entry: one request from the UI performs lookup then JOIN with authoritative version
+  ---
+  duration_ms: 1.0774
+  type: 'test'
+  ...
+# Subtest: direct entry: same-link double submissions share one in-flight transaction
+ok 101 - direct entry: same-link double submissions share one in-flight transaction
+  ---
+  duration_ms: 1.5511
+  type: 'test'
+  ...
+# Subtest: direct entry: transport ambiguity retries the exact command without a new lookup or ID
+ok 102 - direct entry: transport ambiguity retries the exact command without a new lookup or ID
+  ---
+  duration_ms: 1.0765
+  type: 'test'
+  ...
+# Subtest: direct entry: a definitive stale version refreshes and obtains a new command ID
+ok 103 - direct entry: a definitive stale version refreshes and obtains a new command ID
+  ---
+  duration_ms: 0.5398
+  type: 'test'
+  ...
+# Subtest: direct entry: version races have a finite retry budget
+ok 104 - direct entry: version races have a finite retry budget
+  ---
+  duration_ms: 0.6562
+  type: 'test'
+  ...
+# Subtest: direct entry: full, closed and invalid invites report safe errors and stop
+ok 105 - direct entry: full, closed and invalid invites report safe errors and stop
+  ---
+  duration_ms: 1.1179
+  type: 'test'
+  ...
+# Subtest: direct entry: an existing authenticated seat can resume a waiting or started room
+ok 106 - direct entry: an existing authenticated seat can resume a waiting or started room
+  ---
+  duration_ms: 1.088
+  type: 'test'
+  ...
+# Subtest: direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+ok 107 - direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+  ---
+  duration_ms: 0.9039
+  type: 'test'
+  ...
+# Subtest: direct entry: UI has no preview confirmation or separate raw-code input
+ok 108 - direct entry: UI has no preview confirmation or separate raw-code input
+  ---
+  duration_ms: 44.3634
+  type: 'test'
+  ...
+# Subtest: normalizes a guest name and uses the 1–20 Unicode code point rule
+ok 109 - normalizes a guest name and uses the 1–20 Unicode code point rule
+  ---
+  duration_ms: 3.6149
+  type: 'test'
+  ...
+# Subtest: builds guest and room commands from public DTOs without a credential field
+ok 110 - builds guest and room commands from public DTOs without a credential field
+  ---
+  duration_ms: 6.6035
+  type: 'test'
+  ...
+# Subtest: previews before join and sends the exact preview version with JOIN
+ok 111 - previews before join and sends the exact preview version with JOIN
+  ---
+  duration_ms: 0.6198
+  type: 'test'
+  ...
+# Subtest: invalid code preview and JOIN errors share one safe message
+ok 112 - invalid code preview and JOIN errors share one safe message
+  ---
+  duration_ms: 3.6125
+  type: 'test'
+  ...
+# Subtest: invite links contain only the invite code and can be read without session data
+ok 113 - invite links contain only the invite code and can be read without session data
+  ---
+  duration_ms: 0.6495
+  type: 'test'
+  ...
+# Subtest: log time shows local clock and elapsed seconds, including invalid/future timestamps
+ok 114 - log time shows local clock and elapsed seconds, including invalid/future timestamps
+  ---
+  duration_ms: 2818.2444
+  type: 'test'
+  ...
+# Subtest: merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+ok 115 - merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+  ---
+  duration_ms: 3.1708
+  type: 'test'
+  ...
+# Subtest: keeps only the latest public event window when the feed grows
+ok 116 - keeps only the latest public event window when the feed grows
+  ---
+  duration_ms: 0.4967
+  type: 'test'
+  ...
+# Subtest: ignores stale sync versions and preserves the newer turn, status, and event feed
+ok 117 - ignores stale sync versions and preserves the newer turn, status, and event feed
+  ---
+  duration_ms: 0.9141
+  type: 'test'
+  ...
+# Subtest: builds current turn text from the projection and closes input for every non-playing status
+ok 118 - builds current turn text from the projection and closes input for every non-playing status
+  ---
+  duration_ms: 0.5688
+  type: 'test'
+  ...
+# Subtest: keeps public log closed by default and formats only allowlisted events without payloads
+ok 119 - keeps public log closed by default and formats only allowlisted events without payloads
+  ---
+  duration_ms: 25.9989
+  type: 'test'
+  ...
+# Subtest: completed status renders a read-only result state and no action control
+ok 120 - completed status renders a read-only result state and no action control
+  ---
+  duration_ms: 4.7885
+  type: 'test'
+  ...
+# Subtest: non-owner result view explains that the host returns everyone to the lobby
+ok 121 - non-owner result view explains that the host returns everyone to the lobby
+  ---
+  duration_ms: 2.0698
+  type: 'test'
+  ...
+# Subtest: result return action is visible only for the matching completed match in its in-game owner room
+ok 122 - result return action is visible only for the matching completed match in its in-game owner room
+  ---
+  duration_ms: 36.8223
+  type: 'test'
+  ...
+# Subtest: return action single-flight guard ignores a second click while busy and accepts a later retry
+ok 123 - return action single-flight guard ignores a second click while busy and accepts a later retry
+  ---
+  duration_ms: 20.0154
+  type: 'test'
+  ...
+# Subtest: rejected commands and thrown transport errors produce retryable Korean guidance
+ok 124 - rejected commands and thrown transport errors produce retryable Korean guidance
+  ---
+  duration_ms: 0.4331
+  type: 'test'
+  ...
+# Subtest: uses a newer confirmed room command response and syncs only for older acknowledgements
+ok 125 - uses a newer confirmed room command response and syncs only for older acknowledgements
+  ---
+  duration_ms: 1.2836
+  type: 'test'
+  ...
+# Subtest: does not infer an outcome before completion or expose winner IDs when a name is missing
+ok 126 - does not infer an outcome before completion or expose winner IDs when a name is missing
+  ---
+  duration_ms: 0.5875
+  type: 'test'
+  ...
+# Subtest: server status gate removes action controls after play has ended
+ok 127 - server status gate removes action controls after play has ended
+  ---
+  duration_ms: 4.8846
+  type: 'test'
+  ...
+# Subtest: same guest restoration preserves cached projections
+ok 128 - same guest restoration preserves cached projections
+  ---
+  duration_ms: 2.3101
+  type: 'test'
+  ...
+# Subtest: expired session clears private projections and ignores late guest responses
+ok 129 - expired session clears private projections and ignores late guest responses
+  ---
+  duration_ms: 1.4407
+  type: 'test'
+  ...
+# Subtest: changed guest identity cannot reuse previous viewer snapshots
+ok 130 - changed guest identity cannot reuse previous viewer snapshots
+  ---
+  duration_ms: 3.378
+  type: 'test'
+  ...
+# Subtest: outbox notifications trigger sync and duplicate or older hints do not update projections
+ok 131 - outbox notifications trigger sync and duplicate or older hints do not update projections
+  ---
+  duration_ms: 62.9016
+  type: 'test'
+  ...
+# Subtest: projection store rejects duplicate and out-of-order sync responses
+ok 132 - projection store rejects duplicate and out-of-order sync responses
+  ---
+  duration_ms: 0.74
+  type: 'test'
+  ...
+# Subtest: match projections retain only the newest 100 public events without moving the cursor backward
+ok 133 - match projections retain only the newest 100 public events without moving the cursor backward
+  ---
+  duration_ms: 0.7275
+  type: 'test'
+  ...
+# Subtest: ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+ok 134 - ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+  ---
+  duration_ms: 61.2186
+  type: 'test'
+  ...
+# Subtest: a versioned room command projection is applied and only a newly active match is fetched
+ok 135 - a versioned room command projection is applied and only a newly active match is fetched
+  ---
+  duration_ms: 14.6932
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and assigned-seat recovery calls share their HTTP reads
+ok 136 - parallel guest restore and assigned-seat recovery calls share their HTTP reads
+  ---
+  duration_ms: 41.9851
+  type: 'test'
+  ...
+# Subtest: a legacy room ACK during an older sync forces one fresh projection
+ok 137 - a legacy room ACK during an older sync forces one fresh projection
+  ---
+  duration_ms: 5.4006
+  type: 'test'
+  ...
+# Subtest: room-derived match watches release together and old resources are not synced after reconnect
+ok 138 - room-derived match watches release together and old resources are not synced after reconnect
+  ---
+  duration_ms: 4.9835
+  type: 'test'
+  ...
+# Subtest: cookie restore uses the T81 endpoints and schedules authoritative sync
+ok 139 - cookie restore uses the T81 endpoints and schedules authoritative sync
+  ---
+  duration_ms: 15.5286
+  type: 'test'
+  ...
+# Subtest: default fetch keeps the global receiver for all guest session HTTP operations
+ok 140 - default fetch keeps the global receiver for all guest session HTTP operations
+  ---
+  duration_ms: 2.1012
+  type: 'test'
+  ...
+# Subtest: 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+ok 141 - 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+  ---
+  duration_ms: 1.512
+  type: 'test'
+  ...
+# Subtest: reconnect performs a fresh match sync before retrying the same pending command
+ok 142 - reconnect performs a fresh match sync before retrying the same pending command
+  ---
+  duration_ms: 13.0989
+  type: 'test'
+  ...
+# Subtest: design: public portraits open character details and preserve role/hand privacy
+ok 143 - design: public portraits open character details and preserve role/hand privacy
+  ---
+  duration_ms: 2072.3661
+  type: 'test'
+  ...
+# Subtest: design: decorative portrait retains fallback and lazy image loading
+ok 144 - design: decorative portrait retains fallback and lazy image loading
+  ---
+  duration_ms: 5.5263
+  type: 'test'
+  ...
+# Subtest: design: hand count and visible card status complement the detailed accessible names
+ok 145 - design: hand count and visible card status complement the detailed accessible names
+  ---
+  duration_ms: 6.3254
+  type: 'test'
+  ...
+# Subtest: design: a single main landmark is reachable by skip link
+ok 146 - design: a single main landmark is reachable by skip link
+  ---
+  duration_ms: 3.0094
+  type: 'test'
+  ...
+# Subtest: design: circular seating keeps narrow-screen panning inside the table
+ok 147 - design: circular seating keeps narrow-screen panning inside the table
+  ---
+  duration_ms: 1.4323
+  type: 'test'
+  ...
+# Subtest: design: principal text combinations meet WCAG AA 4.5:1
+ok 148 - design: principal text combinations meet WCAG AA 4.5:1
+  ---
+  duration_ms: 6.3178
+  type: 'test'
+  ...
+# Subtest: design: shared tokens require no external fonts or animation dependencies
+ok 149 - design: shared tokens require no external fonts or animation dependencies
+  ---
+  duration_ms: 3.2709
+  type: 'test'
+  ...
+# Subtest: Sites development and production explicitly use the Worker HTTP adapter
+ok 150 - Sites development and production explicitly use the Worker HTTP adapter
+  ---
+  duration_ms: 325.6639
+  type: 'test'
+  ...
+# Subtest: Sites imports the same app stylesheet as the local browser entry
+ok 151 - Sites imports the same app stylesheet as the local browser entry
+  ---
+  duration_ms: 4.2179
+  type: 'test'
+  ...
+# Subtest: P01 a committed ACK projection updates the store and UI without a second match read
+ok 152 - P01 a committed ACK projection updates the store and UI without a second match read
+  ---
+  duration_ms: 97.4825
+  type: 'test'
+  ...
+# Subtest: R06 a stalled session body has a deadline and recovery can be retried
+ok 153 - R06 a stalled session body has a deadline and recovery can be retried
+  ---
+  duration_ms: 33.5678
+  type: 'test'
+  ...
+# Subtest: R06 an accepted command survives stalled sync without remaining busy or resending
+ok 154 - R06 an accepted command survives stalled sync without remaining busy or resending
+  ---
+  duration_ms: 43.3393
+  type: 'test'
+  ...
+# Subtest: R09 EventSource construction errors fall back to HTTP polling and stop on disconnect
+ok 155 - R09 EventSource construction errors fall back to HTTP polling and stop on disconnect
+  ---
+  duration_ms: 104.5993
+  type: 'test'
+  ...
+# Subtest: R07 incremental sync keeps earlier public events through projection consumers
+ok 156 - R07 incremental sync keeps earlier public events through projection consumers
+  ---
+  duration_ms: 1.1015
+  type: 'test'
+  ...
+# Subtest: a late match sync from a previous guest is rejected after identity changes
+ok 157 - a late match sync from a previous guest is rejected after identity changes
+  ---
+  duration_ms: 4.1466
+  type: 'test'
+  ...
+# Subtest: accepted ACK and concurrent passive sync callers share one match request
+ok 158 - accepted ACK and concurrent passive sync callers share one match request
+  ---
+  duration_ms: 24.538
+  type: 'test'
+  ...
+# Subtest: a newer SSE match hint during sync triggers exactly one fresh follow-up
+ok 159 - a newer SSE match hint during sync triggers exactly one fresh follow-up
+  ---
+  duration_ms: 6.7622
+  type: 'test'
+  ...
+# Subtest: mismatched unchanged replies fall back to a strict full sync without opt-in
+ok 160 - mismatched unchanged replies fall back to a strict full sync without opt-in
+  ---
+  duration_ms: 2.1139
+  type: 'test'
+  ...
+# Subtest: a second unchanged response cannot recurse, and successful syncs clear stale errors
+ok 161 - a second unchanged response cannot recurse, and successful syncs clear stale errors
+  ---
+  duration_ms: 7.7689
+  type: 'test'
+  ...
+# Subtest: presence is timestamped separately, filters foreign members, and survives room sync
+ok 162 - presence is timestamped separately, filters foreign members, and survives room sync
+  ---
+  duration_ms: 7.4612
+  type: 'test'
+  ...
+# Subtest: new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+ok 163 - new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+  ---
+  duration_ms: 11.2141
+  type: 'test'
+  ...
+# Subtest: a versioned room ACK fetches a newly active match without repeating the room sync
+ok 164 - a versioned room ACK fetches a newly active match without repeating the room sync
+  ---
+  duration_ms: 1.9625
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+ok 165 - parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+  ---
+  duration_ms: 1.8924
+  type: 'test'
+  ...
+# Subtest: closing the last transient room watch releases its SSE reconnect resource
+ok 166 - closing the last transient room watch releases its SSE reconnect resource
+  ---
+  duration_ms: 14.3755
+  type: 'test'
+  ...
+# Subtest: HTTP room commands remain writable while the membership SSE channel is closed
+ok 167 - HTTP room commands remain writable while the membership SSE channel is closed
+  ---
+  duration_ms: 3.6379
+  type: 'test'
+  ...
+# Subtest: legacy unversioned room ACK forces one follow-up after an older sync already in flight
+ok 168 - legacy unversioned room ACK forces one follow-up after an older sync already in flight
+  ---
+  duration_ms: 13.5974
+  type: 'test'
+  ...
+# Subtest: production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+ok 169 - production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+  ---
+  duration_ms: 1.2468
+  type: 'test'
+  ...
+# Subtest: Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+ok 170 - Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+  ---
+  duration_ms: 80.3999
+  type: 'test'
+  ...
+# Subtest: room preview, create and join use the existing HTTP DTO mapping
+ok 171 - room preview, create and join use the existing HTTP DTO mapping
+  ---
+  duration_ms: 26.6703
+  type: 'test'
+  ...
+# Subtest: SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+ok 172 - SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+  ---
+  duration_ms: 45.6214
+  type: 'test'
+  ...
+# Subtest: malformed API responses do not become transport state
+ok 173 - malformed API responses do not become transport state
+  ---
+  duration_ms: 1.1385
+  type: 'test'
+  ...
+# Subtest: WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+ok 174 - WebMCP registers the primary guest, room, current state and match action tools with lifecycle signal
+  ---
+  duration_ms: 13.7477
+  type: 'test'
+  ...
+# Subtest: unsupported and failing ModelContext registrations leave the game UI usable
+ok 175 - unsupported and failing ModelContext registrations leave the game UI usable
+  ---
+  duration_ms: 1.0851
+  type: 'test'
+  ...
+# Subtest: tool input validation rejects unknown keys and only sends server-projected legal actions
+ok 176 - tool input validation rejects unknown keys and only sends server-projected legal actions
+  ---
+  duration_ms: 3.006
+  type: 'test'
+  ...
+# Subtest: guest and room entry tools reuse the existing normalized transport flow
+ok 177 - guest and room entry tools reuse the existing normalized transport flow
+  ---
+  duration_ms: 5.2496
+  type: 'test'
+  ...
+# Subtest: current state is viewer-scoped and room lobby tools use current versioned commands
+ok 178 - current state is viewer-scoped and room lobby tools use current versioned commands
+  ---
+  duration_ms: 1.3926
+  type: 'test'
+  ...
+# Subtest: tool discards follow the responder's exact private candidate set and count
+ok 179 - tool discards follow the responder's exact private candidate set and count
+  ---
+  duration_ms: 1.1899
+  type: 'test'
+  ...
+1..179
+# tests 179
+# suites 0
+# pass 177
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 24274.3403

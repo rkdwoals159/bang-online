@@ -1,0 +1,119 @@
+TAP version 13
+# Subtest: direct room, role, game, result and invite URLs resolve to the expected path state
+ok 1 - direct room, role, game, result and invite URLs resolve to the expected path state
+  ---
+  duration_ms: 22683.2268
+  type: 'test'
+  ...
+# Subtest: popstate refreshes the route key for back/forward and invite query changes
+ok 2 - popstate refreshes the route key for back/forward and invite query changes
+  ---
+  duration_ms: 0.6179
+  type: 'test'
+  ...
+# Subtest: RoomView activeMatchId drives lobby, sync, game and result projections
+ok 3 - RoomView activeMatchId drives lobby, sync, game and result projections
+  ---
+  duration_ms: 0.6254
+  type: 'test'
+  ...
+# Subtest: room connection notice is accessible and stays until authoritative route sync succeeds
+ok 4 - room connection notice is accessible and stays until authoritative route sync succeeds
+  ---
+  duration_ms: 23.3856
+  type: 'test'
+  ...
+# Subtest: connected CONNECTION errors trigger one route resync attempt without an effect loop
+ok 5 - connected CONNECTION errors trigger one route resync attempt without an effect loop
+  ---
+  duration_ms: 0.4403
+  type: 'test'
+  ...
+# Subtest: reconnect sync waits for the current RoomView and then its active match projection
+ok 6 - reconnect sync waits for the current RoomView and then its active match projection
+  ---
+  duration_ms: 26.8514
+  type: 'test'
+  ...
+# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+ok 7 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+  ---
+  duration_ms: 7.7853
+  type: 'test'
+  ...
+# Subtest: post-start role reveal redirects to the registered canonical role route
+ok 8 - post-start role reveal redirects to the registered canonical role route
+  ---
+  duration_ms: 4.6975
+  type: 'test'
+  ...
+# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately
+ok 9 - role confirmation stays in one tab session and a fresh tab must confirm separately
+  ---
+  duration_ms: 3.9297
+  type: 'test'
+  ...
+# Subtest: role and character face copy is supplied for every canonical base-game entry
+ok 10 - role and character face copy is supplied for every canonical base-game entry
+  ---
+  duration_ms: 166.8692
+  type: 'test'
+  ...
+# Subtest: role reveal renders only the viewer's role and character with canonical rule copy
+ok 11 - role reveal renders only the viewer's role and character with canonical rule copy
+  ---
+  duration_ms: 112.7933
+  type: 'test'
+  ...
+# Subtest: match route composition passes private hand, legalActions, pending and result projection to features
+not ok 12 - match route composition passes private hand, legalActions, pending and result projection to features
+  ---
+  duration_ms: 369.5806
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\src\\app\\routes.test.mjs:312:1'
+  failureType: 'testCodeFailure'
+  error: 'false == true'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/src/app/routes.test.mjs:435:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection
+ok 13 - result return uses one exact empty command then waits for a newer lobby sync projection
+  ---
+  duration_ms: 1.0813
+  type: 'test'
+  ...
+# Subtest: rejected or thrown return transport keeps the result operation retryable
+ok 14 - rejected or thrown return transport keeps the result operation retryable
+  ---
+  duration_ms: 0.5868
+  type: 'test'
+  ...
+# Subtest: room operations can wait for the new cookie-authenticated socket connection
+ok 15 - room operations can wait for the new cookie-authenticated socket connection
+  ---
+  duration_ms: 1.2701
+  type: 'test'
+  ...
+# Subtest: role introduction assigns the interactive portrait and text to explicit grid columns
+ok 16 - role introduction assigns the interactive portrait and text to explicit grid columns
+  ---
+  duration_ms: 1.8466
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 31390.5168

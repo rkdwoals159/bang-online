@@ -347,12 +347,12 @@ test("match route composition passes private hand, legalActions, pending and res
 
   assert.match(playingMarkup, /현재 차례/);
   assert.match(playingMarkup, /초원 별 님이 선택해 주세요/);
-  assert.match(playingMarkup, /빗나감! 8 하트/);
+  assert.match(playingMarkup, /빗나감!, 8 하트/);
   assert.match(playingMarkup, /뱅! 응답/);
-  assert.match(playingMarkup, /행동 입력/);
+  assert.match(playingMarkup, /scene-hand-dock/);
   assert.equal((playingMarkup.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
-  assert.ok(playingMarkup.indexOf("match-request") < playingMarkup.indexOf("game-actions"));
-  assert.ok(playingMarkup.indexOf("game-actions") < playingMarkup.indexOf("game-table"));
+  assert.ok(playingMarkup.indexOf("scene-hud") < playingMarkup.indexOf("scene-board"));
+  assert.ok(playingMarkup.indexOf("scene-board") < playingMarkup.indexOf("game-actions"));
   assert.doesNotMatch(playingMarkup, /private-card-id|private-interaction-id/);
 
   const reconnectMarkup = renderToStaticMarkup(createElement(RoomProjectionFrame, {
@@ -414,8 +414,9 @@ test("match route composition passes private hand, legalActions, pending and res
   }));
 
   assert.match(resultMarkup, /게임 결과/);
-  assert.ok(resultMarkup.indexOf("게임 결과") < resultMarkup.indexOf("match-page__history"));
-  assert.match(resultMarkup, /게임판과 진행 기록 보기/);
+  assert.match(resultMarkup, /scene-result/);
+  assert.match(resultMarkup, /시계 방향 게임 테이블/);
+  assert.match(resultMarkup, /결과 보기/);
   assert.match(resultMarkup, /승리 플레이어/);
   assert.match(resultMarkup, /무법자/);
   assert.match(resultMarkup, /대기실로 돌아가기/);
@@ -431,7 +432,7 @@ test("match route composition passes private hand, legalActions, pending and res
     room: roomView({ status: "in_game" }), roomVersion: 15, transport, showActions: true,
   }));
   assert.equal((ownTurnMarkup.match(/내 손패에서 카드 선택/g) ?? []).length, 1);
-  assert.ok(ownTurnMarkup.indexOf("game-actions") < ownTurnMarkup.indexOf("game-table"));
+  assert.ok(ownTurnMarkup.indexOf("scene-board") < ownTurnMarkup.indexOf("game-actions"));
 });
 
 test("result return uses one exact empty command then waits for a newer lobby sync projection", async () => {

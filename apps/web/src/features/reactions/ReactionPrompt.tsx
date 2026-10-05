@@ -10,6 +10,7 @@ import type {
 } from "../../../../../packages/contracts/src/protocol.js";
 import { getPlayingCardPresentation } from "../cards/assets.js";
 import { PlayingCardZoomButton } from "../cards/CardFaces.js";
+import { cardName } from "../actions/model.js";
 import {
   cardFaceLabel,
   createRespondCommand,
@@ -31,6 +32,7 @@ export interface ReactionTransport {
 }
 
 export interface ReactionPromptProps {
+  readonly variant?: "panel" | "scene";
   readonly matchId: string;
   /** Version accompanying the supplied server projection. */
   readonly version: number;
@@ -49,6 +51,7 @@ export function ReactionPrompt({
   snapshot,
   transport,
   createCommandId = createDefaultCommandId,
+  variant = "panel",
 }: ReactionPromptProps) {
   const [syncedProjection, setSyncedProjection] = useState<(ReactionProjection & { readonly matchId: string }) | null>(null);
   const [pendingCommand, setPendingCommand] = useState<MatchCommand | null>(null);
@@ -204,7 +207,7 @@ export function ReactionPrompt({
     ? responderName(currentSnapshot, responderPlayerId)
     : null;
 
-  if (pending.kind === "GENERAL_STORE_PICK") return <GeneralStoreStage snapshot={currentSnapshot} canRespond={canRespond} isResponder={isResponder} busy={busy} notice={notice} onChoose={submitOption} retry={activePendingCommand && !busy ? retryPending : undefined} />;
+  if (pending.kind === "GENERAL_STORE_PICK") return <GeneralStoreStage imagePick={variant === "scene"} snapshot={currentSnapshot} canRespond={canRespond} isResponder={isResponder} busy={busy} notice={notice} onChoose={submitOption} retry={activePendingCommand && !busy ? retryPending : undefined} />;
 
   const content = (
     <section className={`reaction-prompt reaction-prompt--${pending.kind.toLowerCase()}`} aria-labelledby="reaction-prompt-title" aria-busy={busy}>
@@ -249,7 +252,7 @@ export function ReactionPrompt({
                     return (
                       <li key={card.cardInstanceId}>
                         <div className="reaction-prompt__discard-candidate">
-                          <PlayingCardZoomButton card={card} triggerClassName="reaction-prompt__discard-zoom-trigger" />
+                          <PlayingCardZoomButton card={card} triggerClassName="reaction-prompt__discard-zoom-trigger" triggerLabel={variant === "scene" ? `${cardName(card.typeId)}${selected ? ` · 선택 ${orderIndex+1} 제외` : " · 버리기 선택"}` : undefined} onInspect={variant === "scene" ? () => { if (canRespond && (selected || visibleOrder.length < discardOrder.requiredCount)) { toggleOrderCard(card.cardInstanceId); return false; } return true; } : undefined} />
                           <button
                             className="reaction-prompt__discard-card-choice"
                             type="button"
@@ -259,7 +262,7 @@ export function ReactionPrompt({
                             onClick={() => toggleOrderCard(card.cardInstanceId)}
                           >
                             {selected ? <span className="reaction-prompt__discard-position">{orderIndex + 1}</span> : null}
-                            <span>{cardFaceLabel(card)}</span>
+                            <span>{variant === "scene" ? cardName(card.typeId) : cardFaceLabel(card)}</span>
                             <span>{selected ? "선택됨" : "버리기"}</span>
                           </button>
                         </div>
@@ -365,7 +368,7 @@ export function ReactionPrompt({
       )}
     </section>
   );
-  const usesStage = pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
+  const usesStage = variant === "scene" || pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
   const attack = currentSnapshot.publicTable.tablewideAttack;
   if (attack) return <ChoiceStage interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
     <p className="tablewide-stage__hint">각자 대응을 선택하세요. 모든 플레이어의 진행 상황이 함께 표시돼요.</p>

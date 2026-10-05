@@ -33,9 +33,10 @@ export function ChoiceStage({ interactionId, title, attentionKey, children, dock
   </section>;
 }
 
-export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, notice, onChoose, retry }: {
+export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, notice, onChoose, retry, imagePick = false }: {
   snapshot: MatchSnapshotView; canRespond: boolean; isResponder: boolean; busy: boolean; notice: string;
   onChoose: (option: PendingRespondOption) => void; retry?: () => void;
+  imagePick?: boolean;
 }) {
   const game = useGameExperience();
   const pending = snapshot.pendingInteraction;
@@ -58,9 +59,9 @@ export function GeneralStoreStage({ snapshot, canRespond, isResponder, busy, not
         const option = options.find(o => (o.choice === "CHOOSE_CARD" || o.choice === "TAKE_CARD") && "selectedCardInstanceId" in o && o.selectedCardInstanceId === card.cardInstanceId);
         const presentation = getPlayingCardPresentation(card);
         return <li key={card.cardInstanceId} style={{ "--deal-index": index } as CSSProperties}>
-          <PlayingCardZoomButton card={card} />
-          <strong>{presentation.cardName}</strong>
-          {isResponder ? <button type="button" aria-label={`${presentation.accessibleLabel} 가져오기`} disabled={!canRespond || !option} onClick={() => { if (option) onChoose(option); }}>가져오기</button> : null}
+          <PlayingCardZoomButton card={card} triggerLabel={imagePick && isResponder && option ? `${presentation.accessibleLabel} 가져오기` : undefined} onInspect={imagePick && isResponder && option ? () => { if (canRespond) onChoose(option); return false; } : undefined} />
+          {imagePick && isResponder ? <PlayingCardZoomButton card={card} triggerText={presentation.cardName} triggerLabel={`${presentation.cardName} 설명 보기`} /> : <strong>{presentation.cardName}</strong>}
+          {isResponder && !imagePick ? <button type="button" aria-label={`${presentation.accessibleLabel} 가져오기`} disabled={!canRespond || !option} onClick={() => { if (option) onChoose(option); }}>가져오기</button> : null}
         </li>;
       })}
     </ul>

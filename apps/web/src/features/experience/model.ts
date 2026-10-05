@@ -1,6 +1,6 @@
 import type { CardFaceView, MatchSnapshotView, PublicMatchEvent } from "../../../../../packages/contracts/src/protocol.js";
 
-export type CueKind = "shot" | "burst" | "block" | "hit" | "heal" | "judgment" | "explosion" | "duel" | "threat" | "draw" | "discard" | "equip" | "turn" | "eliminated" | "victory" | "store" | "pick" | "ability" | "pass";
+export type CueKind = "shot" | "burst" | "block" | "hit" | "heal" | "judgment" | "explosion" | "duel" | "threat" | "draw" | "discard" | "equip" | "turn" | "eliminated" | "victory" | "store" | "pick" | "ability" | "pass" | "play";
 export interface GameCue {
   id: string;
   kind: CueKind;
@@ -60,7 +60,7 @@ export function advancePresentation(previous: PresentationCursor | null, version
       }
       case "DUEL_YIELDED": { const id = knownId(p.playerId); if (id) cue("hit", `${name(id)} · 결투 피해`, [id]); break; }
       case "DYNAMITE_EXPLODED": if (targetId) cue("explosion", `${name(targetId)} · 다이너마이트 폭발!`); break;
-      case "DYNAMITE_PASSED": { const id = knownId(p.toPlayerId); if (id) cue("pass", `${name(id)}에게 다이너마이트 전달`, [id]); break; }
+      case "DYNAMITE_PASSED": { const id = knownId(p.toPlayerId); if (id) { cue("pass", `${name(id)}에게 다이너마이트 전달`, [id]); cues[cues.length-1].actorId = knownId(p.fromPlayerId); } break; }
       case "BARREL_JUDGMENT_REVEALED": case "DYNAMITE_JUDGMENT_REVEALED": case "JAIL_JUDGMENT_REVEALED": {
         const card = publicCard(p.card);
         if (card) cue("judgment", e.type.startsWith("JAIL") ? "감옥 판정" : e.type.startsWith("DYNAMITE") ? "다이너마이트 판정" : "술통 판정", actorId ? [actorId] : [], card); break;
@@ -78,10 +78,15 @@ export function advancePresentation(previous: PresentationCursor | null, version
       if (!before) continue;
       if (p.eliminated && !before.eliminated) { add("eliminated", `${p.displayName} · 탈락`, [p.playerId]); continue; }
       if (p.hp !== before.hp && !cues.some(c => c.targetIds.includes(p.playerId) && ["hit", "heal", "explosion"].includes(c.kind))) add(p.hp > before.hp ? "heal" : "hit", `${p.displayName} · 체력 ${p.hp > before.hp ? "+" : ""}${p.hp - before.hp}`, [p.playerId]);
-      for (const card of p.inPlay) if (!before.inPlay.some(c => c.cardInstanceId === card.cardInstanceId)) { add("equip", `${p.displayName} · 카드 장착`, [p.playerId], card); cues[cues.length - 1].id += `:${card.cardInstanceId}`; }
+      for (const card of p.inPlay) if (!before.inPlay.some(c => c.cardInstanceId === card.cardInstanceId) && !cues.some(c => c.kind === "pass" && c.targetIds.includes(p.playerId))) { add("equip", `${p.displayName} · 카드 장착`, [p.playerId], card); cues[cues.length - 1].id += `:${card.cardInstanceId}`; cues[cues.length-1].actorId = old.publicTable.turn.currentPlayerId; }
       if (p.handCount > before.handCount && old.pendingInteraction?.kind !== "GENERAL_STORE_PICK") add("draw", `${p.displayName} · 카드 +${p.handCount - before.handCount}`, [p.playerId]);
     }
     const oldPending = old.pendingInteraction;
+    const played = snapshot.publicTable.publicDiscard.topCard;
+    if (version === previous.version+1 && !oldPending && played && old.publicTable.turn.currentPlayerId === snapshot.publicTable.turn.currentPlayerId && played.cardInstanceId !== old.publicTable.publicDiscard.topCard?.cardInstanceId && !cues.some(c => ["shot","burst","threat","duel","pick","discard"].includes(c.kind))) {
+      add("play", "카드 사용", [old.publicTable.turn.currentPlayerId], played);
+      cues[cues.length-1].actorId = old.publicTable.turn.currentPlayerId;
+    }
     if (oldPending?.kind === "GENERAL_STORE_PICK" && "currentResponderPlayerId" in oldPending) {
       const remaining = new Set(snapshot.publicTable.generalStoreCards?.map(c => c.cardInstanceId));
       const removed = old.publicTable.generalStoreCards?.filter(c => !remaining.has(c.cardInstanceId)) ?? [];

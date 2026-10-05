@@ -18,6 +18,7 @@ import {
 import "./status.css";
 
 export interface StatusPanelProps {
+  initialLogOpen?: boolean;
   /** A server-authenticated match sync projection. */
   sync: MatchStatusSync;
   /** The latest server RoomSyncResponse projection for the current route. */
@@ -177,10 +178,11 @@ export function StatusPanel({
   matchId,
   transport,
   createCommandId = defaultCommandId,
+  initialLogOpen = false,
 }: StatusPanelProps) {
   const [returnBusy, setReturnBusy] = useState(false);
   const [returnFeedback, setReturnFeedback] = useState("");
-  const [logOpen, setLogOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(initialLogOpen);
   const [logNow, setLogNow] = useState(() => Date.now());
   useEffect(() => {
     if (!logOpen) return;
@@ -329,7 +331,7 @@ export function StatusPanel({
         </section>
       ) : null}
 
-      <details className="match-status__log" onToggle={(event) => setLogOpen(event.currentTarget.open)}>
+      <details className="match-status__log" open={logOpen} onToggle={(event) => setLogOpen(event.currentTarget.open)}>
         <summary className="match-status__log-summary" id="match-public-log-title">
           게임 기록
         </summary>

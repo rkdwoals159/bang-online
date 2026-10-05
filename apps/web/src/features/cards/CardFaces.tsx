@@ -81,15 +81,19 @@ export function PlayingCardZoomButton({
   detailHeading = "현재 허용된 선택",
   triggerClassName = "",
   triggerText,
+  onInspect,
+  triggerLabel,
 }: {
   card: CardFaceView;
   details?: readonly string[];
   detailHeading?: string;
   triggerClassName?: string;
   triggerText?: string;
+  onInspect?: () => boolean | void;
+  triggerLabel?: string;
 }) {
   const presentation = getPlayingCardPresentation(card);
-  return <CardDetailButton title={`${presentation.cardName} 카드 상세`} label={`카드 상세 보기: ${presentation.accessibleLabel}`} className={triggerClassName} trigger={triggerText ?? <PlayingCardFace card={card} />}>
+  return <CardDetailButton onInspect={onInspect} title={`${presentation.cardName} 카드 상세`} label={triggerLabel ?? `카드 상세 보기: ${presentation.accessibleLabel}`} className={triggerClassName} trigger={triggerText ?? <PlayingCardFace card={card} />}>
     <div className="card-zoom__content">
       <div className="card-zoom__visual"><PlayingCardFace card={card} /></div>
       <div className="card-zoom__text">
@@ -102,8 +106,9 @@ export function PlayingCardZoomButton({
   </CardDetailButton>;
 }
 
-function CardDetailButton({ title, label, trigger, children, className = "" }: {
+function CardDetailButton({ title, label, trigger, children, className = "", onInspect }: {
   title: string; label: string; trigger: ReactNode; children: ReactNode; className?: string;
+  onInspect?: () => boolean | void;
 }) {
   const titleId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -144,7 +149,7 @@ function CardDetailButton({ title, label, trigger, children, className = "" }: {
         type="button"
         aria-label={label}
         aria-haspopup="dialog"
-        onClick={() => setIsOpen(true)}
+        onClick={() => { if (onInspect?.() !== false) setIsOpen(true); }}
       >
         {trigger}
       </button>

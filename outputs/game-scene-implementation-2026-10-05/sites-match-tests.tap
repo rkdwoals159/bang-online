@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: tablewide responses from one version all commit concurrently with private options
+ok 1 - tablewide responses from one version all commit concurrently with private options
+  ---
+  duration_ms: 7496.8787
+  type: 'test'
+  ...
+# Subtest: P02 scoped SSE checks membership and renews only the viewed room's lease
+ok 2 - P02 scoped SSE checks membership and renews only the viewed room's lease
+  ---
+  duration_ms: 6508.1323
+  type: 'test'
+  ...
+# Subtest: R07 and P01 successive command ACKs include private projections and delta sync preserves history
+ok 3 - R07 and P01 successive command ACKs include private projections and delta sync preserves history
+  ---
+  duration_ms: 6791.5979
+  type: 'test'
+  ...
+# Subtest: General Store HTTP sync includes public remaining faces and removes each selected card
+ok 4 - General Store HTTP sync includes public remaining faces and removes each selected card
+  ---
+  duration_ms: 10338.3144
+  type: 'test'
+  ...
+# Subtest: Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+ok 5 - Worker match commands resolve effects and turn continuations with atomic receipts and stale no-write behavior
+  ---
+  duration_ms: 8714.1964
+  type: 'test'
+  ...
+# Subtest: accepted match commands use one authorization context batch and one atomic commit batch
+ok 6 - accepted match commands use one authorization context batch and one atomic commit batch
+  ---
+  duration_ms: 6339.809
+  type: 'test'
+  ...
+# Subtest: match membership revoked after command load prevents the atomic commit
+ok 7 - match membership revoked after command load prevents the atomic commit
+  ---
+  duration_ms: 11240.1106
+  type: 'test'
+  ...
+# Subtest: a command receipt cannot be reused across two authorized matches
+ok 8 - a command receipt cannot be reused across two authorized matches
+  ---
+  duration_ms: 9743.26
+  type: 'test'
+  ...
+# Subtest: D1 expected-version CAS allows one writer for concurrent match commands
+ok 9 - D1 expected-version CAS allows one writer for concurrent match commands
+  ---
+  duration_ms: 10492.4541
+  type: 'test'
+  ...
+# Subtest: stale match cursors receive the recent event tail and an explicit full snapshot
+ok 10 - stale match cursors receive the recent event tail and an explicit full snapshot
+  ---
+  duration_ms: 11099.9734
+  type: 'test'
+  ...
+# Subtest: room and match sync use strict canonical parsers and viewer-scoped private projections
+ok 11 - room and match sync use strict canonical parsers and viewer-scoped private projections
+  ---
+  duration_ms: 6874.8551
+  type: 'test'
+  ...
+# Subtest: unsupported match schema and ruleset disclose recovery only to members and never mutate state
+ok 12 - unsupported match schema and ruleset disclose recovery only to members and never mutate state
+  ---
+  duration_ms: 14188.2423
+  type: 'test'
+  ...
+# Subtest: existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+ok 13 - existing successful receipts replay before unsupported snapshot decoding without exposing recovery to outsiders
+  ---
+  duration_ms: 7039.8982
+  type: 'test'
+  ...
+# Subtest: receipt replay survives malformed match snapshots, while fresh commands fail without writes
+ok 14 - receipt replay survives malformed match snapshots, while fresh commands fail without writes
+  ---
+  duration_ms: 6158.0323
+  type: 'test'
+  ...
+# Subtest: SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+ok 15 - SSE refreshes membership before cursor reads, emits only allowlisted data, and resumes after cancellation
+  ---
+  duration_ms: 6597.4053
+  type: 'test'
+  ...
+# Subtest: SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+ok 16 - SSE renews only the viewer lease and reports presence lease expiry without disconnect writes
+  ---
+  duration_ms: 7375.3995
+  type: 'test'
+  ...
+# Subtest: SSE keeps active matches on the fast poll after the activity warm window expires
+ok 17 - SSE keeps active matches on the fast poll after the activity warm window expires
+  ---
+  duration_ms: 8741.395
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 150904.9801

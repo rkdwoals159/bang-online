@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: unchanged responses are exact, versioned, and contain no private projection
+ok 1 - unchanged responses are exact, versioned, and contain no private projection
+  ---
+  duration_ms: 3.2637
+  type: 'test'
+  ...
+# Subtest: unchanged response opt-in is explicitly true and remains backward compatible
+ok 2 - unchanged response opt-in is explicitly true and remains backward compatible
+  ---
+  duration_ms: 0.537
+  type: 'test'
+  ...
+# Subtest: presence allows only public membership observations
+ok 3 - presence allows only public membership observations
+  ---
+  duration_ms: 0.4566
+  type: 'test'
+  ...
+# Subtest: public General Store faces are validated only in the matching interaction
+ok 4 - public General Store faces are validated only in the matching interaction
+  ---
+  duration_ms: 47.1803
+  type: 'test'
+  ...
+# Subtest: parses the documented match command and rejects a missing protocol version
+ok 5 - parses the documented match command and rejects a missing protocol version
+  ---
+  duration_ms: 2.1193
+  type: 'test'
+  ...
+# Subtest: rejects client supplied identity, unknown fields and malformed response card selection
+ok 6 - rejects client supplied identity, unknown fields and malformed response card selection
+  ---
+  duration_ms: 0.3469
+  type: 'test'
+  ...
+# Subtest: parses the runtime-backed Jesse, Pedro and Lucky responses with strict payloads
+ok 7 - parses the runtime-backed Jesse, Pedro and Lucky responses with strict payloads
+  ---
+  duration_ms: 0.7418
+  type: 'test'
+  ...
+# Subtest: pending views accept current runtime options and ORDER_CARDS template separately from command payload
+ok 8 - pending views accept current runtime options and ORDER_CARDS template separately from command payload
+  ---
+  duration_ms: 10.5168
+  type: 'test'
+  ...
+# Subtest: validates room creation and readiness
+ok 9 - validates room creation and readiness
+  ---
+  duration_ms: 2.8755
+  type: 'test'
+  ...
+# Subtest: strictly parses room:preview requests and keeps preview replies free of invite/session secrets
+ok 10 - strictly parses room:preview requests and keeps preview replies free of invite/session secrets
+  ---
+  duration_ms: 16.4102
+  type: 'test'
+  ...
+# Subtest: strictly parses room:sync requests with exact keys and non-negative versions
+ok 11 - strictly parses room:sync requests with exact keys and non-negative versions
+  ---
+  duration_ms: 2.7723
+  type: 'test'
+  ...
+# Subtest: strictly parses RoomView and room:sync responses with active-match routing and consistent viewer
+ok 12 - strictly parses RoomView and room:sync responses with active-match routing and consistent viewer
+  ---
+  duration_ms: 10.6698
+  type: 'test'
+  ...
+# Subtest: strictly parses match:sync requests and shares non-disclosing sync rejection DTOs
+ok 13 - strictly parses match:sync requests and shares non-disclosing sync rejection DTOs
+  ---
+  duration_ms: 35.4052
+  type: 'test'
+  ...
+# Subtest: strictly parses accepted/rejected command acknowledgements and excludes extra fields
+ok 14 - strictly parses accepted/rejected command acknowledgements and excludes extra fields
+  ---
+  duration_ms: 6.5628
+  type: 'test'
+  ...
+# Subtest: strictly parses viewer-scoped match:sync responses and ordered visible event cursors
+ok 15 - strictly parses viewer-scoped match:sync responses and ordered visible event cursors
+  ---
+  duration_ms: 9.7475
+  type: 'test'
+  ...
+# Subtest: legal action proposals contain only canonical command types and payloads
+ok 16 - legal action proposals contain only canonical command types and payloads
+  ---
+  duration_ms: 2.7931
+  type: 'test'
+  ...
+# Subtest: pending response options are exclusive to the current responder and progress contains no choices
+ok 17 - pending response options are exclusive to the current responder and progress contains no choices
+  ---
+  duration_ms: 12.5958
+  type: 'test'
+  ...
+# Subtest: winner summary is public only for completed snapshots and rejects unrelated state
+ok 18 - winner summary is public only for completed snapshots and rejects unrelated state
+  ---
+  duration_ms: 2.5729
+  type: 'test'
+  ...
+# Subtest: room commands can carry a canonical version and allowlisted member presence
+ok 19 - room commands can carry a canonical version and allowlisted member presence
+  ---
+  duration_ms: 2.0834
+  type: 'test'
+  ...
+# Subtest: room envelope and nested canonical version cannot disagree
+ok 20 - room envelope and nested canonical version cannot disagree
+  ---
+  duration_ms: 0.4401
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4533.3739

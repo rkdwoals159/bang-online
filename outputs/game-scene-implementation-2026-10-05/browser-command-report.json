@@ -1,0 +1,139 @@
+[
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 5,
+    "commandId": "22ee69bc-484c-4419-8fe1-d74fa8d9d6ec"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 6,
+    "commandId": "f673e4a5-8f47-4563-b056-1a56810de0d3"
+  },
+  {
+    "count": 4,
+    "viewer": 2,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 7,
+    "choice": "USE_MISSED",
+    "commandId": "200d5105-1430-48b5-a309-196e4f3de5fc"
+  },
+  {
+    "count": 4,
+    "viewer": 0,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 8,
+    "choice": "USE_MISSED",
+    "commandId": "44483f26-6365-4807-ae85-df02ae6ad4e1"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 9,
+    "choice": "TAKE_HIT",
+    "commandId": "771924c9-72c3-4144-a71f-bb600d788271"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 10,
+    "commandId": "2f517992-e1d6-4a6a-9dda-1115164da0c3"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 11,
+    "commandId": "11c2f5f4-634b-4492-85b2-b3e72403e269"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 12,
+    "choice": "CHOOSE_CARD",
+    "commandId": "fceb84df-19c4-4e7b-aac9-b51c2a0d3d73"
+  },
+  {
+    "count": 4,
+    "viewer": 0,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 13,
+    "choice": "CHOOSE_CARD",
+    "commandId": "b214de4e-ac7a-40e4-b044-99365dc9f9db"
+  },
+  {
+    "count": 4,
+    "viewer": 1,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 14,
+    "choice": "CHOOSE_CARD",
+    "commandId": "8c6d03c3-ab5b-44e4-9657-2ae5e4194943"
+  },
+  {
+    "count": 4,
+    "viewer": 2,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 15,
+    "choice": "CHOOSE_CARD",
+    "commandId": "b3141e59-737f-427a-990c-989cb2309dcf"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 16,
+    "commandId": "407ed970-9c33-4486-a095-f4686a7fcaa9"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "PLAY_CARD",
+    "status": "accepted",
+    "expectedVersion": 17,
+    "commandId": "d1f44606-82b4-49bf-9420-0a035c4ec09f"
+  },
+  {
+    "count": 4,
+    "viewer": 0,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 18,
+    "choice": "TAKE_HIT",
+    "commandId": "017683f8-4e6f-44aa-9e36-72a1666320b3"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "END_TURN",
+    "status": "accepted",
+    "expectedVersion": 19,
+    "commandId": "7baae0b3-ef1f-4d04-af10-69423e43dd97"
+  },
+  {
+    "count": 4,
+    "viewer": 3,
+    "type": "RESPOND",
+    "status": "accepted",
+    "expectedVersion": 20,
+    "choice": "ORDER_CARDS",
+    "commandId": "cf905797-7581-4876-a575-05c52cba39f9"
+  }
+]

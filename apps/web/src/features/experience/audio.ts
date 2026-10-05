@@ -6,9 +6,18 @@ export class GameAudio {
   private output: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   private enabled = true;
+  private visible = true;
+  private sources = new Set<AudioScheduledSourceNode>();
+  private stopSources(): void { for (const source of this.sources) { try { source.stop(); } catch { /* Already ended. */ } } this.sources.clear(); }
+  setVisible(value: boolean): void {
+    this.visible = value;
+    if (!value) this.stopSources();
+    if (this.output && this.context) this.output.gain.setValueAtTime(value && this.enabled ? .22 : 0, this.context.currentTime);
+  }
   setEnabled(value: boolean): void {
     this.enabled = value;
-    if (this.output && this.context) this.output.gain.setValueAtTime(value ? .22 : 0, this.context.currentTime);
+    if (!value) this.stopSources();
+    if (this.output && this.context) this.output.gain.setValueAtTime(value && this.visible ? .22 : 0, this.context.currentTime);
   }
   unlock(): void {
     if (!this.enabled || typeof window === "undefined") return;
@@ -17,7 +26,7 @@ export class GameAudio {
         const Audio = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
         if (!Audio) return;
         this.context = new Audio();
-        this.output = this.context.createGain(); this.output.gain.value = .22;
+        this.output = this.context.createGain(); this.output.gain.value = this.visible ? .22 : 0;
         this.output.connect(this.context.destination);
         this.noise = this.context.createBuffer(1, Math.ceil(this.context.sampleRate * .6), this.context.sampleRate);
         const data = this.noise.getChannelData(0);
@@ -27,7 +36,7 @@ export class GameAudio {
     } catch { /* Audio support must never block a game action. */ }
   }
   play(kind: CueKind): boolean {
-    if (!this.enabled || !this.context || this.context.state !== "running" || !this.output || (typeof document !== "undefined" && document.hidden)) return false;
+    if (!this.enabled || !this.visible || !this.context || this.context.state !== "running" || !this.output || (typeof document !== "undefined" && document.hidden)) return false;
     const t = this.context.currentTime;
     try {
       if (kind === "shot" || kind === "burst" || kind === "explosion") {
@@ -46,13 +55,17 @@ export class GameAudio {
     const c = this.context!, oscillator = c.createOscillator(), gain = c.createGain();
     oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, start); oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration);
     gain.gain.setValueAtTime(.001, start); gain.gain.exponentialRampToValueAtTime(.45, start + .004); gain.gain.exponentialRampToValueAtTime(.001, start + duration);
-    oscillator.connect(gain); gain.connect(this.output!); oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); }; oscillator.start(start); oscillator.stop(start + duration + .02);
+    if (this.sources.size >= 24) return;
+    this.sources.add(oscillator);
+    oscillator.connect(gain); gain.connect(this.output!); oscillator.onended = () => { this.sources.delete(oscillator); oscillator.disconnect(); gain.disconnect(); }; oscillator.start(start); oscillator.stop(start + duration + .02);
   }
   private hiss(start: number, duration: number, frequency: number): void {
     const c = this.context!, source = c.createBufferSource(), filter = c.createBiquadFilter(), gain = c.createGain();
     source.buffer = this.noise; filter.type = "lowpass"; filter.frequency.value = frequency;
     gain.gain.setValueAtTime(.7, start); gain.gain.exponentialRampToValueAtTime(.001, start + duration);
-    source.connect(filter); filter.connect(gain); gain.connect(this.output!); source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); }; source.start(start); source.stop(start + duration);
+    if (this.sources.size >= 24) return;
+    this.sources.add(source);
+    source.connect(filter); filter.connect(gain); gain.connect(this.output!); source.onended = () => { this.sources.delete(source); source.disconnect(); filter.disconnect(); gain.disconnect(); }; source.start(start); source.stop(start + duration);
   }
-  dispose(): void { if (this.context) void this.context.close().catch(() => {}); this.context = null; this.output = null; this.noise = null; }
+  dispose(): void { this.stopSources(); if (this.context) void this.context.close().catch(() => {}); this.context = null; this.output = null; this.noise = null; }
 }

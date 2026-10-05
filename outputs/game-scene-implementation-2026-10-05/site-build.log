@@ -1,0 +1,75 @@
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2K
+transforming...✓ 290 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - rsc:virtual-client-package (16%)
+  - vinext:middleware-server-only (14%)
+  - vinext:css-data-url (10%)
+  - vinext:og-inline-fetch-assets (10%)
+  - vinext:validate-middleware-exports (8%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 8.46s
+[2/5] analyze server references...
+[2K
+transforming...✓ 163 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (24%)
+  - vinext:css-data-url (9%)
+  - vinext:validate-middleware-exports (8%)
+  - vinext:middleware-server-only (7%)
+  - vite-plugin-commonjs (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 7.76s
+[3/5] build rsc environment...
+[2K
+transforming...✓ 287 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 15.65s
+[4/5] build client environment...
+[2K
+transforming...✓ 205 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (24%)
+  - rsc:virtual-client-package (9%)
+  - vinext:rsc-client-reference-loaders (9%)
+  - rsc:scan-strip (8%)
+  - vinext:validate-middleware-exports (7%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 9.48s
+[5/5] build ssr environment...
+[2K
+transforming...✓ 177 modules transformed.
+rendering chunks...
+computing gzip size...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:og-inline-fetch-assets (27%)
+  - vinext:css-data-url (9%)
+  - vite-plugin-commonjs (9%)
+  - vinext:middleware-server-only (5%)
+  - rsc:rsc-css-export-transform (5%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 11.66s
+[0m
+  Route (app)
+  ┌ ? /      
+  └ ƒ /:path+
+
+  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+  Build complete. Run `vinext start` to start the production server.
+

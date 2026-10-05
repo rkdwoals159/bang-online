@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: R08 owner kick removes one waiting member, replays once, and allows the guest to rejoin
+ok 1 - R08 owner kick removes one waiting member, replays once, and allows the guest to rejoin
+  ---
+  duration_ms: 9632.0183
+  type: 'test'
+  ...
+# Subtest: guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped
+ok 2 - guest cookie create/restore is Worker-safe, expires correctly, and assigned-room restore is identity-scoped
+  ---
+  duration_ms: 5401.3257
+  type: 'test'
+  ...
+# Subtest: invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset
+ok 3 - invite preview is strict and redacted; persistent limiter honors peer IP, backoff, and successful JOIN reset
+  ---
+  duration_ms: 8427.5818
+  type: 'test'
+  ...
+# Subtest: concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected
+ok 4 - concurrent JOIN is single-writer; room receipts replay and command hash mismatch is rejected
+  ---
+  duration_ms: 5327.0919
+  type: 'test'
+  ...
+# Subtest: room automatic arrival/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once
+ok 5 - room automatic arrival/owner/version guards and concurrent START_MATCH persist the full initialized snapshot once
+  ---
+  duration_ms: 13191.4885
+  type: 'test'
+  ...
+# Subtest: completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and allow an immediate rematch
+ok 6 - completed direct restart and RETURN_TO_LOBBY preserve history, allocate one fresh match, and allow an immediate rematch
+  ---
+  duration_ms: 12192.9726
+  type: 'test'
+  ...
+# Subtest: HTTP origin/content-type/body limits, strict command parsing, and closed-room lifecycle are enforced
+ok 7 - HTTP origin/content-type/body limits, strict command parsing, and closed-room lifecycle are enforced
+  ---
+  duration_ms: 7882.4771
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 69995.0452
