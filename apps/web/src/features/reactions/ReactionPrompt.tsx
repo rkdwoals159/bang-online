@@ -1,3 +1,4 @@
+import { ChoiceStage, GeneralStoreStage } from "../experience/ChoiceStage.js";
 import { useEffect, useRef, useState } from "react";
 import type {
   CardFaceView,
@@ -57,6 +58,7 @@ export function ReactionPrompt({
     readonly interactionId: string;
     readonly cardInstanceIds: readonly string[];
   } | null>(null);
+  const [eliminationConfirmation, setEliminationConfirmation] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const busyRef = useRef(false);
@@ -84,13 +86,16 @@ export function ReactionPrompt({
   }, [matchId, pendingInteractionId]);
   useEffect(() => {
     setSelectedOrder(null);
+    setEliminationConfirmation(null);
   }, [matchId, projection.version, pendingInteractionId]);
   if (!pending) return null;
 
   const responderPrompt = responderPromptFor(currentSnapshot);
   const isResponder = responderPrompt !== null;
   const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
-  const canRespond = isResponder && !busy && activePendingCommand === null;
+  const canRespond = currentSnapshot.status === "playing" &&
+    (currentSnapshot.viewer.mode === "active" || pending.kind === "DISCARDS_ORDER") &&
+    isResponder && !busy && activePendingCommand === null;
   const responderHand = responseVisibleCards(currentSnapshot);
   const responderPlayerId = "currentResponderPlayerId" in pending
     ? pending.currentResponderPlayerId
@@ -158,6 +163,9 @@ export function ReactionPrompt({
 
   function submitOption(option: PendingRespondOption, orderedCardInstanceIds?: readonly string[]): void {
     if (!canRespond || !responderPrompt || !responderPrompt.responseOptions.includes(option)) return;
+    if (option.choice === "ACCEPT_ELIMINATION" && eliminationConfirmation !== pendingInteractionId) {
+      setEliminationConfirmation(pendingInteractionId); return;
+    }
     const command = createRespondCommand(
       matchId,
       projection.version,
@@ -196,8 +204,10 @@ export function ReactionPrompt({
     ? responderName(currentSnapshot, responderPlayerId)
     : null;
 
-  return (
-    <section className="reaction-prompt" aria-labelledby="reaction-prompt-title" aria-busy={busy}>
+  if (pending.kind === "GENERAL_STORE_PICK") return <GeneralStoreStage snapshot={currentSnapshot} canRespond={canRespond} isResponder={isResponder} busy={busy} notice={notice} onChoose={submitOption} retry={activePendingCommand && !busy ? retryPending : undefined} />;
+
+  const content = (
+    <section className={`reaction-prompt reaction-prompt--${pending.kind.toLowerCase()}`} aria-labelledby="reaction-prompt-title" aria-busy={busy}>
       <header className="reaction-prompt__header">
         <div>
           <h2 id="reaction-prompt-title">{pending.kind === "DISCARDS_ORDER" && currentSnapshot.publicTable.turn.phase === "discard" ? "초과 카드 버리기" : interactionLabel(pending.kind)}</h2>
@@ -299,12 +309,12 @@ export function ReactionPrompt({
                   <li key={`${option.choice}-${index}`}>
                     <div className="reaction-prompt__option-row">
                       <button
-                        className="reaction-prompt__option"
+                        className={`reaction-prompt__option${["TAKE_HIT", "YIELD", "ACCEPT_ELIMINATION"].includes(option.choice) ? " reaction-prompt__option--danger" : ""}`}
                         type="button"
                         disabled={!canRespond || isOrderTemplate}
                         onClick={() => submitOption(option)}
                       >
-                        <strong>{presentation.label}</strong>
+                        <strong>{option.choice === "ACCEPT_ELIMINATION" && eliminationConfirmation === pendingInteractionId ? "확인 · 탈락하고 관전하기" : presentation.label}</strong>
                         {presentation.detail ? <span>{presentation.detail}</span> : null}
                       </button>
                       {cardFaces.map((card) => (
@@ -348,13 +358,15 @@ export function ReactionPrompt({
           {currentResponderName
             ? pending.kind === "GENERAL_STORE_PICK"
               ? `${currentResponderName} 님이 잡화점 카드를 고르고 있어요.`
-              : `${currentResponderName} 님이 응답 중이에요. 응답 내용은 다른 참가자에게 공개되지 않아요.`
-            : "다른 좌석의 응답을 기다리고 있습니다. 진행 상황만 표시합니다."}
+              : `${currentResponderName} 님이 응답 중이에요.`
+            : "다른 참가자의 응답을 기다리고 있어요."}
           </p>
         </>
       )}
     </section>
   );
+  const usesStage = pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
+  return usesStage ? <ChoiceStage interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;
 }
 
 function rejectionMessage(code: string): string {

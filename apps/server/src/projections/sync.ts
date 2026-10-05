@@ -101,6 +101,18 @@ function projectEvent(
   event: MatchEventRecord,
   state: GameState,
 ): PublicMatchEvent | undefined {
+  // These effects reveal who used Panic/Cat and which public seat was affected.
+  // Never include the randomly stolen/discarded hand card, its ID, rank or suit.
+  if ((event.type === "CARD_TRANSFERRED" || event.type === "CARD_DISCARDED") && isRecord(event.payload)) {
+    const p = event.payload;
+    const source = typeof p.sourceCardInstanceId === "string" ? state.zones.cardsByInstanceId[p.sourceCardInstanceId] : undefined;
+    const sourceType = source && BASE_PHYSICAL_CARDS.find(c => c.definitionId === source.cardDefinitionId)?.typeId;
+    const target = event.type === "CARD_TRANSFERRED" ? p.fromPlayerId : p.ownerPlayerId;
+    const validKind = event.type === "CARD_TRANSFERRED" ? sourceType === "panic" && p.toZone === "hand" && p.toPlayerId === event.actorPlayerId : sourceType === "cat_balou" && p.toZone === "discard";
+    if (validKind && (p.fromZone === "hand" || p.fromZone === "in_play") && p.cardInstanceId !== p.sourceCardInstanceId && typeof target === "string" && state.seats.some(s => s.public.playerId === target) && event.actorPlayerId !== null) {
+      return { eventSeq: event.eventSeq, occurredAt: event.createdAt.toISOString(), type: sourceType === "panic" ? "PANIC_USED" : "CAT_BALOU_USED", payload: { actorPlayerId: event.actorPlayerId, targetPlayerId: target, targetZone: p.fromZone } };
+    }
+  }
   const blackJackReveal = event.type === "CARD_DRAWN" && isRecord(event.payload) &&
     event.payload.visibility === "public" && event.payload.reason === "BLACK_JACK_SECOND_DRAW" &&
     state.seats.some(seat => seat.public.playerId === event.actorPlayerId && seat.public.characterId === "black_jack");

@@ -1,0 +1,1063 @@
+TAP version 13
+# (node:21200) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: HTTP readiness does not wait for a failed notification stream
+ok 1 - HTTP readiness does not wait for a failed notification stream
+  ---
+  duration_ms: 2996.7488
+  type: 'test'
+  ...
+# Subtest: expired sessions remain rejected even for independent HTTP writes
+ok 2 - expired sessions remain rejected even for independent HTTP writes
+  ---
+  duration_ms: 1.4489
+  type: 'test'
+  ...
+# Subtest: Socket.IO readiness still awaits connection
+ok 3 - Socket.IO readiness still awaits connection
+  ---
+  duration_ms: 0.5099
+  type: 'test'
+  ...
+# (node:21896) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: direct room, role, game, result and invite URLs resolve to the expected path state
+ok 4 - direct room, role, game, result and invite URLs resolve to the expected path state
+  ---
+  duration_ms: 6270.0043
+  type: 'test'
+  ...
+# Subtest: popstate refreshes the route key for back/forward and invite query changes
+ok 5 - popstate refreshes the route key for back/forward and invite query changes
+  ---
+  duration_ms: 0.8707
+  type: 'test'
+  ...
+# Subtest: RoomView activeMatchId drives lobby, sync, game and result projections
+ok 6 - RoomView activeMatchId drives lobby, sync, game and result projections
+  ---
+  duration_ms: 0.6372
+  type: 'test'
+  ...
+# Subtest: room connection notice is accessible and stays until authoritative route sync succeeds
+ok 7 - room connection notice is accessible and stays until authoritative route sync succeeds
+  ---
+  duration_ms: 19.1323
+  type: 'test'
+  ...
+# Subtest: connected CONNECTION errors trigger one route resync attempt without an effect loop
+ok 8 - connected CONNECTION errors trigger one route resync attempt without an effect loop
+  ---
+  duration_ms: 0.205
+  type: 'test'
+  ...
+# Subtest: reconnect sync waits for the current RoomView and then its active match projection
+ok 9 - reconnect sync waits for the current RoomView and then its active match projection
+  ---
+  duration_ms: 0.6726
+  type: 'test'
+  ...
+# Subtest: unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+ok 10 - unconfirmed active viewers see the private role reveal before actions, including on direct game paths
+  ---
+  duration_ms: 0.7264
+  type: 'test'
+  ...
+# Subtest: post-start role reveal redirects to the registered canonical role route
+ok 11 - post-start role reveal redirects to the registered canonical role route
+  ---
+  duration_ms: 0.5338
+  type: 'test'
+  ...
+# Subtest: role confirmation stays in one tab session and a fresh tab must confirm separately
+ok 12 - role confirmation stays in one tab session and a fresh tab must confirm separately
+  ---
+  duration_ms: 0.6948
+  type: 'test'
+  ...
+# Subtest: role and character face copy is supplied for every canonical base-game entry
+ok 13 - role and character face copy is supplied for every canonical base-game entry
+  ---
+  duration_ms: 0.3688
+  type: 'test'
+  ...
+# Subtest: role reveal renders only the viewer's role and character with canonical rule copy
+ok 14 - role reveal renders only the viewer's role and character with canonical rule copy
+  ---
+  duration_ms: 7.8744
+  type: 'test'
+  ...
+# Subtest: match route composition passes private hand, legalActions, pending and result projection to features
+ok 15 - match route composition passes private hand, legalActions, pending and result projection to features
+  ---
+  duration_ms: 139.0972
+  type: 'test'
+  ...
+# Subtest: result return uses one exact empty command then waits for a newer lobby sync projection
+ok 16 - result return uses one exact empty command then waits for a newer lobby sync projection
+  ---
+  duration_ms: 2.7076
+  type: 'test'
+  ...
+# Subtest: rejected or thrown return transport keeps the result operation retryable
+ok 17 - rejected or thrown return transport keeps the result operation retryable
+  ---
+  duration_ms: 0.5621
+  type: 'test'
+  ...
+# Subtest: room operations can wait for the new cookie-authenticated socket connection
+ok 18 - room operations can wait for the new cookie-authenticated socket connection
+  ---
+  duration_ms: 1.2601
+  type: 'test'
+  ...
+# (node:19644) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: keyboard controls receive a visible focus indicator
+ok 19 - keyboard controls receive a visible focus indicator
+  ---
+  duration_ms: 1.9354
+  type: 'test'
+  ...
+# Subtest: narrow hand and response rows can scroll horizontally
+ok 20 - narrow hand and response rows can scroll horizontally
+  ---
+  duration_ms: 0.4519
+  type: 'test'
+  ...
+# Subtest: AccessibleButton renders a named native keyboard control
+ok 21 - AccessibleButton renders a named native keyboard control
+  ---
+  duration_ms: 4443.4924
+  type: 'test'
+  ...
+# (node:8372) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+ok 22 - P03 compact Sid costs authorize any distinct allowed pair and reject fabricated costs
+  ---
+  duration_ms: 3347.2634
+  type: 'test'
+  ...
+# Subtest: offers only card and target candidates from legalActions
+ok 23 - offers only card and target candidates from legalActions
+  ---
+  duration_ms: 1.1057
+  type: 'test'
+  ...
+# Subtest: explains only the two public no-recovery Beer conditions
+ok 24 - explains only the two public no-recovery Beer conditions
+  ---
+  duration_ms: 0.7019
+  type: 'test'
+  ...
+# Subtest: maps a distinct Sid cost pair only to its exact projected ability proposal
+ok 25 - maps a distinct Sid cost pair only to its exact projected ability proposal
+  ---
+  duration_ms: 1.9871
+  type: 'test'
+  ...
+# Subtest: keeps server-approved self table targets and never exposes a target hand card ID
+ok 26 - keeps server-approved self table targets and never exposes a target hand card ID
+  ---
+  duration_ms: 6.0453
+  type: 'test'
+  ...
+# Subtest: wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+ok 27 - wraps a selected server proposal with protocol version, current version, match, and idempotency ID
+  ---
+  duration_ms: 0.1796
+  type: 'test'
+  ...
+# Subtest: syncs the latest projection after server rejection so selection can be rebuilt
+ok 28 - syncs the latest projection after server rejection so selection can be rebuilt
+  ---
+  duration_ms: 0.7819
+  type: 'test'
+  ...
+# Subtest: shows the acknowledgement phase before awaiting the authoritative projection
+ok 29 - shows the acknowledgement phase before awaiting the authoritative projection
+  ---
+  duration_ms: 0.5909
+  type: 'test'
+  ...
+# Subtest: keeps a timed-out retry on the same command ID and payload
+ok 30 - keeps a timed-out retry on the same command ID and payload
+  ---
+  duration_ms: 0.7457
+  type: 'test'
+  ...
+# Subtest: renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+ok 31 - renders available cards as selectable, explains unavailable cards, and hides inputs outside active play
+  ---
+  duration_ms: 40.6308
+  type: 'test'
+  ...
+# Subtest: shows turn ownership and pending response without making card actions available
+ok 32 - shows turn ownership and pending response without making card actions available
+  ---
+  duration_ms: 6.822
+  type: 'test'
+  ...
+# Subtest: renders two linear Sid cost selectors instead of one button per card pair
+ok 33 - renders two linear Sid cost selectors instead of one button per card pair
+  ---
+  duration_ms: 315.346
+  type: 'test'
+  ...
+# (node:22640) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+ok 34 - prepared asset paths map to all 22 card, 16 character, and 4 role files in public
+  ---
+  duration_ms: 119.7378
+  type: 'test'
+  ...
+# Subtest: all 80 physical card records keep their own rank and suit over one type image
+ok 35 - all 80 physical card records keep their own rank and suit over one type image
+  ---
+  duration_ms: 0.9458
+  type: 'test'
+  ...
+# Subtest: missing images have visible fallback labels and nonempty alternative text
+ok 36 - missing images have visible fallback labels and nonempty alternative text
+  ---
+  duration_ms: 0.5699
+  type: 'test'
+  ...
+# Subtest: opponent hand back accessibility text exposes no rank, suit, or card identity
+ok 37 - opponent hand back accessibility text exposes no rank, suit, or card identity
+  ---
+  duration_ms: 0.3108
+  type: 'test'
+  ...
+# (node:21352) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+ok 38 - R03 Kit choice markup names the private candidate cards and Lucky's public faces reach observers
+  ---
+  duration_ms: 3109.0873
+  type: 'test'
+  ...
+# Subtest: every base playing card has Korean detail text from the ruleset summaries
+ok 39 - every base playing card has Korean detail text from the ruleset summaries
+  ---
+  duration_ms: 14.8029
+  type: 'test'
+  ...
+# Subtest: hand zoom keeps named triggers and mounts detail content only when opened
+ok 40 - hand zoom keeps named triggers and mounts detail content only when opened
+  ---
+  duration_ms: 7.9926
+  type: 'test'
+  ...
+# Subtest: card images are detail triggers and use buttons contain no image or duplicate detail text
+ok 41 - card images are detail triggers and use buttons contain no image or duplicate detail text
+  ---
+  duration_ms: 19.6069
+  type: 'test'
+  ...
+# Subtest: all public character portraits have accessible image triggers without mounting dialogs eagerly
+ok 42 - all public character portraits have accessible image triggers without mounting dialogs eagerly
+  ---
+  duration_ms: 21.0131
+  type: 'test'
+  ...
+# Subtest: turn-end discard copy states the required count and current-health rule
+ok 43 - turn-end discard copy states the required count and current-health rule
+  ---
+  duration_ms: 34.4834
+  type: 'test'
+  ...
+# Subtest: response zoom is limited to card faces named by the current responder options
+ok 44 - response zoom is limited to card faces named by the current responder options
+  ---
+  duration_ms: 3.2479
+  type: 'test'
+  ...
+# Subtest: discard-order zoom uses only the responder's projected allowedCards
+ok 45 - discard-order zoom uses only the responder's projected allowedCards
+  ---
+  duration_ms: 5.4867
+  type: 'test'
+  ...
+# (node:23940) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: sound stays silent before a user gesture unlocks one reusable context
+ok 46 - sound stays silent before a user gesture unlocks one reusable context
+  ---
+  duration_ms: 3.2238
+  type: 'test'
+  ...
+# Subtest: Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+ok 47 - Gatling schedules five rapid shots and defense schedules a distinct metallic ping
+  ---
+  duration_ms: 0.5094
+  type: 'test'
+  ...
+# Subtest: mute immediately silences the output; hidden tabs and unsupported audio are harmless
+ok 48 - mute immediately silences the output; hidden tabs and unsupported audio are harmless
+  ---
+  duration_ms: 0.4069
+  type: 'test'
+  ...
+# (node:24784) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: first connection and hidden-tab replay do not play historical attacks
+ok 49 - first connection and hidden-tab replay do not play historical attacks
+  ---
+  duration_ms: 6.7169
+  type: 'test'
+  ...
+# Subtest: shots connect authenticated actor and public target; replay is silent
+ok 50 - shots connect authenticated actor and public target; replay is silent
+  ---
+  duration_ms: 1.0003
+  type: 'test'
+  ...
+# Subtest: Gatling targets every projected opponent and a blocked player gets a separate ping
+ok 51 - Gatling targets every projected opponent and a blocked player gets a separate ping
+  ---
+  duration_ms: 1.045
+  type: 'test'
+  ...
+# Subtest: barrel failure never sounds like a successful block; success is not double counted
+ok 52 - barrel failure never sounds like a successful block; success is not double counted
+  ---
+  duration_ms: 0.6371
+  type: 'test'
+  ...
+# Subtest: stale, malformed, private and unknown event data cannot create effects
+ok 53 - stale, malformed, private and unknown event data cannot create effects
+  ---
+  duration_ms: 0.5073
+  type: 'test'
+  ...
+# Subtest: older versions cannot move the effect cursor backwards
+ok 54 - older versions cannot move the effect cursor backwards
+  ---
+  duration_ms: 0.216
+  type: 'test'
+  ...
+# Subtest: HP deltas show hit/heal once and zero-healing beer does not fake a heal
+ok 55 - HP deltas show hit/heal once and zero-healing beer does not fake a heal
+  ---
+  duration_ms: 0.8486
+  type: 'test'
+  ...
+# Subtest: draw, equipment, turn, elimination and victory use public snapshot changes
+ok 56 - draw, equipment, turn, elimination and victory use public snapshot changes
+  ---
+  duration_ms: 0.6259
+  type: 'test'
+  ...
+# Subtest: store pick moves only one publicly revealed card to its known previous chooser
+ok 57 - store pick moves only one publicly revealed card to its known previous chooser
+  ---
+  duration_ms: 3.4969
+  type: 'test'
+  ...
+# Subtest: short bounded queue prevents unbounded animation backlog
+ok 58 - short bounded queue prevents unbounded animation backlog
+  ---
+  duration_ms: 1.8148
+  type: 'test'
+  ...
+# Subtest: elimination precedes victory and simultaneous equipment cues have unique identities
+ok 59 - elimination precedes victory and simultaneous equipment cues have unique identities
+  ---
+  duration_ms: 0.7599
+  type: 'test'
+  ...
+# (node:24680) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: shared store offers only the current picker a take button; observers see public cards
+ok 60 - shared store offers only the current picker a take button; observers see public cards
+  ---
+  duration_ms: 2887.1657
+  type: 'test'
+  ...
+# Subtest: Kit private choice opens a stage only for its authenticated picker
+ok 61 - Kit private choice opens a stage only for its authenticated picker
+  ---
+  duration_ms: 3.9278
+  type: 'test'
+  ...
+# Subtest: Lucky judgments are public while response options stay with Lucky
+ok 62 - Lucky judgments are public while response options stay with Lucky
+  ---
+  duration_ms: 2.9972
+  type: 'test'
+  ...
+# Subtest: the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+ok 63 - the eliminated owner may finish server-authorized discard ordering, then becomes an observer
+  ---
+  duration_ms: 7.8638
+  type: 'test'
+  ...
+# Subtest: mobile navigation points to my response only when I am the responder and is absent for observers
+ok 64 - mobile navigation points to my response only when I am the responder and is absent for observers
+  ---
+  duration_ms: 4.0667
+  type: 'test'
+  ...
+# (node:21312) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: renders HTML-like server guest names as text with readiness and explicit room status
+ok 65 - renders HTML-like server guest names as text with readiness and explicit room status
+  ---
+  duration_ms: 1945.3451
+  type: 'test'
+  ...
+# Subtest: renders disabled start and locked seat actions once the server room has started
+ok 66 - renders disabled start and locked seat actions once the server room has started
+  ---
+  duration_ms: 3.5038
+  type: 'test'
+  ...
+# Subtest: shows owner controls only to the owner and keeps full rooms closed to invites
+ok 67 - shows owner controls only to the owner and keeps full rooms closed to invites
+  ---
+  duration_ms: 23.0768
+  type: 'test'
+  ...
+# Subtest: shows explicit presence and never treats a missing status as connected
+ok 68 - shows explicit presence and never treats a missing status as connected
+  ---
+  duration_ms: 12.3546
+  type: 'test'
+  ...
+# (node:24016) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: shows server seats and readiness in seat order and blocks start until everyone is ready
+ok 69 - shows server seats and readiness in seat order and blocks start until everyone is ready
+  ---
+  duration_ms: 5.0159
+  type: 'test'
+  ...
+# Subtest: leaves unoccupied room seats visible and blocks starting before four guests
+ok 70 - leaves unoccupied room seats visible and blocks starting before four guests
+  ---
+  duration_ms: 0.4932
+  type: 'test'
+  ...
+# Subtest: only the server-designated owner can start or remove another waiting guest
+ok 71 - only the server-designated owner can start or remove another waiting guest
+  ---
+  duration_ms: 0.7093
+  type: 'test'
+  ...
+# Subtest: a full seven-seat room has no invitation capacity for an eighth guest
+ok 72 - a full seven-seat room has no invitation capacity for an eighth guest
+  ---
+  duration_ms: 0.2331
+  type: 'test'
+  ...
+# Subtest: started rooms disable readiness, start, invitations and kick actions
+ok 73 - started rooms disable readiness, start, invitations and kick actions
+  ---
+  duration_ms: 1.851
+  type: 'test'
+  ...
+# Subtest: builds only the shared room command envelopes with the current version
+ok 74 - builds only the shared room command envelopes with the current version
+  ---
+  duration_ms: 0.4562
+  type: 'test'
+  ...
+# (node:20660) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: General Store selection shows public card names, suits, images and zoom while keeping exact commands
+ok 75 - General Store selection shows public card names, suits, images and zoom while keeping exact commands
+  ---
+  duration_ms: 2111.8047
+  type: 'test'
+  ...
+# Subtest: only the current responder's pending options are offered, with the server step
+ok 76 - only the current responder's pending options are offered, with the server step
+  ---
+  duration_ms: 4.0127
+  type: 'test'
+  ...
+# Subtest: a non-responder sees progress only and no response options or card IDs
+ok 77 - a non-responder sees progress only and no response options or card IDs
+  ---
+  duration_ms: 0.9974
+  type: 'test'
+  ...
+# Subtest: death rescue presents only saved Beer and elimination choices
+ok 78 - death rescue presents only saved Beer and elimination choices
+  ---
+  duration_ms: 3.5658
+  type: 'test'
+  ...
+# Subtest: Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+ok 79 - Vulture Sam cleanup discard prompt uses only server-projected candidates and count
+  ---
+  duration_ms: 36.1083
+  type: 'test'
+  ...
+# Subtest: creates a canonical RESPOND envelope from the exact saved option fields
+ok 80 - creates a canonical RESPOND envelope from the exact saved option fields
+  ---
+  duration_ms: 0.2038
+  type: 'test'
+  ...
+# Subtest: does not turn an ORDER_CARDS option template into a command without user-entered order
+ok 81 - does not turn an ORDER_CARDS option template into a command without user-entered order
+  ---
+  duration_ms: 2.2373
+  type: 'test'
+  ...
+# Subtest: validates discard order against the server candidate IDs and required count
+ok 82 - validates discard order against the server candidate IDs and required count
+  ---
+  duration_ms: 0.3931
+  type: 'test'
+  ...
+# Subtest: sync projection restores the same pending prompt and response choices
+ok 83 - sync projection restores the same pending prompt and response choices
+  ---
+  duration_ms: 0.7371
+  type: 'test'
+  ...
+# Subtest: reports a response acknowledgement before waiting for the authoritative projection
+ok 84 - reports a response acknowledgement before waiting for the authoritative projection
+  ---
+  duration_ms: 0.5028
+  type: 'test'
+  ...
+# Subtest: a multi-target response sync opens only the next responder's new prompt
+ok 85 - a multi-target response sync opens only the next responder's new prompt
+  ---
+  duration_ms: 0.477
+  type: 'test'
+  ...
+# (node:12844) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+ok 86 - direct entry: actual adapter rejection wrapper supports seat recovery, stale retry and friendly errors
+  ---
+  duration_ms: 4.6121
+  type: 'test'
+  ...
+# Subtest: direct entry: parses the current invite URL and retains legacy internal token compatibility
+ok 87 - direct entry: parses the current invite URL and retains legacy internal token compatibility
+  ---
+  duration_ms: 2.0261
+  type: 'test'
+  ...
+# Subtest: direct entry: one request from the UI performs lookup then JOIN with authoritative version
+ok 88 - direct entry: one request from the UI performs lookup then JOIN with authoritative version
+  ---
+  duration_ms: 0.911
+  type: 'test'
+  ...
+# Subtest: direct entry: same-link double submissions share one in-flight transaction
+ok 89 - direct entry: same-link double submissions share one in-flight transaction
+  ---
+  duration_ms: 0.5722
+  type: 'test'
+  ...
+# Subtest: direct entry: transport ambiguity retries the exact command without a new lookup or ID
+ok 90 - direct entry: transport ambiguity retries the exact command without a new lookup or ID
+  ---
+  duration_ms: 0.8974
+  type: 'test'
+  ...
+# Subtest: direct entry: a definitive stale version refreshes and obtains a new command ID
+ok 91 - direct entry: a definitive stale version refreshes and obtains a new command ID
+  ---
+  duration_ms: 0.5037
+  type: 'test'
+  ...
+# Subtest: direct entry: version races have a finite retry budget
+ok 92 - direct entry: version races have a finite retry budget
+  ---
+  duration_ms: 1.4771
+  type: 'test'
+  ...
+# Subtest: direct entry: full, closed and invalid invites report safe errors and stop
+ok 93 - direct entry: full, closed and invalid invites report safe errors and stop
+  ---
+  duration_ms: 0.8163
+  type: 'test'
+  ...
+# Subtest: direct entry: an existing authenticated seat can resume a waiting or started room
+ok 94 - direct entry: an existing authenticated seat can resume a waiting or started room
+  ---
+  duration_ms: 0.8407
+  type: 'test'
+  ...
+# Subtest: direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+ok 95 - direct entry: closed recovered seats and unrelated rooms cannot bypass admission
+  ---
+  duration_ms: 1.0971
+  type: 'test'
+  ...
+# Subtest: direct entry: UI has no preview confirmation or separate raw-code input
+ok 96 - direct entry: UI has no preview confirmation or separate raw-code input
+  ---
+  duration_ms: 33.5562
+  type: 'test'
+  ...
+# (node:6612) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: normalizes a guest name and uses the 1–20 Unicode code point rule
+ok 97 - normalizes a guest name and uses the 1–20 Unicode code point rule
+  ---
+  duration_ms: 2.6224
+  type: 'test'
+  ...
+# Subtest: builds guest and room commands from public DTOs without a credential field
+ok 98 - builds guest and room commands from public DTOs without a credential field
+  ---
+  duration_ms: 1.7214
+  type: 'test'
+  ...
+# Subtest: previews before join and sends the exact preview version with JOIN
+ok 99 - previews before join and sends the exact preview version with JOIN
+  ---
+  duration_ms: 1.4948
+  type: 'test'
+  ...
+# Subtest: invalid code preview and JOIN errors share one safe message
+ok 100 - invalid code preview and JOIN errors share one safe message
+  ---
+  duration_ms: 1.9012
+  type: 'test'
+  ...
+# Subtest: invite links contain only the invite code and can be read without session data
+ok 101 - invite links contain only the invite code and can be read without session data
+  ---
+  duration_ms: 0.6817
+  type: 'test'
+  ...
+# (node:19424) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+ok 102 - merges public event batches in eventSeq order and deduplicates without filling hidden gaps
+  ---
+  duration_ms: 1832.8216
+  type: 'test'
+  ...
+# Subtest: keeps only the latest public event window when the feed grows
+ok 103 - keeps only the latest public event window when the feed grows
+  ---
+  duration_ms: 0.6377
+  type: 'test'
+  ...
+# Subtest: ignores stale sync versions and preserves the newer turn, status, and event feed
+ok 104 - ignores stale sync versions and preserves the newer turn, status, and event feed
+  ---
+  duration_ms: 0.4877
+  type: 'test'
+  ...
+# Subtest: builds current turn text from the projection and closes input for every non-playing status
+ok 105 - builds current turn text from the projection and closes input for every non-playing status
+  ---
+  duration_ms: 0.4449
+  type: 'test'
+  ...
+# Subtest: keeps public log closed by default and formats only allowlisted events without payloads
+ok 106 - keeps public log closed by default and formats only allowlisted events without payloads
+  ---
+  duration_ms: 17.469
+  type: 'test'
+  ...
+# Subtest: completed status renders a read-only result state and no action control
+ok 107 - completed status renders a read-only result state and no action control
+  ---
+  duration_ms: 2.4302
+  type: 'test'
+  ...
+# Subtest: non-owner result view explains that the host returns everyone to the lobby
+ok 108 - non-owner result view explains that the host returns everyone to the lobby
+  ---
+  duration_ms: 1.5984
+  type: 'test'
+  ...
+# Subtest: result return action is visible only for the matching completed match in its in-game owner room
+ok 109 - result return action is visible only for the matching completed match in its in-game owner room
+  ---
+  duration_ms: 52.6008
+  type: 'test'
+  ...
+# Subtest: return action single-flight guard ignores a second click while busy and accepts a later retry
+ok 110 - return action single-flight guard ignores a second click while busy and accepts a later retry
+  ---
+  duration_ms: 0.7969
+  type: 'test'
+  ...
+# Subtest: rejected commands and thrown transport errors produce retryable Korean guidance
+ok 111 - rejected commands and thrown transport errors produce retryable Korean guidance
+  ---
+  duration_ms: 0.4347
+  type: 'test'
+  ...
+# Subtest: uses a newer confirmed room command response and syncs only for older acknowledgements
+ok 112 - uses a newer confirmed room command response and syncs only for older acknowledgements
+  ---
+  duration_ms: 7.6201
+  type: 'test'
+  ...
+# Subtest: does not infer an outcome before completion or expose winner IDs when a name is missing
+ok 113 - does not infer an outcome before completion or expose winner IDs when a name is missing
+  ---
+  duration_ms: 0.7858
+  type: 'test'
+  ...
+# Subtest: server status gate removes action controls after play has ended
+ok 114 - server status gate removes action controls after play has ended
+  ---
+  duration_ms: 0.9173
+  type: 'test'
+  ...
+# (node:5444) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: same guest restoration preserves cached projections
+ok 115 - same guest restoration preserves cached projections
+  ---
+  duration_ms: 1.9883
+  type: 'test'
+  ...
+# Subtest: expired session clears private projections and ignores late guest responses
+ok 116 - expired session clears private projections and ignores late guest responses
+  ---
+  duration_ms: 2.1526
+  type: 'test'
+  ...
+# Subtest: changed guest identity cannot reuse previous viewer snapshots
+ok 117 - changed guest identity cannot reuse previous viewer snapshots
+  ---
+  duration_ms: 0.41
+  type: 'test'
+  ...
+# Subtest: outbox notifications trigger sync and duplicate or older hints do not update projections
+ok 118 - outbox notifications trigger sync and duplicate or older hints do not update projections
+  ---
+  duration_ms: 19.6153
+  type: 'test'
+  ...
+# Subtest: projection store rejects duplicate and out-of-order sync responses
+ok 119 - projection store rejects duplicate and out-of-order sync responses
+  ---
+  duration_ms: 0.5969
+  type: 'test'
+  ...
+# Subtest: match projections retain only the newest 100 public events without moving the cursor backward
+ok 120 - match projections retain only the newest 100 public events without moving the cursor backward
+  ---
+  duration_ms: 0.6486
+  type: 'test'
+  ...
+# Subtest: ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+ok 121 - ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch
+  ---
+  duration_ms: 54.4815
+  type: 'test'
+  ...
+# Subtest: a versioned room command projection is applied and only a newly active match is fetched
+ok 122 - a versioned room command projection is applied and only a newly active match is fetched
+  ---
+  duration_ms: 2.0655
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and assigned-seat recovery calls share their HTTP reads
+ok 123 - parallel guest restore and assigned-seat recovery calls share their HTTP reads
+  ---
+  duration_ms: 6.2261
+  type: 'test'
+  ...
+# Subtest: a legacy room ACK during an older sync forces one fresh projection
+ok 124 - a legacy room ACK during an older sync forces one fresh projection
+  ---
+  duration_ms: 2.7195
+  type: 'test'
+  ...
+# Subtest: room-derived match watches release together and old resources are not synced after reconnect
+ok 125 - room-derived match watches release together and old resources are not synced after reconnect
+  ---
+  duration_ms: 31.9618
+  type: 'test'
+  ...
+# Subtest: cookie restore uses the T81 endpoints and schedules authoritative sync
+ok 126 - cookie restore uses the T81 endpoints and schedules authoritative sync
+  ---
+  duration_ms: 2.4056
+  type: 'test'
+  ...
+# Subtest: default fetch keeps the global receiver for all guest session HTTP operations
+ok 127 - default fetch keeps the global receiver for all guest session HTTP operations
+  ---
+  duration_ms: 1.7311
+  type: 'test'
+  ...
+# Subtest: 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+ok 128 - 204 is an empty guest restore; 401 room recovery follows SESSION_EXPIRED
+  ---
+  duration_ms: 1.5348
+  type: 'test'
+  ...
+# Subtest: reconnect performs a fresh match sync before retrying the same pending command
+ok 129 - reconnect performs a fresh match sync before retrying the same pending command
+  ---
+  duration_ms: 26.8232
+  type: 'test'
+  ...
+# (node:10932) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: design: public portraits open character details and preserve role/hand privacy
+ok 130 - design: public portraits open character details and preserve role/hand privacy
+  ---
+  duration_ms: 2330.4847
+  type: 'test'
+  ...
+# Subtest: design: decorative portrait retains fallback and lazy image loading
+ok 131 - design: decorative portrait retains fallback and lazy image loading
+  ---
+  duration_ms: 2.1794
+  type: 'test'
+  ...
+# Subtest: design: hand count and visible card status complement the detailed accessible names
+ok 132 - design: hand count and visible card status complement the detailed accessible names
+  ---
+  duration_ms: 9.8954
+  type: 'test'
+  ...
+# Subtest: design: a single main landmark is reachable by skip link
+ok 133 - design: a single main landmark is reachable by skip link
+  ---
+  duration_ms: 4.7827
+  type: 'test'
+  ...
+# Subtest: design: desktop/tablet/mobile layouts avoid absolute seat positioning
+ok 134 - design: desktop/tablet/mobile layouts avoid absolute seat positioning
+  ---
+  duration_ms: 27.6292
+  type: 'test'
+  ...
+# Subtest: design: principal text combinations meet WCAG AA 4.5:1
+ok 135 - design: principal text combinations meet WCAG AA 4.5:1
+  ---
+  duration_ms: 20.0311
+  type: 'test'
+  ...
+# Subtest: design: shared tokens require no external fonts or animation dependencies
+ok 136 - design: shared tokens require no external fonts or animation dependencies
+  ---
+  duration_ms: 65.0411
+  type: 'test'
+  ...
+# (node:25208) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Sites development and production explicitly use the Worker HTTP adapter
+ok 137 - Sites development and production explicitly use the Worker HTTP adapter
+  ---
+  duration_ms: 78.4329
+  type: 'test'
+  ...
+# Subtest: Sites imports the same app stylesheet as the local browser entry
+ok 138 - Sites imports the same app stylesheet as the local browser entry
+  ---
+  duration_ms: 5.9766
+  type: 'test'
+  ...
+# (node:11456) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: P01 a committed ACK projection updates the store and UI without a second match read
+ok 139 - P01 a committed ACK projection updates the store and UI without a second match read
+  ---
+  duration_ms: 51.0274
+  type: 'test'
+  ...
+# Subtest: R06 a stalled session body has a deadline and recovery can be retried
+ok 140 - R06 a stalled session body has a deadline and recovery can be retried
+  ---
+  duration_ms: 33.1595
+  type: 'test'
+  ...
+# Subtest: R06 an accepted command survives stalled sync without remaining busy or resending
+ok 141 - R06 an accepted command survives stalled sync without remaining busy or resending
+  ---
+  duration_ms: 28.6895
+  type: 'test'
+  ...
+# Subtest: R09 EventSource construction errors fall back to HTTP polling and stop on disconnect
+ok 142 - R09 EventSource construction errors fall back to HTTP polling and stop on disconnect
+  ---
+  duration_ms: 97.6192
+  type: 'test'
+  ...
+# Subtest: R07 incremental sync keeps earlier public events through projection consumers
+ok 143 - R07 incremental sync keeps earlier public events through projection consumers
+  ---
+  duration_ms: 0.6352
+  type: 'test'
+  ...
+# Subtest: a late match sync from a previous guest is rejected after identity changes
+ok 144 - a late match sync from a previous guest is rejected after identity changes
+  ---
+  duration_ms: 1.6412
+  type: 'test'
+  ...
+# Subtest: accepted ACK and concurrent passive sync callers share one match request
+ok 145 - accepted ACK and concurrent passive sync callers share one match request
+  ---
+  duration_ms: 40.667
+  type: 'test'
+  ...
+# Subtest: a newer SSE match hint during sync triggers exactly one fresh follow-up
+ok 146 - a newer SSE match hint during sync triggers exactly one fresh follow-up
+  ---
+  duration_ms: 23.5488
+  type: 'test'
+  ...
+# Subtest: mismatched unchanged replies fall back to a strict full sync without opt-in
+ok 147 - mismatched unchanged replies fall back to a strict full sync without opt-in
+  ---
+  duration_ms: 1.7048
+  type: 'test'
+  ...
+# Subtest: a second unchanged response cannot recurse, and successful syncs clear stale errors
+ok 148 - a second unchanged response cannot recurse, and successful syncs clear stale errors
+  ---
+  duration_ms: 3.7428
+  type: 'test'
+  ...
+# Subtest: presence is timestamped separately, filters foreign members, and survives room sync
+ok 149 - presence is timestamped separately, filters foreign members, and survives room sync
+  ---
+  duration_ms: 5.2523
+  type: 'test'
+  ...
+# Subtest: new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+ok 150 - new guests use JSON create/join without an initial SSE dependency; versioned room ACK is applied directly
+  ---
+  duration_ms: 3.3843
+  type: 'test'
+  ...
+# Subtest: a versioned room ACK fetches a newly active match without repeating the room sync
+ok 151 - a versioned room ACK fetches a newly active match without repeating the room sync
+  ---
+  duration_ms: 6.3889
+  type: 'test'
+  ...
+# Subtest: parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+ok 152 - parallel guest restore and seat recovery share each Sites HTTP read and projection sync
+  ---
+  duration_ms: 4.1212
+  type: 'test'
+  ...
+# Subtest: closing the last transient room watch releases its SSE reconnect resource
+ok 153 - closing the last transient room watch releases its SSE reconnect resource
+  ---
+  duration_ms: 10.1024
+  type: 'test'
+  ...
+# Subtest: HTTP room commands remain writable while the membership SSE channel is closed
+ok 154 - HTTP room commands remain writable while the membership SSE channel is closed
+  ---
+  duration_ms: 32.0166
+  type: 'test'
+  ...
+# Subtest: legacy unversioned room ACK forces one follow-up after an older sync already in flight
+ok 155 - legacy unversioned room ACK forces one follow-up after an older sync already in flight
+  ---
+  duration_ms: 12.7785
+  type: 'test'
+  ...
+# (node:9760) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+ok 156 - production builds select Sites HTTP/SSE and local Vite selects Socket.IO
+  ---
+  duration_ms: 1.6774
+  type: 'test'
+  ...
+# Subtest: Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+ok 157 - Sites requests use strict DTO parsing, cookie credentials and same-payload command retry
+  ---
+  duration_ms: 48.1717
+  type: 'test'
+  ...
+# Subtest: room preview, create and join use the existing HTTP DTO mapping
+ok 158 - room preview, create and join use the existing HTTP DTO mapping
+  ---
+  duration_ms: 14.8799
+  type: 'test'
+  ...
+# Subtest: SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+ok 159 - SSE messages only invalidate, hidden streams close, and visible reconnect resumes the cursor
+  ---
+  duration_ms: 117.3732
+  type: 'test'
+  ...
+# Subtest: malformed API responses do not become transport state
+ok 160 - malformed API responses do not become transport state
+  ---
+  duration_ms: 6.4921
+  type: 'test'
+  ...
+# (node:19548) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/web/src/app/webmcp.ts:68
+# export class WebMcpActionError extends Error {
+#   constructor(readonly code: string, message: string) {
+#                        ^^^^^^^^^^^^
+#     super(message);
+# SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]: TypeScript parameter property is not supported in strip-only mode
+#     at parseTypeScript (node:internal/modules/typescript:63:40)
+#     at processTypeScriptCode (node:internal/modules/typescript:133:42)
+#     at stripTypeScriptModuleTypes (node:internal/modules/typescript:163:10)
+#     at ModuleLoader.<anonymous> (node:internal/modules/esm/translators:656:29)
+#     at \#translate (node:internal/modules/esm/loader:559:20)
+#     at afterLoad (node:internal/modules/esm/loader:612:29) {
+#   code: 'ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\web\\test\\webmcp.test.mjs
+not ok 21 - apps\\web\\test\\webmcp.test.mjs
+  ---
+  duration_ms: 421.2784
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\web\\test\\webmcp.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..161
+# tests 161
+# suites 0
+# pass 160
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 20463.4182

@@ -82,7 +82,7 @@ h1 { margin: 0; color: var(--color-ink); font-size: clamp(28px, 3.3vw, 44px); fo
 .loading-mark { display: inline-block; width: 32px; height: 32px; margin-bottom: 16px; border: 3px solid var(--color-border); border-top-color: var(--color-forest); border-radius: 50%; animation: loading-spin 900ms linear infinite; }
 .site-footer { display: flex; width: min(100% - 48px, 1376px); min-height: 56px; margin: 0 auto; padding-block: 12px; gap: 12px; align-items: center; justify-content: space-between; border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 12px; }
 @keyframes loading-spin { to { transform: rotate(360deg); } }
-@media (max-width: 1100px) { .match-page--playing { grid-template-columns: minmax(0, 1fr); grid-template-areas: "request" "controls" "table" "log"; } }
+@media (max-width: 1100px) { .match-page--playing { grid-template-columns: minmax(0, 1fr); grid-template-areas: "request" "table" "controls" "log"; } }
 @media (max-width: 760px) {
   .site-header { min-height: 64px; padding-inline: 16px; }
   .header-note { font-size: 12px; }

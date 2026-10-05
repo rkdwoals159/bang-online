@@ -1,0 +1,40 @@
+.choice-stage__dock { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border: 1px solid var(--color-brass-ink); border-radius: 12px; background: var(--color-brass-soft); }
+.choice-stage button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-ink); font: inherit; font-weight: 700; cursor: pointer; }
+.choice-stage button:disabled { opacity: .5; cursor: default; }
+.choice-stage__dialog { position: fixed; width: min(980px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 24px; overflow-y: auto; border: 2px solid var(--color-brass); border-radius: 20px; background: #133d30; color: #fffdf7; box-shadow: 0 24px 90px #0006; animation: choice-stage-enter 220ms ease-out; }
+.choice-stage__dialog::backdrop { background: rgb(5 18 14 / 72%); }
+.choice-stage__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.choice-stage__header h2 { margin: 0; color: #f4c968; font-size: 30px; letter-spacing: -.03em; }
+.choice-stage__header button { color: #e5ece5; background: transparent; border-color: #b8ccbf66; }
+.store-stage__turn { margin: 0 0 24px; padding: 12px 16px; border-radius: 10px; background: #ffffff12; color: #f6f2e7; font-size: 16px; text-align: center; }
+.store-stage__turn--mine { color: #ffe2a4; border: 1px solid #e8bd6980; }
+.store-stage__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); justify-content: center; align-items: start; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.store-stage__cards > li { display: grid; min-width: 0; justify-items: center; gap: 10px; animation: store-deal 350ms ease-out both; animation-delay: calc(var(--deal-index) * 45ms); }
+.store-stage__cards .playing-card { width: min(100%, 142px); }
+.store-stage__cards .card-zoom { width: 100%; max-width: 142px; }
+.store-stage__cards .card-zoom__trigger { background: transparent; padding: 0; border: 0; }
+.store-stage__cards strong { font-size: 14px; }
+.store-stage__cards li > button { width: 100%; max-width: 142px; background: #e8bd69; border-color: #e8bd69; color: #33260f; }
+.store-stage__players { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 24px 0 0; padding: 16px 0 0; border-top: 1px solid #b8ccbf44; list-style: none; }
+.store-stage__players li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 0 8px; align-items: center; padding: 8px; border: 1px solid transparent; border-radius: 10px; font-size: 13px; color: #b8ccbf; }
+.store-stage__players img { grid-row: 1 / 3; object-fit: cover; border-radius: 4px; }
+.store-stage__players .is-picking { border-color: #e8bd69; background: #e8bd691a; color: #ffdfa0; }
+.store-stage__players strong { font-size: 12px; }
+.store-stage__taken { position: fixed; bottom: 10%; left: 50%; pointer-events: none; display: grid; justify-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: #102b24ee; animation: store-take 650ms ease-in both; }
+.store-stage__taken .playing-card { width: 90px; }
+.store-stage__retry { margin-top: 16px; }
+.choice-stage__dialog .reaction-prompt { padding: 0; border: 0; border-radius: 0; background: transparent; color: #f6f2e7; }
+.choice-stage__dialog .reaction-prompt__header h2, .choice-stage__dialog .reaction-prompt__judgment { color: #f6f2e7; }
+.choice-stage__dialog .reaction-prompt__header { display: none; }
+.choice-stage__dialog .reaction-prompt__instruction { color: #173c2e; background: #eef4eb; margin-bottom: 20px; }
+.choice-stage__dialog .reaction-prompt__options { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+.choice-stage__dialog .reaction-prompt__option-row { gap: 12px; }
+.choice-stage__dialog .reaction-prompt__option-row .playing-card { width: 110px; }
+.choice-stage__dialog .reaction-prompt__judgment { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.choice-stage__dialog .reaction-prompt__judgment > p { width: 100%; }
+@keyframes choice-stage-enter { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes store-deal { from { opacity: 0; transform: translateY(-24px) rotate(-5deg); } to { opacity: 1; transform: none; } }
+@keyframes store-take { from { opacity: 1; transform: translate(-50%, 0) scale(1); } to { opacity: 0; transform: translate(-50%, 120px) scale(.45); } }
+@media (max-width: 600px) { .choice-stage__dialog { padding: 16px; } .choice-stage__header h2 { font-size: 24px; } .store-stage__cards { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px 8px; } .store-stage__cards .playing-card { width: 100%; } .store-stage__cards li > button { padding: 8px 4px; font-size: 13px; } .store-stage__turn { padding: 12px; font-size: 15px; } }
+.game-experience--still .store-stage__taken { display: none; }
+@media (prefers-reduced-motion: reduce) { .choice-stage__dialog, .store-stage__cards > li { animation: none; } .store-stage__taken { display: none; } }

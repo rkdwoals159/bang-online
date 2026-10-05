@@ -1,7 +1,7 @@
 """Prepare controlled visual review states in the local Sites D1 database only.
 
 Run from repository root: python scripts/local-design-fixture.py ROOM_ID play
-Supports play, completed, observer, paused; explicitly reload the QA browser after use.
+Supports play, experience, critical, completed, observer, paused; explicitly reload the QA browser after use.
 These fixtures verify UI states, not acceptance scenarios or a natural complete game.
 """
 import copy
@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 room_id, mode = sys.argv[1:3]
-if mode not in ('play', 'completed', 'observer', 'paused'):
+if mode not in ('play', 'experience', 'critical', 'completed', 'observer', 'paused'):
     raise ValueError('Unknown visual review mode')
 database = Path('apps/site/.wrangler/state/v3/d1/miniflare-D1DatabaseObject/faaf2b0445ab934c3aac48ddf0cdfade8f9bac050be98993748742cdd2cb05fb.sqlite').resolve()
 expected = Path('apps/site/.wrangler/state').resolve()
@@ -44,11 +44,36 @@ def eliminate(seat):
     seat['private']['handCardInstanceIds'] = []
     seat['public'].update(hp=0, eliminated=True, roleRevealed=True, inPlayCardInstanceIds=[])
 state['turn'].update(currentPlayerId=reviewer['public']['playerId'], phase='play', bangCardPlaysThisTurn=0)
-if mode == 'play':
+if mode in ('play', 'experience', 'critical'):
     for definition in ('beer_01', 'general_store_01'):
         card_id = next(i for i, c in zones['cardsByInstanceId'].items() if c['cardDefinitionId'] == definition)
         remove_card(card_id)
         reviewer['private']['handCardInstanceIds'].append(card_id)
+    if mode in ('experience', 'critical'):
+        # Controlled presentation fixture: no unresolved opening choice, all 80 cards preserved.
+        zones['drawPileCardInstanceIds'] += zones['revealedPoolCardInstanceIds']
+        zones['revealedPoolCardInstanceIds'] = []
+        state['resolution']['pendingInteraction'] = None
+        state['resolution']['effectQueue'] = []
+        state['resolution']['continuations'] = []
+        reviewer['public']['hp'] = max(1, reviewer['public']['maxHp'] - 1)
+        for definition in ('bang_01', 'gatling_01', 'panic_01', 'cat_balou_01', 'barrel_01', 'dynamite_01', 'jail_01', 'winchester_01'):
+            card_id = next(i for i, c in zones['cardsByInstanceId'].items() if c['cardDefinitionId'] == definition)
+            remove_card(card_id)
+            destination = reviewer['public']['inPlayCardInstanceIds'] if definition == 'winchester_01' else reviewer['private']['handCardInstanceIds']
+            destination.append(card_id)
+        opponents = [s for s in state['seats'] if s['public']['playerId'] != reviewer['public']['playerId']]
+        for seat, definition in zip(opponents, ('missed_01', 'missed_02', 'missed_03')):
+            card_id = next(i for i, c in zones['cardsByInstanceId'].items() if c['cardDefinitionId'] == definition)
+            remove_card(card_id)
+            seat['private']['handCardInstanceIds'].append(card_id)
+        if mode == 'critical':
+            # Actual PLAY_CARD/RESPOND commands must still create the death-rescue window.
+            target = next((s for s in opponents if s['public']['displayName'].startswith('디자인 검증')), opponents[0])
+            target['public']['hp'] = 1
+            beer_id = next(i for i, c in zones['cardsByInstanceId'].items() if c['cardDefinitionId'] == 'beer_01')
+            remove_card(beer_id)
+            target['private']['handCardInstanceIds'].append(beer_id)
 elif mode == 'completed':
     sheriff = next(s for s in state['seats'] if s['private']['roleId'] == 'sheriff')
     eliminate(sheriff)

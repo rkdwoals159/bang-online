@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { GameExperienceControls, TableEffects, useGameExperience } from "../experience/GameExperience.js";
 import { cardName } from "../actions/model.js";
 import { CharacterPortrait } from "../cards/CardFaces.js";
 import { AppIcon } from "../../components/AppIcon.js";
@@ -53,7 +55,11 @@ interface PositionedPlayer {
 /** A presentation-only table built from the authenticated seat's projection. */
 export function GameTable({ snapshot }: GameTableProps) {
   const players = orderPlayersForViewer(snapshot);
+  const surface = useRef<HTMLDivElement>(null);
   const activeSelfPrivate = snapshot.viewer.mode === "active" ? snapshot.selfPrivate : null;
+  const pending = snapshot.pendingInteraction;
+  const responderId = pending && "currentResponderPlayerId" in pending ? pending.currentResponderPlayerId : null;
+  const responseLabel = pending?.kind === "GENERAL_STORE_PICK" ? "카드 선택 중" : pending?.kind === "DEATH_RESCUE" ? "생명력 구제 중" : "응답 중";
   const isEliminated = snapshot.viewer.mode === "eliminated_observer";
 
   return (
@@ -62,16 +68,17 @@ export function GameTable({ snapshot }: GameTableProps) {
         <div>
           <h1 id="game-table-title">게임 테이블</h1>
         </div>
-        <span className="game-table__status">{statusNames[snapshot.status]}</span>
+        <GameExperienceControls />
+        {snapshot.status !== "playing" ? <span className="game-table__status">{statusNames[snapshot.status]}</span> : null}
       </header>
 
       {isEliminated ? (
-        <p className="game-table__observer-note" role="status">
+        <p className="game-table__observer-note sr-only" role="status">
           탈락한 플레이어로서 공개된 테이블을 보고 있습니다.
         </p>
       ) : null}
 
-      <div className="game-table__surface">
+      <div className="game-table__surface" ref={surface}>
         <div className="game-table__felt" aria-hidden="true" />
 
         <ol className="game-table__seats" aria-label="플레이어 좌석">
@@ -79,6 +86,7 @@ export function GameTable({ snapshot }: GameTableProps) {
             <PlayerSeat
               key={player.playerId}
               player={player}
+              responseLabel={player.playerId === responderId ? responseLabel : undefined}
               isViewer={player.playerId === snapshot.viewer.playerId}
               isCurrentTurn={player.playerId === snapshot.publicTable.turn.currentPlayerId}
               ownRole={
@@ -89,6 +97,7 @@ export function GameTable({ snapshot }: GameTableProps) {
             />
           ))}
         </ol>
+        <TableEffects surface={surface} />
       </div>
 
     </section>
@@ -100,12 +109,19 @@ function PlayerSeat({
   isViewer,
   isCurrentTurn,
   ownRole,
+  responseLabel,
 }: {
   player: PublicPlayerView;
   isViewer: boolean;
   isCurrentTurn: boolean;
   ownRole: RoleId | null;
+  responseLabel?: string;
 }) {
+  const experience = useGameExperience();
+  const cue = experience?.cue;
+  const target = experience?.targeting;
+  const canTarget = target?.playerIds.includes(player.playerId) ?? false;
+  const selected = canTarget && target?.selectedPlayerId === player.playerId;
   const role = player.role ?? ownRole;
   const characterName = characterNames[player.characterId] ?? "인물 카드";
   const accessibleName = [
@@ -131,7 +147,10 @@ function PlayerSeat({
         .filter(Boolean)
         .join(" ")}
     >
-      <article className="game-table__seat-card" aria-label={accessibleName}>
+      <article className="game-table__seat-card" aria-label={accessibleName}
+        data-player-seat={player.playerId}
+        data-effect={cue?.targetIds.includes(player.playerId) ? cue.kind : cue?.actorId === player.playerId ? "source" : undefined}
+        data-target={canTarget ? selected ? "selected" : "available" : undefined}>
         <CharacterPortrait characterId={player.characterId} />
         <div className="game-table__seat-heading">
           <div className="game-table__player-name">
@@ -142,6 +161,7 @@ function PlayerSeat({
         </div>
 
         <p className="game-table__character">{characterName}</p>
+        {responseLabel ? <span className="game-table__response-badge">{responseLabel}</span> : null}
 
         <div key={player.hp} className="game-table__health" aria-label={`생명력 ${player.hp}/${player.maxHp}`}>
           <AppIcon name="heart" />
@@ -168,6 +188,8 @@ function PlayerSeat({
             <span className="game-table__no-equipment">없음</span>
           )}
         </div>
+
+        {canTarget ? <button type="button" className="game-table__choose-target" aria-pressed={selected} aria-label={`${player.displayName} 대상 선택`} onClick={() => target?.choosePlayer(player.playerId)}>{selected ? "선택된 대상" : "이 플레이어 선택"}</button> : null}
 
         {player.eliminated ? (
           <span className="game-table__eliminated-label">탈락</span>

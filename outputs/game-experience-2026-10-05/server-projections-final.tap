@@ -1,0 +1,67 @@
+TAP version 13
+# (node:16504) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Panic/Cat presentation reveals affected seats without the hidden victim card
+ok 1 - Panic/Cat presentation reveals affected seats without the hidden victim card
+  ---
+  duration_ms: 19.5521
+  type: 'test'
+  ...
+# Subtest: R05 only Black Jack's explicitly public second draw reaches the shared event projection
+ok 2 - R05 only Black Jack's explicitly public second draw reaches the shared event projection
+  ---
+  duration_ms: 3.0592
+  type: 'test'
+  ...
+# Subtest: match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+ok 3 - match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+  ---
+  duration_ms: 3.9238
+  type: 'test'
+  ...
+# Subtest: match sync rejects an actor when membership is absent or the saved roster no longer contains them
+ok 4 - match sync rejects an actor when membership is absent or the saved roster no longer contains them
+  ---
+  duration_ms: 1.0372
+  type: 'test'
+  ...
+# Subtest: match sync flags a truncated or future event cursor for a full snapshot
+ok 5 - match sync flags a truncated or future event cursor for a full snapshot
+  ---
+  duration_ms: 1.3921
+  type: 'test'
+  ...
+# Subtest: room sync rechecks both authenticated view and persisted membership without returning invite material
+ok 6 - room sync rechecks both authenticated view and persisted membership without returning invite material
+  ---
+  duration_ms: 0.8799
+  type: 'test'
+  ...
+# Subtest: room sync carries the persisted active match route after START_MATCH
+ok 7 - room sync carries the persisted active match route after START_MATCH
+  ---
+  duration_ms: 0.3859
+  type: 'test'
+  ...
+# Subtest: room sync rejects a missing membership without disclosing the room ID
+ok 8 - room sync rejects a missing membership without disclosing the room ID
+  ---
+  duration_ms: 0.3617
+  type: 'test'
+  ...
+# Subtest: room sync rejects when persisted membership has expired after an earlier member view
+ok 9 - room sync rejects when persisted membership has expired after an earlier member view
+  ---
+  duration_ms: 0.5644
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2482.9755

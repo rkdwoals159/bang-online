@@ -54,10 +54,13 @@ try {
     assert.equal(eliminatedMarkup.includes(sentinel), false, `eliminated leaked ${sentinel}`);
   }
 
-  for (const markup of [survivorMarkup, eliminatedMarkup]) {
-    assert.doesNotMatch(markup, /\b(?:sheriff|deputy|outlaw|renegade)\b/);
-    assert.doesNotMatch(markup, /\b(?:bang|beer|mustang|scope)\b/);
-    assert.doesNotMatch(markup, /\bdata-[\w-]+=/);
+  for (const [markup, snapshot] of [[survivorMarkup, survivorSnapshot], [eliminatedMarkup, eliminatedSnapshot]]) {
+    const publicIds = new Set(snapshot.publicTable.players.map(p => p.playerId));
+    for (const match of markup.matchAll(/ data-player-seat="([^"]*)"/g)) assert.ok(publicIds.has(match[1]));
+    const content = markup.replace(/ data-player-seat="[^"]*"/g, "");
+    assert.doesNotMatch(content, /\b(?:sheriff|deputy|outlaw|renegade)\b/);
+    assert.doesNotMatch(content, /\b(?:bang|beer|mustang|scope)\b/);
+    assert.doesNotMatch(content, /\bdata-[\w-]+=/);
   }
 
   process.stdout.write("Survivor and eliminated projection render checks passed.\n");

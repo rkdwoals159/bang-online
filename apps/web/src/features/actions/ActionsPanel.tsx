@@ -1,3 +1,4 @@
+import { useGameExperience } from "../experience/GameExperience.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CommandAck,
@@ -61,6 +62,7 @@ export function ActionsPanel({
   transport,
   createCommandId = createDefaultCommandId,
 }: ActionsPanelProps) {
+  const experience = useGameExperience();
   const [syncedProjection, setSyncedProjection] = useState<(ActionsProjection & { readonly matchId: string }) | null>(null);
   const [selection, setSelection] = useState<ActionSelection | null>(null);
   const [noHealBeerConfirmation, setNoHealBeerConfirmation] = useState<NoHealBeerConfirmation | null>(null);
@@ -284,6 +286,28 @@ export function ActionsPanel({
       : [],
     [currentSnapshot, actions, activeCardIndexes, visibleSelection?.kind, visibleSelection?.kind === "card" ? visibleSelection.cardInstanceId : null],
   );
+  const setTableTargeting = experience?.setTargeting;
+  useEffect(() => {
+    if (!setTableTargeting) return;
+    const indexes = visibleSelection?.kind === "card" && canAct
+      ? getCardProposalIndexes(actions, visibleSelection.cardInstanceId) : [];
+    const grouped = new Map<string, number[]>();
+    indexes.forEach(index => {
+      const proposal = actions[index];
+      if (proposal?.type === "PLAY_CARD" && proposal.payload.targetPlayerId) {
+        const id = proposal.payload.targetPlayerId;
+        grouped.set(id, [...(grouped.get(id) ?? []), index]);
+      }
+    });
+    // A seat shortcut is offered only when it maps to one exact server proposal.
+    const unique = new Map([...grouped].filter(([, candidates]) => candidates.length === 1));
+    setTableTargeting(unique.size ? {
+      version: projection.version, playerIds: [...unique.keys()],
+      selectedPlayerId: selectedProposal?.type === "PLAY_CARD" ? selectedProposal.payload.targetPlayerId : undefined,
+      choosePlayer: id => { const index = unique.get(id)?.[0]; if (index !== undefined) chooseProposal(index); },
+    } : null);
+    return () => setTableTargeting(null);
+  }, [setTableTargeting, projection.version, visibleSelection?.kind, visibleSelection?.kind === "card" ? visibleSelection.cardInstanceId : null, visibleSelection?.kind === "card" ? visibleSelection.proposalIndex : null, canAct]);
   const endTurnIndexes = useMemo(
     () => actions.flatMap((action, index) => action.type === "END_TURN" ? [index] : []),
     [actions],

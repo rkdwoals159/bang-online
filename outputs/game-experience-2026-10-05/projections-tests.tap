@@ -1,0 +1,100 @@
+TAP version 13
+# (node:25100) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Panic/Cat presentation reveals affected seats without the hidden victim card
+ok 1 - Panic/Cat presentation reveals affected seats without the hidden victim card
+  ---
+  duration_ms: 5.7443
+  type: 'test'
+  ...
+# Subtest: R05 only Black Jack's explicitly public second draw reaches the shared event projection
+ok 2 - R05 only Black Jack's explicitly public second draw reaches the shared event projection
+  ---
+  duration_ms: 0.9757
+  type: 'test'
+  ...
+# Subtest: match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+ok 3 - match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+  ---
+  duration_ms: 2.9442
+  type: 'test'
+  ...
+# Subtest: match sync rejects an actor when membership is absent or the saved roster no longer contains them
+ok 4 - match sync rejects an actor when membership is absent or the saved roster no longer contains them
+  ---
+  duration_ms: 0.8335
+  type: 'test'
+  ...
+# Subtest: match sync flags a truncated or future event cursor for a full snapshot
+ok 5 - match sync flags a truncated or future event cursor for a full snapshot
+  ---
+  duration_ms: 1.2494
+  type: 'test'
+  ...
+# Subtest: room sync rechecks both authenticated view and persisted membership without returning invite material
+ok 6 - room sync rechecks both authenticated view and persisted membership without returning invite material
+  ---
+  duration_ms: 0.8292
+  type: 'test'
+  ...
+# Subtest: room sync carries the persisted active match route after START_MATCH
+ok 7 - room sync carries the persisted active match route after START_MATCH
+  ---
+  duration_ms: 0.3832
+  type: 'test'
+  ...
+# Subtest: room sync rejects a missing membership without disclosing the room ID
+ok 8 - room sync rejects a missing membership without disclosing the room ID
+  ---
+  duration_ms: 0.3482
+  type: 'test'
+  ...
+# Subtest: room sync rejects when persisted membership has expired after an earlier member view
+ok 9 - room sync rejects when persisted membership has expired after an earlier member view
+  ---
+  duration_ms: 0.61
+  type: 'test'
+  ...
+# (node:1128) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# file:///C:/Users/user/Documents/Codex/2026-09-27/new-chat-2/apps/site/src/storage/repository.ts:349
+# export class MatchNotFoundError extends Error {
+#   constructor(readonly matchId: string) {
+#                        ^^^^^^^^^^^^^^^
+#     super(`Match '${matchId}' does not exist.`);
+# SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]: TypeScript parameter property is not supported in strip-only mode
+#     at parseTypeScript (node:internal/modules/typescript:63:40)
+#     at processTypeScriptCode (node:internal/modules/typescript:133:42)
+#     at stripTypeScriptModuleTypes (node:internal/modules/typescript:163:10)
+#     at ModuleLoader.<anonymous> (node:internal/modules/esm/translators:656:29)
+#     at \#translate (node:internal/modules/esm/loader:559:20)
+#     at afterLoad (node:internal/modules/esm/loader:612:29) {
+#   code: 'ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX'
+# }
+# Node.js v22.23.1
+# Subtest: apps\\site\\test\\server\\match-sync.test.ts
+not ok 2 - apps\\site\\test\\server\\match-sync.test.ts
+  ---
+  duration_ms: 1903.3928
+  type: 'test'
+  location: 'C:\\Users\\user\\Documents\\Codex\\2026-09-27\\new-chat-2\\apps\\site\\test\\server\\match-sync.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 9
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2056.9711

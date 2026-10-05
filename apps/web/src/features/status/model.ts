@@ -109,6 +109,8 @@ const publicEventMessages: Readonly<Record<string, string>> = Object.freeze({
   JAIL_JUDGMENT_RESOLVED: "감옥 판정이 끝났어요.",
   BLACK_JACK_CARD_REVEALED: "블랙 잭의 두 번째 카드가 공개됐어요.",
   GENERAL_STORE_CARD_REVEALED: "잡화점 카드가 공개됐어요.",
+  PANIC_USED: "패닉!으로 카드를 가져왔어요.",
+  CAT_BALOU_USED: "캣 벌루로 카드를 버렸어요.",
 });
 
 function isValidEventSeq(event: PublicMatchEvent): boolean {
@@ -207,6 +209,8 @@ export function formatPublicEvent(
 
   switch (event.type) {
     case "BANG_ATTACKED": return actor && target ? `${actor} 님이 ${target} 님을 뱅!으로 공격해요.` : fallback;
+    case "PANIC_USED": return actor && target ? `${actor} 님이 ${target} 님에게 패닉!을 사용했어요.` : fallback;
+    case "CAT_BALOU_USED": return actor && target ? `${actor} 님이 ${target} 님에게 캣 벌루를 사용했어요.` : fallback;
     case "BANG_HIT": return actor && target ? `${actor} 님의 뱅!이 ${target} 님에게 적중했어요${damage}.` : fallback;
     case "BANG_MISSED": return target ? `${target} 님이 뱅!을 피했어요.` : fallback;
     case "GATLING_STARTED": {

@@ -19,6 +19,22 @@ import { createSyncProjectionHandlers, syncProjectionInternals } from "../../src
 
 const FIXED_DATE = new Date("2026-09-28T00:00:00.000Z");
 
+test("Panic/Cat presentation reveals affected seats without the hidden victim card", () => {
+  const state = makeState();
+  for (const [typeId, eventType, projectedType] of [["panic", "CARD_TRANSFERRED", "PANIC_USED"], ["cat_balou", "CARD_DISCARDED", "CAT_BALOU_USED"]]) {
+    const source = Object.values(state.zones.cardsByInstanceId).find(c => c.cardDefinitionId.startsWith(`${typeId}_`));
+    assert.ok(source);
+    const event: MatchEventRecord = { eventId: "presentation", eventSeq: 1, version: 1, createdAt: FIXED_DATE, type: eventType, actorPlayerId: "player-a", payload: {
+      sourceCardInstanceId: source.cardInstanceId, cardInstanceId: "hidden-victim-card", fromPlayerId: "player-b", ownerPlayerId: "player-b", fromZone: "hand", toZone: eventType === "CARD_TRANSFERRED" ? "hand" : "discard", toPlayerId: "player-a", secret: "private-sentinel", rank: "K", suit: "SPADES",
+    } };
+    const projected = syncProjectionInternals.projectEvent(event, state);
+    assert.equal(projected?.type, projectedType);
+    assert.deepEqual(projected?.payload, { actorPlayerId: "player-a", targetPlayerId: "player-b", targetZone: "hand" });
+    assert.doesNotMatch(JSON.stringify(projected), /hidden-victim-card|private-sentinel|sourceCardInstanceId|SPADES/);
+    assert.equal(syncProjectionInternals.projectEvent({ ...event, payload: { ...event.payload as object, cardInstanceId: source.cardInstanceId } }, state), undefined, "discarding the played source card is not a target effect");
+  }
+});
+
 test("R05 only Black Jack's explicitly public second draw reaches the shared event projection", () => {
   const state = makeState();
   state.seats[0]!.public.characterId = "black_jack";

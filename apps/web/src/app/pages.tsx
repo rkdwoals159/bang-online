@@ -1,3 +1,4 @@
+import { GameExperience } from "../features/experience/GameExperience.js";
 import { characterDescriptions } from "../features/cards/character-descriptions.js";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { MatchSnapshotView, RoomView, PublicMatchEvent } from "../../../../packages/contracts/src/protocol.js";
@@ -509,10 +510,14 @@ export function MatchPage({
   const statusSync = { version, snapshot, visibleEvents };
   const completed = snapshot.status === "completed";
   const pending = snapshot.pendingInteraction;
+  const sharedStore = pending?.kind === "GENERAL_STORE_PICK";
   const choosingDiscards = pending && "discardOrder" in pending && pending.discardOrder &&
     "currentResponderPlayerId" in pending && pending.currentResponderPlayerId === snapshot.viewer.playerId;
+  const showControls = showActions && !completed &&
+    (snapshot.viewer.mode === "active" || choosingDiscards || pending?.kind === "LUCKY_DRAW");
   return (
-    <div className={`match-page${completed ? " match-page--result" : " match-page--playing"}`}>
+    <GameExperience key={matchId} version={version} snapshot={snapshot} visibleEvents={visibleEvents}>
+    <div className={`match-page${completed ? " match-page--result" : " match-page--playing"}${snapshot.viewer.mode !== "active" && !showControls ? " match-page--observer" : ""}`}>
       {!completed ? <MatchRequestBanner snapshot={snapshot} /> : null}
       {completed ? (
         <StatusPanel
@@ -523,10 +528,11 @@ export function MatchPage({
           transport={transport}
         />
       ) : null}
-      {showActions && !completed ? (
+      {sharedStore && !completed ? <div className="match-page__shared-choice"><ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} /></div> : null}
+      {showControls ? (
         <MatchInputGate status={snapshot.status}>
-          <ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} />
-          {!choosingDiscards ? <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
+          {!sharedStore ? <ReactionPrompt matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
+          {!choosingDiscards && snapshot.viewer.mode === "active" ? <ActionsPanel matchId={matchId} version={version} snapshot={snapshot} transport={transport} /> : null}
         </MatchInputGate>
       ) : null}
       {completed ? (
@@ -547,6 +553,7 @@ export function MatchPage({
         </>
       )}
     </div>
+    </GameExperience>
   );
 }
 

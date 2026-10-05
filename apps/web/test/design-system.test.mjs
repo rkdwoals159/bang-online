@@ -21,7 +21,8 @@ test('design: public portraits open character details and preserve role/hand pri
     const markup = renderToStaticMarkup(createElement(GameTable, { snapshot }));
     for (const sentinel of forbiddenSentinels) assert.equal(markup.includes(sentinel), false);
     assert.equal((markup.match(/class="character-portrait" aria-hidden="true"/g) ?? []).length, snapshot.publicTable.players.length);
-    assert.doesNotMatch(markup, /내 손패|\bdata-[\w-]+=/);
+    assert.doesNotMatch(markup.replace(/ data-player-seat="[^"]*"/g, ""), /내 손패|\bdata-[\w-]+=/);
+    for (const player of snapshot.publicTable.players) assert.ok(markup.includes(`data-player-seat="${player.playerId}"`));
   }
   const markup = renderToStaticMarkup(createElement(GameTable, { snapshot: survivorSnapshot }));
   assert.match(markup, /내 역할 배신자/);
@@ -56,7 +57,7 @@ test('design: a single main landmark is reachable by skip link', async () => {
 
 test('design: desktop/tablet/mobile layouts avoid absolute seat positioning', async () => {
   const [app, table, reactions] = await Promise.all([source('app/app.css'), source('features/game-table/game-table.css'), source('features/reactions/reactions.css')]);
-  assert.match(app, /"request" "controls" "table" "log"/);
+  assert.match(app, /"request" "table" "controls" "log"/);
   assert.match(app, /prefers-reduced-motion: reduce/);
   assert.match(table, /repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(table, /:nth-child\(7\)/);
