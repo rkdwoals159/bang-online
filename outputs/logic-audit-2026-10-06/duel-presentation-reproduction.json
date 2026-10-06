@@ -1,0 +1,25 @@
+{
+  "id": "A04",
+  "event": {
+    "eventSeq": 1,
+    "type": "DUEL_BANG_PLAYED",
+    "occurredAt": "2026-10-05T15:15:58.449Z",
+    "payload": {
+      "initiatorPlayerId": "player-A",
+      "responderPlayerId": "player-A",
+      "cardType": "bang",
+      "asCardType": "bang",
+      "actorPlayerId": "player-A"
+    }
+  },
+  "shot": {
+    "id": "event:1",
+    "kind": "shot",
+    "label": "Seat A · 결투 뱅!",
+    "actorId": "player-A",
+    "targetIds": [
+      "player-A"
+    ]
+  },
+  "expectedTarget": "player-B"
+}

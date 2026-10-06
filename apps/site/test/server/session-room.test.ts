@@ -7,10 +7,80 @@ import { handleRoomsRoute } from "../../src/server/routes/rooms.js";
 import { handleSessionRoute } from "../../src/server/routes/session.js";
 import type { D1DatabaseLike } from "../../src/storage/d1-types.js";
 import { D1StorageRepository } from "../../src/storage/repository.js";
+import { D1InviteRateLimiter } from "../../src/storage/invite-limiter.js";
 import { countRows, createIsolatedD1 } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
 const FIXED_TIME = Date.parse("2026-09-27T12:00:00.000Z");
+
+test("A03 lost create replies can be recovered by owner invite rotation, with CAS and no secret in projections", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const options = serviceOptions({ value: FIXED_TIME });
+    const owner = await createGuest(db, "Owner", options), visitor = await createGuest(db, "Visitor", options);
+    const id = nextCommandId(), created = await createRoom(db, owner, options, id);
+    const replay = await createRoom(db, owner, options, id);
+    assert.equal(replay.roomId, created.roomId); assert.equal(replay.inviteCode, null);
+    const reissue = (guest: Guest, expectedVersion: number) => handleRoomsRoute(request(`/api/rooms/${created.roomId}/invite`, {
+      cookie: guest.cookie, body: { protocolVersion: 1, expectedVersion },
+    }), { DB: db }, options);
+    assert.equal((await reissue(visitor, 0))!.status, 403);
+    const responses = await Promise.all([reissue(owner, 0), reissue(owner, 0)]);
+    assert.deepEqual(responses.map(response => response!.status).sort(), [200, 409]);
+    const renewed = await json(responses.find(response => response!.status === 200)!) as { inviteCode: string; version: number };
+    assert.ok(renewed.inviteCode); assert.notEqual(renewed.inviteCode, created.inviteCode); assert.equal(renewed.version, 1);
+    const repository = new D1StorageRepository(db), stored = (await repository.getRoom(created.roomId))!;
+    assert.equal(stored.players.length, 1); assert.equal(stored.inviteCodeHash, await sha256Hex(renewed.inviteCode));
+    const recovery = await handleSessionRoute(request("/api/guest-sessions/rooms", { method: "GET", cookie: owner.cookie }), { DB: db }, options);
+    assert.equal((await recovery!.text()).includes(renewed.inviteCode), false);
+    const oldJoin = await sendRoomCommand(db, visitor, options, roomCommand("JOIN", created.roomId, 1, { inviteCode: created.inviteCode }), created.roomId);
+    assertRejected(oldJoin.body, "INVITE_INVALID");
+    const newJoin = await sendRoomCommand(db, visitor, options, roomCommand("JOIN", created.roomId, 1, { inviteCode: renewed.inviteCode }), created.roomId);
+    assert.equal(assertRoomView(newJoin.body).members.length, 2);
+    assert.equal(await countRows(db, "commit_guards"), 0);
+    await db.prepare("UPDATE rooms SET status = 'closed' WHERE id = ?").bind(created.roomId).run();
+    assert.equal((await reissue(owner, 2))!.status, 403);
+  } finally { await runtime.dispose(); }
+});
+
+test("A06 seat recovery excludes closed rooms", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const options = serviceOptions({ value: FIXED_TIME }), owner = await createGuest(db, "Owner", options);
+    const closed = await createRoom(db, owner, options), live = await createRoom(db, owner, options);
+    await db.prepare("UPDATE rooms SET status = 'closed' WHERE id = ?").bind(closed.roomId).run();
+    const response = await handleSessionRoute(request("/api/guest-sessions/rooms", { method: "GET", cookie: owner.cookie }), { DB: db }, options);
+    assert.deepEqual((await json(response!) as Array<{ roomId: string }>).map(room => room.roomId), [live.roomId]);
+  } finally { await runtime.dispose(); }
+});
+
+test("A07 retryAt survives rolling expiry; exact deadline and 15 minute idle reset work without cleanup", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const limiter = new D1InviteRateLimiter(db), hash = "c".repeat(64);
+    for (let index = 0; index < 5; index++) {
+      const reservation = await limiter.reserve(hash, `failure-${index}`, index);
+      assert.ok(reservation.allowed); await reservation.complete("invalid", index);
+    }
+    for (let index = 0; index < 12; index++) assert.equal((await limiter.reserve(hash, `early-${index}`, 10 + index)).allowed, false);
+    const afterWindow = await limiter.reserve(hash, "after-window", 62_000);
+    assert.equal(afterWindow.allowed, false, "future retryAt must be enforced after failures expire");
+    const bucket = await db.prepare("SELECT retry_at FROM invite_attempts WHERE bucket_hash = ?").bind(hash).first<{ retry_at: number }>();
+    assert.ok(bucket);
+    const boundary = await limiter.reserve(hash, "exact-deadline", bucket.retry_at);
+    assert.ok(boundary.allowed); await boundary.complete("neutral", bucket.retry_at);
+    const idleTime = bucket.retry_at + 900_000;
+    for (let index = 0; index < 5; index++) {
+      const reservation = await limiter.reserve(hash, `after-idle-${index}`, idleTime + index);
+      assert.ok(reservation.allowed); await reservation.complete("invalid", idleTime + index);
+    }
+    const blocked = await limiter.reserve(hash, "idle-first-block", idleTime + 10);
+    assert.ok(!blocked.allowed); assert.equal(blocked.retryAfterMs, 1000);
+    const early = await limiter.reserve(hash, "idle-early", idleTime + 11);
+    assert.ok(!early.allowed); assert.equal(early.retryAfterMs, 2000);
+    assert.equal(await countRows(db, "commit_guards"), 0);
+  } finally { await runtime.dispose(); }
+});
 
 test("R08 owner kick removes one waiting member, replays once, and allows the guest to rejoin", async () => {
   const { runtime, db } = await createIsolatedD1();

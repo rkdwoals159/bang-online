@@ -782,6 +782,32 @@ export class D1StorageRepository {
     return mapRoom(row, (results[1]?.results ?? []) as RoomPlayerRow[]);
   }
 
+  /** Owner-only invite rotation. No raw invite is stored or exposed in room projections. */
+  async rotateRoomInvite(roomId: string, ownerPlayerId: string, expectedVersion: number,
+    inviteCodeHash: string, markerId: string, outboxEventId: string): Promise<number> {
+    requiredText(inviteCodeHash, "Invite code hash");
+    const results = await this.db.batch([
+      this.db.prepare(`INSERT INTO commit_guards (marker_id, aggregate_id, expected_version)
+        SELECT ?, id, version FROM rooms WHERE id = ? AND owner_player_id = ? AND status = 'waiting' AND version = ?
+          AND EXISTS (SELECT 1 FROM room_players WHERE room_id = rooms.id AND player_id = ?)`)
+        .bind(markerId, roomId, ownerPlayerId, expectedVersion, ownerPlayerId),
+      this.db.prepare(`UPDATE rooms SET invite_code_hash = ?, version = version + 1,
+        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        WHERE id = ? AND version = ? AND EXISTS (SELECT 1 FROM commit_guards WHERE marker_id = ?)`)
+        .bind(inviteCodeHash, roomId, expectedVersion, markerId),
+      roomOutboxWrite(this.db, outboxEventId, roomId, expectedVersion + 1, markerId),
+      this.db.prepare("DELETE FROM commit_guards WHERE marker_id = ?").bind(markerId),
+    ]);
+    if (changes(results[0]) !== 1 || changes(results[1]) !== 1) {
+      const room = await this.getRoom(roomId);
+      if (!room || room.ownerPlayerId !== ownerPlayerId || !room.players.some(player => player.playerId === ownerPlayerId)) {
+        throw new RoomNotFoundError(roomId);
+      }
+      throw new RoomVersionConflictError(expectedVersion, room.version);
+    }
+    return expectedVersion + 1;
+  }
+
   async getRoomPreviewByInviteHash(inviteCodeHash: string): Promise<RoomPreviewRecord | null> {
     const row = await this.db.prepare(`
       SELECT r.id, r.version, r.status, COUNT(rp.player_id) AS occupancy
@@ -805,7 +831,7 @@ export class D1StorageRepository {
       JOIN rooms AS r ON r.id = viewer.room_id
       JOIN room_players AS members ON members.room_id = r.id
       LEFT JOIN guest_sessions AS gs ON gs.id = members.player_id
-      WHERE viewer.player_id = ?
+      WHERE viewer.player_id = ? AND r.status <> 'closed'
       ORDER BY viewer.joined_at, r.id, members.seat_index
     `).bind(playerId).all<RoomRow & RoomPlayerRow & { viewer_joined_at: string }>();
     const groups = new Map<string, { room: RoomRow; players: RoomPlayerRow[] }>();

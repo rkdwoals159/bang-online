@@ -75,7 +75,7 @@ const PUBLIC_EVENT_FIELDS: Readonly<Record<string, readonly string[]>> = Object.
   INDIANS_DEFENDED: ["targetPlayerId", "convertedFromMissed"],
   DUEL_STARTED: ["initiatorPlayerId", "targetPlayerId"],
   DUEL_YIELDED: ["initiatorPlayerId", "playerId", "damage"],
-  DUEL_BANG_PLAYED: ["initiatorPlayerId", "responderPlayerId", "cardType", "asCardType"],
+  DUEL_BANG_PLAYED: ["initiatorPlayerId", "responderPlayerId", "targetPlayerId", "cardType", "asCardType"],
   BEER_USED: ["mode", "healed"],
   SALOON_USED: ["healedPlayerIds"],
   PLAYER_HEALED: ["targetPlayerId", "amount", "cause"],

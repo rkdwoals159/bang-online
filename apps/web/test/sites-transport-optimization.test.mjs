@@ -12,7 +12,7 @@ test("P01 a committed ACK projection updates the store and UI without a second m
     if (url.endsWith("/sync")) { reads++; return Response.json(matchSync(JSON.parse(init.body))); }
     if (url.endsWith("/commands")) return Response.json({ protocolVersion: 1,
       commandId: JSON.parse(init.body).commandId, status: "accepted", duplicate: false,
-      aggregateVersion: 2, eventSeq: 2, matchProjection: { snapshot: matchSync({}).snapshot, visibleEvents: [] } });
+      aggregateVersion: 2, eventSeq: 2, matchProjection: { baseEventSeq: 1, snapshot: matchSync({}).snapshot, visibleEvents: [] } });
     throw new Error(url);
   } });
   await transport.restoreGuestSession();
@@ -495,7 +495,7 @@ test("new guests use JSON create/join without an initial SSE dependency; version
   assert.equal(joined.version, 5);
   assert.equal(transport.getSnapshot().rooms["joined-room"].version, 5);
   assert.equal(syncRequests.length, 1, "create requires one full projection, while versioned JOIN ACK does not need a follow-up");
-  assert.equal(sourceAttempts, 2, "unavailable SSE must not block either JSON write");
+  assert.equal(sourceAttempts, 0, "create/join must not subscribe rooms until the route is being viewed");
   transport.disconnect();
 });
 

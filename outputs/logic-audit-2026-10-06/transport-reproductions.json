@@ -1,0 +1,27 @@
+[
+  {
+    "id": "A01",
+    "connection": "connected",
+    "lastError": "INVALID_RESPONSE",
+    "version": 1,
+    "readCallsAfterInitial": 1,
+    "readCallsAfterRepeatedHint": 0
+  },
+  {
+    "id": "A02",
+    "cachedEventSeq": 14,
+    "visibleSequences": [
+      10,
+      14
+    ],
+    "lastReadCursor": 14
+  },
+  {
+    "id": "A05",
+    "lastError": "SYNC_REJECTED",
+    "cachedRoomAfterMembershipRejected": true,
+    "cachedMemberIds": [
+      "p0"
+    ]
+  }
+]

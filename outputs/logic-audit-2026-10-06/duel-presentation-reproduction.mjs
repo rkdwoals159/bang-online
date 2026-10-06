@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {runEngineAcceptanceScenario,findCard,playerId} from '../../packages/test-fixtures/engine/index.ts';
+import {BASE_PHYSICAL_CARDS} from '../../packages/catalog/src/cards/index.ts';
+import {projectMatchSnapshot} from '../../packages/engine/src/state/projection.ts';
+import {syncProjectionInternals} from '../../apps/server/src/projections/sync.ts';
+import {advancePresentation} from '../../apps/web/src/features/experience/model.ts';
+import {writeFileSync} from 'node:fs';
+let evidence;
+runEngineAcceptanceScenario({id:'audit-duel',seats:{A:{hand:[{typeId:'duel'},{typeId:'bang'}]},B:{hand:[{typeId:'bang'}]}}},session=>{
+  assert.ok(session.play('A',findCard(session.state,'duel',{player:'A',zone:'hand'}),'B').ok);
+  assert.ok(session.respond('B','PLAY_BANG',{cardInstanceId:findCard(session.state,'bang',{player:'B',zone:'hand'})}).ok);
+  const old=projectMatchSnapshot(session.state,playerId('A'),BASE_PHYSICAL_CARDS),version=session.state.version;
+  const before=advancePresentation(null,version,old,[],Date.now()).cursor;
+  const prior=session.events.length;
+  assert.ok(session.respond('A','PLAY_BANG',{cardInstanceId:findCard(session.state,'bang',{player:'A',zone:'hand'})}).ok);
+  const draft=session.events.slice(prior).find(e=>e.type==='DUEL_BANG_PLAYED');assert.ok(draft);
+  const projected=syncProjectionInternals.projectEvent({...draft,eventSeq:1,createdAt:new Date()},session.state);assert.ok(projected);
+  const snapshot=projectMatchSnapshot(session.state,playerId('A'),BASE_PHYSICAL_CARDS);
+  const next=advancePresentation(before,session.state.version,snapshot,[projected],Date.now());
+  const shot=next.cues.find(cue=>cue.kind==='shot');assert.ok(shot);
+  evidence={id:'A04',event:projected,shot,expectedTarget:playerId('B')};
+  assert.deepEqual(shot.targetIds,[playerId('A')]);
+});
+writeFileSync(new URL('./duel-presentation-reproduction.json',import.meta.url),JSON.stringify(evidence,null,2));console.log(JSON.stringify(evidence,null,2));

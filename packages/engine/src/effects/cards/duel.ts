@@ -134,6 +134,7 @@ function damageResult(
 function bangResponseEvents(
   input: CardEffectInput,
   initiatorPlayerId: string,
+  opponentPlayerId: string,
   responder: EffectSeat,
   cardInstanceId: string,
   typeId: "bang" | "missed",
@@ -150,6 +151,7 @@ function bangResponseEvents(
       sourceCardInstanceId: input.sourceCardInstanceId,
       initiatorPlayerId,
       responderPlayerId: responder.public.playerId,
+      targetPlayerId: opponentPlayerId,
       cardInstanceId,
       cardType: typeId,
       asCardType: "bang",
@@ -260,6 +262,7 @@ function resolveDuel(input: CardEffectInput): CardEffectResult {
     prefixEvents = bangResponseEvents(
       input,
       initiator.public.playerId,
+      currentResponder.public.playerId,
       lastResponse.responder,
       lastResponse.card.cardInstanceId,
       lastResponse.card.typeId,

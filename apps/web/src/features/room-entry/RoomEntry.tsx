@@ -183,7 +183,7 @@ export function RoomEntry({
       setCreatedRoom(safeResult);
       createIntent.current = null;
       if (safeResult.inviteCode === null) {
-        setErrorMessage("방은 이미 만들어졌지만 초대 링크는 다시 받을 수 없어요. 새 초대가 필요하면 새 방을 만들어 주세요.");
+        setNotice("대기실에서 초대 링크를 발급할 수 있어요.");
       } else {
         setNotice("방이 만들어졌어요. 초대 링크를 친구에게 공유해 주세요.");
       }

@@ -76,7 +76,7 @@ export function isRoomProjectionInputEnabled(
 ): boolean {
   const usableTransport = connection === "connected" ||
     (writesAvailableWhileDisconnected && connection === "disconnected");
-  const connectionErrorAcknowledged = lastError !== "CONNECTION";
+  const connectionErrorAcknowledged = lastError === null;
   return usableTransport && connectionErrorAcknowledged && !awaitingAuthoritativeSync;
 }
 
@@ -233,6 +233,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     sessionRecovery,
     retrySessionRecovery,
     inviteCodeForRoom,
+    rememberCreatedRoom,
   } = useAppState();
   const roomId = route.roomId;
   const writesAvailableWhileDisconnected = transport.writesAvailableWhileDisconnected === true;
@@ -295,7 +296,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
     }).catch(() => {
       // Keep the cached server projection visible and input locked until a sync succeeds.
     });
-  }, [roomId, sessionRecovery, transport, transportState.connection, writesAvailableWhileDisconnected]);
+  }, [roomId, sessionRecovery, transport, transportState.connection, transportState.lastError, writesAvailableWhileDisconnected]);
 
   useEffect(() => {
     if (transportState.lastError !== "CONNECTION") {
@@ -352,6 +353,8 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
       retry={retrySessionRecovery}
     />;
   }
+  if (transportState.unavailableRooms?.includes(roomId) ||
+      (matchId && transportState.unavailableMatches?.includes(matchId))) return <RoomUnavailablePage />;
   if (!room) {
     if (transportState.lastError === "SYNC_REJECTED") return <RoomUnavailablePage />;
     if ((transportState.connection === "disconnected" || transportState.lastError === "CONNECTION") &&
@@ -413,6 +416,10 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
           room={room}
           roomVersion={roomProjection?.version ?? 0}
           inviteCode={inviteCodeForRoom(roomId)}
+          onReissueInvite={transport.reissueRoomInvite ? async () => {
+            const result = await transport.reissueRoomInvite!(roomId, roomProjection?.version ?? 0);
+            rememberCreatedRoom(result);
+          } : undefined}
           viewerConnectionState={transportState.connection}
           onCommand={async (command) => {
             const response = await transport.sendRoomCommand(command);

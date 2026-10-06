@@ -1,0 +1,486 @@
+{
+  "scope": "Isolated deterministic random walks, not production/browser acceptance",
+  "commands": 14433,
+  "results": [
+    {
+      "seed": 1,
+      "count": 5,
+      "steps": 234,
+      "status": "completed"
+    },
+    {
+      "seed": 2,
+      "count": 6,
+      "steps": 264,
+      "status": "completed"
+    },
+    {
+      "seed": 3,
+      "count": 7,
+      "steps": 245,
+      "status": "completed"
+    },
+    {
+      "seed": 4,
+      "count": 4,
+      "steps": 134,
+      "status": "completed"
+    },
+    {
+      "seed": 5,
+      "count": 5,
+      "steps": 140,
+      "status": "completed"
+    },
+    {
+      "seed": 6,
+      "count": 6,
+      "steps": 195,
+      "status": "completed"
+    },
+    {
+      "seed": 7,
+      "count": 7,
+      "steps": 199,
+      "status": "completed"
+    },
+    {
+      "seed": 8,
+      "count": 4,
+      "steps": 99,
+      "status": "completed"
+    },
+    {
+      "seed": 9,
+      "count": 5,
+      "steps": 176,
+      "status": "completed"
+    },
+    {
+      "seed": 10,
+      "count": 6,
+      "steps": 228,
+      "status": "completed"
+    },
+    {
+      "seed": 11,
+      "count": 7,
+      "steps": 223,
+      "status": "completed"
+    },
+    {
+      "seed": 12,
+      "count": 4,
+      "steps": 143,
+      "status": "completed"
+    },
+    {
+      "seed": 13,
+      "count": 5,
+      "steps": 213,
+      "status": "completed"
+    },
+    {
+      "seed": 14,
+      "count": 6,
+      "steps": 181,
+      "status": "completed"
+    },
+    {
+      "seed": 15,
+      "count": 7,
+      "steps": 154,
+      "status": "completed"
+    },
+    {
+      "seed": 16,
+      "count": 4,
+      "steps": 199,
+      "status": "completed"
+    },
+    {
+      "seed": 17,
+      "count": 5,
+      "steps": 189,
+      "status": "completed"
+    },
+    {
+      "seed": 18,
+      "count": 6,
+      "steps": 137,
+      "status": "completed"
+    },
+    {
+      "seed": 19,
+      "count": 7,
+      "steps": 222,
+      "status": "completed"
+    },
+    {
+      "seed": 20,
+      "count": 4,
+      "steps": 71,
+      "status": "completed"
+    },
+    {
+      "seed": 21,
+      "count": 5,
+      "steps": 147,
+      "status": "completed"
+    },
+    {
+      "seed": 22,
+      "count": 6,
+      "steps": 145,
+      "status": "completed"
+    },
+    {
+      "seed": 23,
+      "count": 7,
+      "steps": 232,
+      "status": "completed"
+    },
+    {
+      "seed": 24,
+      "count": 4,
+      "steps": 116,
+      "status": "completed"
+    },
+    {
+      "seed": 25,
+      "count": 5,
+      "steps": 252,
+      "status": "completed"
+    },
+    {
+      "seed": 26,
+      "count": 6,
+      "steps": 199,
+      "status": "completed"
+    },
+    {
+      "seed": 27,
+      "count": 7,
+      "steps": 221,
+      "status": "completed"
+    },
+    {
+      "seed": 28,
+      "count": 4,
+      "steps": 185,
+      "status": "completed"
+    },
+    {
+      "seed": 29,
+      "count": 5,
+      "steps": 148,
+      "status": "completed"
+    },
+    {
+      "seed": 30,
+      "count": 6,
+      "steps": 173,
+      "status": "completed"
+    },
+    {
+      "seed": 31,
+      "count": 7,
+      "steps": 97,
+      "status": "completed"
+    },
+    {
+      "seed": 32,
+      "count": 4,
+      "steps": 150,
+      "status": "completed"
+    },
+    {
+      "seed": 33,
+      "count": 5,
+      "steps": 105,
+      "status": "completed"
+    },
+    {
+      "seed": 34,
+      "count": 6,
+      "steps": 132,
+      "status": "completed"
+    },
+    {
+      "seed": 35,
+      "count": 7,
+      "steps": 263,
+      "status": "completed"
+    },
+    {
+      "seed": 36,
+      "count": 4,
+      "steps": 139,
+      "status": "completed"
+    },
+    {
+      "seed": 37,
+      "count": 5,
+      "steps": 183,
+      "status": "completed"
+    },
+    {
+      "seed": 38,
+      "count": 6,
+      "steps": 143,
+      "status": "completed"
+    },
+    {
+      "seed": 39,
+      "count": 7,
+      "steps": 223,
+      "status": "completed"
+    },
+    {
+      "seed": 40,
+      "count": 4,
+      "steps": 18,
+      "status": "completed"
+    },
+    {
+      "seed": 41,
+      "count": 5,
+      "steps": 223,
+      "status": "completed"
+    },
+    {
+      "seed": 42,
+      "count": 6,
+      "steps": 137,
+      "status": "completed"
+    },
+    {
+      "seed": 43,
+      "count": 7,
+      "steps": 133,
+      "status": "completed"
+    },
+    {
+      "seed": 44,
+      "count": 4,
+      "steps": 177,
+      "status": "completed"
+    },
+    {
+      "seed": 45,
+      "count": 5,
+      "steps": 171,
+      "status": "completed"
+    },
+    {
+      "seed": 46,
+      "count": 6,
+      "steps": 189,
+      "status": "completed"
+    },
+    {
+      "seed": 47,
+      "count": 7,
+      "steps": 207,
+      "status": "completed"
+    },
+    {
+      "seed": 48,
+      "count": 4,
+      "steps": 94,
+      "status": "completed"
+    },
+    {
+      "seed": 49,
+      "count": 5,
+      "steps": 197,
+      "status": "completed"
+    },
+    {
+      "seed": 50,
+      "count": 6,
+      "steps": 127,
+      "status": "completed"
+    },
+    {
+      "seed": 51,
+      "count": 7,
+      "steps": 262,
+      "status": "completed"
+    },
+    {
+      "seed": 52,
+      "count": 4,
+      "steps": 133,
+      "status": "completed"
+    },
+    {
+      "seed": 53,
+      "count": 5,
+      "steps": 214,
+      "status": "completed"
+    },
+    {
+      "seed": 54,
+      "count": 6,
+      "steps": 139,
+      "status": "completed"
+    },
+    {
+      "seed": 55,
+      "count": 7,
+      "steps": 245,
+      "status": "completed"
+    },
+    {
+      "seed": 56,
+      "count": 4,
+      "steps": 146,
+      "status": "completed"
+    },
+    {
+      "seed": 57,
+      "count": 5,
+      "steps": 178,
+      "status": "completed"
+    },
+    {
+      "seed": 58,
+      "count": 6,
+      "steps": 255,
+      "status": "completed"
+    },
+    {
+      "seed": 59,
+      "count": 7,
+      "steps": 234,
+      "status": "completed"
+    },
+    {
+      "seed": 60,
+      "count": 4,
+      "steps": 174,
+      "status": "completed"
+    },
+    {
+      "seed": 61,
+      "count": 5,
+      "steps": 185,
+      "status": "completed"
+    },
+    {
+      "seed": 62,
+      "count": 6,
+      "steps": 194,
+      "status": "completed"
+    },
+    {
+      "seed": 63,
+      "count": 7,
+      "steps": 217,
+      "status": "completed"
+    },
+    {
+      "seed": 64,
+      "count": 4,
+      "steps": 122,
+      "status": "completed"
+    },
+    {
+      "seed": 65,
+      "count": 5,
+      "steps": 166,
+      "status": "completed"
+    },
+    {
+      "seed": 66,
+      "count": 6,
+      "steps": 154,
+      "status": "completed"
+    },
+    {
+      "seed": 67,
+      "count": 7,
+      "steps": 371,
+      "status": "completed"
+    },
+    {
+      "seed": 68,
+      "count": 4,
+      "steps": 142,
+      "status": "completed"
+    },
+    {
+      "seed": 69,
+      "count": 5,
+      "steps": 195,
+      "status": "completed"
+    },
+    {
+      "seed": 70,
+      "count": 6,
+      "steps": 159,
+      "status": "completed"
+    },
+    {
+      "seed": 71,
+      "count": 7,
+      "steps": 392,
+      "status": "completed"
+    },
+    {
+      "seed": 72,
+      "count": 4,
+      "steps": 82,
+      "status": "completed"
+    },
+    {
+      "seed": 73,
+      "count": 5,
+      "steps": 122,
+      "status": "completed"
+    },
+    {
+      "seed": 74,
+      "count": 6,
+      "steps": 210,
+      "status": "completed"
+    },
+    {
+      "seed": 75,
+      "count": 7,
+      "steps": 266,
+      "status": "completed"
+    },
+    {
+      "seed": 76,
+      "count": 4,
+      "steps": 164,
+      "status": "completed"
+    },
+    {
+      "seed": 77,
+      "count": 5,
+      "steps": 135,
+      "status": "completed"
+    },
+    {
+      "seed": 78,
+      "count": 6,
+      "steps": 167,
+      "status": "completed"
+    },
+    {
+      "seed": 79,
+      "count": 7,
+      "steps": 284,
+      "status": "completed"
+    },
+    {
+      "seed": 80,
+      "count": 4,
+      "steps": 154,
+      "status": "completed"
+    }
+  ]
+}

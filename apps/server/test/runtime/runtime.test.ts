@@ -261,9 +261,13 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     }) as { room?: { viewer: { playerId: string } } };
     assert.equal(roomSync.room?.viewer.playerId, session.player.playerId);
 
-    const roomChanged = serverEvent(authenticated, "room:changed", (payload) =>
-      typeof payload === "object" && payload !== null && "version" in payload && payload.version === 1,
-    );
+    const unexpectedChanges: unknown[] = [];
+    const observeReadyChange = (payload: unknown) => {
+      if (typeof payload === "object" && payload !== null && "version" in payload && typeof payload.version === "number" && payload.version > 0) {
+        unexpectedChanges.push(payload);
+      }
+    };
+    authenticated.on("room:changed", observeReadyChange);
     const readyRoom = await acknowledged(authenticated, "room:command", {
       protocolVersion: 1,
       commandId: "018f8e3d-7b11-7c82-8a7b-123456789abd",
@@ -271,9 +275,14 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
       roomId: createdRoom.roomId,
       type: "SET_READY",
       payload: { ready: true },
-    }) as { members?: readonly { playerId: string; ready: boolean }[] };
+    }) as { version: number; members?: readonly { playerId: string; ready: boolean }[] };
     assert.equal(readyRoom.members?.[0]?.ready, true);
-    assert.deepEqual(await roomChanged, { roomId: createdRoom.roomId, version: 1 });
+    const readyVersion = await withClient(pool, client => client.query<{ version: string }>(
+      "SELECT version::text AS version FROM rooms WHERE id = $1", [createdRoom.roomId]));
+    assert.equal(readyVersion.rows[0]?.version, "0", "automatic arrival makes SET_READY(true) a no-op");
+    await new Promise(resolve => setTimeout(resolve, 100));
+    authenticated.off("room:changed", observeReadyChange);
+    assert.deepEqual(unexpectedChanges, [], "no-op readiness must not publish a room mutation");
 
     const pendingOutbox = await withClient(pool, async (client) =>
       client.query<{ count: string }>("SELECT count(*)::text AS count FROM outbox WHERE published_at IS NULL"),
@@ -296,7 +305,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
   assert.equal(closePoolCalled, true, "shutdown closes the pool owned by the runtime");
 });
 
-test("START_MATCH enforces the ready owner roster, persists once, and syncs the exact match route", async () => {
+test("START_MATCH enforces owner and minimum roster, automatically prepares arrivals, and persists once", async () => {
   const { database, pool } = await createDatabase();
   const sockets: Socket[] = [];
   let runtime: Awaited<ReturnType<typeof createRuntimeServer>> | undefined;
@@ -353,6 +362,13 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
     }) as { room?: { activeMatchId: string | null } };
     assert.equal(lobbySync.room?.activeMatchId, null);
 
+    const incomplete = await acknowledged(owner.socket, "room:command", {
+      protocolVersion: 1, commandId: "018f8e3d-7b11-7c82-8a7b-323456789abc",
+      expectedVersion: 0, roomId: created.roomId, type: "START_MATCH", payload: {},
+    }) as { status: string; error?: { code: string } };
+    assert.equal(incomplete.status, "rejected");
+    assert.equal(incomplete.error?.code, "ROOM_NOT_READY");
+
     let roomVersion = created.version;
     for (let index = 1; index < 4; index += 1) {
       const joined = await acknowledged(guests[index]!.socket, "room:command", {
@@ -377,9 +393,6 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
         payload: {},
       }) as { status?: string; error?: { code: string; currentVersion?: number } };
 
-    const notReady = await rejectedStart(owner.socket, "018f8e3d-7b11-7c82-8a7b-323456789abc", roomVersion);
-    assert.equal(notReady.status, "rejected");
-    assert.equal(notReady.error?.code, "ROOM_NOT_READY");
     const notOwner = await rejectedStart(guests[1]!.socket, "018f8e3d-7b11-7c82-8a7b-423456789abc", roomVersion);
     assert.equal(notOwner.status, "rejected");
     assert.equal(notOwner.error?.code, "ROOM_FORBIDDEN");
@@ -403,19 +416,6 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
       ),
     );
     assert.equal(rejectedReceipts.rows[0]?.count, "0");
-
-    for (let index = 0; index < 4; index += 1) {
-      const ready = await acknowledged(guests[index]!.socket, "room:command", {
-        protocolVersion: 1,
-        commandId: `018f8e3d-7b11-7c82-8a7b-723456789ab${index}`,
-        expectedVersion: roomVersion,
-        roomId: created.roomId,
-        type: "SET_READY",
-        payload: { ready: true },
-      }) as { members?: readonly { playerId: string; ready: boolean }[] };
-      assert.equal(ready.members?.find(({ playerId }) => playerId === guests[index]!.playerId)?.ready, true);
-      roomVersion += 1;
-    }
 
     const startCommandId = "018f8e3d-7b11-7c82-8a7b-823456789abc";
     const startPayload = {
@@ -684,7 +684,7 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
     assert.equal(returned.ownerPlayerId, owner.playerId);
     assert.equal(returned.viewer.isOwner, true);
     assert.deepEqual(returned.members.map(({ playerId, seatIndex, ready }) => ({ playerId, seatIndex, ready })),
-      beforeCompletedReturn.roomSeats.map(({ player_id, seat_index }) => ({ playerId: player_id, seatIndex: seat_index, ready: false })));
+      beforeCompletedReturn.roomSeats.map(({ player_id, seat_index }) => ({ playerId: player_id, seatIndex: seat_index, ready: true })));
 
     const duplicateReturn = await acknowledged(owner.socket, "room:command", returnCommand) as typeof returned;
     assert.deepEqual(duplicateReturn, returned);
@@ -698,7 +698,7 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
     assert.equal(synchronizedAfterReturn.requiresFullSnapshot, false);
     assert.equal(synchronizedAfterReturn.room.status, "waiting");
     assert.equal(synchronizedAfterReturn.room.activeMatchId, null);
-    assert.ok(synchronizedAfterReturn.room.members.every(({ ready }) => !ready));
+    assert.ok(synchronizedAfterReturn.room.members.every(({ ready }) => ready));
     assert.deepEqual(await matchStorage.getMatch(matchId), completedMatch, "return preserves completed match snapshot");
     const afterReturn = await readReturnBoundary();
     assert.equal(afterReturn.room?.status, "waiting");
@@ -717,9 +717,9 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
       roomId: created.roomId,
       type: "START_MATCH",
       payload: {},
-    }) as { status?: string; error?: { code: string } };
-    assert.equal(startAfterReturn.status, "rejected");
-    assert.equal(startAfterReturn.error?.code, "ROOM_NOT_READY");
+    }) as { status?: string; activeMatchId?: string; error?: { code: string } };
+    assert.equal(startAfterReturn.status, "in_game", "automatic readiness allows an immediate rematch");
+    assert.ok(startAfterReturn.activeMatchId && startAfterReturn.activeMatchId !== matchId);
 
     const readKickBoundary = async () => withClient(pool, async (client) => {
       const room = await client.query<{ version: string }>("SELECT version::text AS version FROM rooms WHERE id = $1", [created.roomId]);
@@ -752,8 +752,8 @@ test("START_MATCH enforces the ready owner roster, persists once, and syncs the 
       payload: { targetPlayerId: guests[3]!.playerId },
     }) as { status?: string; error?: { code: string } };
     assert.equal(ownerKick.status, "rejected");
-    assert.equal(ownerKick.error?.code, "COMMAND_UNAVAILABLE");
-    assert.deepEqual(await readKickBoundary(), beforeKick, "lobby KICK_MEMBER remains unavailable and preserves versions and seats");
+    assert.equal(ownerKick.error?.code, "ROOM_LOCKED");
+    assert.deepEqual(await readKickBoundary(), beforeKick, "in-game KICK_MEMBER stays locked and preserves versions and seats");
   } finally {
     for (const socket of sockets) socket.disconnect();
     await runtime?.close();

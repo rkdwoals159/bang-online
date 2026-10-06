@@ -1,0 +1,13 @@
+{
+  "id": "A02",
+  "scope": "Real isolated D1 services/routes plus production transport",
+  "initialEventSeq": 4,
+  "cachedEventSeq": 8,
+  "omittedHitSeq": 5,
+  "omittedHitTarget": "p_avjfNtjLs7tOEPKs_1bjs_0u",
+  "ackVersion": 8,
+  "cachePublicTypes": [
+    "INDIANS_STARTED",
+    "INDIANS_HIT"
+  ]
+}

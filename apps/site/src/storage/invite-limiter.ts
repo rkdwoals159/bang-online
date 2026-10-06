@@ -73,6 +73,12 @@ function mapBucket(row: InviteBucketRow): BucketState {
 }
 
 function expireFailures(bucket: BucketState, now: number): void {
+  if (now - bucket.lastActivityAt >= D1_INVITE_RATE_LIMIT_POLICY.idleResetMs) {
+    bucket.failures = [];
+    bucket.lastInvalidAt = null;
+    bucket.retryDelayMs = 0;
+    bucket.retryAt = null;
+  }
   bucket.failures = bucket.failures.filter((failedAt) => now - failedAt < D1_INVITE_RATE_LIMIT_POLICY.windowMs);
 }
 
@@ -131,7 +137,8 @@ export class D1InviteRateLimiter {
       expireFailures(bucket, now);
       const pending = await this.countReservations(bucketHash, now);
       bucket.lastActivityAt = now;
-      const retryAfter = bucket.failures.length + pending >= D1_INVITE_RATE_LIMIT_POLICY.maxFailedLookups
+      const retryAfter = (bucket.retryAt !== null && now < bucket.retryAt) ||
+        bucket.failures.length + pending >= D1_INVITE_RATE_LIMIT_POLICY.maxFailedLookups
         ? reject(bucket, now)
         : null;
       if (retryAfter === null) bucket.retryAt = null;

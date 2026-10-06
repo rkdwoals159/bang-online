@@ -104,7 +104,8 @@ export async function handleRoomsRoute(
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname;
   const commandPath = path.match(/^\/api\/rooms\/([^/]+)\/commands$/u);
-  if (path !== ROOMS_PATH && path !== PREVIEW_PATH && !commandPath) return null;
+  const invitePath = path.match(/^\/api\/rooms\/([^/]+)\/invite$/u);
+  if (path !== ROOMS_PATH && path !== PREVIEW_PATH && !commandPath && !invitePath) return null;
 
   if (request.method !== "POST") {
     const allow = "POST";
@@ -139,6 +140,25 @@ export async function handleRoomsRoute(
       return jsonResponse(response);
     } catch (error) {
       if (error instanceof SiteRoomServiceError) return jsonResponse(previewRejected(parsed.value.requestId, "INVITE_INVALID"));
+      return boundaryError(error);
+    }
+  }
+
+  if (invitePath) {
+    if (!isRecord(body) || Object.keys(body).length !== 2 || body.protocolVersion !== 1 ||
+        !Number.isSafeInteger(body.expectedVersion) || (body.expectedVersion as number) < 0) {
+      return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
+    }
+    try {
+      const playerId = await authenticatedPlayer(request, env, options);
+      if (!playerId) return jsonResponse({ error: { code: "SESSION_EXPIRED" } }, 401);
+      const roomId = decodeURIComponent(invitePath[1]!);
+      const result = await new D1RoomService(env.DB, options).reissueInvite(playerId, roomId, body.expectedVersion as number);
+      return jsonResponse({ roomId: result.roomId, version: result.version, inviteCode: result.inviteCode, duplicate: false });
+    } catch (error) {
+      if (error instanceof SiteRoomServiceError) return jsonResponse({ error: { code: error.code } },
+        error.code === "STALE_VERSION" ? 409 : 403);
+      if (error instanceof URIError) return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
       return boundaryError(error);
     }
   }

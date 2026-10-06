@@ -129,11 +129,14 @@ export function parseCommandAck(input: unknown): ParseResult<CommandAck> {
     }
     if (Object.hasOwn(input, "matchProjection")) {
       const projection = input.matchProjection;
-      if (!isRecord(projection) || !exactShape(projection, ["snapshot", "visibleEvents"]) ||
+      if (!isRecord(projection) || !exactShape(projection, ["snapshot", "visibleEvents"], ["baseEventSeq"]) ||
           !validMatchSnapshot(projection.snapshot) || !Array.isArray(projection.visibleEvents) ||
           !projection.visibleEvents.every(validPublicMatchEvent)) return bad("$.matchProjection");
+      if (Object.hasOwn(projection, "baseEventSeq") && (!isVersion(projection.baseEventSeq) ||
+          (projection.baseEventSeq as number) > (input.eventSeq as number))) return bad("$.matchProjection.baseEventSeq");
       const events = projection.visibleEvents as PublicMatchEvent[];
       if (!events.every((event, index) => event.eventSeq <= (input.eventSeq as number) &&
+          (projection.baseEventSeq === undefined || event.eventSeq > (projection.baseEventSeq as number)) &&
           (index === 0 || event.eventSeq > events[index - 1]!.eventSeq))) return bad("$.matchProjection");
     }
     return good(input);

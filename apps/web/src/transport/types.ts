@@ -37,6 +37,8 @@ export interface BrowserTransportState {
   readonly matches: Readonly<Record<string, MatchProjectionState>>;
   readonly pendingCommandIds: readonly string[];
   readonly lastError: "CONNECTION" | "SESSION_EXPIRED" | "SYNC_REJECTED" | "INVALID_RESPONSE" | null;
+  readonly unavailableRooms?: readonly string[];
+  readonly unavailableMatches?: readonly string[];
 }
 
 /** Consumer contract shared by the local Socket.IO and Sites HTTP/SSE adapters. */
@@ -58,6 +60,7 @@ export interface GameTransport {
   restoreGuestSession(): Promise<GuestSessionResponse | null>;
   recoverAssignedSeats(): Promise<readonly RoomView[]>;
   createRoom(command: Extract<RoomCommand, { type: "CREATE_ROOM" }>): Promise<RoomEntryCreateResult>;
+  reissueRoomInvite?(roomId: string, expectedVersion: number): Promise<RoomEntryCreateResult>;
   previewInvite(inviteCode: string): Promise<RoomEntryPreview | null>;
   joinRoom(command: Extract<RoomCommand, { type: "JOIN" }>): Promise<RoomView>;
   sendRoomCommand(command: RoomCommand): Promise<unknown>;

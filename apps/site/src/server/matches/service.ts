@@ -388,6 +388,7 @@ export class D1MatchService {
         const nextState: GameState = { ...candidateState, eventSeq: match.eventSeq + events.length };
         const ack = accepted(command.commandId, nextState);
         const reply: CommandAck = this.options.includeMatchProjection ? { ...ack, matchProjection: {
+          baseEventSeq: match.eventSeq,
           snapshot: projectMatchSnapshot(nextState, actorPlayerId, BASE_PHYSICAL_CARDS),
           visibleEvents: events.flatMap(event => {
             const projected = syncProjectionInternals.projectEvent(event, nextState);

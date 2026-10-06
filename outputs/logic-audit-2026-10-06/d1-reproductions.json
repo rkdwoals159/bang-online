@@ -1,0 +1,21 @@
+[
+  {
+    "id": "A03",
+    "firstHasInvite": true,
+    "replayInvite": null,
+    "recoveredHasInvite": false
+  },
+  {
+    "id": "A06",
+    "recoveredRoomStatuses": [
+      "closed"
+    ]
+  },
+  {
+    "id": "A07",
+    "retryAt": 901001,
+    "attemptAt": 62000,
+    "allowedBeforeRetryAt": true,
+    "afterOver15MinutesIdleFirstRetryMs": 900000
+  }
+]

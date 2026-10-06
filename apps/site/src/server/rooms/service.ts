@@ -230,6 +230,20 @@ export class D1RoomService {
     }
   }
 
+  async reissueInvite(playerId: string, roomId: string, expectedVersion: number): Promise<CreatePrivateRoomResult> {
+    const room = await this.repository.getRoom(roomId);
+    if (!room || room.ownerPlayerId !== playerId || !room.players.some(member => member.playerId === playerId)) {
+      throw new SiteRoomServiceError("NOT_FOUND_OR_FORBIDDEN");
+    }
+    if (room.status !== "waiting") throw new SiteRoomServiceError("ROOM_LOCKED");
+    const inviteCode = opaqueSecret(this.options.crypto);
+    try {
+      const version = await this.repository.rotateRoomInvite(roomId, playerId, expectedVersion,
+        await sha256Hex(inviteCode, this.options.crypto), opaqueId("commit", this.options.crypto), opaqueId("evt", this.options.crypto));
+      return { roomId, version, inviteCode, duplicate: false, room: await this.roomViewForMember(roomId, playerId) };
+    } catch (error) { normalizeRepositoryError(error); }
+  }
+
   async joinPrivateRoom(
     playerId: string,
     input: JoinPrivateRoomInput,

@@ -16,6 +16,7 @@ import { useBrowserTransportState } from "../transport/use-transport.js";
 import type { BrowserTransportState } from "../transport/types.js";
 import type { RoomEntryCreateResult, RoomEntryTransport } from "../features/room-entry/model.js";
 import { navigateTo, resolveRoute } from "./router.js";
+import { browserInviteStorage, loadRoomInvites, saveRoomInvites } from "./invite-storage.js";
 import { registerBangWebMcpTools, type BangWebMcpRuntime, type WebMcpDocument } from "./webmcp.js";
 
 export type AppStatus =
@@ -82,30 +83,23 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
   const [sessionRecovery, setSessionRecovery] = useState<SessionRecovery>({ kind: "loading" });
   const [lastCreatedRoomId, setLastCreatedRoomId] = useState<string | null>(null);
   const [roomInviteCodes, setRoomInviteCodes] = useState<Readonly<Record<string, string>>>({});
-  const roomWatchers = useRef<(() => void)[]>([]);
-
-  const replaceAssignedRoomWatches = useCallback((rooms: readonly RoomView[]) => {
-    roomWatchers.current.forEach((stop) => stop());
-    roomWatchers.current = rooms.map((room) => transport.watchRoom(room.roomId));
-  }, [transport]);
 
   const retrySessionRecovery = useCallback(async () => {
     setSessionRecovery({ kind: "loading" });
     try {
       const guest = await transport.restoreGuestSession();
       if (!guest) {
-        replaceAssignedRoomWatches([]);
+        setRoomInviteCodes({});
         setSessionRecovery({ kind: "ready", guest: null, assignedRooms: [] });
         return;
       }
 
       const assignedRooms = await transport.recoverAssignedSeats();
-      replaceAssignedRoomWatches(assignedRooms);
+      setRoomInviteCodes(loadRoomInvites(guest.player.playerId, browserInviteStorage()));
       await waitForTransportConnection(transport);
       setSessionRecovery({ kind: "ready", guest, assignedRooms });
     } catch (error) {
       const expired = error instanceof BrowserTransportError && error.code === "SESSION_EXPIRED";
-      replaceAssignedRoomWatches([]);
       setSessionRecovery({
         kind: "error",
         expired,
@@ -114,13 +108,11 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
           : "참가 중인 방을 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.",
       });
     }
-  }, [replaceAssignedRoomWatches, transport]);
+  }, [transport]);
 
   useEffect(() => {
     void retrySessionRecovery();
     return () => {
-      roomWatchers.current.forEach((stop) => stop());
-      roomWatchers.current = [];
       transport.disconnect();
     };
   }, [retrySessionRecovery, transport]);
@@ -135,6 +127,9 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
   }, [transportState.connection]);
 
   const recoveredPlayerId = sessionRecovery.kind === "ready" ? sessionRecovery.guest?.player.playerId : undefined;
+  useEffect(() => {
+    if (recoveredPlayerId) saveRoomInvites(recoveredPlayerId, roomInviteCodes, browserInviteStorage());
+  }, [recoveredPlayerId, roomInviteCodes]);
   useEffect(() => {
     if (!recoveredPlayerId) return;
     let activeRoomId: string | null = null;
@@ -160,9 +155,9 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
     // A newly issued identity has no assigned seats. Existing identities use
     // retrySessionRecovery, which performs the authenticated recovery query.
     const assignedRooms: readonly RoomView[] = [];
-    replaceAssignedRoomWatches(assignedRooms);
+    setRoomInviteCodes(loadRoomInvites(guest.player.playerId, browserInviteStorage()));
     setSessionRecovery({ kind: "ready", guest, assignedRooms });
-  }, [replaceAssignedRoomWatches]);
+  }, []);
 
   const roomEntryTransport = useState<RoomEntryTransport>(() => ({
     restoreGuestSession: () => transport.restoreGuestSession(),
@@ -189,7 +184,10 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
   const rememberCreatedRoom = useCallback((result: RoomEntryCreateResult) => {
     setLastCreatedRoomId(result.roomId);
     if (result.inviteCode) {
-      setRoomInviteCodes((current) => ({ ...current, [result.roomId]: result.inviteCode! }));
+      setRoomInviteCodes((current) => {
+        const next = { ...current, [result.roomId]: result.inviteCode! };
+        return next;
+      });
     }
   }, []);
 

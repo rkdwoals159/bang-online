@@ -20,6 +20,7 @@ export interface LobbyProps {
   viewerConnectionState?: TransportConnectionState;
   /** Parent owns T58 transport, syncing and receipt handling. */
   onCommand: (command: LobbyRoomCommand) => void | Promise<void>;
+  onReissueInvite?: () => Promise<void>;
   createCommandId?: () => string;
   origin?: string;
 }
@@ -43,6 +44,7 @@ export function Lobby({
   inviteCode = null,
   viewerConnectionState,
   onCommand,
+  onReissueInvite,
   createCommandId = commandId,
   origin,
 }: LobbyProps) {
@@ -50,6 +52,7 @@ export function Lobby({
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [inviteFeedback, setInviteFeedback] = useState("");
+  const [issuingInvite, setIssuingInvite] = useState(false);
   const resolvedOrigin = browserOrigin(origin);
   const inviteUrl = inviteCode && view.canInvite && resolvedOrigin
     ? makeInviteUrl(inviteCode, resolvedOrigin)
@@ -79,6 +82,15 @@ export function Lobby({
     } catch {
       setInviteFeedback("복사할 수 없어요. 초대 링크를 직접 선택해 복사해 주세요.");
     }
+  }
+
+  async function reissueInvite() {
+    if (!onReissueInvite || issuingInvite) return;
+    setIssuingInvite(true);
+    setInviteFeedback("");
+    try { await onReissueInvite(); }
+    catch { setInviteFeedback("초대 링크를 만들지 못했어요. 다시 시도해 주세요."); }
+    finally { setIssuingInvite(false); }
   }
 
   function send(command: RoomCommand) {
@@ -194,6 +206,15 @@ export function Lobby({
             <input id="room-lobby-invite-url" value={inviteUrl} readOnly />
             <button type="button" className="room-lobby__button room-lobby__button--secondary" onClick={() => void copyInviteUrl()}>
               링크 복사
+            </button>
+            {inviteFeedback && <p className="room-lobby__hint" role="status" aria-live="polite">{inviteFeedback}</p>}
+          </div>
+        ) : view.viewerIsOwner && view.canInvite && onReissueInvite ? (
+          <div className="room-lobby__invite-controls">
+            <p className="room-lobby__hint">새 링크를 발급하면 기존 초대 링크는 만료돼요. 참가자는 그대로 유지됩니다.</p>
+            <button type="button" className="room-lobby__button room-lobby__button--secondary"
+              disabled={issuingInvite || busy} aria-busy={issuingInvite} onClick={() => void reissueInvite()}>
+              {issuingInvite ? "초대 링크 만드는 중…" : "초대 링크 발급"}
             </button>
             {inviteFeedback && <p className="room-lobby__hint" role="status" aria-live="polite">{inviteFeedback}</p>}
           </div>

@@ -87,7 +87,12 @@ export interface CommandAccepted {
   aggregateVersion: number;
   eventSeq: number;
   /** Fresh match writes may return the committed viewer projection with their ACK. */
-  matchProjection?: { snapshot: MatchSnapshotView; visibleEvents: readonly PublicMatchEvent[] };
+  matchProjection?: {
+    snapshot: MatchSnapshotView;
+    visibleEvents: readonly PublicMatchEvent[];
+    /** Delta covers all visible events after this cursor, including private sequence gaps. */
+    baseEventSeq?: number;
+  };
 }
 export interface CommandRejected {
   protocolVersion: typeof PROTOCOL_VERSION;

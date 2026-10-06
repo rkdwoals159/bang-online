@@ -19,6 +19,8 @@ const INITIAL_STATE: BrowserTransportState = Object.freeze({
   matches: Object.freeze({}),
   pendingCommandIds: Object.freeze([]),
   lastError: null,
+  unavailableRooms: Object.freeze([]),
+  unavailableMatches: Object.freeze([]),
 });
 
 const MAX_VISIBLE_EVENTS = 100;
@@ -62,7 +64,8 @@ export class BrowserTransportStore {
   setViewerPlayerId(playerId: string | null): void {
     if (playerId === this.viewerPlayerId) return;
     this.viewerPlayerId = playerId;
-    this.update({ rooms: Object.freeze({}), matches: Object.freeze({}), pendingCommandIds: Object.freeze([]) });
+    this.update({ rooms: Object.freeze({}), matches: Object.freeze({}), pendingCommandIds: Object.freeze([]),
+      unavailableRooms: Object.freeze([]), unavailableMatches: Object.freeze([]) });
   }
 
   isCurrentViewer(playerId: string): boolean {
@@ -72,6 +75,25 @@ export class BrowserTransportStore {
   setError(error: BrowserTransportState["lastError"]): void {
     if (this.current.lastError === error) return;
     this.update({ lastError: error });
+  }
+
+  setResourceUnavailable(kind: "room" | "match", id: string): void {
+    if (kind === "room") {
+      const { [id]: _removed, ...rooms } = this.current.rooms;
+      this.update({ rooms: Object.freeze(rooms),
+        unavailableRooms: Object.freeze([...new Set([...(this.current.unavailableRooms ?? []), id])]),
+        lastError: "SYNC_REJECTED" });
+    } else {
+      const { [id]: _removed, ...matches } = this.current.matches;
+      this.update({ matches: Object.freeze(matches),
+        unavailableMatches: Object.freeze([...new Set([...(this.current.unavailableMatches ?? []), id])]),
+        lastError: "SYNC_REJECTED" });
+    }
+  }
+
+  restoreResourceAccess(kind: "room" | "match", id: string): void {
+    if (kind === "room") this.update({ unavailableRooms: Object.freeze((this.current.unavailableRooms ?? []).filter(value => value !== id)) });
+    else this.update({ unavailableMatches: Object.freeze((this.current.unavailableMatches ?? []).filter(value => value !== id)) });
   }
 
   setPendingCommandIds(ids: readonly string[]): void {

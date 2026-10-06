@@ -10,3 +10,6 @@ dist/
 **/.env.*
 npm-debug.log*
 pnpm-debug.log*
+outputs/logic-audit-2026-10-06/logs/
+outputs/logic-audit-2026-10-06/browser-fixture.sql
+outputs/logic-audit-2026-10-06/deployment-result.json

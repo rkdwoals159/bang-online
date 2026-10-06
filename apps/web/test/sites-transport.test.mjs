@@ -126,6 +126,134 @@ test("production builds select Sites HTTP/SSE and local Vite selects Socket.IO",
   assert.equal(selectGameTransportAdapter("test"), "socket-io");
 });
 
+for (const kind of ["room", "match"]) {
+  test(`A01 ${kind} sync retries HTTP 500 while SSE stays connected and no new event arrives`, async () => {
+    let version = 1, failOnce = false, reads = 0;
+    const sources = [];
+    const transport = new SitesGameTransport({ syncRetryIntervalMs: 10,
+      fetcher: async (url, init) => {
+        if (url === "/api/guest-sessions") return Response.json(guest);
+        reads++;
+        if (failOnce) { failOnce = false; return new Response("temporarily unavailable", { status: 500 }); }
+        const request = JSON.parse(init.body);
+        return Response.json(kind === "room" ? roomSync(request, { version }) : matchSync(request, { version, eventSeq: version }));
+      }, eventSourceFactory: () => { const source = new FakeEventSource(); sources.push(source); return source; } });
+    try {
+      await transport.restoreGuestSession();
+      transport.connect();
+      const id = `${kind}-1`;
+      kind === "room" ? transport.watchRoom(id) : transport.watchMatch(id);
+      sources[0].open();
+      const projection = () => transport.getSnapshot()[kind === "room" ? "rooms" : "matches"][id];
+      await waitUntil(() => projection()?.version === 1, "initial sync missing");
+      version = 2; failOnce = true;
+      sources[0].invalidation(1, { kind, aggregateId: id, version, ...(kind === "match" ? { eventSeq: 2 } : {}) });
+      await waitUntil(() => projection()?.version === 2, "a single failed read must recover without another invalidation");
+      assert.equal(transport.getSnapshot().connection, "connected");
+      assert.equal(transport.getSnapshot().lastError, null);
+      assert.ok(reads >= 3);
+    } finally { transport.disconnect(); }
+  });
+}
+
+test("A01 failed read retries stop when hidden, unwatched or disconnected", async () => {
+  for (const stopKind of ["hidden", "unwatch", "disconnect"]) {
+    const visibility = new FakeVisibility(); let reads = 0;
+    const transport = new SitesGameTransport({ syncRetryIntervalMs: 10, visibilityTarget: visibility,
+      fetcher: async url => {
+        if (url === "/api/guest-sessions") return Response.json(guest);
+        reads++; return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 500 });
+      }, eventSourceFactory: () => new FakeEventSource() });
+    try {
+      await transport.restoreGuestSession(); transport.connect();
+      const unwatch = transport.watchRoom("room-1");
+      await waitUntil(() => transport.getSnapshot().lastError === "CONNECTION", "failure not received");
+      if (stopKind === "hidden") visibility.setVisibility("hidden");
+      else if (stopKind === "unwatch") unwatch(); else transport.disconnect();
+      const stopped = reads;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      assert.equal(reads, stopped, stopKind);
+    } finally { transport.disconnect(); }
+  }
+});
+
+test("A02 a delta ACK with a missing prefix fetches from the previous cursor, including private gaps", async () => {
+  for (const baseEventSeq of [undefined, 5]) {
+    const requests = [];
+    const visibleEvent = seq => ({ eventSeq: seq, type: "INDIANS_HIT", occurredAt: new Date().toISOString(), payload: { targetPlayerId: "player-1", damage: 1 } });
+    const transport = new SitesGameTransport({ fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      if (url.endsWith("/commands")) return Response.json({ protocolVersion: 1, commandId: JSON.parse(init.body).commandId,
+        status: "accepted", duplicate: false, aggregateVersion: 3, eventSeq: 8,
+        matchProjection: { ...(baseEventSeq === undefined ? {} : { baseEventSeq }), snapshot: matchSync({}).snapshot, visibleEvents: [visibleEvent(8)] } });
+      const request = JSON.parse(init.body); requests.push(request);
+      const response = matchSync(request, { version: requests.length === 1 ? 1 : 3, eventSeq: requests.length === 1 ? 4 : 8 });
+      response.requiresFullSnapshot = requests.length === 1;
+      response.visibleEvents = requests.length === 1 ? [] : [visibleEvent(5), visibleEvent(8)];
+      return Response.json(response);
+    } });
+    try {
+      await transport.restoreGuestSession(); await transport.syncMatch("match-1");
+      await transport.sendMatchCommand({ protocolVersion: 1, commandId: crypto.randomUUID(), matchId: "match-1", expectedVersion: 1, type: "END_TURN", payload: {} });
+      await transport.syncMatch("match-1");
+      assert.equal(requests[1].afterEventSeq, 4);
+      assert.deepEqual(transport.getSnapshot().matches["match-1"].visibleEvents.map(event => event.eventSeq), [5, 8]);
+    } finally { transport.disconnect(); }
+  }
+});
+
+test("A05 membership rejection drops only the denied room, clears its match, stops reads and allows JOIN", async () => {
+  let deny = false, reads = 0;
+  const sources = [];
+  const transport = new SitesGameTransport({ syncRetryIntervalMs: 10, fetcher: async (url, init) => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    const request = JSON.parse(init.body);
+    if (url.endsWith("/commands")) { deny = false; return Response.json({ ...roomView("room-1"), version: 2 }); }
+    reads++;
+    if (deny && request.roomId === "room-1") return Response.json({ protocolVersion: 1, requestId: request.requestId,
+      status: "rejected", error: { code: "NOT_FOUND_OR_FORBIDDEN" } });
+    return Response.json(request.matchId ? matchSync(request) : roomSync(request, { activeMatchId: deny ? null : "match-1" }));
+  }, eventSourceFactory: () => { const source = new FakeEventSource(); sources.push(source); return source; } });
+  try {
+    await transport.restoreGuestSession(); transport.connect(); const unwatch = transport.watchRoom("room-1");
+    await transport.syncRoom("room-1"); await transport.syncMatch("match-1");
+    transport.store.applyRoomCommand({ ...roomView("other-room"), version: 1 });
+    deny = true;
+    await assert.rejects(transport.syncRoom("room-1"), { code: "REQUEST_REJECTED" });
+    assert.equal(transport.getSnapshot().rooms["room-1"], undefined);
+    assert.equal(transport.getSnapshot().matches["match-1"], undefined);
+    assert.ok(transport.getSnapshot().rooms["other-room"]);
+    assert.deepEqual(transport.getSnapshot().unavailableRooms, ["room-1"]);
+    assert.ok(sources.every(source => source.closed));
+    const stopped = reads; await new Promise(resolve => setTimeout(resolve, 40)); assert.equal(reads, stopped);
+    await transport.joinRoom({ protocolVersion: 1, commandId: crypto.randomUUID(), expectedVersion: 1,
+      roomId: "room-1", type: "JOIN", payload: { inviteCode: "new-invite" } });
+    assert.deepEqual(transport.getSnapshot().unavailableRooms, []);
+    assert.equal(transport.getSnapshot().rooms["room-1"].version, 2);
+    unwatch();
+  } finally { transport.disconnect(); }
+});
+
+test("A06 assigned seats hydrate the home list without watching old or closed rooms", async () => {
+  const urls = [], sources = [];
+  const transport = new SitesGameTransport({ fetcher: async (url, init) => {
+    urls.push(url);
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    if (url === "/api/guest-sessions/rooms") return Response.json([roomView("old-room"), roomView("room-1"), { ...roomView("closed-room"), status: "closed" }]);
+    return Response.json(roomSync(JSON.parse(init.body)));
+  }, eventSourceFactory: url => { const source = new FakeEventSource(); sources.push({ source, url }); return source; } });
+  try {
+    await transport.restoreGuestSession(); transport.connect();
+    const rooms = await transport.recoverAssignedSeats(); assert.deepEqual(rooms.map(room => room.roomId), ["old-room", "room-1"]);
+    assert.equal(sources.length, 0);
+    const unwatch = transport.watchRoom("room-1"); await transport.syncRoom("room-1");
+    assert.ok(sources[0].url.includes("resource=room-1"));
+    assert.equal(sources[0].url.includes("old-room"), false);
+    assert.equal(urls.some(url => url.includes("closed-room")), false);
+    unwatch(); assert.ok(sources[0].source.closed);
+  } finally { transport.disconnect(); }
+});
+
 test("Sites requests use strict DTO parsing, cookie credentials and same-payload command retry", async () => {
   const calls = [];
   let failCommandOnce = true;
@@ -182,7 +310,7 @@ test("Sites requests use strict DTO parsing, cookie credentials and same-payload
   const commandCalls = calls.filter(({ url }) => url.endsWith("/commands"));
   assert.equal(commandCalls.length, 2);
   assert.equal(commandCalls[0].init.body, commandCalls[1].init.body);
-  eventSources[0].source.open();
+  assert.equal(eventSources.length, 0, "an unwatched command must not retain a background subscription");
   for (const { init } of calls) {
     assert.equal(init.credentials, "include");
     assert.equal(init.cache, "no-store");

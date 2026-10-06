@@ -57,9 +57,10 @@ export function advancePresentation(previous: PresentationCursor | null, version
       case "CAT_BALOU_USED": if (actorId && targetId) cue("discard", `${name(actorId)} · ${name(targetId)}에게 캣 벌루`); break;
       case "DUEL_STARTED": if (targetId) cue("duel", `${name(actorId)} ↔ ${name(targetId)} · 결투`); break;
       case "DUEL_BANG_PLAYED": {
-        const initiator = knownId(p.initiatorPlayerId), responder = knownId(p.responderPlayerId);
-        const opponent = actorId === initiator ? responder : initiator;
-        if (actorId && opponent) cue("shot", `${name(actorId)} · 결투 뱅!`, [opponent]); break;
+        // Old persisted events omit the opponent; never animate a self-directed shot.
+        const initiator = knownId(p.initiatorPlayerId);
+        const opponent = knownId(p.targetPlayerId) ?? (actorId !== initiator ? initiator : undefined);
+        if (actorId && opponent && actorId !== opponent) cue("shot", `${name(actorId)} · 결투 뱅!`, [opponent]); break;
       }
       case "DUEL_YIELDED": { const id = knownId(p.playerId); if (id) cue("hit", `${name(id)} · 결투 피해`, [id]); break; }
       case "DYNAMITE_EXPLODED": if (targetId) cue("explosion", `${name(targetId)} · 다이너마이트 폭발!`); break;
