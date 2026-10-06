@@ -6,14 +6,19 @@ import {
   type RoomCommand,
   type RoomSyncResponse,
   type RoomView,
+  type MatchHistoryResponse,
+  type PublicMatchEvent,
 } from "../../../../../packages/contracts/src/protocol.js";
 import { parseRoomView } from "../../../../../packages/contracts/src/validation.js";
 import type { MatchStatusSync } from "./model.js";
+import type { BrowserTransportState } from "../../transport/types.js";
 import {
   buildMatchStatusViewModel,
   formatLogTime,
   isMatchActionInputEnabled,
   mergeMatchStatusProjection,
+  mergePublicEvents,
+  PUBLIC_LOG_PAGE_SIZE,
 } from "./model.js";
 import "./status.css";
 
@@ -32,6 +37,8 @@ export interface StatusPanelProps {
 export interface ResultRoomTransport {
   sendRoomCommand(command: RoomCommand): Promise<unknown>;
   syncRoom(roomId: string): Promise<RoomSyncResponse>;
+  getMatchHistory?(matchId: string, beforeEventSeq?: number): Promise<MatchHistoryResponse>;
+  getSnapshot?: () => BrowserTransportState;
 }
 
 export const RETURN_TO_LOBBY_ERROR_MESSAGE =
@@ -184,28 +191,62 @@ export function StatusPanel({
   const [returnFeedback, setReturnFeedback] = useState("");
   const [logOpen, setLogOpen] = useState(initialLogOpen);
   const [logNow, setLogNow] = useState(() => Date.now());
+  const [logUpperSeq, setLogUpperSeq] = useState(() => sync.visibleEvents.at(-1)?.eventSeq ?? 0);
+  const [history, setHistory] = useState<readonly PublicMatchEvent[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<number | null | undefined>(undefined);
+  const [historyBusy, setHistoryBusy] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [displayCount, setDisplayCount] = useState(PUBLIC_LOG_PAGE_SIZE);
+  const historyFlight = useRef(false);
+  const historyScope = `${matchId ?? ""}:${sync.snapshot.viewer.playerId}`;
+  const latestEvents = useRef(sync.visibleEvents);
+  latestEvents.current = sync.visibleEvents;
+  const currentHistoryScope = useRef(historyScope);
+  const historyMounted = useRef(true);
+  currentHistoryScope.current = historyScope;
   useEffect(() => {
-    if (!logOpen) return;
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const update = () => {
-      if (timer) clearInterval(timer);
-      timer = undefined;
-      if (!document.hidden) {
-        setLogNow(Date.now());
-        timer = setInterval(() => setLogNow(Date.now()), 1000);
-      }
-    };
-    update();
-    document.addEventListener("visibilitychange", update);
-    return () => { if (timer) clearInterval(timer); document.removeEventListener("visibilitychange", update); };
-  }, [logOpen]);
+    setHistory([]); setHistoryCursor(undefined); setHistoryError(""); setHistoryBusy(false);
+    setDisplayCount(PUBLIC_LOG_PAGE_SIZE); historyFlight.current = false;
+    setLogNow(Date.now()); setLogUpperSeq(latestEvents.current.at(-1)?.eventSeq ?? 0);
+  }, [historyScope]);
+  useEffect(() => { historyMounted.current = true; return () => { historyMounted.current = false; }; }, []);
   const singleFlight = useRef(createSingleFlightRunner()).current;
 
   const projection = useMemo(
-    () => mergeMatchStatusProjection(null, sync),
-    [sync.version, sync.snapshot, sync.visibleEvents],
+    () => mergeMatchStatusProjection(null, { ...sync, visibleEvents: mergePublicEvents(history, sync.visibleEvents) }),
+    [sync.version, sync.snapshot, sync.visibleEvents, history],
   );
   const view = useMemo(() => buildMatchStatusViewModel(projection), [projection]);
+  const frozenLog = view.publicLog.filter(entry => entry.eventSeq <= logUpperSeq);
+  const displayedLog = frozenLog.slice(0, displayCount);
+  const newLogCount = view.publicLog.length - frozenLog.length;
+  const hasOlderCached = frozenLog.length > displayCount;
+  const storedCursor = matchId ? transport?.getSnapshot?.().matches[matchId]?.historyNextBeforeEventSeq : undefined;
+  const nextHistoryCursor = storedCursor !== undefined ? storedCursor : historyCursor;
+  const canLoadHistory = !!matchId && !!transport?.getMatchHistory && nextHistoryCursor !== null;
+
+  function captureLog() {
+    setLogNow(Date.now()); setLogUpperSeq(view.publicLog[0]?.eventSeq ?? 0);
+  }
+
+  async function loadOlder() {
+    if (historyFlight.current) return;
+    if (hasOlderCached) { setDisplayCount(count => count + PUBLIC_LOG_PAGE_SIZE); return; }
+    if (!matchId || !transport?.getMatchHistory || !canLoadHistory) return;
+    const scope = historyScope;
+    historyFlight.current = true; setHistoryBusy(true); setHistoryError("");
+    try {
+      const response = await transport.getMatchHistory(matchId, nextHistoryCursor ?? projection.visibleEvents[0]?.eventSeq);
+      if (!historyMounted.current || currentHistoryScope.current !== scope) return;
+      setHistory(events => mergePublicEvents(events, response.events));
+      setHistoryCursor(response.nextBeforeEventSeq);
+      setDisplayCount(count => count + PUBLIC_LOG_PAGE_SIZE);
+    } catch {
+      if (historyMounted.current && currentHistoryScope.current === scope) setHistoryError("이전 기록을 불러오지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      if (historyMounted.current && currentHistoryScope.current === scope) { historyFlight.current = false; setHistoryBusy(false); }
+    }
+  }
   const canReturn = canReturnToLobbyFromResult(
     matchId,
     projection.status,
@@ -331,13 +372,20 @@ export function StatusPanel({
         </section>
       ) : null}
 
-      <details className="match-status__log" open={logOpen} onToggle={(event) => setLogOpen(event.currentTarget.open)}>
+      <details className="match-status__log" open={logOpen} onToggle={(event) => {
+        const open = event.currentTarget.open;
+        if (open && !logOpen) captureLog();
+        setLogOpen(open);
+      }}>
         <summary className="match-status__log-summary" id="match-public-log-title">
           게임 기록
         </summary>
-        {logOpen && view.publicLog.length > 0 ? (
+        {logOpen && newLogCount > 0 ? <button className="match-status__new-events" type="button" onClick={captureLog}>
+          새 기록 {newLogCount.toLocaleString()}개
+        </button> : null}
+        {logOpen && displayedLog.length > 0 ? (
           <ol className="match-status__events" aria-label="공개 게임 이벤트">
-            {view.publicLog.map((entry) => (
+            {displayedLog.map((entry) => (
               <li key={entry.eventSeq} data-event-seq={entry.eventSeq}>
                 <span><time dateTime={entry.occurredAt}>{formatLogTime(entry.occurredAt, logNow)}</time> - {entry.message}</span>
               </li>
@@ -346,6 +394,9 @@ export function StatusPanel({
         ) : logOpen ? (
           <p className="match-status__empty-log">아직 표시할 공개 기록이 없어요.</p>
         ) : null}
+        {logOpen && (hasOlderCached || canLoadHistory) ? <button className="match-status__history-more" type="button"
+          disabled={historyBusy} onClick={() => void loadOlder()}>{historyBusy ? "불러오는 중…" : "이전 기록 더 보기"}</button> : null}
+        {logOpen && historyError ? <p className="match-status__history-error" role="alert">{historyError}</p> : null}
       </details>
     </section>
   );

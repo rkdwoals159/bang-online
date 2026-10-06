@@ -3,7 +3,7 @@ export {
   buildMatchStatusViewModel,
   formatPublicEvent,
   isMatchActionInputEnabled,
-  MAX_PUBLIC_LOG_EVENTS,
+  PUBLIC_LOG_PAGE_SIZE,
   mergeMatchStatusProjection,
   mergePublicEvents,
   type MatchStatusProjection,

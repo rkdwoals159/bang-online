@@ -8,6 +8,8 @@ import type {
   MatchStatus,
   MatchSyncRequest,
   MatchSyncResponse,
+  MatchHistoryRequest,
+  MatchHistoryResponse,
   PendingInteractionProgressView,
   PendingRespondOption,
   PendingInteractionResponderView,
@@ -340,6 +342,27 @@ function validPublicMatchEvent(input: unknown): input is PublicMatchEvent {
   return isRecord(input) && exactShape(input, ["eventSeq", "type", "occurredAt", "payload"]) &&
     isVersion(input.eventSeq) && input.eventSeq > 0 && isText(input.type) &&
     typeof input.occurredAt === "string" && Number.isFinite(Date.parse(input.occurredAt)) && isRecord(input.payload);
+}
+
+export function parseMatchHistoryRequest(input: unknown): ParseResult<MatchHistoryRequest> {
+  if (!isRecord(input) || !exactShape(input, ["protocolVersion", "requestId", "matchId", "beforeEventSeq"]) ||
+      input.protocolVersion !== 1 || !isText(input.requestId) || !isText(input.matchId) ||
+      !isVersion(input.beforeEventSeq) || input.beforeEventSeq < 1) return bad();
+  return good(input);
+}
+
+export function parseMatchHistoryResponse(input: unknown): ParseResult<MatchHistoryResponse> {
+  if (!isRecord(input) || !exactShape(input, ["protocolVersion", "requestId", "matchId", "beforeEventSeq", "events", "nextBeforeEventSeq"]) ||
+      !parseMatchHistoryRequest({ protocolVersion: input.protocolVersion, requestId: input.requestId,
+        matchId: input.matchId, beforeEventSeq: input.beforeEventSeq }).ok ||
+      !Array.isArray(input.events) || input.events.length > 100 || !input.events.every(validPublicMatchEvent)) return bad();
+  const before = input.beforeEventSeq as number;
+  const next = input.nextBeforeEventSeq;
+  if (next !== null && (!isVersion(next) || next < 1 || next >= before)) return bad("$.nextBeforeEventSeq");
+  const events = input.events as PublicMatchEvent[];
+  if (!events.every((event, index) => event.eventSeq < before && (next === null || event.eventSeq >= next) &&
+      (index === 0 || event.eventSeq > events[index - 1]!.eventSeq))) return bad("$.events");
+  return good(input);
 }
 
 /** Strict success parser for match:sync, including viewer-scoped snapshot and ordered visible events. */

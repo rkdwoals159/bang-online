@@ -7,6 +7,7 @@ import type {
   MatchSnapshotView,
   MatchSyncRequest,
   MatchSyncResponse,
+  MatchHistoryResponse,
   PublicMatchEvent,
   RoomCommand,
   RoomPreviewRequest,
@@ -21,6 +22,8 @@ import {
   parseMatchCommand,
   parseMatchOutcomeForStatus,
   parseMatchSyncRequest,
+  parseMatchHistoryRequest,
+  parseMatchHistoryResponse,
   parsePendingInteractionView,
   parseRoomCommand,
   parseRoomPreviewResponse,
@@ -353,6 +356,19 @@ export class BrowserGameTransport implements GameTransport {
       void this.syncMatch(matchId).catch(() => undefined);
     }
     return response;
+  }
+
+  async getMatchHistory(matchId: string, beforeEventSeq = (this.getSnapshot().matches[matchId]?.eventSeq ?? 0) + 1): Promise<MatchHistoryResponse> {
+    const request = { protocolVersion: 1, requestId: this.createId(), matchId, beforeEventSeq };
+    if (!parseMatchHistoryRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
+    const playerId = this.restoredPlayerId;
+    const raw = await this.emitAck("match:history", request);
+    if (parseSyncRejectedResponse(raw).ok) throw new BrowserTransportError("REQUEST_REJECTED");
+    const parsed = parseMatchHistoryResponse(raw);
+    if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId ||
+        parsed.value.beforeEventSeq !== beforeEventSeq || playerId !== this.restoredPlayerId) throw new BrowserTransportError("INVALID_RESPONSE");
+    this.store.appendMatchHistory(matchId, parsed.value.events, parsed.value);
+    return parsed.value;
   }
 
   async createGuestSession(input: GuestSessionRequest): Promise<GuestSessionResponse> {

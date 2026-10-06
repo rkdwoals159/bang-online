@@ -824,6 +824,22 @@ export class StorageRepository {
     });
   }
 
+  async listMatchEventsBefore(matchId: string, beforeEventSeq: number, limit = 101): Promise<MatchEventRecord[]> {
+    if (!Number.isSafeInteger(beforeEventSeq) || beforeEventSeq < 1 || !Number.isSafeInteger(limit) || limit < 1 || limit > 101) {
+      throw new RangeError("Invalid history pagination.");
+    }
+    return withClient(this.pool, async client => {
+      const result = await client.query<EventRow>(
+        `SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at
+         FROM match_events WHERE match_id = $1 AND event_seq < $2 ORDER BY event_seq DESC LIMIT $3`,
+        [matchId, beforeEventSeq, limit],
+      );
+      return result.rows.map(row => ({ eventId: row.event_id, eventSeq: safeInteger(row.event_seq, "event sequence"),
+        version: safeInteger(row.version, "event version"), type: row.type, actorPlayerId: row.actor_player_id,
+        payload: parseJson(row.payload_json), createdAt: date(row.created_at) }));
+    });
+  }
+
   async listPendingOutbox(limit = 100): Promise<OutboxRecord[]> {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) {
       throw new RangeError("Outbox query limit must be an integer from 1 to 1000.");

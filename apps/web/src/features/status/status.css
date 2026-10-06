@@ -33,6 +33,9 @@
 .match-status__events li { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid var(--color-border); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .match-status__event-seq { flex: 0 0 auto; color: var(--color-brass-ink); font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 750; }
 .match-status__empty-log { margin: 16px 0 0; color: var(--color-muted); font-size: 14px; }
+.match-status__new-events, .match-status__history-more { min-height: 44px; padding: 8px 14px; margin-top: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-ink); font-size: 14px; cursor: pointer; }
+.match-status__history-more:disabled { cursor: wait; opacity: .65; }
+.match-status__history-error { color: var(--color-danger); font-size: 14px; }
 .match-status__input-gate { min-width: 0; width: 100%; margin: 0; padding: 0; border: 0; }
 .match-status__input-gate legend { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .match-status__input-gate:disabled { padding: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-muted); }

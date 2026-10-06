@@ -15,11 +15,12 @@ import { HealthHearts, roleName, SceneTable } from "./SceneTable.js";
 import "./scene.css";
 
 export interface GameSceneProps {
+  historyEvents?: readonly PublicMatchEvent[];
   matchId: string; version: number; snapshot: MatchSnapshotView; visibleEvents: readonly PublicMatchEvent[];
   room: RoomView; roomVersion: number; transport: ActionTransport & ResultRoomTransport; showActions: boolean;
 }
 /** One persistent scene; commands and responses still use their authoritative controllers. */
-export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersion,transport,showActions}:GameSceneProps) {
+export function GameScene({matchId,version,snapshot,visibleEvents,historyEvents,room,roomVersion,transport,showActions}:GameSceneProps) {
   const surface=useRef<HTMLDivElement>(null);
   const [centerHost,setCenterHost]=useState<HTMLDivElement|null>(null);
   const [inspectionHost,setInspectionHost]=useState<HTMLDivElement|null>(null);
@@ -29,7 +30,7 @@ export function GameScene({matchId,version,snapshot,visibleEvents,room,roomVersi
   const self=snapshot.publicTable.players.find(p=>p.playerId===snapshot.viewer.playerId);
   const turn=snapshot.publicTable.players.find(p=>p.playerId===snapshot.publicTable.turn.currentPlayerId);
   const mine=turn?.playerId===snapshot.viewer.playerId;
-  const sync={version,snapshot,visibleEvents};
+  const sync={version,snapshot,visibleEvents:historyEvents ?? visibleEvents};
   const statusProps={sync,room,roomVersion,matchId,transport};
   const caption=completed?"게임 종료":snapshot.status==="paused"?"잠시 멈춤":snapshot.status==="recovery_required"?"연결 확인 중":pending?interactionLabel(pending.kind):mine?"내 차례":`${turn?.displayName ?? "참가자"} 님 차례`;
   async function fullscreen() { try { setFullscreenError(""); if (document.fullscreenElement) await document.exitFullscreen(); else if (surface.current?.requestFullscreen) await surface.current.requestFullscreen(); else setFullscreenError("이 브라우저에서는 전체 화면을 지원하지 않아요."); } catch {setFullscreenError("전체 화면을 열지 못했어요.");} }

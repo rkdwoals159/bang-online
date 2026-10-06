@@ -62,7 +62,7 @@ function boundaryError(error: unknown, kind: "room" | "match", stage: SyncStage)
   return internalError(kind, stage, error);
 }
 
-async function authenticatedPlayer(
+export async function authenticatedPlayer(
   request: Request,
   env: SiteApiEnvironment,
   options: HttpServiceOptions,

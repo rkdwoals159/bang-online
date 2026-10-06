@@ -13,8 +13,8 @@ export type MatchStatusSync = Pick<
   "version" | "snapshot" | "visibleEvents"
 >;
 
-/** Keep the local public-history projection small enough for a stable DOM. */
-export const MAX_PUBLIC_LOG_EVENTS = 100;
+/** Bound rendered rows while retaining history for pagination. */
+export const PUBLIC_LOG_PAGE_SIZE = 100;
 
 type StatusPlayer = Pick<
   MatchSnapshotView["publicTable"]["players"][number],
@@ -40,7 +40,8 @@ export function formatLogTime(occurredAt: string, now: number): string {
   const date = new Date(occurredAt);
   if (!Number.isFinite(date.getTime())) return "시간 정보 없음";
   const clock = [date.getHours(), date.getMinutes(), date.getSeconds()].map(value => String(value).padStart(2, "0")).join(":");
-  return `${clock}(${Math.max(0, Math.floor((now - date.getTime()) / 1000))}초 전)`;
+  const seconds = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+  return `${clock}(${seconds < 60 ? `${seconds}초 전` : `${Math.floor(seconds / 60)}분 전`})`;
 }
 
 export interface RevealedRoleEntry {
@@ -119,6 +120,18 @@ const publicEventMessages: Readonly<Record<string, string>> = Object.freeze({
   GENERAL_STORE_CARD_REVEALED: "잡화점 카드가 공개됐어요.",
   PANIC_USED: "패닉!으로 카드를 가져왔어요.",
   CAT_BALOU_USED: "캣 벌루로 카드를 버렸어요.",
+  CARD_USED: "카드를 사용했어요.",
+  CARD_EQUIPPED: "카드를 장착했어요.",
+  PUBLIC_CARD_DISCARDED: "카드를 버렸어요.",
+  PUBLIC_CARD_TAKEN: "다른 플레이어의 카드를 가져왔어요.",
+  STORE_CARD_PICKED: "잡화점에서 카드를 가져왔어요.",
+  STORE_CARD_DISCARDED: "잡화점의 남은 카드를 버렸어요.",
+  CARD_RECEIVED: "카드를 받았어요.",
+  DISCARD_CARD_TAKEN: "버림더미에서 카드를 가져왔어요.",
+  PLAYER_ELIMINATED: "플레이어가 탈락했어요.",
+  MATCH_COMPLETED: "게임이 끝났어요.",
+  DRAW_PILE_RESHUFFLED: "버림더미를 섞어 덱을 다시 만들었어요.",
+  RULE_RESOURCE_EXHAUSTED: "덱에 카드가 부족해 진행이 멈췄어요.",
 });
 
 function isValidEventSeq(event: PublicMatchEvent): boolean {
@@ -146,8 +159,7 @@ export function mergePublicEvents(
   }
 
   return [...eventsBySeq.values()]
-    .sort((left, right) => left.eventSeq - right.eventSeq)
-    .slice(-MAX_PUBLIC_LOG_EVENTS);
+    .sort((left, right) => left.eventSeq - right.eventSeq);
 }
 
 /**
@@ -217,8 +229,21 @@ export function formatPublicEvent(
 
   switch (event.type) {
     case "BANG_ATTACKED": return actor && target ? `${actor} 님이 ${target} 님을 뱅!으로 공격해요.` : fallback;
-    case "PANIC_USED": return actor && target ? `${actor} 님이 ${target} 님에게 패닉!을 사용했어요.` : fallback;
-    case "CAT_BALOU_USED": return actor && target ? `${actor} 님이 ${target} 님에게 캣 벌루를 사용했어요.` : fallback;
+    case "PANIC_USED": return actor && target ? `${actor} 님이 패닉!으로 ${target} 님의 ${payload.targetZone === "in_play" ? "장착 카드" : "손패"} 1장을 가져왔어요.` : fallback;
+    case "CAT_BALOU_USED": return actor && target ? `${actor} 님이 캣 벌루로 ${target} 님의 ${payload.targetZone === "in_play" ? "장착 카드" : "손패"} 1장을 버렸어요.` : fallback;
+    case "CARD_USED": return actor ? `${actor} 님이 ${cardName(String(payload.cardType ?? ""))} 카드를 사용했어요.` : fallback;
+    case "CARD_EQUIPPED": return actor && target ? `${actor} 님이 ${target === actor ? "" : `${target} 님에게 `}${cardName(String(payload.cardType ?? ""))} 카드를 장착했어요.` : fallback;
+    case "PUBLIC_CARD_DISCARDED": return target ? `${target} 님이 ${cardName(String(payload.cardType ?? ""))} 1장을 버렸어요${payload.fromZone === "in_play" ? " · 장착 해제" : ""}.` : fallback;
+    case "PUBLIC_CARD_TAKEN": return actor && target ? `${actor} 님이 ${target} 님의 ${payload.targetZone === "in_play" ? "장착 카드" : "손패"} 1장을 가져왔어요.` : fallback;
+    case "STORE_CARD_PICKED": return actor ? `${actor} 님이 잡화점에서 ${cardName(String(payload.cardType ?? ""))} 1장을 가져왔어요.` : fallback;
+    case "STORE_CARD_DISCARDED": return `잡화점의 ${cardName(String(payload.cardType ?? ""))} 1장을 버렸어요.`;
+    case "CARD_RECEIVED": return actor ? `${actor} 님이 카드 1장을 받았어요.` : fallback;
+    case "DISCARD_CARD_TAKEN": return actor ? `${actor} 님이 버림더미에서 ${cardName(String(payload.cardType ?? ""))} 1장을 가져왔어요.` : fallback;
+    case "PLAYER_ELIMINATED": {
+      const player = publicName(payload, "playerId", players);
+      return player ? `${player} 님이 탈락했어요.` : fallback;
+    }
+    case "MATCH_COMPLETED": return "게임이 끝났어요.";
     case "BANG_HIT": return actor && target ? `${actor} 님의 뱅!이 ${target} 님에게 적중했어요${damage}.` : fallback;
     case "BANG_MISSED": return target ? `${target} 님이 뱅!을 피했어요.` : fallback;
     case "GATLING_STARTED": {
@@ -239,7 +264,7 @@ export function formatPublicEvent(
     case "DUEL_BANG_PLAYED": return responder ? `${responder} 님이 결투에서 뱅!을 냈어요.` : fallback;
     case "BEER_USED": return actor ? `${actor} 님이 맥주를 사용했어요.` : fallback;
     case "SALOON_USED": return actor ? `${actor} 님이 술집을 사용했어요.` : fallback;
-    case "PLAYER_HEALED": return target ? `${target} 님의 생명력이 회복됐어요.` : fallback;
+    case "PLAYER_HEALED": return target ? `${target} 님의 생명력 +${typeof payload.amount === "number" ? payload.amount : 1}${payload.cause === "SID" ? " · 시드 케첨 능력" : ""}.` : fallback;
     case "DYNAMITE_EXPLODED": return target ? `${target} 님에게 다이너마이트가 폭발했어요${damage}.` : fallback;
     case "DYNAMITE_PASSED": {
       const from = publicName(payload, "fromPlayerId", players);
@@ -258,6 +283,7 @@ export function formatPublicEvent(
         ? `${target} 님의 술통 판정 ${succeeded ? "성공" : "실패"}이에요.`
         : fallback;
     }
+    case "JAIL_JUDGMENT_RESOLVED": return actor ? `${actor} 님의 감옥 판정: ${payload.turnSkipped === true ? "이번 차례를 건너뛰어요" : "탈출했어요"}.` : fallback;
     default: return fallback;
   }
 }

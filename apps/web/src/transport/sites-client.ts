@@ -5,6 +5,7 @@ import type {
   MatchCommand,
   MatchSyncRequest,
   MatchSyncResponse,
+  MatchHistoryResponse,
   RoomCommand,
   RoomPreviewRequest,
   RoomSyncRequest,
@@ -16,6 +17,8 @@ import {
   parseMatchCommand,
   parseMatchSyncRequest,
   parseMatchSyncResponse,
+  parseMatchHistoryRequest,
+  parseMatchHistoryResponse,
   parseRoomCommand,
   parseRoomPreviewRequest,
   parseRoomPreviewResponse,
@@ -309,6 +312,19 @@ export class SitesGameTransport implements GameTransport {
     });
     this.matchSyncs.set(matchId, request);
     return request;
+  }
+
+  async getMatchHistory(matchId: string, beforeEventSeq = (this.getSnapshot().matches[matchId]?.eventSeq ?? 0) + 1): Promise<MatchHistoryResponse> {
+    const request = { protocolVersion: 1, requestId: this.createId(), matchId, beforeEventSeq };
+    if (!parseMatchHistoryRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
+    const playerId = this.restoredPlayerId;
+    const reply = await this.requestJson(`/api/matches/${encodeURIComponent(matchId)}/history`, "POST", request, undefined, false);
+    if (parseSyncRejectedResponse(reply.body).ok) throw new BrowserTransportError("REQUEST_REJECTED");
+    const parsed = parseMatchHistoryResponse(reply.body);
+    if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId ||
+        parsed.value.beforeEventSeq !== beforeEventSeq || playerId !== this.restoredPlayerId) throw new BrowserTransportError("INVALID_RESPONSE");
+    this.store.appendMatchHistory(matchId, parsed.value.events, parsed.value);
+    return parsed.value;
   }
 
   async createGuestSession(input: GuestSessionRequest): Promise<GuestSessionResponse> {
@@ -1112,7 +1128,7 @@ export class SitesGameTransport implements GameTransport {
     this.reconnectTimer = null;
   }
 
-  private async requestJson(path: string, method: "GET" | "POST", body?: unknown, signal?: AbortSignal): Promise<HttpReply> {
+  private async requestJson(path: string, method: "GET" | "POST", body?: unknown, signal?: AbortSignal, reportError = true): Promise<HttpReply> {
     const controller = new AbortController();
     let rejectAbort: (error: unknown) => void = () => {};
     const aborted = new Promise<never>((_resolve, reject) => { rejectAbort = reject; });
@@ -1138,7 +1154,7 @@ export class SitesGameTransport implements GameTransport {
         return { status: response.status, body: responseBody };
       })()]);
     } catch (error) {
-      this.store.setError(error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE"
+      if (reportError) this.store.setError(error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE"
         : error instanceof BrowserTransportError && error.code === "HTTP_SERVER_ERROR" ? "SERVER_ERROR" : "CONNECTION");
       throw error instanceof BrowserTransportError ? error : new BrowserTransportError("HTTP_REQUEST_FAILED");
     } finally {

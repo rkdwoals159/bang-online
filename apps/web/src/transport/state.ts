@@ -1,5 +1,6 @@
 import type {
   MatchSyncResponse,
+  MatchHistoryResponse,
   PublicMatchEvent,
   RoomPresenceView,
   RoomSyncResponse,
@@ -182,6 +183,17 @@ export class BrowserTransportStore {
     return true;
   }
 
+  appendMatchHistory(matchId: string, events: readonly PublicMatchEvent[], page?: MatchHistoryResponse): void {
+    const previous = this.current.matches[matchId];
+    if (!previous) return;
+    const historyEvents = mergeHistoryEvents(previous.historyEvents ?? previous.visibleEvents,
+      events.filter(event => event.eventSeq <= previous.eventSeq));
+    this.update({ matches: Object.freeze({ ...this.current.matches,
+      [matchId]: Object.freeze({ ...previous, historyEvents: Object.freeze(historyEvents),
+        ...(page && page.beforeEventSeq === previous.historyNextBeforeEventSeq
+          ? { historyNextBeforeEventSeq: page.nextBeforeEventSeq } : {}) }) }) });
+  }
+
   applyMatchSync(response: MatchSyncResponse): boolean {
     if (!this.isCurrentViewer(response.snapshot.viewer.playerId)) return false;
     const previous = this.current.matches[response.matchId];
@@ -204,6 +216,10 @@ export class BrowserTransportStore {
       return true;
     }
 
+    const historyEvents = mergeHistoryEvents(previous?.historyEvents ?? previous?.visibleEvents ?? [], response.visibleEvents);
+    const historyNextBeforeEventSeq = !previous || (response.requiresFullSnapshot && response.eventSeq - previous.eventSeq > 100)
+      ? response.visibleEvents[0]?.eventSeq ?? response.eventSeq + 1
+      : previous.historyNextBeforeEventSeq;
     const visibleEvents = response.requiresFullSnapshot || !previous
       ? response.visibleEvents.slice(-MAX_VISIBLE_EVENTS)
       : mergeEvents(previous.visibleEvents, response.visibleEvents);
@@ -212,6 +228,8 @@ export class BrowserTransportStore {
       eventSeq: response.eventSeq,
       snapshot: response.snapshot,
       visibleEvents: Object.freeze(visibleEvents),
+      historyEvents: Object.freeze(historyEvents),
+      historyNextBeforeEventSeq,
       requiresFullSnapshot: response.requiresFullSnapshot,
     });
     this.update({
@@ -225,6 +243,12 @@ export class BrowserTransportStore {
     this.current = Object.freeze({ ...this.current, ...patch });
     for (const listener of this.listeners) listener();
   }
+}
+
+function mergeHistoryEvents(previous: readonly PublicMatchEvent[], received: readonly PublicMatchEvent[]): PublicMatchEvent[] {
+  const events = new Map(previous.map(event => [event.eventSeq, event]));
+  for (const event of received) if (!events.has(event.eventSeq)) events.set(event.eventSeq, event);
+  return [...events.values()].sort((a, b) => a.eventSeq - b.eventSeq);
 }
 
 function preserveRoomPresence(incoming: RoomView, previous?: RoomView): RoomView {

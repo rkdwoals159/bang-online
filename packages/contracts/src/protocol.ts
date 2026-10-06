@@ -272,6 +272,18 @@ export interface PublicMatchEvent {
   occurredAt: string;
   payload: Readonly<Record<string, unknown>>;
 }
+export interface MatchHistoryRequest {
+  protocolVersion: typeof PROTOCOL_VERSION;
+  requestId: string;
+  matchId: string;
+  /** Exclusive upper cursor; pagination is independent of the live sync cursor. */
+  beforeEventSeq: number;
+}
+export interface MatchHistoryResponse extends MatchHistoryRequest {
+  events: readonly PublicMatchEvent[];
+  /** Raw-event cursor, including private gaps. Null means the beginning was reached. */
+  nextBeforeEventSeq: number | null;
+}
 export interface MatchSyncResponse {
   protocolVersion: typeof PROTOCOL_VERSION;
   requestId: string;

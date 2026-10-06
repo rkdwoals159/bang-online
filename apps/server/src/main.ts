@@ -430,6 +430,7 @@ function gatewayHandlers(
     matchCommand,
     roomSync: syncHandlers.roomSync,
     matchSync: syncHandlers.matchSync,
+    matchHistory: syncHandlers.matchHistory,
   };
 }
 

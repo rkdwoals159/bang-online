@@ -6,6 +6,7 @@ import type {
   MatchSyncResponse,
   MatchSnapshotView,
   PublicMatchEvent,
+  MatchHistoryResponse,
   RoomCommand,
   RoomSyncResponse,
   RoomView,
@@ -27,6 +28,9 @@ export interface MatchProjectionState {
   readonly eventSeq: number;
   readonly snapshot: MatchSnapshotView;
   readonly visibleEvents: readonly PublicMatchEvent[];
+  /** Separate from the bounded animation feed; retained and paged on demand. */
+  readonly historyEvents?: readonly PublicMatchEvent[];
+  readonly historyNextBeforeEventSeq?: number | null;
   readonly requiresFullSnapshot: boolean;
 }
 
@@ -56,6 +60,7 @@ export interface GameTransport {
   watchMatch(matchId: string): () => void;
   syncRoom(roomId: string): Promise<RoomSyncResponse>;
   syncMatch(matchId: string): Promise<MatchSyncResponse>;
+  getMatchHistory?(matchId: string, beforeEventSeq?: number): Promise<MatchHistoryResponse>;
   createGuestSession(input: GuestSessionRequest): Promise<GuestSessionResponse>;
   restoreGuestSession(): Promise<GuestSessionResponse | null>;
   recoverAssignedSeats(): Promise<readonly RoomView[]>;

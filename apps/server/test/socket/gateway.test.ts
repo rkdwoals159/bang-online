@@ -216,6 +216,28 @@ function ackCapture(): { ack: GatewayAck; values: unknown[] } {
 
 const commandId = "00000000-0000-4000-8000-000000000001";
 
+test("history checks current membership and strict input before invoking its read handler", async () => {
+  let historyCalls = 0;
+  const harness = createHarness({ handlers: { matchHistory(context, request, ack) {
+    historyCalls += 1;
+    assert.equal(context.playerId, "player-1");
+    ack({ ...request, events: [], nextBeforeEventSeq: null });
+  } } });
+  const { socket } = await harness.io.connect({ cookie: "guest_session=secret-token" });
+  const request = { protocolVersion: 1, requestId: "history-1", matchId: "match-1", beforeEventSeq: 120 };
+  const received = ackCapture(); socket.receive("match:history", request, received.ack);
+  await new Promise<void>(resolve => setTimeout(resolve, 0));
+  assert.equal(historyCalls, 1); assert.equal(received.values.length, 1);
+  assert.deepEqual(received.values[0], { ...request, events: [], nextBeforeEventSeq: null });
+  harness.setMatchMember(false);
+  const denied = ackCapture(); socket.receive("match:history", request, denied.ack);
+  await new Promise<void>(resolve => setTimeout(resolve, 0));
+  assert.equal((denied.values[0] as { error: { code: string } }).error.code, "NOT_FOUND_OR_FORBIDDEN");
+  const invalid = ackCapture(); socket.receive("match:history", { ...request, playerId: "spoofed" }, invalid.ack);
+  assert.equal((invalid.values[0] as { error: { code: string } }).error.code, "BAD_REQUEST");
+  assert.equal(historyCalls, 1);
+});
+
 test("handshake authenticates the configured cookie and sets only the server-resolved identity", async () => {
   const harness = createHarness();
   const { socket, error } = await harness.io.connect({ cookie: "other=x; guest_session=secret-token" });
@@ -786,6 +808,7 @@ test("the accepted client event list is exact and unknown/server-only events are
     "match:command",
     "room:sync",
     "match:sync",
+    "match:history",
     "room:preview",
   ]);
   for (const eventName of ["lobby:join", "match:changed", "room:changed", "join"]) {

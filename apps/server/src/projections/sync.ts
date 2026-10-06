@@ -2,6 +2,8 @@ import { BASE_PHYSICAL_CARDS } from "../../../../packages/catalog/src/cards/inde
 import type {
   MatchSyncRequest,
   MatchSyncResponse,
+  MatchHistoryRequest,
+  MatchHistoryResponse,
   PublicMatchEvent,
   RoomSyncRequest,
   RoomSyncResponse,
@@ -11,10 +13,12 @@ import { projectMatchSnapshot } from "../../../../packages/engine/src/state/proj
 import type { GameState, JsonValue } from "../../../../packages/engine/src/state/types.js";
 import type { AuthenticatedSocketContext, GatewayAck, GatewayHandlers } from "../socket/gateway.js";
 import type { MatchEventRecord, StorageRepository } from "../storage/repository.js";
+import { projectPublicMovement } from "./public-movements.js";
 
-type SyncHandlers = Pick<GatewayHandlers, "roomSync" | "matchSync">;
+type SyncHandlers = Pick<GatewayHandlers, "roomSync" | "matchSync" | "matchHistory">;
 type SyncContext = Pick<AuthenticatedSocketContext, "playerId" | "roomMembership" | "matchMembership">;
-type SyncStorage = Pick<StorageRepository, "getRoom" | "getMatch" | "listMatchEvents">;
+type SyncStorage = Pick<StorageRepository, "getRoom" | "getMatch" | "listMatchEvents"> &
+  Partial<Pick<StorageRepository, "listMatchEventsBefore">>;
 
 export interface SyncProjectionDependencies {
   readonly storage: SyncStorage;
@@ -51,7 +55,7 @@ function projectPayloadFields(
     const value = payload[field];
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null) {
       projected[field] = value;
-    } else if ((field === "targetPlayerIds" || field === "healedPlayerIds") && strings(value)) {
+    } else if (["targetPlayerIds", "healedPlayerIds", "winningPlayerIds"].includes(field) && strings(value)) {
       projected[field] = strings(value);
     }
   }
@@ -88,6 +92,10 @@ const PUBLIC_EVENT_FIELDS: Readonly<Record<string, readonly string[]>> = Object.
   BARREL_CHECK_RESOLVED: ["attackKind", "defenseSource", "targetPlayerId", "succeeded", "successfulMisses", "requiredMisses"],
   JAIL_JUDGMENT_RESOLVED: ["suit", "heart", "turnSkipped"],
   GENERAL_STORE_CARD_REVEALED: [],
+  PLAYER_ELIMINATED: ["playerId", "cause"],
+  MATCH_COMPLETED: ["winningFaction", "winningPlayerIds"],
+  DRAW_PILE_RESHUFFLED: [],
+  RULE_RESOURCE_EXHAUSTED: ["requestedCount", "fulfilledCount"],
 });
 
 const PUBLIC_CARD_REVEAL_EVENTS = new Set([
@@ -116,6 +124,10 @@ function projectEvent(
   const blackJackReveal = event.type === "CARD_DRAWN" && isRecord(event.payload) &&
     event.payload.visibility === "public" && event.payload.reason === "BLACK_JACK_SECOND_DRAW" &&
     state.seats.some(seat => seat.public.playerId === event.actorPlayerId && seat.public.characterId === "black_jack");
+  if (!blackJackReveal) {
+    const movement = projectPublicMovement(event, state);
+    if (movement) return movement;
+  }
   const fields = blackJackReveal ? ["rank", "suit"] : PUBLIC_EVENT_FIELDS[event.type];
   if (!fields) return undefined;
 
@@ -178,6 +190,17 @@ function roomRecordMatchesView(
 /** Build server sync callbacks for T45's authenticated gateway context. */
 export function createSyncProjectionHandlers(dependencies: SyncProjectionDependencies): SyncHandlers {
   return {
+    matchHistory: async (context: SyncContext, request: MatchHistoryRequest, ack: GatewayAck) => {
+      if (!await context.matchMembership(request.matchId)) { reject(request.requestId, ack); return; }
+      const match = await dependencies.storage.getMatch(request.matchId);
+      if (!match || !match.players.some(player => player.playerId === context.playerId)) { reject(request.requestId, ack); return; }
+      const before = Math.min(request.beforeEventSeq, match.eventSeq + 1);
+      const events = dependencies.storage.listMatchEventsBefore
+        ? await dependencies.storage.listMatchEventsBefore(request.matchId, before, 101)
+        : (await dependencies.storage.listMatchEvents(request.matchId, 0)).filter(event => event.eventSeq < before)
+          .sort((left, right) => right.eventSeq - left.eventSeq).slice(0, 101);
+      ack(projectMatchHistoryPage(request, match.state, events));
+    },
     roomSync: async (context: SyncContext, request: RoomSyncRequest, ack: GatewayAck) => {
       const memberView = await context.roomMembership(request.roomId);
       const roomRecord = await dependencies.storage.getRoom(request.roomId);
@@ -238,6 +261,14 @@ export function createSyncProjectionHandlers(dependencies: SyncProjectionDepende
       ack(response);
     },
   };
+}
+
+export function projectMatchHistoryPage(request: MatchHistoryRequest, state: GameState, newestFirst: readonly MatchEventRecord[]): MatchHistoryResponse {
+  const page = newestFirst.slice(0, 100).reverse();
+  return { ...request, events: page.flatMap(event => {
+    const projected = projectEvent(event, state);
+    return projected ? [projected] : [];
+  }), nextBeforeEventSeq: newestFirst.length > 100 ? page[0]!.eventSeq : null };
 }
 
 /** Public for focused cursor and event privacy tests. */

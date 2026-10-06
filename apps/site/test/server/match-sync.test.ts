@@ -8,6 +8,7 @@ import {
   parseRoomSyncResponse,
   parseSyncUnchangedResponse,
   parseSyncRejectedResponse,
+  parseMatchHistoryResponse,
 } from "../../../../packages/contracts/src/validation.js";
 import type { GameState } from "../../../../packages/engine/src/state/types.js";
 import { buildLegalActionCandidates } from "../../../../packages/engine/src/actions/index.js";
@@ -19,6 +20,80 @@ import { D1StorageRepository } from "../../src/storage/repository.js";
 import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
+
+test("history paginates beyond 100 records through an empty private page and rejects outsiders", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const before = (await new D1StorageRepository(db).getMatch(fixture.matchId))!;
+    const actor = fixture.guests[0]!;
+    const statements = Array.from({ length: 250 }, (_, index) => {
+      const offset = index + 1, isPrivate = offset > 50 && offset <= 150;
+      return db.prepare(`INSERT INTO match_events
+        (event_id, match_id, event_seq, version, type, actor_player_id, payload_json, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(`history-${offset}`, before.id, before.eventSeq + offset, before.version,
+          isPrivate ? "PRIVATE_INTERNAL" : "BEER_USED", actor.playerId,
+          JSON.stringify({ healed: false, secret: "private-sentinel", cardInstanceId: "hidden-card-sentinel" }), new Date().toISOString());
+    });
+    await db.batch(statements);
+    const preparedState = { ...before.state, eventSeq: before.eventSeq + 250 };
+    await db.prepare("UPDATE matches SET event_seq = ?, state_json = ? WHERE id = ?")
+      .bind(preparedState.eventSeq, JSON.stringify(preparedState), before.id).run();
+    const page = async (cursor: number, cookie = actor.cookie) => routeApiRequest(request(`/api/matches/${before.id}/history`, {
+      cookie, body: { protocolVersion: 1, requestId: `history-${cursor}`, matchId: before.id, beforeEventSeq: cursor },
+    }), { DB: db });
+    const firstResponse = await page(before.eventSeq + 251);
+    const firstBody = await json(firstResponse);
+    assert.equal(firstResponse.status, 200, JSON.stringify(firstBody));
+    const first = parseMatchHistoryResponse(firstBody); assert.ok(first.ok, JSON.stringify(firstBody));
+    assert.equal(first.value.events.length, 100); assert.equal(first.value.events[0]!.eventSeq, before.eventSeq + 151);
+    assert.equal(first.value.nextBeforeEventSeq, before.eventSeq + 151);
+    const second = parseMatchHistoryResponse(await json(await page(first.value.nextBeforeEventSeq!))); assert.ok(second.ok);
+    assert.deepEqual(second.value.events, []); assert.equal(second.value.nextBeforeEventSeq, before.eventSeq + 51);
+    const third = parseMatchHistoryResponse(await json(await page(second.value.nextBeforeEventSeq!))); assert.ok(third.ok);
+    assert.equal(third.value.nextBeforeEventSeq, null);
+    assert.ok(third.value.events.some(event => event.eventSeq === before.eventSeq + 1));
+    const data = JSON.stringify([first.value, second.value, third.value]);
+    assert.doesNotMatch(data, /private-sentinel|hidden-card-sentinel|PRIVATE_INTERNAL|snapshot|selfPrivate/);
+    const outsider = await createGuest(db, "Outside history");
+    const denied = await json(await page(before.eventSeq + 251, outsider.cookie));
+    assertSyncRejected(denied, "NOT_FOUND_OR_FORBIDDEN");
+    assert.equal(Object.hasOwn(denied as object, "matchId"), false);
+    const invalid = await routeApiRequest(request(`/api/matches/${before.id}/history`, { cookie: actor.cookie,
+      body: { protocolVersion: 1, requestId: "invalid-history", matchId: before.id, beforeEventSeq: 0 } }), { DB: db });
+    assert.equal(invalid.status, 400);
+    const after = (await new D1StorageRepository(db).getMatch(before.id))!;
+    assert.equal(after.version, before.version); assert.deepEqual(after.state, preparedState);
+  } finally { await runtime.dispose(); }
+});
+
+test("actual Panic and Cat commands produce visible named records without exposing their hand targets", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    await completeTurnDrawIfNeeded(db, fixture.matchId, fixture.guests);
+    const repository = new D1StorageRepository(db);
+    const initial = (await repository.getMatch(fixture.matchId))!;
+    const actor = fixture.guests.find(guest => guest.playerId === initial.state.turn.currentPlayerId)!;
+    for (const [type, expected] of [["panic", "PANIC_USED"], ["cat_balou", "CAT_BALOU_USED"]]) {
+      await giveCardFromDeckToHand(db, initial.id, actor.playerId, type!);
+      const before = (await repository.getMatch(initial.id))!;
+      const command = buildLegalActionCandidates(before.state, actor.playerId).find(candidate => candidate.type === "PLAY_CARD" &&
+        candidate.payload.targetZone === "HAND" && BASE_PHYSICAL_CARDS.some(card => card.typeId === type &&
+          card.definitionId === before.state.zones.cardsByInstanceId[candidate.payload.cardInstanceId]!.cardDefinitionId));
+      assert.ok(command?.type === "PLAY_CARD");
+      const result = await matchCommand(db, actor, before.id, command.type, before.version, { ...command.payload });
+      assert.equal(result.ack.status, "accepted");
+      const response = await routeApiRequest(request(`/api/matches/${before.id}/sync`, { cookie: actor.cookie,
+        body: { protocolVersion: 1, requestId: type, matchId: before.id, knownVersion: before.version, afterEventSeq: before.eventSeq } }), { DB: db });
+      const parsed = parseMatchSyncResponse(await json(response)); assert.ok(parsed.ok);
+      const event = parsed.value.visibleEvents.find(event => event.type === expected); assert.ok(event);
+      assert.equal(event.payload.actorPlayerId, actor.playerId); assert.equal(event.payload.targetZone, "hand");
+      assert.doesNotMatch(JSON.stringify(event), /cardInstanceId|rank|suit/);
+    }
+  } finally { await runtime.dispose(); }
+});
 
 test("sync excludes a command committed after its snapshot and retrieves it on the next sync", async () => {
   const { runtime, db } = await createIsolatedD1();

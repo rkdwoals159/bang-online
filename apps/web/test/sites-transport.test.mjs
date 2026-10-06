@@ -70,6 +70,36 @@ const guest = {
   sessionExpiresAt: "2026-10-01T00:00:00Z",
 };
 
+test("history reads merge older records without changing the live snapshot or sync cursor", async () => {
+  const transport = new SitesGameTransport({ fetcher: async (url, init) => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    const request = JSON.parse(init.body);
+    if (url.endsWith("/history")) return Response.json({ ...request, events: [{ eventSeq: 1, type: "BEER_USED",
+      occurredAt: "2026-10-06T00:00:00Z", payload: { actorPlayerId: "player-1" } }], nextBeforeEventSeq: null });
+    return Response.json(matchSync(request, { version: 300, eventSeq: 300 }));
+  } });
+  await transport.restoreGuestSession(); await transport.syncMatch("match-1");
+  const previous = transport.getSnapshot().matches["match-1"];
+  const history = await transport.getMatchHistory("match-1", 301);
+  const current = transport.getSnapshot().matches["match-1"];
+  assert.equal(history.nextBeforeEventSeq, null); assert.equal(current.eventSeq, 300); assert.equal(current.version, 300);
+  assert.equal(current.snapshot, previous.snapshot); assert.equal(current.visibleEvents, previous.visibleEvents);
+  assert.deepEqual(current.historyEvents.map(event => event.eventSeq), [1]);
+  assert.equal(current.historyNextBeforeEventSeq, null);
+});
+
+test("history 500 failure leaves gameplay connection and its live cursor intact", async () => {
+  const transport = new SitesGameTransport({ fetcher: async (url, init) => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    if (url.endsWith("/history")) return new Response("failed", { status: 500 });
+    return Response.json(matchSync(JSON.parse(init.body)));
+  } });
+  await transport.restoreGuestSession(); await transport.syncMatch("match-1");
+  await assert.rejects(transport.getMatchHistory("match-1"), { code: "HTTP_SERVER_ERROR" });
+  assert.equal(transport.getSnapshot().lastError, null);
+  assert.equal(transport.getSnapshot().matches["match-1"].eventSeq, 1);
+});
+
 class FakeEventSource {
   readyState = 0;
   onopen = null;

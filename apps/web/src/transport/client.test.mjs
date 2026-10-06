@@ -154,6 +154,29 @@ function countEmits(socket, event) {
   return socket.emitted.filter((item) => item.event === event).length;
 }
 
+test("socket history retains older records without changing the live cursor and rejects mismatched replies", async () => {
+  const socket = new FakeSocket();
+  let mismatch = false;
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "match:sync") acknowledgement(matchSync(payload, { version: 4, eventSeq: 200 }));
+    if (event === "match:history") acknowledgement({ ...payload, requestId: mismatch ? "wrong-request" : payload.requestId,
+      events: [{ eventSeq: 1, type: "BEER_USED", occurredAt: "2026-10-01T00:00:00Z", payload: {} }], nextBeforeEventSeq: null });
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.watchMatch("match-1"); transport.connect();
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.eventSeq === 200, "initial match sync missing");
+  const before = transport.getSnapshot().matches["match-1"];
+  await transport.getMatchHistory("match-1", 100);
+  const after = transport.getSnapshot().matches["match-1"];
+  assert.equal(after.eventSeq, 200); assert.equal(after.version, 4);
+  assert.equal(after.snapshot, before.snapshot); assert.equal(after.visibleEvents, before.visibleEvents);
+  assert.equal(after.historyEvents[0].eventSeq, 1);
+  mismatch = true;
+  await assert.rejects(transport.getMatchHistory("match-1", 100), error => error.code === "INVALID_RESPONSE");
+  assert.equal(transport.getSnapshot().matches["match-1"], after);
+  transport.disconnect();
+});
+
 test("outbox notifications trigger sync and duplicate or older hints do not update projections", async () => {
   const socket = new FakeSocket();
   let roomVersion = 2;
@@ -246,6 +269,28 @@ test("match projections retain only the newest 100 public events without moving 
   assert.equal(projection.visibleEvents[0].eventSeq, 56);
   assert.equal(projection.visibleEvents.at(-1).eventSeq, 155);
   assert.equal(projection.eventSeq, 155);
+  assert.equal(projection.historyEvents.length, 155);
+  assert.equal(projection.historyEvents[0].eventSeq, 1);
+  const refreshed = { ...delta, version: 156, eventSeq: 156, requiresFullSnapshot: true, visibleEvents: events(57, 156) };
+  store.applyMatchSync(refreshed);
+  assert.equal(store.getSnapshot().matches["match-1"].historyEvents.length, 156);
+});
+
+test("history pagination fills a reconnect gap without rewinding the live cursor or clearing cached old records", () => {
+  const store = new BrowserTransportStore();
+  const record = eventSeq => ({ eventSeq, type: "BEER_USED", occurredAt: "2026-10-06T00:00:00Z", payload: {} });
+  store.applyMatchSync({ ...matchSync({ requestId: "m", matchId: "match-1" }, { version: 10, eventSeq: 10 }), visibleEvents: [record(1), record(10)] });
+  store.applyMatchSync({ ...matchSync({ requestId: "r", matchId: "match-1" }, { version: 300, eventSeq: 300 }), visibleEvents: [record(201), record(300)] });
+  assert.equal(store.getSnapshot().matches["match-1"].historyNextBeforeEventSeq, 201);
+  const live = store.getSnapshot().matches["match-1"].visibleEvents;
+  store.appendMatchHistory("match-1", [record(101), record(200)], { beforeEventSeq: 201, nextBeforeEventSeq: 101 });
+  const match = store.getSnapshot().matches["match-1"];
+  assert.equal(match.version, 300); assert.equal(match.eventSeq, 300); assert.equal(match.visibleEvents, live);
+  assert.deepEqual(match.historyEvents.map(event => event.eventSeq), [1, 10, 101, 200, 201, 300]);
+  assert.equal(match.historyNextBeforeEventSeq, 101);
+  store.appendMatchHistory("match-1", [], { beforeEventSeq: 201, nextBeforeEventSeq: null });
+  assert.equal(store.getSnapshot().matches["match-1"].historyNextBeforeEventSeq, 101, "late page cannot replace the current history cursor");
+  store.setViewerPlayerId("someone-else"); assert.deepEqual(store.getSnapshot().matches, {});
 });
 
 test("ACK auto-sync and the action helper share one request; covered in-flight hints do not refetch", async () => {

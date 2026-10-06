@@ -962,6 +962,16 @@ export class D1StorageRepository {
     return (result.results ?? []).map(mapEvent);
   }
 
+  async listMatchEventsBefore(matchId: string, beforeEventSeq: number, limit = 101): Promise<MatchEventRecord[]> {
+    safeInteger(beforeEventSeq, "history cursor");
+    this.validateLimit(limit, "history query limit");
+    const result = await this.db.prepare(`
+      SELECT event_id, event_seq, version, type, actor_player_id, payload_json, created_at
+      FROM match_events WHERE match_id = ? AND event_seq < ? ORDER BY event_seq DESC LIMIT ?
+    `).bind(matchId, beforeEventSeq, limit).all<EventRow>();
+    return (result.results ?? []).map(mapEvent);
+  }
+
   async listOutboxAfter(cursor: number, aggregateIds?: readonly string[], limit = 100): Promise<OutboxRecord[]> {
     safeInteger(cursor, "outbox cursor");
     this.validateLimit(limit, "outbox query limit");

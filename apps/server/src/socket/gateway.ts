@@ -2,6 +2,7 @@ import type {
   CommandAck,
   MatchCommand,
   MatchSyncRequest,
+  MatchHistoryRequest,
   RoomPreviewResponse,
   RoomCommand,
   RoomSyncRequest,
@@ -10,6 +11,7 @@ import type {
 import {
   parseMatchCommand,
   parseMatchSyncRequest,
+  parseMatchHistoryRequest,
   parseRoomCommand,
   parseRoomPreviewRequest,
   parseRoomSyncRequest,
@@ -68,6 +70,7 @@ export interface GatewayHandlers {
   matchCommand(context: AuthenticatedSocketContext, command: MatchCommand, ack: GatewayAck): void | Promise<void>;
   roomSync(context: AuthenticatedSocketContext, request: RoomSyncRequest, ack: GatewayAck): void | Promise<void>;
   matchSync(context: AuthenticatedSocketContext, request: MatchSyncRequest, ack: GatewayAck): void | Promise<void>;
+  matchHistory?(context: AuthenticatedSocketContext, request: MatchHistoryRequest, ack: GatewayAck): void | Promise<void>;
   /** Disconnect is connection presence only; this hook must not remove a seat or mutate match state. */
   disconnected?(playerId: string, reason: string): void | Promise<void>;
 }
@@ -93,6 +96,7 @@ export const CLIENT_PROTOCOL_EVENT_NAMES = Object.freeze([
   "match:command",
   "room:sync",
   "match:sync",
+  "match:history",
   "room:preview",
 ] as const);
 const CLIENT_EVENT_NAMES = new Set<string>(CLIENT_PROTOCOL_EVENT_NAMES);
@@ -451,6 +455,18 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
         return;
       }
       await options.handlers.matchSync(context, parsed.value, ack);
+    });
+  });
+
+  socket.on("match:history", (...args) => {
+    const ack = ackFrom(args), requestId = requestIdFrom(args[0]);
+    const parsed = parseMatchHistoryRequest(args[0]);
+    if (!ack || requestId === null) { socket.disconnect(true); return; }
+    if (args.length !== 2 || !parsed.ok) { syncRejectedAck(ack, requestId, "BAD_REQUEST"); return; }
+    invoke(socket, async () => {
+      if (!await context.matchMembership(parsed.value.matchId)) { syncRejectedAck(ack, requestId, "NOT_FOUND_OR_FORBIDDEN"); return; }
+      if (!options.handlers.matchHistory) { syncRejectedAck(ack, requestId, "RECOVERY_REQUIRED"); return; }
+      await options.handlers.matchHistory(context, parsed.value, ack);
     });
   });
 

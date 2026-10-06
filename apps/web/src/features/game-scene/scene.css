@@ -174,3 +174,6 @@
   .table-stage__header{margin-bottom:5px}.table-stage__header h2{font-size:16px}
   .table-stage .tablewide-stage__players{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+.scene-log .match-status__events{max-height:none;overflow:visible}.scene-log .match-status__events li{color:#e2d8c3;border-color:#65775a55}.scene-log .match-status__new-events,.scene-log .match-status__history-more{color:#f4e4b9;background:#1c3527;border-color:#85936d}.scene-log .match-status__new-events{position:sticky;top:38px;z-index:1}.scene-log .match-status__history-error{color:#ffb9a9}
+

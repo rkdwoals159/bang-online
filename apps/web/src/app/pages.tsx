@@ -463,6 +463,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
       version={matchProjection.version}
       snapshot={matchProjection.snapshot}
       visibleEvents={matchProjection.visibleEvents}
+      historyEvents={matchProjection.historyEvents}
       room={room}
       roomVersion={roomProjection?.version ?? 0}
       transport={transport}
@@ -508,6 +509,7 @@ export function MatchPage({
   version,
   snapshot,
   visibleEvents,
+  historyEvents,
   room,
   roomVersion,
   transport,
@@ -517,13 +519,14 @@ export function MatchPage({
   version: number;
   snapshot: MatchSnapshotView;
   visibleEvents: readonly PublicMatchEvent[];
+  historyEvents?: readonly PublicMatchEvent[];
   room: RoomView;
   roomVersion: number;
   transport: ReturnType<typeof useAppState>["transport"];
   showActions: boolean;
 }) {
   return <GameExperience key={matchId} scene version={version} snapshot={snapshot} visibleEvents={visibleEvents}>
-    <GameScene {...{matchId,version,snapshot,visibleEvents,room,roomVersion,transport,showActions}} />
+    <GameScene {...{matchId,version,snapshot,visibleEvents,historyEvents,room,roomVersion,transport,showActions}} />
   </GameExperience>;
 }
 

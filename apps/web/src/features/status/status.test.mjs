@@ -7,7 +7,7 @@ import {
   buildMatchStatusViewModel,
   formatLogTime,
   isMatchActionInputEnabled,
-  MAX_PUBLIC_LOG_EVENTS,
+  PUBLIC_LOG_PAGE_SIZE,
   mergeMatchStatusProjection,
   mergePublicEvents,
 } from "./model.ts";
@@ -18,6 +18,10 @@ test("log time shows local clock and elapsed seconds, including invalid/future t
   assert.equal(formatLogTime(date.toISOString(), date.getTime() + 5200), "12:34:56(5초 전)");
   assert.equal(formatLogTime(date.toISOString(), date.getTime() - 1000), "12:34:56(0초 전)");
   assert.equal(formatLogTime("invalid", date.getTime()), "시간 정보 없음");
+  assert.equal(formatLogTime(date.toISOString(), date.getTime() + 59_999), "12:34:56(59초 전)");
+  assert.equal(formatLogTime(date.toISOString(), date.getTime() + 60_000), "12:34:56(1분 전)");
+  assert.equal(formatLogTime(date.toISOString(), date.getTime() + 119_999), "12:34:56(1분 전)");
+  assert.equal(formatLogTime(date.toISOString(), date.getTime() + 120_000), "12:34:56(2분 전)");
 });
 let StatusPanel;
 let MatchInputGate;
@@ -115,14 +119,14 @@ test("merges public event batches in eventSeq order and deduplicates without fil
   assert.deepEqual(events.map(({ type }) => type), ["BANG_HIT", "BANG_ATTACKED", "BEER_USED", "DUEL_STARTED"]);
 });
 
-test("keeps only the latest public event window when the feed grows", () => {
-  const events = mergePublicEvents([], Array.from({ length: MAX_PUBLIC_LOG_EVENTS + 40 }, (_, index) =>
+test("retains older public events beyond the rendered page size", () => {
+  const events = mergePublicEvents([], Array.from({ length: PUBLIC_LOG_PAGE_SIZE + 40 }, (_, index) =>
     event(index + 1, "BANG_HIT"),
   ));
 
-  assert.equal(events.length, MAX_PUBLIC_LOG_EVENTS);
-  assert.equal(events[0]?.eventSeq, 41);
-  assert.equal(events.at(-1)?.eventSeq, MAX_PUBLIC_LOG_EVENTS + 40);
+  assert.equal(events.length, PUBLIC_LOG_PAGE_SIZE + 40);
+  assert.equal(events[0]?.eventSeq, 1);
+  assert.equal(events.at(-1)?.eventSeq, PUBLIC_LOG_PAGE_SIZE + 40);
 });
 
 test("ignores stale sync versions and preserves the newer turn, status, and event feed", () => {

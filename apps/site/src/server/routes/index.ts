@@ -4,6 +4,7 @@ import { handleNotificationsRoute } from "./notifications.js";
 import { handleRoomsRoute } from "./rooms.js";
 import { handleSessionRoute } from "./session.js";
 import { handleSyncRoute } from "./sync.js";
+import { handleMatchHistoryRoute } from "./history.js";
 
 function notFound(request: Request): Response {
   const headers = new Headers({
@@ -23,6 +24,7 @@ export async function routeApiRequest(request: Request, env: SiteApiEnvironment)
     handleRoomsRoute,
     handleMatchesRoute,
     handleSyncRoute,
+    handleMatchHistoryRoute,
     handleNotificationsRoute,
   ] as const;
   for (const handler of handlers) {
