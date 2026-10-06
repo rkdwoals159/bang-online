@@ -126,6 +126,92 @@ test("production builds select Sites HTTP/SSE and local Vite selects Socket.IO",
   assert.equal(selectGameTransportAdapter("test"), "socket-io");
 });
 
+for (const failure of ["500", "lost-ack"]) {
+  test(`transient ${failure} quietly replays the identical command and applies it only once`, async () => {
+    const envelopes = []; let mutations = 0;
+    const transport = new SitesGameTransport({ commandRetryIntervalMs: 1, fetcher: async (url, init) => {
+      if (url === "/api/guest-sessions") return Response.json(guest);
+      const request = JSON.parse(init.body);
+      if (!url.endsWith("/commands")) return Response.json(matchSync(request));
+      envelopes.push(init.body);
+      if (envelopes.length === 1) {
+        if (failure === "lost-ack") { mutations++; throw new Error("response lost after commit"); }
+        return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 500 });
+      }
+      if (failure === "500") mutations++;
+      return Response.json({ protocolVersion: 1, commandId: request.commandId, status: "accepted",
+        duplicate: failure === "lost-ack", aggregateVersion: 2, eventSeq: 2,
+        matchProjection: { baseEventSeq: 1, snapshot: matchSync(request).snapshot, visibleEvents: [] } });
+    }, eventSourceFactory: () => new FakeEventSource() });
+    try {
+      await transport.restoreGuestSession(); transport.connect(); await transport.syncMatch("match-1");
+      const command = { protocolVersion: 1, commandId: crypto.randomUUID(), matchId: "match-1", expectedVersion: 1,
+        type: "END_TURN", payload: {} };
+      const ack = await transport.sendMatchCommand(command);
+      assert.equal(ack.status, "accepted"); assert.equal(envelopes.length, 2);
+      assert.equal(envelopes[0], envelopes[1]); assert.equal(mutations, 1);
+      assert.deepEqual(transport.getSnapshot().pendingCommandIds, []);
+      assert.equal(transport.getSnapshot().lastError, null);
+      assert.deepEqual(transport.getCommandAcknowledgement(command.commandId), ack);
+      const copy = transport.getCommandAcknowledgement(command.commandId); copy.aggregateVersion = 99;
+      assert.equal(transport.getCommandAcknowledgement(command.commandId).aggregateVersion, 2);
+    } finally { transport.disconnect(); }
+  });
+}
+
+test("persistent server failure retries at most three times and keeps the original pending ID", async () => {
+  let attempts = 0;
+  const transport = new SitesGameTransport({ commandRetryIntervalMs: 1, fetcher: async url => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    attempts++; return new Response("server failure", { status: 503 });
+  }, eventSourceFactory: () => new FakeEventSource() });
+  try {
+    await transport.restoreGuestSession(); transport.connect();
+    const command = { protocolVersion: 1, commandId: crypto.randomUUID(), matchId: "match-1", expectedVersion: 1,
+      type: "END_TURN", payload: {} };
+    await assert.rejects(transport.sendMatchCommand(command), { code: "HTTP_SERVER_ERROR" });
+    assert.equal(attempts, 3); assert.equal(transport.getSnapshot().lastError, "SERVER_ERROR");
+    assert.deepEqual(transport.getSnapshot().pendingCommandIds, [command.commandId]);
+    assert.equal(transport.getCommandAcknowledgement(command.commandId), undefined);
+  } finally { transport.disconnect(); }
+});
+
+for (const stopKind of ["hidden", "disconnect", "identity"]) {
+  test(`command retry stops on ${stopKind} before another mutation request`, async () => {
+    const visibility = new FakeVisibility(); let attempts = 0, playerId = "player-1";
+    const transport = new SitesGameTransport({ commandRetryIntervalMs: 15, visibilityTarget: visibility,
+      eventSourceFactory: () => new FakeEventSource(), fetcher: async url => {
+        if (url === "/api/guest-sessions") return Response.json({ ...guest, player: { ...guest.player, playerId } });
+        attempts++; return new Response("failure", { status: 500 });
+      } });
+    try {
+      await transport.restoreGuestSession(); transport.connect();
+      const pending = transport.sendMatchCommand({ protocolVersion: 1, commandId: crypto.randomUUID(), matchId: "match-1",
+        expectedVersion: 1, type: "END_TURN", payload: {} });
+      const failed = assert.rejects(pending, { code: "HTTP_SERVER_ERROR" });
+      await waitUntil(() => attempts === 1, "initial request not received");
+      if (stopKind === "hidden") visibility.setVisibility("hidden");
+      else if (stopKind === "disconnect") transport.disconnect();
+      else { playerId = "player-2"; await transport.restoreGuestSession(); }
+      await failed; assert.equal(attempts, 1);
+    } finally { transport.disconnect(); }
+  });
+}
+
+test("invalid command acknowledgement is never automatically retried", async () => {
+  let attempts = 0;
+  const transport = new SitesGameTransport({ commandRetryIntervalMs: 1, fetcher: async url => {
+    if (url === "/api/guest-sessions") return Response.json(guest);
+    attempts++; return Response.json({ status: "accepted", commandId: "wrong-id" });
+  }, eventSourceFactory: () => new FakeEventSource() });
+  try {
+    await transport.restoreGuestSession(); transport.connect();
+    await assert.rejects(transport.sendMatchCommand({ protocolVersion: 1, commandId: crypto.randomUUID(), matchId: "match-1",
+      expectedVersion: 1, type: "END_TURN", payload: {} }), { code: "INVALID_RESPONSE" });
+    assert.equal(attempts, 1);
+  } finally { transport.disconnect(); }
+});
+
 for (const kind of ["room", "match"]) {
   test(`A01 ${kind} sync retries HTTP 500 while SSE stays connected and no new event arrives`, async () => {
     let version = 1, failOnce = false, reads = 0;
@@ -167,7 +253,7 @@ test("A01 failed read retries stop when hidden, unwatched or disconnected", asyn
     try {
       await transport.restoreGuestSession(); transport.connect();
       const unwatch = transport.watchRoom("room-1");
-      await waitUntil(() => transport.getSnapshot().lastError === "CONNECTION", "failure not received");
+      await waitUntil(() => transport.getSnapshot().lastError === "SERVER_ERROR", "failure not received");
       if (stopKind === "hidden") visibility.setVisibility("hidden");
       else if (stopKind === "unwatch") unwatch(); else transport.disconnect();
       const stopped = reads;
@@ -254,7 +340,7 @@ test("A06 assigned seats hydrate the home list without watching old or closed ro
   } finally { transport.disconnect(); }
 });
 
-test("Sites requests use strict DTO parsing, cookie credentials and same-payload command retry", async () => {
+test("Sites requests use strict DTO parsing, cookie credentials and automatic same-payload command retry", async () => {
   const calls = [];
   let failCommandOnce = true;
   const eventSources = [];
@@ -280,6 +366,7 @@ test("Sites requests use strict DTO parsing, cookie credentials and same-payload
   };
   const transport = new SitesGameTransport({
     fetcher,
+    commandRetryIntervalMs: 1,
     createId: () => "00000000-0000-4000-8000-000000000002",
     eventSourceFactory: (url, init) => {
       const source = new FakeEventSource();
@@ -299,12 +386,10 @@ test("Sites requests use strict DTO parsing, cookie credentials and same-payload
     type: "END_TURN",
     payload: {},
   };
-  await assert.rejects(transport.sendMatchCommand(command), (error) =>
-    error instanceof BrowserTransportError && error.code === "HTTP_REQUEST_FAILED");
-  assert.deepEqual(transport.getSnapshot().pendingCommandIds, [command.commandId]);
+  const ack = await transport.sendMatchCommand(command);
+  assert.deepEqual(transport.getSnapshot().pendingCommandIds, []);
   const firstCommandCall = calls.find(({ url }) => url.endsWith("/commands"));
   assert.equal(firstCommandCall.url, "/api/matches/match-1/commands");
-  const ack = await transport.retryPendingCommand(command.commandId);
   assert.equal(ack.commandId, command.commandId);
   assert.equal(ack.status, "accepted");
   const commandCalls = calls.filter(({ url }) => url.endsWith("/commands"));

@@ -1,6 +1,7 @@
 export type TransportErrorCode =
   | "NOT_CONNECTED"
   | "ACK_TIMEOUT"
+  | "HTTP_SERVER_ERROR"
   | "SESSION_EXPIRED"
   | "REQUEST_REJECTED"
   | "INVALID_RESPONSE"

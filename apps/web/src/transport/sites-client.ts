@@ -54,6 +54,7 @@ export interface SitesGameTransportOptions {
   readTimeoutMs?: number;
   fallbackPollIntervalMs?: number;
   syncRetryIntervalMs?: number;
+  commandRetryIntervalMs?: number;
   visibilityTarget?: Pick<Document, "visibilityState" | "addEventListener" | "removeEventListener">;
 }
 
@@ -143,6 +144,8 @@ export class SitesGameTransport implements GameTransport {
   private readonly readTimeoutMs: number;
   private readonly fallbackPollIntervalMs: number;
   private readonly syncRetryIntervalMs: number;
+  private readonly commandRetryIntervalMs: number;
+  private readonly acknowledgedCommands = new Map<string, CommandAck>();
   private readonly syncRetries = new Map<string, { timer: ReturnType<typeof setTimeout>; delay: number }>();
   private readonly syncRetryDelays = new Map<string, number>();
   private readonly unavailableRoomIds = new Set<string>();
@@ -186,7 +189,8 @@ export class SitesGameTransport implements GameTransport {
     this.readTimeoutMs = options.readTimeoutMs ?? 5_000;
     this.fallbackPollIntervalMs = options.fallbackPollIntervalMs ?? 2_000;
     this.syncRetryIntervalMs = options.syncRetryIntervalMs ?? 250;
-    if (![this.readTimeoutMs, this.fallbackPollIntervalMs, this.syncRetryIntervalMs].every(value => Number.isSafeInteger(value) && value > 0)) {
+    this.commandRetryIntervalMs = options.commandRetryIntervalMs ?? 500;
+    if (![this.readTimeoutMs, this.fallbackPollIntervalMs, this.syncRetryIntervalMs, this.commandRetryIntervalMs].every(value => Number.isSafeInteger(value) && value > 0)) {
       throw new RangeError("Transport timing must be a positive integer.");
     }
     this.visibilityTarget = options.visibilityTarget ?? (typeof document === "undefined" ? undefined : document);
@@ -318,6 +322,7 @@ export class SitesGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     this.sessionExpired = false;
+    if (this.restoredPlayerId !== reply.body.player.playerId) this.acknowledgedCommands.clear();
     this.store.setViewerPlayerId(reply.body.player.playerId);
     this.restoredPlayerId = reply.body.player.playerId;
     this.store.setConnection(this.getSnapshot().connection, true);
@@ -338,6 +343,7 @@ export class SitesGameTransport implements GameTransport {
   private async performRestoreGuestSession(): Promise<GuestSessionResponse | null> {
     const reply = await this.requestJson("/api/guest-sessions", "GET");
     if (reply.status === 204) {
+      this.acknowledgedCommands.clear();
       this.restoredPlayerId = undefined;
       this.store.setConnection(this.getSnapshot().connection, false);
       return null;
@@ -347,6 +353,7 @@ export class SitesGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     this.sessionExpired = false;
+    if (this.restoredPlayerId !== reply.body.player.playerId) this.acknowledgedCommands.clear();
     this.store.setViewerPlayerId(reply.body.player.playerId);
     this.restoredPlayerId = reply.body.player.playerId;
     this.store.setConnection(this.getSnapshot().connection, true);
@@ -499,6 +506,11 @@ export class SitesGameTransport implements GameTransport {
     return this.attemptPending(pending);
   }
 
+  getCommandAcknowledgement(commandId: string): CommandAck | undefined {
+    const acknowledgement = this.acknowledgedCommands.get(commandId);
+    return acknowledgement ? cloneProtocolValue(acknowledgement) : undefined;
+  }
+
   private sendCommand(
     command: RoomCommand | MatchCommand,
     event: PendingCommand["event"],
@@ -521,11 +533,27 @@ export class SitesGameTransport implements GameTransport {
 
   private attemptPending(pending: PendingCommand): Promise<unknown> {
     if (pending.active) return pending.active;
-    const attempt = this.performPending(pending);
+    const attempt = this.performPendingWithRecovery(pending);
     pending.active = attempt;
     return attempt.finally(() => {
       if (pending.active === attempt) pending.active = undefined;
     });
+  }
+
+  private async performPendingWithRecovery(pending: PendingCommand): Promise<unknown> {
+    const playerId = this.restoredPlayerId;
+    for (let attempt = 0; ; attempt += 1) {
+      try { return await this.performPending(pending); }
+      catch (error) {
+        const transient = error instanceof BrowserTransportError &&
+          ["HTTP_REQUEST_FAILED", "HTTP_SERVER_ERROR"].includes(error.code);
+        if (!transient || attempt >= 2 || !this.started || this.sessionExpired || !this.isVisible() ||
+            this.restoredPlayerId !== playerId) throw error;
+        await new Promise(resolve => setTimeout(resolve, this.commandRetryIntervalMs * (attempt + 1)));
+        if (!this.started || this.sessionExpired || !this.isVisible() || this.restoredPlayerId !== playerId) throw error;
+        // Reuse the frozen envelope and command ID: the first attempt may have committed.
+      }
+    }
   }
 
   private async performPending(pending: PendingCommand): Promise<unknown> {
@@ -574,6 +602,10 @@ export class SitesGameTransport implements GameTransport {
         this.restoredPlayerId !== undefined && ack.value.matchProjection.snapshot.viewer.playerId !== this.restoredPlayerId) {
       this.store.setError("INVALID_RESPONSE");
       throw new BrowserTransportError("INVALID_RESPONSE");
+    }
+    if (ack.ok && pending.matchId) {
+      this.acknowledgedCommands.set(pending.commandId, cloneProtocolValue(ack.value));
+      if (this.acknowledgedCommands.size > 50) this.acknowledgedCommands.delete(this.acknowledgedCommands.keys().next().value!);
     }
     this.pending.delete(pending.commandId);
     this.updatePendingIds();
@@ -1098,7 +1130,7 @@ export class SitesGameTransport implements GameTransport {
     try {
       return await Promise.race([aborted, (async (): Promise<HttpReply> => {
         const response = await this.fetcher(path, init);
-        if (response.status >= 500) throw new BrowserTransportError("HTTP_REQUEST_FAILED");
+        if (response.status >= 500) throw new BrowserTransportError("HTTP_SERVER_ERROR");
         if (response.status === 204) return { status: response.status, body: null };
         let responseBody: unknown;
         try { responseBody = await response.json() as unknown; }
@@ -1106,7 +1138,8 @@ export class SitesGameTransport implements GameTransport {
         return { status: response.status, body: responseBody };
       })()]);
     } catch (error) {
-      this.store.setError(error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE" : "CONNECTION");
+      this.store.setError(error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE" ? "INVALID_RESPONSE"
+        : error instanceof BrowserTransportError && error.code === "HTTP_SERVER_ERROR" ? "SERVER_ERROR" : "CONNECTION");
       throw error instanceof BrowserTransportError ? error : new BrowserTransportError("HTTP_REQUEST_FAILED");
     } finally {
       clearTimeout(timer);
@@ -1137,6 +1170,7 @@ export class SitesGameTransport implements GameTransport {
 
   private markSessionExpired(): void {
     this.sessionExpired = true;
+    this.acknowledgedCommands.clear();
     this.clearSyncRetries();
     this.clearFallbackPoll();
     this.clearReconnectTimer();

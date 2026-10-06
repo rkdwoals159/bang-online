@@ -20,6 +20,77 @@ import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
 
+test("sync excludes a command committed after its snapshot and retrieves it on the next sync", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  const originalListEvents = D1StorageRepository.prototype.listMatchEvents;
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    await completeTurnDrawIfNeeded(db, fixture.matchId, fixture.guests);
+    const repository = new D1StorageRepository(db);
+    const initial = (await repository.getMatch(fixture.matchId))!;
+    const actor = fixture.guests.find(guest => guest.playerId === initial.state.turn.currentPlayerId)!;
+    await giveCardFromDeckToHand(db, fixture.matchId, actor.playerId, "beer");
+    const before = (await repository.getMatch(fixture.matchId))!;
+    const card = before.state.seats.find(seat => seat.public.playerId === actor.playerId)!.private.handCardInstanceIds
+      .find(id => BASE_PHYSICAL_CARDS.some(face => face.typeId === "beer" &&
+        face.definitionId === before.state.zones.cardsByInstanceId[id]!.cardDefinitionId))!;
+    let raced = false;
+    D1StorageRepository.prototype.listMatchEvents = async function (id, after, limit) {
+      if (id === fixture.matchId && !raced) {
+        raced = true;
+        const result = await matchCommand(db, actor, id, "PLAY_CARD", before.version, { cardInstanceId: card });
+        assert.equal(result.ack.status, "accepted");
+      }
+      return originalListEvents.call(this, id, after, limit);
+    };
+    const response = await routeApiRequest(request(`/api/matches/${fixture.matchId}/sync`, {
+      cookie: actor.cookie, body: { protocolVersion: 1, requestId: "raced-sync", matchId: fixture.matchId,
+        knownVersion: 0, afterEventSeq: 0 },
+    }), { DB: db });
+    assert.equal(raced, true); assert.equal(response.status, 200);
+    const parsed = parseMatchSyncResponse(await json(response)); assert.ok(parsed.ok);
+    assert.equal(parsed.value.version, before.version); assert.equal(parsed.value.eventSeq, before.eventSeq);
+    assert.ok(parsed.value.visibleEvents.every(event => event.eventSeq <= before.eventSeq));
+    assert.ok(parsed.value.snapshot.selfPrivate!.hand.some(face => face.cardInstanceId === card));
+    const next = await routeApiRequest(request(`/api/matches/${fixture.matchId}/sync`, {
+      cookie: actor.cookie, body: { protocolVersion: 1, requestId: "next-sync", matchId: fixture.matchId,
+        knownVersion: before.version, afterEventSeq: before.eventSeq },
+    }), { DB: db });
+    const nextParsed = parseMatchSyncResponse(await json(next)); assert.ok(nextParsed.ok);
+    assert.equal(nextParsed.value.version, before.version + 1);
+    assert.ok(nextParsed.value.visibleEvents.some(event => event.type === "BEER_USED"));
+    assert.equal(nextParsed.value.snapshot.selfPrivate!.hand.some(face => face.cardInstanceId === card), false);
+  } finally {
+    D1StorageRepository.prototype.listMatchEvents = originalListEvents;
+    await runtime.dispose();
+  }
+});
+
+test("unexpected sync failure logs only its stage and error category", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  const originalRead = D1StorageRepository.prototype.getMatchForPlayer;
+  const originalError = console.error;
+  try {
+    const fixture = await startedFourPlayerMatch(db);
+    const messages: unknown[][] = [];
+    console.error = (...args) => { messages.push(args); };
+    D1StorageRepository.prototype.getMatchForPlayer = async () => {
+      throw new Error("private-card-session-cookie-sentinel");
+    };
+    const response = await routeApiRequest(request(`/api/matches/${fixture.matchId}/sync`, {
+      cookie: fixture.guests[0]!.cookie, body: { protocolVersion: 1, requestId: "diagnostic-sync", matchId: fixture.matchId,
+        knownVersion: 0, afterEventSeq: 0 },
+    }), { DB: db });
+    assert.equal(response.status, 500);
+    assert.deepEqual(messages, [["bang.sync.failure", { kind: "match", stage: "load", errorType: "Error" }]]);
+    assert.equal(JSON.stringify(messages).includes("sentinel"), false);
+  } finally {
+    console.error = originalError;
+    D1StorageRepository.prototype.getMatchForPlayer = originalRead;
+    await runtime.dispose();
+  }
+});
+
 test("tablewide responses from one version all commit concurrently with private options", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {

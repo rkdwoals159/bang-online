@@ -11,6 +11,11 @@ import { AppLink, navigateTo, replaceTo, type AppRoute } from "./router.js";
 import { useAppState, type SessionRecovery } from "./app-state.js";
 import { ErrorFrame, LoadingFrame } from "./app-frames.js";
 import { AppIcon } from "../components/AppIcon.js";
+import { useDelayedConnectionNotice } from "../features/feedback/hooks.js";
+
+function isRecoverableConnectionError(error: BrowserTransportState["lastError"]): boolean {
+  return error === "CONNECTION" || error === "SERVER_ERROR";
+}
 
 type RoomSurface =
   | { kind: "lobby" }
@@ -55,8 +60,12 @@ export function roomConnectionStatusMessage(
   lastError: BrowserTransportState["lastError"],
   awaitingAuthoritativeSync: boolean,
   connectionWasLost: boolean,
+  writesAvailableWhileDisconnected = false,
+  commandPending = false,
 ): string | null {
-  if (connection === "disconnected" || lastError === "CONNECTION" || connectionWasLost) {
+  if (lastError === "SERVER_ERROR") return "서버 응답을 다시 확인하고 있어요. 잠시만 기다려 주세요.";
+  if ((connection === "disconnected" && !writesAvailableWhileDisconnected) || lastError === "CONNECTION" ||
+      (connectionWasLost && awaitingAuthoritativeSync)) {
     return "연결이 끊겼어요. 다시 연결하면 게임을 이어갈 수 있어요.";
   }
   if (connection === "connecting" && awaitingAuthoritativeSync) {
@@ -65,6 +74,7 @@ export function roomConnectionStatusMessage(
   if (connection === "connected" && awaitingAuthoritativeSync) {
     return "연결 중…";
   }
+  if (commandPending) return "처리가 늦어지고 있어요. 다시 확인해 주세요.";
   return null;
 }
 
@@ -88,7 +98,7 @@ export function shouldRetryConnectionSync(
 ): boolean {
   const usableTransport = connection === "connected" ||
     (writesAvailableWhileDisconnected && connection === "disconnected");
-  return usableTransport && lastError === "CONNECTION" && !alreadyAttempted;
+  return usableTransport && isRecoverableConnectionError(lastError) && !alreadyAttempted;
 }
 
 export async function syncRoomAndActiveMatch(
@@ -251,15 +261,17 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
   const authoritativeSyncGeneration = useRef(0);
   const isMounted = useRef(true);
   currentRoomId.current = roomId;
-  const connectionErrorWasAcknowledged = transportState.lastError === "CONNECTION" &&
+  const connectionErrorWasAcknowledged = isRecoverableConnectionError(transportState.lastError) &&
     connectionErrorSyncRecovered && connectionErrorSyncAttempted.current;
   const routeLastError = connectionErrorWasAcknowledged ? null : transportState.lastError;
-  const connectionMessage = roomConnectionStatusMessage(
+  const connectionMessage = useDelayedConnectionNotice(roomConnectionStatusMessage(
     transportState.connection,
     routeLastError,
     awaitingAuthoritativeSync,
     connectionWasLost,
-  );
+    writesAvailableWhileDisconnected,
+    transportState.pendingCommandIds.length > 0,
+  ), roomId);
   const inputEnabled = isRoomProjectionInputEnabled(
     transportState.connection,
     routeLastError,
@@ -283,23 +295,23 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
       return;
     }
     if (sessionRecovery.kind !== "ready" || !sessionRecovery.guest) return;
-    if (transportState.lastError === "CONNECTION") return;
+    if (isRecoverableConnectionError(transportState.lastError)) return;
 
     void syncRoomAndActiveMatch(transport, roomId).then(() => {
       if (!isMounted.current || currentRoomId.current !== roomId ||
           authoritativeSyncGeneration.current !== generation) return;
       setAwaitingAuthoritativeSync(false);
       const latest = transport.getSnapshot();
-      if (latest.lastError === "CONNECTION") connectionErrorSyncAttempted.current = true;
-      setConnectionWasLost(latest.connection === "disconnected" || latest.lastError === "CONNECTION");
-      setConnectionErrorSyncRecovered(latest.lastError === "CONNECTION");
+      if (isRecoverableConnectionError(latest.lastError)) connectionErrorSyncAttempted.current = true;
+      setConnectionWasLost((latest.connection === "disconnected" && !writesAvailableWhileDisconnected) || isRecoverableConnectionError(latest.lastError));
+      setConnectionErrorSyncRecovered(isRecoverableConnectionError(latest.lastError));
     }).catch(() => {
       // Keep the cached server projection visible and input locked until a sync succeeds.
     });
   }, [roomId, sessionRecovery, transport, transportState.connection, transportState.lastError, writesAvailableWhileDisconnected]);
 
   useEffect(() => {
-    if (transportState.lastError !== "CONNECTION") {
+    if (!isRecoverableConnectionError(transportState.lastError)) {
       if (!connectionErrorSyncInFlight.current) {
         connectionErrorSyncAttempted.current = false;
         setConnectionErrorSyncRecovered(false);
@@ -328,13 +340,13 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
       if (!isMounted.current || currentRoomId.current !== roomId || !transportUsable) return;
       if (authoritativeSyncGeneration.current !== generation) return;
       setAwaitingAuthoritativeSync(false);
-      setConnectionWasLost(latest.connection === "disconnected" || latest.lastError === "CONNECTION");
+      setConnectionWasLost((latest.connection === "disconnected" && !writesAvailableWhileDisconnected) || isRecoverableConnectionError(latest.lastError));
       setConnectionErrorSyncRecovered(true);
     }).catch(() => {
       // A failed retry remains locked; the attempt guard prevents an automatic retry loop.
     }).finally(() => {
       connectionErrorSyncInFlight.current = false;
-      if (transport.getSnapshot().lastError !== "CONNECTION") {
+      if (!isRecoverableConnectionError(transport.getSnapshot().lastError)) {
         connectionErrorSyncAttempted.current = false;
       }
     });
@@ -357,7 +369,7 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
       (matchId && transportState.unavailableMatches?.includes(matchId))) return <RoomUnavailablePage />;
   if (!room) {
     if (transportState.lastError === "SYNC_REJECTED") return <RoomUnavailablePage />;
-    if ((transportState.connection === "disconnected" || transportState.lastError === "CONNECTION") &&
+    if ((transportState.connection === "disconnected" || isRecoverableConnectionError(transportState.lastError)) &&
         !writesAvailableWhileDisconnected) {
       return <>
         <RoomConnectionNotice message={connectionMessage} />

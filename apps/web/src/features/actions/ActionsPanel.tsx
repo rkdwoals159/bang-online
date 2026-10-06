@@ -21,8 +21,10 @@ import {
 } from "./model.js";
 import "./actions.css";
 import { ChoiceStage } from "../experience/ChoiceStage.js";
+import { useCommandRecovery } from "../feedback/hooks.js";
+import type { RecoveryTransport } from "../feedback/recovery.js";
 
-export interface ActionTransport {
+export interface ActionTransport extends RecoveryTransport {
   sendMatchCommand(command: MatchCommand): Promise<CommandAck>;
   syncMatch(matchId: string): Promise<MatchSyncResponse>;
 }
@@ -99,6 +101,18 @@ export function ActionsPanel({
   const visibleSelection = selection?.matchId === matchId && selection.version === projection.version ? selection : null;
   const selectionExpired = selection?.matchId === matchId && selection.version !== projection.version;
   const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
+  useCommandRecovery(transport, activePendingCommand, busy, (ack, response) => {
+    if (currentMatchIdRef.current !== response.matchId) return;
+    const incoming = projectionFromSync(response);
+    setSyncedProjection(current => current?.matchId === matchId && current.version > incoming.version
+      ? current : { ...incoming, matchId });
+    setPendingCommand(null);
+    setNeedsRefresh(false);
+    setSelection(null);
+    setNoHealBeerConfirmation(null);
+    setSidAbilitySelection(null);
+    setNotice(ack.status === "rejected" ? rejectionMessage(ack.error.code) : "");
+  });
   const selectedProposal = visibleSelection?.kind === "card" && visibleSelection.proposalIndex !== null
     ? actions[visibleSelection.proposalIndex]
     : undefined;
@@ -171,7 +185,7 @@ export function ActionsPanel({
       setSelection(null);
       setNoHealBeerConfirmation(null);
       setSidAbilitySelection(null);
-      setPendingCommand(null);
+      if (result.projection) setPendingCommand(null);
 
       if (result.projection) {
         const incomingProjection = result.projection;
@@ -189,18 +203,16 @@ export function ActionsPanel({
           : "지금은 사용할 수 없어요. 다시 골라 주세요.");
       } else {
         setAbilityOpen(false);
-        setNotice(result.projection
-          ? ""
-          : "연결이 지연되고 있어요. 다시 확인해 주세요.");
+        setNotice("");
       }
     } catch {
       if (currentMatchIdRef.current !== command.matchId) return;
       setNeedsRefresh(true);
-      setNotice("연결이 지연되고 있어요. 다시 확인해 주세요.");
+      setNotice("");
       try {
         await refreshProjection(command.matchId);
       } catch {
-        setNotice("연결 상태를 확인하고 다시 시도해 주세요.");
+        // The room frame provides one delayed connection notice.
       }
     } finally {
       if (currentMatchIdRef.current === command.matchId) {
@@ -357,7 +369,6 @@ export function ActionsPanel({
         <p className="game-actions__empty" role="status">탈락한 플레이어는 공개 테이블만 볼 수 있습니다.</p>
       ) : needsRefresh ? (
         <div className="game-actions__recovery">
-          <p>연결이 지연되고 있어요.</p>
           <button
             className="game-actions__button game-actions__button--secondary"
             type="button"
@@ -367,7 +378,7 @@ export function ActionsPanel({
               busyRef.current = true;
               void refreshProjection(matchId)
                 .then(() => setNotice(""))
-                .catch(() => setNotice("최신 게임 정보를 불러오지 못했어요. 다시 시도해 주세요."))
+                .catch(() => undefined)
                 .finally(() => {
                   if (currentMatchIdRef.current === matchId) {
                     busyRef.current = false;

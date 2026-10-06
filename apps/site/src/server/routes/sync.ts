@@ -48,9 +48,18 @@ function rejected(requestId: string, code: SyncRejectedResponse["error"]["code"]
   return response;
 }
 
-function boundaryError(error: unknown): Response {
-  if (error instanceof HttpBoundaryError) return jsonResponse({ error: { code: error.code } }, error.statusCode);
+type SyncStage = "body" | "authenticate" | "load" | "events" | "projection" | "validate";
+function internalError(kind: "room" | "match", stage: SyncStage, error?: unknown): Response {
+  // Keep diagnostic metadata useful without exposing cards, sessions or request bodies.
+  const errorType = error instanceof TypeError ? "TypeError" : error instanceof SyntaxError ? "SyntaxError"
+    : error instanceof Error ? "Error" : error === undefined ? "ValidationFailure" : "Unknown";
+  console.error("bang.sync.failure", { kind, stage, errorType });
   return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+}
+
+function boundaryError(error: unknown, kind: "room" | "match", stage: SyncStage): Response {
+  if (error instanceof HttpBoundaryError) return jsonResponse({ error: { code: error.code } }, error.statusCode);
+  return internalError(kind, stage, error);
 }
 
 async function authenticatedPlayer(
@@ -85,14 +94,14 @@ export async function handleSyncRoute(
   try {
     body = await readJsonRequest(request);
   } catch (error) {
-    return boundaryError(error);
+    return boundaryError(error, roomPath ? "room" : "match", "body");
   }
   const requestId = requestIdFrom(body);
 
   if (roomPath) {
     const parsed = parseRoomSyncRequest(body);
     if (!parsed.ok || !requestId) {
-      return requestId ? jsonResponse(rejected(requestId, "BAD_REQUEST")) : boundaryError(new HttpBoundaryError(400, "BAD_REQUEST"));
+      return requestId ? jsonResponse(rejected(requestId, "BAD_REQUEST")) : boundaryError(new HttpBoundaryError(400, "BAD_REQUEST"), "room", "body");
     }
     let pathRoomId: string;
     try {
@@ -101,10 +110,12 @@ export async function handleSyncRoute(
       return jsonResponse(rejected(requestId, "BAD_REQUEST"));
     }
     if (parsed.value.roomId !== pathRoomId) return jsonResponse(rejected(requestId, "BAD_REQUEST"));
+    let stage: SyncStage = "authenticate";
     try {
       const playerId = await authenticatedPlayer(request, env, options);
       if (!playerId) return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
 
+      stage = "load";
       const repository = new D1StorageRepository(env.DB);
       const record = await repository.getRoom(parsed.value.roomId);
       const room = record
@@ -114,7 +125,7 @@ export async function handleSyncRoute(
         return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
       }
       if (room.version !== record.version || room.rulesetVersion !== BASE_DECK_RULESET_VERSION) {
-        return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+        return internalError("room", "validate");
       }
 
       if (parsed.value.acceptUnchanged === true && parsed.value.knownVersion === room.version) {
@@ -125,7 +136,7 @@ export async function handleSyncRoute(
           roomId: room.roomId,
           version: room.version,
         };
-        if (!parseSyncUnchangedResponse(unchanged).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+        if (!parseSyncUnchangedResponse(unchanged).ok) return internalError("room", "validate");
         return jsonResponse(unchanged);
       }
 
@@ -137,18 +148,19 @@ export async function handleSyncRoute(
         requiresFullSnapshot: parsed.value.knownVersion !== room.version,
         room,
       };
-      if (!parseRoomSyncResponse(response).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+      if (!parseRoomSyncResponse(response).ok) return internalError("room", "validate");
       return jsonResponse(response);
     } catch (error) {
-      return boundaryError(error);
+      return boundaryError(error, "room", stage);
     }
   }
 
   const parsed = parseMatchSyncRequest(body);
   if (!parsed.ok || !requestId) {
-    return requestId ? jsonResponse(rejected(requestId, "BAD_REQUEST")) : boundaryError(new HttpBoundaryError(400, "BAD_REQUEST"));
+    return requestId ? jsonResponse(rejected(requestId, "BAD_REQUEST")) : boundaryError(new HttpBoundaryError(400, "BAD_REQUEST"), "match", "body");
   }
   let pathMatchId: string;
+  let stage: SyncStage = "authenticate";
   try {
     pathMatchId = decodeURIComponent(matchPath![1]!);
   } catch {
@@ -160,6 +172,7 @@ export async function handleSyncRoute(
     const playerId = await authenticatedPlayer(request, env, options);
     if (!playerId) return jsonResponse(rejected(requestId, "NOT_FOUND_OR_FORBIDDEN"));
 
+    stage = "load";
     const repository = new D1StorageRepository(env.DB);
     let match;
     try {
@@ -187,15 +200,19 @@ export async function handleSyncRoute(
         version: match.version,
         eventSeq: match.eventSeq,
       };
-      if (!parseSyncUnchangedResponse(unchanged).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+      if (!parseSyncUnchangedResponse(unchanged).ok) return internalError("match", "validate");
       return jsonResponse(unchanged);
     }
 
+    stage = "events";
     const events = afterEventSeq <= match.eventSeq
       // Reconnecting clients need the recent tail, rather than the first page
       // of old history. A truncated cursor is explicitly a full snapshot below.
-      ? await repository.listMatchEvents(match.id, Math.max(afterEventSeq, match.eventSeq - 100))
+      ? (await repository.listMatchEvents(match.id, Math.max(afterEventSeq, match.eventSeq - 100)))
+        // A concurrent command may commit between the snapshot and event reads.
+        .filter(event => event.eventSeq <= match.eventSeq)
       : [];
+    stage = "projection";
     const replayable = syncProjectionInternals.cursorIsReplayable(afterEventSeq, match.eventSeq, events);
     const visibleEvents = events.flatMap((event) => {
       const projected = syncProjectionInternals.projectEvent(event, match.state);
@@ -211,9 +228,9 @@ export async function handleSyncRoute(
       snapshot: projectMatchSnapshot(match.state, playerId, BASE_PHYSICAL_CARDS),
       visibleEvents,
     };
-    if (!parseMatchSyncResponse(response).ok) return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
+    if (!parseMatchSyncResponse(response).ok) return internalError("match", "validate");
     return jsonResponse(response);
   } catch (error) {
-    return boundaryError(error);
+    return boundaryError(error, "match", stage);
   }
 }

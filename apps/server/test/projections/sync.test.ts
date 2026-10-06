@@ -240,6 +240,22 @@ function roomRequest(overrides: Partial<RoomSyncRequest> = {}): RoomSyncRequest 
   };
 }
 
+test("match sync bounds concurrently committed events to its loaded snapshot", async () => {
+  const match = makeMatch();
+  const future = { ...makeEvents()[1]!, eventSeq: match.eventSeq + 1, version: match.version + 1 };
+  const handlers = createSyncProjectionHandlers({ storage: {
+    getRoom: async () => makeRoomRecord(), getMatch: async () => match,
+    listMatchEvents: async () => [...makeEvents(), future],
+  } as unknown as Pick<StorageRepository, "getRoom" | "getMatch" | "listMatchEvents"> });
+  const ack = captureAck<MatchSyncReply>();
+  await handlers.matchSync(makeContext(), matchRequest(), ack.ack);
+  const response = ack.value();
+  if ("status" in response) assert.fail("authorized sync should succeed");
+  assert.equal(response.eventSeq, match.eventSeq);
+  assert.ok(response.visibleEvents.every(event => event.eventSeq <= match.eventSeq));
+  assert.equal(response.visibleEvents.some(event => event.eventSeq === future.eventSeq), false);
+});
+
 test("match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events", async () => {
   const state = makeState();
   const match = makeMatch(state);

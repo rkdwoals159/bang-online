@@ -26,8 +26,10 @@ import {
   type ReactionProjection,
 } from "./model.js";
 import "./reactions.css";
+import { useCommandRecovery } from "../feedback/hooks.js";
+import type { RecoveryTransport } from "../feedback/recovery.js";
 
-export interface ReactionTransport {
+export interface ReactionTransport extends RecoveryTransport {
   sendMatchCommand(command: MatchCommand): Promise<CommandAck>;
   syncMatch(matchId: string): Promise<MatchSyncResponse>;
 }
@@ -92,11 +94,19 @@ export function ReactionPrompt({
     setSelectedOrder(null);
     setEliminationConfirmation(null);
   }, [matchId, projection.version, pendingInteractionId]);
+  const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
+  useCommandRecovery(transport, activePendingCommand, busy, (ack, response) => {
+    if (currentMatchIdRef.current !== response.matchId) return;
+    const incoming = projectionFromSync(response);
+    setSyncedProjection(current => current?.matchId === matchId && current.version > incoming.version
+      ? current : { ...incoming, matchId });
+    setPendingCommand(null);
+    setNotice(ack.status === "rejected" ? rejectionMessage(ack.error.code) : "");
+  });
   if (!pending) return null;
 
   const responderPrompt = responderPromptFor(currentSnapshot);
   const isResponder = responderPrompt !== null;
-  const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
   const canRespond = currentSnapshot.status === "playing" &&
     (currentSnapshot.viewer.mode === "active" || pending.kind === "DISCARDS_ORDER") &&
     isResponder && !busy && activePendingCommand === null;
@@ -147,15 +157,16 @@ export function ReactionPrompt({
           ? rejectionMessage(result.acknowledgement.error.code)
           : "");
       } else {
-        setNotice("연결이 지연되고 있어요. 잠시 후 다시 확인해 주세요.");
+        setNotice(result.acknowledgement.status === "rejected"
+          ? rejectionMessage(result.acknowledgement.error.code) : "");
       }
     } catch {
       if (currentMatchIdRef.current !== command.matchId) return;
-      setNotice("연결이 지연되고 있어요. 잠시 후 다시 확인해 주세요.");
+      setNotice("");
       try {
         await refreshProjection(command.matchId);
       } catch {
-        setNotice("연결 상태를 확인하고 다시 시도해 주세요.");
+        // The room frame provides one delayed connection notice.
       }
     } finally {
       if (currentMatchIdRef.current === command.matchId) {

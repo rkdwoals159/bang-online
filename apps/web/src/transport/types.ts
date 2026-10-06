@@ -36,7 +36,7 @@ export interface BrowserTransportState {
   readonly rooms: Readonly<Record<string, RoomProjectionState>>;
   readonly matches: Readonly<Record<string, MatchProjectionState>>;
   readonly pendingCommandIds: readonly string[];
-  readonly lastError: "CONNECTION" | "SESSION_EXPIRED" | "SYNC_REJECTED" | "INVALID_RESPONSE" | null;
+  readonly lastError: "CONNECTION" | "SERVER_ERROR" | "SESSION_EXPIRED" | "SYNC_REJECTED" | "INVALID_RESPONSE" | null;
   readonly unavailableRooms?: readonly string[];
   readonly unavailableMatches?: readonly string[];
 }
@@ -65,5 +65,6 @@ export interface GameTransport {
   joinRoom(command: Extract<RoomCommand, { type: "JOIN" }>): Promise<RoomView>;
   sendRoomCommand(command: RoomCommand): Promise<unknown>;
   sendMatchCommand(command: MatchCommand): Promise<CommandAck>;
+  getCommandAcknowledgement?(commandId: string): CommandAck | undefined;
   retryPendingCommand(commandId: string): Promise<unknown>;
 }

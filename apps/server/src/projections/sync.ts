@@ -216,7 +216,8 @@ export function createSyncProjectionHandlers(dependencies: SyncProjectionDepende
       }
 
       const matchEvents = request.afterEventSeq <= match.eventSeq
-        ? await dependencies.storage.listMatchEvents(request.matchId, request.afterEventSeq)
+        ? (await dependencies.storage.listMatchEvents(request.matchId, request.afterEventSeq))
+          .filter(event => event.eventSeq <= match.eventSeq)
         : [];
       const replayable = cursorIsReplayable(request.afterEventSeq, match.eventSeq, matchEvents);
       const visibleEvents = matchEvents.flatMap((event) => {

@@ -179,6 +179,9 @@ test("room connection notice is accessible and stays until authoritative route s
   assert.equal(roomConnectionStatusMessage("connecting", null, true, true), disconnectedMessage);
   assert.equal(roomConnectionStatusMessage("connected", null, true, false), "연결 중…");
   assert.equal(roomConnectionStatusMessage("connected", null, false, false), null);
+  assert.equal(roomConnectionStatusMessage("disconnected", null, false, false, true), null);
+  assert.match(roomConnectionStatusMessage("connected", "SERVER_ERROR", false, false), /서버 응답/);
+  assert.match(roomConnectionStatusMessage("connected", null, false, false, true, true), /처리가 늦어/);
   assert.equal(isRoomProjectionInputEnabled("disconnected", null, false), false);
   assert.equal(isRoomProjectionInputEnabled("disconnected", null, false, true), true);
   assert.equal(isRoomProjectionInputEnabled("disconnected", "CONNECTION", false, true), false);
@@ -203,6 +206,8 @@ test("connected CONNECTION errors trigger one route resync attempt without an ef
   assert.equal(shouldRetryConnectionSync("disconnected", "CONNECTION", false), false);
   assert.equal(shouldRetryConnectionSync("disconnected", "CONNECTION", false, true), true);
   assert.equal(shouldRetryConnectionSync("connected", null, false), false);
+  assert.equal(shouldRetryConnectionSync("connected", "SERVER_ERROR", false), true);
+  assert.equal(shouldRetryConnectionSync("connected", "SERVER_ERROR", true), false);
 });
 
 test("reconnect sync waits for the current RoomView and then its active match projection", async () => {
