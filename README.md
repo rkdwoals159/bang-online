@@ -5,6 +5,7 @@
 - 운영 환경: Codex Sites Worker, D1, same-origin HTTP/SSE
 - 개발 환경: pnpm 모노레포, React 웹 UI, 공용 게임 엔진/계약
 - 실행·호스팅 안내: [Sites README](apps/site/README.md)
+- 정훈서버 이전 구성: [자체 호스팅 운영 안내](deploy/selfhost/README.md), [진행·검증 기록](outputs/server-migration-2026-10-08/STATUS.md)
 - 규칙·구현 결정: [기능 계획서](outputs/development-plan/00_README.md)
 - UI/API 개선 및 검증 범위: [개선 결과](outputs/review-2026-10-04/IMPLEMENTATION_REPORT.md)
 - 최신 로직·성능 재검토: [수정 목록과 증거](outputs/review-2026-10-04/logic-performance-audit/REPORT.md)

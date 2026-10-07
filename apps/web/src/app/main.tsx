@@ -11,6 +11,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <App transportAdapter="socket-io" />
   </StrictMode>,
 );
