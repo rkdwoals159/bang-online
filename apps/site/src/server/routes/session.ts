@@ -17,6 +17,7 @@ import {
 
 const SESSION_PATH = "/api/guest-sessions";
 const ASSIGNED_ROOMS_PATH = `${SESSION_PATH}/rooms`;
+const PROFILE_PATH = `${SESSION_PATH}/profile`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -42,7 +43,19 @@ export async function handleSessionRoute(
   options: HttpServiceOptions = {},
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname;
-  if (path !== SESSION_PATH && path !== ASSIGNED_ROOMS_PATH) return null;
+  if (path !== SESSION_PATH && path !== ASSIGNED_ROOMS_PATH && path !== PROFILE_PATH) return null;
+
+  if (path === PROFILE_PATH && request.method === "POST") {
+    if (!sameOrigin(request)) return jsonResponse({ error: { code: "BAD_ORIGIN" } }, 403);
+    try {
+      const input = guestSessionInput(await readJsonRequest(request));
+      if (!input) return jsonResponse({ error: { code: "BAD_REQUEST" } }, 400);
+      const service = new GuestSessionService(env.DB, { now: options.now, crypto: options.crypto,
+        guestSessionTtlMs: configuredGuestTtl(env, options) });
+      const response = await service.rename(sessionCredential(request, configuredCookieName(env, options)), input.displayName);
+      return response ? jsonResponse(response) : jsonResponse({ error: { code: "SESSION_EXPIRED" } }, 401);
+    } catch (error) { return inputErrorResponse(error); }
+  }
 
   if (path === SESSION_PATH && request.method === "GET") {
     try {
@@ -107,6 +120,6 @@ export async function handleSessionRoute(
     }
   }
 
-  const allow = path === SESSION_PATH ? "GET, POST" : "GET";
+  const allow = path === SESSION_PATH ? "GET, POST" : path === PROFILE_PATH ? "POST" : "GET";
   return jsonResponse({ error: { code: "METHOD_NOT_ALLOWED" } }, 405, { Allow: allow });
 }

@@ -1,4 +1,17 @@
 .game-experience { position: relative; width: 100%; min-width: 0; }
+.dynamite-explosion{position:absolute;width:0;height:0;pointer-events:none;isolation:isolate}
+.dynamite-explosion__flash,.dynamite-explosion__wave,.dynamite-explosion__spark{position:absolute;display:block;border-radius:50%}
+.dynamite-explosion__flash{width:128px;height:128px;margin:-64px;background:radial-gradient(circle,#fffbd3 8%,#ffc452 30%,#ff6e2c 52%,transparent 72%);animation:dynamite-flash 700ms ease-out both}
+.dynamite-explosion__wave{width:116px;height:116px;margin:-58px;border:5px solid #ffce78;box-shadow:0 0 28px #ff9b40;animation:dynamite-wave 900ms ease-out both}
+.dynamite-explosion__spark{width:9px;height:9px;margin:-4.5px;background:#ffe8a3;box-shadow:0 0 10px #ffa843;animation:dynamite-spark 750ms ease-out both}
+.dynamite-explosion__label{position:absolute;left:-52px;top:-36px;width:104px;text-align:center;color:#fff1b8;text-shadow:0 3px 0 #862f0d,0 0 12px #ff651f;font-size:40px;line-height:1.8;font-weight:900;animation:dynamite-label 950ms ease-out both}
+.table-effects--discard .scene-card-flight{animation:forced-card-discard 640ms ease-in both}
+.table-effects--pick .scene-card-flight{box-shadow:0 0 20px #eac27680}
+@keyframes dynamite-flash{0%{opacity:0;transform:scale(.15)}18%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.9)}}
+@keyframes dynamite-wave{0%{opacity:.95;transform:scale(.2)}100%{opacity:0;transform:scale(2)}}
+@keyframes dynamite-spark{0%{opacity:1;transform:rotate(var(--spark-angle)) translateX(0) scale(1)}100%{opacity:0;transform:rotate(var(--spark-angle)) translateX(var(--spark-distance)) scale(.2)}}
+@keyframes dynamite-label{0%{opacity:0;transform:scale(.3) rotate(-12deg)}22%{opacity:1;transform:scale(1.2) rotate(-6deg)}65%{opacity:1}100%{opacity:0;transform:scale(1.1) translateY(-20px)}}
+@keyframes forced-card-discard{0%{opacity:1;transform:translate(0,0) rotate(-8deg)}75%{opacity:1;transform:translate(calc(var(--travel-x)*.75),calc(var(--travel-y)*.75)) rotate(22deg)}100%{opacity:0;transform:translate(var(--travel-x),var(--travel-y)) rotate(40deg) scale(.25)}}
 .game-experience__controls { display: flex; flex-wrap: wrap; gap: 8px; }
 .game-experience__volume { display:flex; align-items:center; gap:8px; min-height:44px; color:var(--color-on-felt); font-size:14px; }
 .game-experience__volume input { width:clamp(90px,20vw,150px); min-height:44px; accent-color:var(--color-brass); cursor:pointer; }

@@ -4,6 +4,25 @@ import { selectGameTransportAdapter } from "../src/transport/adapter-selection.t
 import { BrowserTransportError } from "../src/transport/errors.ts";
 import { SitesGameTransport } from "../src/transport/sites-client.ts";
 
+test("profile update keeps cached identity and rejects an unexpected player without corrupting the connection", async()=>{
+  let swapped=false, requests=[];
+  const guest={protocolVersion:1,player:{playerId:'player-1',displayName:'Before'},sessionExpiresAt:'9999-12-31T23:59:59.999Z'};
+  const transport=new SitesGameTransport({fetcher:async(url,options)=>{
+    requests.push({url,options});
+    return Response.json(url.endsWith('/profile')?{...guest,player:{playerId:swapped?'stranger':'player-1',displayName:'After'}}:guest);
+  }});
+  await transport.restoreGuestSession();
+  const before=transport.getSnapshot();
+  const response=await transport.updateGuestName({protocolVersion:1,displayName:'After'});
+  assert.equal(response.player.playerId,'player-1');assert.equal(response.player.displayName,'After');
+  assert.equal(transport.getSnapshot(),before);
+  assert.equal(requests.at(-1).url,'/api/guest-sessions/profile');
+  assert.equal(requests.at(-1).options.method,'POST');assert.equal(requests.at(-1).options.credentials,'include');
+  swapped=true;
+  await assert.rejects(transport.updateGuestName({protocolVersion:1,displayName:'After'}),error=>error.code==='INVALID_RESPONSE');
+  assert.equal(transport.getSnapshot(),before);transport.disconnect();
+});
+
 function roomView(roomId, { version = 1, activeMatchId = null } = {}) {
   return {
     roomId,

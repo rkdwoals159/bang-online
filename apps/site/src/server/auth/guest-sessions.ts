@@ -18,6 +18,14 @@ export interface GuestSessionIssue {
   credential: string;
 }
 
+export function normalizeGuestName(input: string): string {
+  if (typeof input !== "string") throw new TypeError("Display name is required.");
+  const name = input.trim();
+  if (!name || DISPLAY_NAME_CONTROL_CHARACTERS.test(name) || Array.from(name).length > MAX_DISPLAY_NAME_CODE_POINTS)
+    throw new RangeError("Invalid display name.");
+  return name;
+}
+
 export class GuestSessionService {
   private readonly repository: D1StorageRepository;
   private readonly options: GuestSessionOptions;
@@ -67,10 +75,19 @@ export class GuestSessionService {
     return this.repository.findActiveGuestSessionByTokenHash(await sha256Hex(credential, this.options.crypto), at);
   }
 
+  async rename(credential: string | undefined, displayNameInput: string): Promise<GuestSessionResponse | null> {
+    const displayName = normalizeGuestName(displayNameInput);
+    const guest = await this.authenticate(credential);
+    if (!guest) return null;
+    await this.repository.renameGuest(guest.playerId, displayName, opaqueId("profile", this.options.crypto), this.now());
+    const current = await this.authenticate(credential);
+    return current ? { protocolVersion: 1, player: { playerId: current.playerId, displayName: current.displayName },
+      sessionExpiresAt: current.expiresAt.toISOString() } : null;
+  }
+
   private now(): Date {
     const result = this.options.now?.() ?? new Date();
     if (!(result instanceof Date) || !Number.isFinite(result.getTime())) throw new TypeError("Guest session clock must return a valid Date.");
     return new Date(result.getTime());
   }
 }
-

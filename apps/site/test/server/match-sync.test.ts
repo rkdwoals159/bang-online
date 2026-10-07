@@ -21,6 +21,80 @@ import { createIsolatedD1, countRows } from "../storage/d1-test-db.js";
 
 const ORIGIN = "https://site.test";
 
+test("profile rename preserves identity and all game data, notifies peers, and repeats without extra writes", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db), repository = new D1StorageRepository(db);
+    const actor = fixture.guests[0]!, before = (await repository.getMatch(fixture.matchId))!;
+    const room = (await repository.getRoom(fixture.roomId))!;
+    const events = await countRows(db, "match_events"), receipts = await countRows(db, "command_receipts");
+    const outbox = await countRows(db, "outbox"), sessions = await countRows(db, "guest_sessions");
+    const rename = () => routeApiRequest(request("/api/guest-sessions/profile", {
+      cookie: actor.cookie, body: { protocolVersion: 1, displayName: "  새 이름😀  " },
+    }), { DB: db });
+    const response = await rename(); assert.equal(response.status, 200, await response.clone().text());
+    const body = await json(response) as { player: { playerId: string; displayName: string } };
+    assert.deepEqual(body.player, { playerId: actor.playerId, displayName: "새 이름😀" });
+    assert.equal(response.headers.get("Set-Cookie"), null);
+    const after = (await repository.getMatch(before.id))!;
+    const expected = structuredClone(before.state); expected.version++;
+    expected.seats.find(seat => seat.public.playerId === actor.playerId)!.public.displayName = "새 이름😀";
+    assert.deepEqual(after.state, expected); assert.equal(after.eventSeq, before.eventSeq);
+    assert.equal(after.version, before.version + 1);
+    assert.equal((await repository.getRoom(fixture.roomId))!.version, room.version + 1);
+    assert.equal(await countRows(db, "guest_sessions"), sessions);
+    assert.equal(await countRows(db, "match_events"), events); assert.equal(await countRows(db, "command_receipts"), receipts);
+    assert.equal(await countRows(db, "outbox"), outbox + 2);
+    const peer = await routeApiRequest(request(`/api/matches/${before.id}/sync`, { cookie: fixture.guests[1]!.cookie,
+      body: { protocolVersion: 1, requestId: "renamed-peer", matchId: before.id, knownVersion: before.version, afterEventSeq: before.eventSeq, acceptUnchanged: true } }), { DB: db });
+    const parsed = parseMatchSyncResponse(await json(peer)); assert.ok(parsed.ok);
+    assert.equal(parsed.value.snapshot.publicTable.players.find(p => p.playerId === actor.playerId)!.displayName, "새 이름😀");
+    assert.equal((await rename()).status, 200);
+    assert.equal((await repository.getMatch(before.id))!.version, after.version);
+    assert.equal(await countRows(db, "outbox"), outbox + 2);
+    for (const displayName of ["", "x".repeat(21), "name\u0000"]) {
+      const bad = await routeApiRequest(request("/api/guest-sessions/profile", { cookie: actor.cookie, body: { protocolVersion: 1, displayName } }), { DB: db });
+      assert.equal(bad.status, 400);
+    }
+    const spoof = await routeApiRequest(request("/api/guest-sessions/profile", { cookie: actor.cookie,
+      body: { protocolVersion: 1, displayName: "Spoof", playerId: fixture.guests[1]!.playerId } }), { DB: db });
+    assert.equal(spoof.status, 400);
+    const anonymous = await routeApiRequest(request("/api/guest-sessions/profile", { body: { protocolVersion: 1, displayName: "Anonymous" } }), { DB: db });
+    assert.equal(anonymous.status, 401);
+    const badOrigin = await routeApiRequest(new Request(`${ORIGIN}/api/guest-sessions/profile`, { method: "POST", headers: { Origin: "https://evil.test", Cookie: actor.cookie, "Content-Type": "application/json" }, body: JSON.stringify({ protocolVersion: 1, displayName: "Foreign" }) }), { DB: db });
+    assert.equal(badOrigin.status, 403);
+    assert.deepEqual((await repository.getMatch(before.id))!.state, expected);
+  } finally { await runtime.dispose(); }
+});
+
+test("profile rename and a simultaneous match command cannot overwrite game state", async () => {
+  const { runtime, db } = await createIsolatedD1();
+  try {
+    const fixture = await startedFourPlayerMatch(db); await completeTurnDrawIfNeeded(db, fixture.matchId, fixture.guests);
+    const repository = new D1StorageRepository(db), before = (await repository.getMatch(fixture.matchId))!;
+    const actor = fixture.guests.find(p => p.playerId === before.state.turn.currentPlayerId)!;
+    await giveCardFromDeckToHand(db, fixture.matchId, actor.playerId, "beer");
+    const prepared = (await repository.getMatch(fixture.matchId))!;
+    const cardInstanceId = prepared.state.seats.find(s => s.public.playerId === actor.playerId)!.private.handCardInstanceIds
+      .find(id => prepared.state.zones.cardsByInstanceId[id]!.cardDefinitionId.startsWith("beer_"))!;
+    const [renamed, command] = await Promise.all([
+      routeApiRequest(request("/api/guest-sessions/profile", { cookie: actor.cookie, body: { protocolVersion: 1, displayName: "Concurrent" } }), { DB: db }),
+      matchCommand(db, actor, prepared.id, "PLAY_CARD", prepared.version, { cardInstanceId }),
+    ]);
+    assert.equal(renamed.status, 200);
+    if (command.ack.status === "rejected") {
+      assert.equal(command.ack.error.code, "STALE_VERSION");
+      const latest = (await repository.getMatch(prepared.id))!;
+      const retry = await matchCommand(db, actor, prepared.id, "PLAY_CARD", latest.version, { cardInstanceId });
+      assert.equal(retry.ack.status, "accepted");
+    }
+    const after = (await repository.getMatch(prepared.id))!;
+    assert.equal(after.state.seats.find(s => s.public.playerId === actor.playerId)!.public.displayName, "Concurrent");
+    assert.equal(after.state.seats.find(s => s.public.playerId === actor.playerId)!.private.handCardInstanceIds.includes(cardInstanceId), false);
+    assert.equal(after.version, prepared.version + 2);
+  } finally { await runtime.dispose(); }
+});
+
 test("history paginates beyond 100 records through an empty private page and rejects outsiders", async () => {
   const { runtime, db } = await createIsolatedD1();
   try {
@@ -533,10 +607,15 @@ async function giveCardFromDeckToHand(db: D1DatabaseLike, matchId: string, playe
   assert.ok(match);
   const state: GameState = structuredClone(match.state);
   const definitions = new Set(BASE_PHYSICAL_CARDS.filter((card) => card.typeId === typeId).map((card) => card.definitionId));
-  const index = state.zones.drawPileCardInstanceIds.findIndex((id) => definitions.has(state.zones.cardsByInstanceId[id]!.cardDefinitionId));
-  assert.notEqual(index, -1, `fixture deck must contain a ${typeId} card`);
-  const [cardInstanceId] = state.zones.drawPileCardInstanceIds.splice(index, 1);
   const seat = state.seats.find((candidate) => candidate.public.playerId === playerId)!;
+  const hasType = (id: string) => definitions.has(state.zones.cardsByInstanceId[id]!.cardDefinitionId);
+  const index = state.zones.drawPileCardInstanceIds.findIndex((id) => definitions.has(state.zones.cardsByInstanceId[id]!.cardDefinitionId));
+  // A shuffled opening deal may put every copy in another player's hand.
+  const donor = index < 0 ? state.seats.find(candidate => candidate.private.handCardInstanceIds.some(hasType)) : null;
+  const source = donor ? donor.private.handCardInstanceIds : state.zones.drawPileCardInstanceIds;
+  const sourceIndex = donor ? source.findIndex(hasType) : index;
+  assert.notEqual(sourceIndex, -1, `fixture must contain an available ${typeId} card`);
+  const [cardInstanceId] = source.splice(sourceIndex, 1);
   seat.private.handCardInstanceIds.push(cardInstanceId!);
   await db.prepare("UPDATE matches SET state_json = ? WHERE id = ? AND version = ?")
     .bind(JSON.stringify(state), matchId, match.version).run();

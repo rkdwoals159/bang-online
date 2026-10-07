@@ -15,6 +15,7 @@ import "./room-entry.css";
 
 export interface RoomEntryProps {
   transport: RoomEntryTransport;
+  currentGuest?: GuestSessionResponse | null;
   initialMode?: "choose" | "create" | "join";
   initialInviteCode?: string;
   createCommandId?: () => string;
@@ -50,6 +51,7 @@ function messageFrom(error: unknown, fallback: string): string {
 
 export function RoomEntry({
   transport,
+  currentGuest,
   initialMode = "choose",
   initialInviteCode,
   createCommandId = commandId,
@@ -57,6 +59,7 @@ export function RoomEntry({
   onRoomCreated,
 }: RoomEntryProps) {
   const [guest, setGuest] = useState<GuestSessionResponse | null>(null);
+  useEffect(() => { if (currentGuest) setGuest(previous => previous?.player.playerId === currentGuest.player.playerId ? currentGuest : previous); }, [currentGuest]);
   const [assignedRooms, setAssignedRooms] = useState<readonly RoomView[]>([]);
   const [restoringSession, setRestoringSession] = useState(true);
   const [mode, setMode] = useState<EntryMode>(initialMode);

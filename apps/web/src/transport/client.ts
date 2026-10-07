@@ -401,6 +401,22 @@ export class BrowserGameTransport implements GameTransport {
     return body;
   }
 
+  async updateGuestName(input: GuestSessionRequest): Promise<GuestSessionResponse> {
+    if (!isRecord(input) || !exactKeys(input, ["protocolVersion", "displayName"]) || input.protocolVersion !== 1 || typeof input.displayName !== "string")
+      throw new BrowserTransportError("INVALID_RESPONSE");
+    const playerId = this.restoredPlayerId;
+    const response = await this.fetcher("/api/guest-sessions/profile", { method: "POST", credentials: "include", cache: "no-store",
+      headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+    if (response.status === 401) throw new BrowserTransportError("SESSION_EXPIRED");
+    if (!response.ok) throw new BrowserTransportError("HTTP_REQUEST_FAILED");
+    const body: unknown = await response.json();
+    if (!isGuestSessionResponse(body) || body.player.playerId !== playerId || playerId !== this.restoredPlayerId)
+      throw new BrowserTransportError("INVALID_RESPONSE");
+    void Promise.allSettled([...Object.keys(this.getSnapshot().rooms).map(id => this.syncRoom(id)),
+      ...Object.keys(this.getSnapshot().matches).map(id => this.syncMatch(id))]);
+    return body;
+  }
+
   /** Restore the guest identity using the HttpOnly cookie; credentials never enter JS state. */
   restoreGuestSession(): Promise<GuestSessionResponse | null> {
     if (this.restoreSessionRequest) return this.restoreSessionRequest;
@@ -1019,4 +1035,3 @@ function parseRoomPreviewRequestLocally(input: unknown): input is {
 export function createBrowserGameTransport(options: BrowserTransportOptions = {}): BrowserGameTransport {
   return new BrowserGameTransport(options);
 }
-

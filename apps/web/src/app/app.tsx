@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { NicknameSettings } from "../features/profile/NicknameSettings.js";
 import { AccessibilityStyles } from "../components/accessibility/AccessibilityStyles.js";
 import { AppErrorBoundary, AppStatusBoundary } from "./app-frames";
 import { AppStateProvider, useAppState } from "./app-state";
@@ -40,6 +41,7 @@ function AppShell({ children }: { children: ReactNode }) {
           <span className="brand-mark" aria-hidden="true">B!</span>
           <span className="brand-name">BANG! <span>온라인</span></span>
         </AppLink>
+        <NicknameSettings />
       </header>
       <main className="main-content" id="main-content" tabIndex={-1}>{children}</main>
     </div>

@@ -11,10 +11,24 @@ export interface GameCue {
   card?: CardFaceView;
   sound?: SoundKind;
   count?: number;
+  /** Public route only. Never carries an opponent's private card face or instance ID. */
+  movement?: { fromId: string; toId?: string; fromZone: "hand" | "in_play"; toZone: "hand" | "discard" };
 }
 export interface PresentationCursor { version: number; eventSeq: number; snapshot: MatchSnapshotView }
 export const MAX_QUEUED_CUES = 12;
-export const cueDuration = (kind: CueKind): number => kind === "burst" ? 900 : kind === "victory" ? 1600 : kind === "judgment" ? 1100 : 680;
+export function boundCueQueue(cues: readonly GameCue[]): GameCue[] {
+  // Keep a lethal explosion even when its cleanup generates many following effects.
+  const latest = cues.slice(-MAX_QUEUED_CUES);
+  const essential = cues.filter(c => ["explosion", "eliminated", "victory"].includes(c.kind));
+  for (const cue of essential.slice(-3)) if (!latest.some(c => c.id === cue.id)) {
+    const ordinary = latest.findIndex(c => !["explosion", "eliminated", "victory"].includes(c.kind));
+    latest.splice(ordinary >= 0 ? ordinary : 0, 1);
+    latest.push(cue);
+  }
+  const order = new Map(cues.map((cue, index) => [cue.id, index]));
+  return latest.sort((a,b) => order.get(a.id)! - order.get(b.id)!);
+}
+export const cueDuration = (kind: CueKind): number => kind === "explosion" ? 1050 : kind === "burst" ? 900 : kind === "victory" ? 1600 : kind === "judgment" ? 1100 : 680;
 
 /** Presentation consumes authenticated projections only. It never decides game outcomes. */
 export function advancePresentation(previous: PresentationCursor | null, version: number, snapshot: MatchSnapshotView, events: readonly PublicMatchEvent[], now: number, visible = true): { cursor: PresentationCursor; cues: GameCue[] } {
@@ -53,8 +67,17 @@ export function advancePresentation(previous: PresentationCursor | null, version
       case "SALOON_USED": cue("heal", "술집 · 함께 회복", Array.isArray(p.healedPlayerIds) ? p.healedPlayerIds.flatMap(id => knownId(id) ? [id as string] : []) : []); break;
       case "INDIANS_STARTED": if (targets.length) cue("threat", "인디언! · 각자 대응하세요"); break;
       case "INDIANS_DEFENDED": if (targetId) cue("block", `${name(targetId)} · 대응 성공`); break;
-      case "PANIC_USED": if (actorId && targetId) cue("pick", `${name(actorId)} · ${name(targetId)}에게 패닉!`); break;
-      case "CAT_BALOU_USED": if (actorId && targetId) cue("discard", `${name(actorId)} · ${name(targetId)}에게 캣 벌루`); break;
+      case "PANIC_USED": case "PUBLIC_CARD_TAKEN":
+        if (actorId && targetId && actorId !== targetId) {
+          cue("pick", `${name(actorId)} · ${name(targetId)}의 카드 탈취!`);
+          cues[cues.length-1].movement = { fromId: targetId, toId: actorId, fromZone: p.targetZone === "in_play" ? "in_play" : "hand", toZone: "hand" };
+        } break;
+      case "CAT_BALOU_USED": case "PUBLIC_CARD_DISCARDED":
+        if (targetId) {
+          cue("discard", actorId && actorId !== targetId ? `${name(targetId)} · 카드 강제 버림!` : `${name(targetId)} · 카드 버리기`);
+          cues[cues.length-1].movement = { fromId: targetId,
+            fromZone: (p.targetZone ?? p.fromZone) === "in_play" ? "in_play" : "hand", toZone: "discard" };
+        } break;
       case "DUEL_STARTED": if (targetId) cue("duel", `${name(actorId)} ↔ ${name(targetId)} · 결투`); break;
       case "DUEL_BANG_PLAYED": {
         // Old persisted events omit the opponent; never animate a self-directed shot.
@@ -85,7 +108,8 @@ export function advancePresentation(previous: PresentationCursor | null, version
       for (const card of p.inPlay) if (!before.inPlay.some(c => c.cardInstanceId === card.cardInstanceId) && !cues.some(c => c.kind === "pass" && c.targetIds.includes(p.playerId))) { add("equip", `${p.displayName} · 카드 장착`, [p.playerId], card); cues[cues.length - 1].id += `:${card.cardInstanceId}`; cues[cues.length-1].actorId = old.publicTable.turn.currentPlayerId; }
       const ownIncoming = p.playerId === snapshot.viewer.playerId && old.viewer.playerId === snapshot.viewer.playerId && old.selfPrivate && snapshot.selfPrivate
         ? snapshot.selfPrivate.hand.filter(card => !old.selfPrivate!.hand.some(previousCard => previousCard.cardInstanceId === card.cardInstanceId)).length : 0;
-      const receivedCount = Math.max(0, p.handCount - before.handCount, ownIncoming);
+      const transferred = cues.filter(c => c.movement?.toId === p.playerId && c.movement.toZone === "hand").length;
+      const receivedCount = Math.max(0, Math.max(0, p.handCount - before.handCount, ownIncoming) - transferred);
       if (receivedCount > 0 && old.pendingInteraction?.kind !== "GENERAL_STORE_PICK") { add("draw", `${p.displayName} · 카드 +${receivedCount}`, [p.playerId]); cues[cues.length-1].count=receivedCount; }
     }
     const oldPending = old.pendingInteraction;
@@ -100,12 +124,12 @@ export function advancePresentation(previous: PresentationCursor | null, version
       // A skipped sync must not attribute several unknown picks to a single player.
       if (removed.length === 1) add("pick", `${name(oldPending.currentResponderPlayerId)} · 카드 획득`, [oldPending.currentResponderPlayerId], removed[0]);
     }
-    if (old.pendingInteraction?.kind === "DISCARDS_ORDER" && !snapshot.pendingInteraction && old.selfPrivate && snapshot.selfPrivate && snapshot.selfPrivate.hand.length < old.selfPrivate.hand.length) add("discard", "선택한 카드 버리기", [snapshot.viewer.playerId]);
+    if (old.pendingInteraction?.kind === "DISCARDS_ORDER" && !snapshot.pendingInteraction && old.selfPrivate && snapshot.selfPrivate && snapshot.selfPrivate.hand.length < old.selfPrivate.hand.length && !cues.some(c => c.kind === "discard" && c.targetIds.includes(snapshot.viewer.playerId))) add("discard", "선택한 카드 버리기", [snapshot.viewer.playerId]);
     if (snapshot.pendingInteraction?.kind === "GENERAL_STORE_PICK" && old.pendingInteraction?.kind !== "GENERAL_STORE_PICK") add("store", "잡화점 · 카드를 펼칩니다", []);
     if (snapshot.status === "playing" && old.publicTable.turn.currentPlayerId !== snapshot.publicTable.turn.currentPlayerId) add("turn", `${name(snapshot.publicTable.turn.currentPlayerId)} · 차례 시작`, [snapshot.publicTable.turn.currentPlayerId]);
     if (snapshot.status === "completed" && old.status !== "completed") add("victory", "승부가 결정됐습니다!", [...(snapshot.outcome?.winningPlayerIds ?? [])]);
   }
-  return { cursor, cues: cues.slice(-MAX_QUEUED_CUES) };
+  return { cursor, cues: boundCueQueue(cues) };
 }
 
 function publicCard(value: unknown): CardFaceView | undefined {

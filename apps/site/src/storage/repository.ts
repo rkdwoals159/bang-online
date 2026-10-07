@@ -706,6 +706,39 @@ export class D1StorageRepository {
     return changes(result) === 1;
   }
 
+  /** Atomic profile + current room/match update. JSON patching preserves concurrent game state. */
+  async renameGuest(playerId: string, displayName: string, operationId: string, at: Date): Promise<void> {
+    const active = `EXISTS (SELECT 1 FROM guest_sessions WHERE id = ? AND revoked_at IS NULL
+      AND expires_at > ? AND display_name <> ?)`;
+    const gate = [playerId, timestamp(at), displayName];
+    const rooms = `id IN (SELECT room_id FROM room_players WHERE player_id = ?) AND status <> 'closed'`;
+    const matches = `id IN (SELECT mp.match_id FROM match_players mp JOIN matches live ON live.id = mp.match_id
+      JOIN rooms r ON r.id = live.room_id WHERE mp.player_id = ? AND r.status <> 'closed'
+      AND live.id = (SELECT id FROM matches WHERE room_id = r.id
+        ORDER BY room_version DESC, created_at DESC, started_at DESC, id DESC LIMIT 1))
+      AND state_schema_version = 1 AND EXISTS (SELECT 1 FROM json_each(state_json, '$.seats') seat
+        WHERE json_extract(seat.value, '$.public.playerId') = ?)`;
+    // The guest row is changed last so every earlier statement shares the same authorization/no-op guard.
+    await this.db.batch([
+      this.db.prepare(`UPDATE rooms SET version = version + 1, updated_at = ? WHERE ${rooms} AND ${active}`)
+        .bind(timestamp(at), playerId, ...gate),
+      this.db.prepare(`INSERT INTO outbox (event_id, aggregate_id, aggregate_version, event_seq, kind, payload_json)
+        SELECT ? || ':room:' || id, id, version, 0, 'room:changed', json_object('roomId', id, 'version', version)
+        FROM rooms WHERE ${rooms} AND ${active}`).bind(operationId, playerId, ...gate),
+      this.db.prepare(`UPDATE matches SET version = version + 1, updated_at = ?,
+        state_json = json_set(state_json, '$.version', version + 1,
+          '$.seats[' || (SELECT seat.key FROM json_each(state_json, '$.seats') seat
+            WHERE json_extract(seat.value, '$.public.playerId') = ? LIMIT 1) || '].public.displayName', ?)
+        WHERE ${matches} AND ${active}`).bind(timestamp(at), playerId, displayName, playerId, playerId, ...gate),
+      this.db.prepare(`INSERT INTO outbox (event_id, aggregate_id, aggregate_version, event_seq, kind, payload_json)
+        SELECT ? || ':match:' || id, id, version, event_seq, 'match:changed',
+          json_object('matchId', id, 'version', version, 'eventSeq', event_seq)
+        FROM matches WHERE ${matches} AND ${active}`).bind(operationId, playerId, playerId, ...gate),
+      this.db.prepare(`UPDATE guest_sessions SET display_name = ? WHERE id = ? AND revoked_at IS NULL AND expires_at > ?`)
+        .bind(displayName, playerId, timestamp(at)),
+    ]);
+  }
+
   async createRoom(input: NewRoom): Promise<void> {
     requiredText(input.id, "Room ID");
     requiredText(input.ownerPlayerId, "Room owner ID");

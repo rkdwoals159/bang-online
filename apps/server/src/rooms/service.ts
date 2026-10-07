@@ -222,6 +222,15 @@ export class RoomService {
   }
 
   /** Resolve the bearer credential to its server-owned player identity. */
+  async renameGuest(credential: string, displayNameInput: string): Promise<GuestSessionResponse | null> {
+    const displayName = displayNameInput.trim();
+    if (!displayName || DISPLAY_NAME_CONTROL_CHARACTERS.test(displayName) || Array.from(displayName).length > MAX_DISPLAY_NAME_CODE_POINTS)
+      throw new RangeError("Invalid display name.");
+    const guest = await this.authenticateGuestCredential(credential);
+    if (!guest || !await this.storage.renameGuest(guest.playerId, displayName, opaqueId("profile"), this.now())) return null;
+    return { protocolVersion: 1, player: { playerId: guest.playerId, displayName }, sessionExpiresAt: guest.expiresAt.toISOString() };
+  }
+
   async authenticateGuestCredential(
     credential: string,
     at: Date = this.now(),

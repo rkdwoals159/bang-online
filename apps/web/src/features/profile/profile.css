@@ -1,0 +1,14 @@
+.nickname-settings{position:relative;min-width:0;color:#f7ecce;font-size:14px}
+.nickname-settings summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;cursor:pointer;min-height:44px;padding:8px 12px;border:1px solid #758365;border-radius:8px;list-style:none}
+.nickname-settings summary::-webkit-details-marker{display:none}
+.nickname-settings summary span:first-child{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.nickname-settings summary:focus-visible{outline:3px solid #ecc477;outline-offset:3px}
+.nickname-settings form{display:grid;gap:12px;padding:16px;margin-top:8px;min-width:0;border:1px solid #758365;border-radius:10px;background:#17392d;color:#f7ecce}
+.site-header .nickname-settings form{position:absolute;right:0;z-index:40;width:min(320px,calc(100vw - 32px));box-sizing:border-box;box-shadow:0 12px 28px #0006}
+.nickname-settings label{display:grid;gap:8px}
+.nickname-settings input{width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:8px 12px;font:inherit;color:#f7ecce;background:#0e211a;border:1px solid #758365;border-radius:6px}
+.nickname-settings form>div{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.nickname-settings button{min-height:44px;padding:8px 16px;border:1px solid #758365;border-radius:6px;background:#214a38;color:#f7ecce;font:inherit;cursor:pointer}
+.nickname-settings p{margin:0;color:#ffbaa4;line-height:1.5}
+.nickname-settings button:disabled{opacity:.65;cursor:wait}
+@media(max-width:520px){.site-header .nickname-settings summary{flex-direction:column;align-items:flex-start;gap:2px}.site-header .nickname-settings summary span:first-child{max-width:100px}}

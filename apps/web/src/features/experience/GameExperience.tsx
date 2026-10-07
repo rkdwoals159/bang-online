@@ -3,7 +3,7 @@ import type { MatchSnapshotView, PublicMatchEvent } from "../../../../../package
 import { PlayingCardFace } from "../cards/CardFaces.js";
 import { GameAudio } from "./audio.js";
 import { planSounds } from "./sound-plan.js";
-import { advancePresentation, cueDuration, MAX_QUEUED_CUES, type GameCue, type PresentationCursor } from "./model.js";
+import { advancePresentation, boundCueQueue, cueDuration, type GameCue, type PresentationCursor } from "./model.js";
 import "./animista.css";
 import "./experience.css";
 
@@ -27,6 +27,7 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
   const cursor = useRef<PresentationCursor | null>(null);
   const audio = useRef<GameAudio | null>(null);
   const [lastSound, setLastSound] = useState("");
+  const explosionSound = useRef("");
   const [queue, setQueue] = useState<GameCue[]>([]);
   const [targeting, setTargeting] = useState<TableTargeting | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -58,12 +59,16 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
     const next = advancePresentation(cursor.current, version, snapshot, visibleEvents, Date.now(), !document.hidden);
     cursor.current = next.cursor;
     if (next.cues.length) {
-      for (const step of planSounds(next.cues)) if (audio.current?.play(step.kind, step.offset, step.count)) setLastSound(step.id);
-      setQueue(current => [...current, ...next.cues].slice(-MAX_QUEUED_CUES));
+      for (const step of planSounds(next.cues.filter(c => c.kind !== "explosion"))) if (audio.current?.play(step.kind, step.offset, step.count)) setLastSound(step.id);
+      setQueue(current => boundCueQueue([...current, ...next.cues]));
     }
   }, [version, snapshot, visibleEvents]);
   useEffect(() => {
     if (!cue) return;
+    if (cue.kind === "explosion" && explosionSound.current !== cue.id) {
+      explosionSound.current = cue.id;
+      if (audio.current?.play("explosion")) setLastSound(cue.id);
+    }
     const timer = window.setTimeout(() => setQueue(current => current.filter(c => c.id !== cue.id)), cueDuration(cue.kind));
     return () => window.clearTimeout(timer);
   }, [cue]);
@@ -113,12 +118,24 @@ export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | 
       const seats = new Map(Array.from(table.querySelectorAll<HTMLElement>("[data-player-seat]")).map(e => [e.dataset.playerSeat, e]));
       const center = (id: string): Point | undefined => { const seat = id === table.dataset.viewerId ? table.querySelector<HTMLElement>(".scene-self") ?? seats.get(id) : seats.get(id); if (!seat) return; const r = (seat.querySelector(".character-detail") ?? seat).getBoundingClientRect(); return { x: r.left + r.width / 2 - bounds.left, y: r.top + r.height / 2 - bounds.top }; };
       const anchor = (name:string):Point|undefined => { const element=table.querySelector<HTMLElement>(`[data-card-anchor="${name}"]`); if (!element) return; const r=element.getBoundingClientRect(); return {x:r.left+r.width/2-bounds.left,y:r.top+r.height/2-bounds.top}; };
-      const hand = (id:string):Point|undefined => id===table.dataset.viewerId ? anchor("hand") ?? center(id) : center(id);
+      const hand = (id:string):Point|undefined => {
+        if (id===table.dataset.viewerId) return anchor("hand") ?? center(id);
+        const row=seats.get(id)?.querySelector<HTMLElement>(".scene-seat__hand");
+        if (!row) return center(id); const r=row.getBoundingClientRect();
+        return r.height>0?{x:r.left+r.width/2-bounds.left,y:r.top+r.height/2-bounds.top}:center(id);
+      };
+      const equipment = (id:string):Point|undefined => {
+        const seat = seats.get(id), button = seat?.querySelector<HTMLElement>(".scene-seat__equipment");
+        if (!button) return center(id);
+        const r = button.getBoundingClientRect(); return {x:r.left+r.width/2-bounds.left,y:r.top+r.height/2-bounds.top};
+      };
       const source=cue.actorId?center(cue.actorId):undefined;
       const targets=cue.targetIds.flatMap(id=>{const p=center(id);return p?[p]:[];});
       const flights:{from:Point;to:Point}[]=[];
       const route=(from:Point|undefined,to:Point|undefined)=>{if(from&&to)flights.push({from,to});};
-      if(cue.kind==="draw")cue.targetIds.forEach(id=>route(anchor("deck"),hand(id)));
+      if(cue.movement)route(cue.movement.fromZone==="in_play"?equipment(cue.movement.fromId):hand(cue.movement.fromId),
+        cue.movement.toZone==="discard"?anchor("discard"):cue.movement.toId?hand(cue.movement.toId):undefined);
+      else if(cue.kind==="draw")cue.targetIds.forEach(id=>route(anchor("deck"),hand(id)));
       else if(["play","shot","burst","threat","duel"].includes(cue.kind))route(cue.actorId?hand(cue.actorId):undefined,anchor("discard"));
       else if(cue.kind==="equip")cue.targetIds.forEach(id=>route(cue.actorId?hand(cue.actorId):anchor("discard"),center(id)));
       else if(cue.kind==="discard")cue.targetIds.forEach(id=>route(hand(id),anchor("discard")));
@@ -134,11 +151,16 @@ export function TableEffects({ surface }: { surface: RefObject<HTMLDivElement | 
   return <div className={`table-effects table-effects--${cue.kind}`} key={cue.id} aria-hidden="true">
     {geometry.flights.map(({from,to},index)=><div key={`flight:${index}`} className="scene-card-flight" style={{left:from.x,top:from.y,"--travel-x":`${to.x-from.x}px`,"--travel-y":`${to.y-from.y}px`} as CSSProperties}>{cue.card?<PlayingCardFace card={cue.card}/>:<span className="scene-flight-back">B!</span>}</div>)}
     {geometry.targets.map((target, index) => <div key={index}>
+      {cue.kind === "explosion" ? <div className="dynamite-explosion" style={{left:target.x,top:target.y}}>
+        <i className="dynamite-explosion__flash"/><i className="dynamite-explosion__wave"/>
+        {Array.from({length:10},(_,spark)=><i key={spark} className="dynamite-explosion__spark" style={{"--spark-angle":`${spark*36}deg`,"--spark-distance":`${64+(spark%3)*18}px`} as CSSProperties}/>)}
+        <span className="dynamite-explosion__label">펑!</span>
+      </div> : null}
       {shooting && geometry.source ? <>
         <svg className="table-effects__traces"><path pathLength="1" d={`M ${geometry.source.x} ${geometry.source.y} L ${target.x} ${target.y}`} /></svg>
         {Array.from({ length: cue.kind === "burst" ? 4 : 1 }, (_, shot) => <i key={shot} className="table-effects__projectile" style={{ left: geometry.source!.x, top: geometry.source!.y, "--travel-x": `${target.x - geometry.source!.x}px`, "--travel-y": `${target.y - geometry.source!.y}px`, animationDelay: `${shot * 90 + index * 50}ms` } as CSSProperties} />)}
       </> : null}
-      <span className="table-effects__impact" style={{ left: target.x, top: target.y, animationDelay: shooting ? `${index * 50 + 220}ms` : "0ms" }}>{cue.kind === "block" ? "팅!" : cue.kind === "heal" ? "+♥" : shooting ? "뱅!" : cue.kind === "hit" ? "−♥" : cue.kind === "explosion" ? "쾅!" : cue.kind === "eliminated" ? "탈락" : cue.kind === "threat" ? "대응!" : cue.kind === "victory" ? "승리" : ""}</span>
+      {cue.kind !== "explosion" ? <span className="table-effects__impact" style={{ left: target.x, top: target.y, animationDelay: shooting ? `${index * 50 + 220}ms` : "0ms" }}>{cue.kind === "block" ? "팅!" : cue.kind === "heal" ? "+♥" : shooting ? "뱅!" : cue.kind === "hit" ? "−♥" : cue.kind === "pick" && cue.movement ? "탈취!" : cue.kind === "discard" ? "버림!" : cue.kind === "eliminated" ? "탈락" : cue.kind === "threat" ? "대응!" : cue.kind === "victory" ? "승리" : ""}</span> : null}
     </div>)}
   </div>;
 }

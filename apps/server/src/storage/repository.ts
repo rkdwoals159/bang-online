@@ -497,6 +497,35 @@ export class StorageRepository {
     });
   }
 
+  async renameGuest(playerId: string, displayName: string, operationId: string, at: Date): Promise<boolean> {
+    return withTransaction(this.pool, async client => {
+      const guest = await client.query<{ display_name: string }>(`SELECT display_name FROM guest_sessions
+        WHERE id = $1 AND revoked_at IS NULL AND expires_at > $2 FOR UPDATE`, [playerId, at]);
+      if (!guest.rows[0]) return false;
+      if (guest.rows[0].display_name === displayName) return true;
+      await client.query(`UPDATE guest_sessions SET display_name = $2 WHERE id = $1`, [playerId, displayName]);
+      await client.query(`WITH changed AS (UPDATE rooms SET version = version + 1, updated_at = $2
+        WHERE id IN (SELECT room_id FROM room_players WHERE player_id = $1) AND status <> 'closed' RETURNING id, version)
+        INSERT INTO outbox (event_id, aggregate_id, aggregate_version, event_seq, kind, payload_json)
+        SELECT $3 || ':room:' || id, id, version, 0, 'room:changed', jsonb_build_object('roomId', id, 'version', version)
+        FROM changed`, [playerId, at, operationId]);
+      await client.query(`WITH changed AS (UPDATE matches m SET version = version + 1, updated_at = $3,
+        state_json = jsonb_set(jsonb_set(state_json, '{version}', to_jsonb(version + 1)),
+          ARRAY['seats', (SELECT (seat.n - 1)::text FROM jsonb_array_elements(state_json->'seats')
+            WITH ORDINALITY seat(value, n) WHERE seat.value->'public'->>'playerId' = $1 LIMIT 1), 'public', 'displayName'], to_jsonb($2::text))
+        WHERE state_schema_version = 1 AND EXISTS (SELECT 1 FROM match_players mp JOIN rooms r ON r.id = m.room_id
+          WHERE mp.match_id = m.id AND mp.player_id = $1 AND r.status <> 'closed')
+          AND id = (SELECT latest.id FROM matches latest WHERE latest.room_id = m.room_id
+            ORDER BY latest.created_at DESC, latest.started_at DESC, latest.id DESC LIMIT 1)
+          AND EXISTS (SELECT 1 FROM jsonb_array_elements(state_json->'seats') seat WHERE seat->'public'->>'playerId' = $1)
+        RETURNING id, version, event_seq)
+        INSERT INTO outbox (event_id, aggregate_id, aggregate_version, event_seq, kind, payload_json)
+        SELECT $4 || ':match:' || id, id, version, event_seq, 'match:changed',
+          jsonb_build_object('matchId', id, 'version', version, 'eventSeq', event_seq) FROM changed`, [playerId, displayName, at, operationId]);
+      return true;
+    });
+  }
+
   async createRoom(input: NewRoom): Promise<void> {
     await withTransaction(this.pool, async (client) => {
       await client.query(

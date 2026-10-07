@@ -62,6 +62,7 @@ export interface GameTransport {
   syncMatch(matchId: string): Promise<MatchSyncResponse>;
   getMatchHistory?(matchId: string, beforeEventSeq?: number): Promise<MatchHistoryResponse>;
   createGuestSession(input: GuestSessionRequest): Promise<GuestSessionResponse>;
+  updateGuestName(input: GuestSessionRequest): Promise<GuestSessionResponse>;
   restoreGuestSession(): Promise<GuestSessionResponse | null>;
   recoverAssignedSeats(): Promise<readonly RoomView[]>;
   createRoom(command: Extract<RoomCommand, { type: "CREATE_ROOM" }>): Promise<RoomEntryCreateResult>;

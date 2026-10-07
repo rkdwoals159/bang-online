@@ -244,6 +244,20 @@ async function handleHttpRequest(
     return;
   }
 
+  if (path === "/api/guest-sessions/profile") {
+    if (request.method !== "POST") { response.setHeader("Allow", "POST, OPTIONS"); writeJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED" } }); return; }
+    try {
+      const input = guestSessionInput(await readJsonBody(request));
+      const credential = sessionCredential(request, config.sessionCookieName);
+      const profile = credential ? await rooms.renameGuest(credential, input.displayName) : null;
+      writeJson(response, profile ? 200 : 401, profile ?? { error: { code: "SESSION_EXPIRED" } });
+    } catch (error) {
+      const badInput = error instanceof HttpInputError || error instanceof RangeError || error instanceof TypeError;
+      writeJson(response, badInput ? 400 : 500, { error: { code: badInput ? "BAD_REQUEST" : "INTERNAL_ERROR" } });
+    }
+    return;
+  }
+
   if (path === "/api/guest-sessions") {
     response.setHeader("Allow", "GET, POST, OPTIONS");
     writeJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED" } });

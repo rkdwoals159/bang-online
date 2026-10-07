@@ -12,6 +12,7 @@ import {
 import { StorageRepository } from "../../src/storage/repository.ts";
 import { RoomAuthorizationError, RoomService } from "../../src/rooms/service.ts";
 import { createDatabase } from "../storage/pglite-pool.ts";
+import { initializeGame } from "../../../../packages/engine/src/setup/initialize.ts";
 
 const fixedNow = new Date("2026-09-27T12:00:00.000Z");
 const BASE_DECK_RULESET_VERSION = "base4-ko-online-1.0";
@@ -53,6 +54,33 @@ async function guest(service: RoomService, displayName: string) {
 function hash(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
+
+test("renaming a guest updates the current room and match atomically without changing their seat or cards", async () => {
+  const { database, service, storage } = await createFixture();
+  try {
+    const players = await Promise.all(["a", "b", "c", "d"].map(name => guest(service, name)));
+    const playerIds = players.map(p => p.authenticated.playerId), owner = players[0]!;
+    await storage.createRoom({ id: "profile-room", ownerPlayerId: playerIds[0]!, inviteCodeHash: hash("profile-invite"), capacity: 4,
+      players: playerIds.map((playerId, seatIndex) => ({ playerId, seatIndex })) });
+    const state = initializeGame({ players: playerIds.map((playerId,i) => ({ playerId, displayName: ["a", "b", "c", "d"][i]! })), random: deterministicRandom });
+    await storage.createMatch({ id: "profile-match", roomId: "profile-room", state });
+    const before = (await storage.getMatch("profile-match"))!;
+    const response = await service.renameGuest(owner.issued.credential, "  새 이름😀  ");
+    assert.equal(response!.player.playerId, playerIds[0]); assert.equal(response!.player.displayName, "새 이름😀");
+    const after = (await storage.getMatch("profile-match"))!;
+    const expected = structuredClone(before.state); expected.version++;
+    expected.seats.find(s => s.public.playerId === playerIds[0])!.public.displayName = "새 이름😀";
+    assert.deepEqual(after.state, expected); assert.equal(after.eventSeq, before.eventSeq);
+    assert.equal((await storage.getRoom("profile-room"))!.version, 1);
+    assert.equal(Number((await database.query<{ count: number }>("SELECT COUNT(*) AS count FROM outbox")).rows[0]!.count), 2);
+    await service.renameGuest(owner.issued.credential, "새 이름😀");
+    assert.equal((await storage.getMatch("profile-match"))!.version, after.version);
+    assert.equal(await service.renameGuest("wrong-credential", "Stranger"), null);
+    await assert.rejects(service.renameGuest(owner.issued.credential, "x".repeat(21)), RangeError);
+    const restored = await service.authenticateGuestCredential(owner.issued.credential);
+    assert.equal(restored!.displayName, "새 이름😀");
+  } finally { await database.close(); }
+});
 
 test("trims display names and enforces 1–20 Unicode code points without controls", async () => {
   const { database, service } = await createFixture();

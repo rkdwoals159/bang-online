@@ -37,6 +37,7 @@ interface AppStateValue {
   roomEntryTransport: RoomEntryTransport;
   sessionRecovery: SessionRecovery;
   retrySessionRecovery: () => Promise<void>;
+  changeNickname: (displayName: string) => Promise<void>;
   rememberCreatedRoom: (result: RoomEntryCreateResult) => void;
   lastCreatedRoomId: string | null;
   clearCreatedRoom: () => void;
@@ -44,6 +45,7 @@ interface AppStateValue {
 }
 
 const AppStateContext = createContext<AppStateValue | null>(null);
+export function useOptionalAppState() { return useContext(AppStateContext); }
 
 export function AppStateProvider({ children, adapter }: { children: ReactNode; adapter?: "sites-http-sse" | "socket-io" }) {
   const useSitesTransport = adapter === "sites-http-sse" || (adapter === undefined && import.meta.env.PROD);
@@ -159,6 +161,12 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
     setSessionRecovery({ kind: "ready", guest, assignedRooms });
   }, []);
 
+  const changeNickname = useCallback(async (displayName: string) => {
+    const guest = await transport.updateGuestName({ protocolVersion: 1, displayName });
+    setSessionRecovery(current => current.kind === "ready" && current.guest?.player.playerId === guest.player.playerId
+      ? { ...current, guest } : current);
+  }, [transport]);
+
   const roomEntryTransport = useState<RoomEntryTransport>(() => ({
     restoreGuestSession: () => transport.restoreGuestSession(),
     recoverAssignedSeats: () => transport.recoverAssignedSeats(),
@@ -222,6 +230,7 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
       roomEntryTransport,
       sessionRecovery,
       retrySessionRecovery,
+      changeNickname,
       rememberCreatedRoom,
       lastCreatedRoomId,
       clearCreatedRoom,

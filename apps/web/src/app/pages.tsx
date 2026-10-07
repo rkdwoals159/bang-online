@@ -213,6 +213,7 @@ export function RoutePage({ route }: { route: AppRoute }) {
 function RoomEntryPage({ initialMode }: { initialMode: "create" | "join" }) {
   const {
     roomEntryTransport,
+    sessionRecovery,
     rememberCreatedRoom,
     clearCreatedRoom,
   } = useAppState();
@@ -225,6 +226,7 @@ function RoomEntryPage({ initialMode }: { initialMode: "create" | "join" }) {
     <>
       <RoomEntry
         transport={roomEntryTransport}
+        currentGuest={sessionRecovery.kind === "ready" ? sessionRecovery.guest : null}
         initialMode={initialMode}
         onRoomCreated={(room) => {
           rememberCreatedRoom(room);

@@ -52,7 +52,7 @@ export class GameAudio {
     try {
       if (kind === "shot" || kind === "burst" || kind === "explosion") {
         const count = kind === "burst" ? 5 : 1;
-        for (let i = 0; i < count; i++) { this.hiss(t + i * .105, kind === "explosion" ? .5 : .13, kind === "explosion" ? 480 : 1800); this.tone(t + i * .105, 110, .13, "triangle", 40); }
+        for (let i = 0; i < count; i++) { this.hiss(t + i * .105, kind === "explosion" ? .65 : .13, kind === "explosion" ? 780 : 1800); this.tone(t + i * .105, kind === "explosion" ? 95 : 110, kind === "explosion" ? .45 : .13, "triangle", kind === "explosion" ? 28 : 40); }
       } else if (kind === "block") { this.tone(t, 1800, .27, "sine", 900); this.tone(t + .012, 2800, .18, "sine", 1400); }
       else if (kind === "hit") { this.hiss(t, .09, 650); this.tone(t, 150, .23, "triangle", 55); }
       else if (kind === "eliminated") [220,165,110].forEach((f,i)=>this.tone(t+i*.13,f,.23,"triangle",f*.8));

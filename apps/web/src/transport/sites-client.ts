@@ -346,6 +346,20 @@ export class SitesGameTransport implements GameTransport {
     return reply.body;
   }
 
+  async updateGuestName(input: GuestSessionRequest): Promise<GuestSessionResponse> {
+    if (!isRecord(input) || !exactKeys(input, ["protocolVersion", "displayName"]) || input.protocolVersion !== 1 || typeof input.displayName !== "string")
+      throw new BrowserTransportError("INVALID_RESPONSE");
+    const playerId = this.restoredPlayerId;
+    const reply = await this.requestJson("/api/guest-sessions/profile", "POST", input, undefined, false);
+    if (reply.status === 401) throw new BrowserTransportError("SESSION_EXPIRED");
+    if (reply.status !== 200 || !isGuestSessionResponse(reply.body) || reply.body.player.playerId !== playerId || playerId !== this.restoredPlayerId)
+      throw new BrowserTransportError("INVALID_RESPONSE");
+    // Eager refresh for the changing player; peers receive transactional outbox notifications.
+    void Promise.allSettled([...Object.keys(this.getSnapshot().rooms).map(id => this.syncRoom(id)),
+      ...Object.keys(this.getSnapshot().matches).map(id => this.syncMatch(id))]);
+    return reply.body;
+  }
+
   restoreGuestSession(): Promise<GuestSessionResponse | null> {
     if (this.restoreSessionRequest) return this.restoreSessionRequest;
     let request: Promise<GuestSessionResponse | null>;
