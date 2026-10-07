@@ -20,6 +20,7 @@
 - Postgres.app macOS 코드 서명 검증 통과.
 - 공개 `https://bang-online.site`에서 상태 응답, SPA 경로, Secure/HttpOnly 쿠키, 4명 WebSocket 인증, 방 생성/입장/시작, 개인별 게임 정보, 닉네임 변경 검증 통과.
 - Cloudflare Universal SSL Active 확인. HTTP 접속의 HTTPS 301 전환 확인.
+- Chrome 게스트 가입/방 생성, API 클라이언트 3명의 실시간 입장, 브라우저 게임 시작/역할 확인/4인 테이블 렌더링 확인. 카드 이미지 9개 모두 로딩 성공, 브라우저 error/warn 로그 없음. 4명 모두 브라우저에서 완주한 대국 검증과는 구분함.
 - 기존 Sites 접근 정책 revision 3, custom / 소유자 1명 / 그룹 0개 확인. 익명 홈페이지와 API 접근 모두 HTTP 401 확인.
 
 검증 스크립트의 초기 재시작 검사에서 matchId를 snapshot 내부에서 찾는 잘못된 기대값이 실패했다. 공용 계약에 따라 응답 최상위 matchId를 검사하도록 수정한 뒤 전체 재시작 검증 통과.
