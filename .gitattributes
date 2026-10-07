@@ -1,2 +1,3 @@
 # Preserve bytes of the SQL recorded in the legacy production checksum ledger.
 db/legacy/0000_long_iron_man.sql -text
+deploy/selfhost/*.sh text eol=lf

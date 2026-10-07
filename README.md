@@ -2,7 +2,8 @@
 
 한국어 BANG! 기본판 4–7인 온라인 플레이 프로젝트입니다.
 
-- 운영 환경: Codex Sites Worker, D1, same-origin HTTP/SSE
+- 운영 환경: 정훈서버 Node/Socket.IO, PostgreSQL, Cloudflare Tunnel ([bang-online.site](https://bang-online.site))
+- 이전 Sites: 소유자 전용 접근으로 변경해 공개 운영 종료, 기존 D1 데이터 보존
 - 개발 환경: pnpm 모노레포, React 웹 UI, 공용 게임 엔진/계약
 - 실행·호스팅 안내: [Sites README](apps/site/README.md)
 - 정훈서버 이전 구성: [자체 호스팅 운영 안내](deploy/selfhost/README.md), [진행·검증 기록](outputs/server-migration-2026-10-08/STATUS.md)

@@ -54,6 +54,7 @@ python3 ~/.bang-online/backup.py
 - 공개 경로: `bang-online.site`, 서비스 `http://127.0.0.1:8088`
 - 가비아 네임서버: `rayne.ns.cloudflare.com`, `sage.ns.cloudflare.com`
 - 서버 포트는 루프백에서만 수신한다. 공개 TLS는 Cloudflare가 처리한다.
+- Cloudflare Universal SSL 활성화 및 Always Use HTTPS 설정을 완료했다.
 - `www.bang-online.site`는 별도로 구성하지 않았다. 기본 주소는 `https://bang-online.site`이다.
 
 ## 검증

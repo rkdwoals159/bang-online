@@ -18,21 +18,26 @@
 - SSH 포워딩을 통한 실제 정훈서버 검증 통과: 상태 응답, SPA 직접 경로, Secure/HttpOnly 쿠키, 4명 WebSocket 인증, 방 생성/입장, 게임 시작, 개인별 게임 정보, 닉네임 변경.
 - 정훈서버의 게임 서버 재시작 후 4명 세션과 개인 게임 정보 복구 확인.
 - Postgres.app macOS 코드 서명 검증 통과.
+- 공개 `https://bang-online.site`에서 상태 응답, SPA 경로, Secure/HttpOnly 쿠키, 4명 WebSocket 인증, 방 생성/입장/시작, 개인별 게임 정보, 닉네임 변경 검증 통과.
+- Cloudflare Universal SSL Active 확인. HTTP 접속의 HTTPS 301 전환 확인.
+- 기존 Sites 접근 정책 revision 3, custom / 소유자 1명 / 그룹 0개 확인. 익명 홈페이지와 API 접근 모두 HTTP 401 확인.
 
 검증 스크립트의 초기 재시작 검사에서 matchId를 snapshot 내부에서 찾는 잘못된 기대값이 실패했다. 공용 계약에 따라 응답 최상위 matchId를 검사하도록 수정한 뒤 전체 재시작 검증 통과.
 
-## 현재 대기
+## 전환 결과
 
-- Cloudflare: `Waiting for your registrar to propagate your new nameservers`.
-- 일반 DNS 질의는 아직 SERVFAIL로 공개 HTTPS 접속을 검증하지 못함.
-- 새 도메인 검증 전에는 기존 Sites의 공개 서비스를 중지하지 않음.
-- 기존 Sites D1 데이터는 보존 중이며 PostgreSQL로 이관되지 않음.
+- 최초 DNS 전파 대기 중 SERVFAIL 및 SSL handshake 실패를 관측했으나, Cloudflare 활성화/인증서 발급 이후 공개 검증 통과.
+- 기존 Sites는 소유자 전용으로 전환해 일반 이용자의 공개 접속을 종료함. Sites 호스팅 리소스의 undeploy/suspend 도구는 제공되지 않아 리소스 자체는 active 상태로 보존.
+- 기존 Sites D1 데이터는 보존 중이며 PostgreSQL로 이관되지 않음. 기존 세션/진행 중 방이 새 도메인으로 자동 이전되는 것은 아님.
 - 기존 수락 케이스 95/97 상태를 이 배포 검증만으로 올리지 않음.
 
-## 남은 전환 순서
+## 배포 출처
 
-1. 공개 DNS가 Cloudflare로 반영되고 HTTPS 인증서가 유효한지 확인.
-2. 공개 도메인에서 verify-selfhost.mjs 실행 및 브라우저 게임 화면 확인.
-3. 실제 정상 동작 확인 후 기존 Sites 공개 운영 중지. 제공된 Sites 도구에는 호스팅 중단 기능이 없으므로 공개 접근 제한으로 대체 가능한지 확인하고 실제 적용 결과를 구분해서 기록.
+- 구현 커밋: `a5a16c1545a98dc18fd468199d5b1016b7a80b31` (GitHub main 업로드 확인).
+- Node 번들 SHA256: `673f9f68b74ae9ce336696f4f8f23bbc1d279ae9113fa88c163e80b5fe45e84e`.
+- 웹 index SHA256: `78a6d450a27c6df4431bf999c70b6b39a3d282483e62b71e11a66e11b7918e49`.
+- 로컬 산출물과 서버 파일의 SHA256 일치 확인.
+
+향후 서버 재부팅 전 로그인 이후 사용자 LaunchAgents 실행 조건 및 동일 서버 백업의 한계를 운영 문서에서 확인한다.
 
 운영 설명: `deploy/selfhost/README.md`.
