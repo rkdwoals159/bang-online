@@ -120,9 +120,9 @@ function sessionCookie(config: ServerConfig, credential: string, expiresAt: stri
     "Secure",
     "SameSite=Lax",
   ];
-  if (config.guestSessionTtlMs !== undefined) {
-    parts.push(`Expires=${new Date(expiresAt).toUTCString()}`);
-  }
+  // Database retention and browser persistence are separate: without Expires,
+  // a non-expiring guest becomes a session cookie lost on browser shutdown.
+  parts.push(`Expires=${new Date(expiresAt).toUTCString()}`);
   return parts.join("; ");
 }
 
@@ -194,6 +194,8 @@ async function handleHttpRequest(
         player: { playerId: guest.playerId, displayName: guest.displayName },
         sessionExpiresAt: guest.expiresAt.toISOString(),
       };
+      // Upgrade existing session cookies without replacing the player's identity.
+      response.setHeader("Set-Cookie", sessionCookie(config, credential, restored.sessionExpiresAt));
       writeJson(response, 200, restored);
     } catch {
       logger.error("guest_session_restore_failed");

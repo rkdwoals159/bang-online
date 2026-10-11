@@ -65,13 +65,14 @@ export async function handleSessionRoute(
         guestSessionTtlMs: configuredGuestTtl(env, options),
         crypto: options.crypto,
       });
-      const guest = await service.authenticate(sessionCredential(request, cookieName));
-      if (!guest) return emptyResponse(204);
+      const credential = sessionCredential(request, cookieName);
+      const guest = await service.authenticate(credential);
+      if (!guest || !credential) return emptyResponse(204);
       return jsonResponse({
         protocolVersion: 1,
         player: { playerId: guest.playerId, displayName: guest.displayName },
         sessionExpiresAt: guest.expiresAt.toISOString(),
-      });
+      }, 200, { "Set-Cookie": serializeSessionCookie(cookieName, credential, guest.expiresAt.toISOString()) });
     } catch {
       return jsonResponse({ error: { code: "INTERNAL_ERROR" } }, 500);
     }
@@ -111,7 +112,6 @@ export async function handleSessionRoute(
           configuredCookieName(env, options),
           issue.credential,
           issue.response.sessionExpiresAt,
-          ttl !== undefined,
         ),
       });
       return jsonResponse(issue.response, 201, headers);

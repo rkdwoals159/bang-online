@@ -353,6 +353,8 @@ test("guest cookie create/restore is Worker-safe, expires correctly, and assigne
     const restored = await handleSessionRoute(request("/api/guest-sessions", { method: "GET", cookie: owner.cookie }), { DB: db }, ttlOptions);
     assert.ok(restored);
     assert.equal(restored.status, 200);
+    assert.equal(restored.headers.get("Set-Cookie"), cookie,
+      "restoration preserves the finite expiry and upgrades cookie persistence");
     assert.deepEqual(await json(restored), {
       protocolVersion: 1,
       player: { playerId: owner.playerId, displayName: "Sheriff 🐎" },
@@ -368,7 +370,14 @@ test("guest cookie create/restore is Worker-safe, expires correctly, and assigne
       body: { protocolVersion: 1, displayName: "No expiry" },
     }), { DB: db }, serviceOptions(clock));
     assert.ok(noExpiryResponse);
-    assert.equal(noExpiryResponse.headers.get("Set-Cookie")?.includes("Expires="), false);
+    assert.match(noExpiryResponse.headers.get("Set-Cookie") ?? "", /Expires=Fri, 31 Dec 9999 23:59:59 GMT/u);
+    const noExpiryRestored = await handleSessionRoute(request("/api/guest-sessions", {
+      method: "GET", cookie: noExpiryGuest.cookie,
+    }), { DB: db }, serviceOptions(clock));
+    assert.ok(noExpiryRestored);
+    assert.equal(noExpiryRestored.status, 200);
+    assert.ok(noExpiryRestored.headers.get("Set-Cookie")?.startsWith(noExpiryGuest.cookie + ";"));
+    assert.match(noExpiryRestored.headers.get("Set-Cookie") ?? "", /Expires=Fri, 31 Dec 9999 23:59:59 GMT/u);
     assert.ok(noExpiryGuest.cookie);
 
     const room = await createRoom(db, owner, ttlOptions);

@@ -124,7 +124,7 @@ export function sessionCredential(request: Request, cookieName: string): string 
   return matches.length === 1 && matches[0]!.length > 0 ? matches[0] : undefined;
 }
 
-export function serializeSessionCookie(cookieName: string, credential: string, expiresAt: string, hasTtl: boolean): string {
+export function serializeSessionCookie(cookieName: string, credential: string, expiresAt: string): string {
   const parts = [
     `${cookieName}=${encodeURIComponent(credential)}`,
     "Path=/",
@@ -132,7 +132,8 @@ export function serializeSessionCookie(cookieName: string, credential: string, e
     "Secure",
     "SameSite=Lax",
   ];
-  if (hasTtl) parts.push(`Expires=${new Date(expiresAt).toUTCString()}`);
+  // A guest with no server TTL must still survive a browser restart.
+  parts.push(`Expires=${new Date(expiresAt).toUTCString()}`);
   return parts.join("; ");
 }
 

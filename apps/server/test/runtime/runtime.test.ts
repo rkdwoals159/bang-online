@@ -142,6 +142,8 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     assert.match(setCookie, /(?:^|;\s*)Secure(?:;|$)/i);
     assert.match(setCookie, /(?:^|;\s*)SameSite=Lax(?:;|$)/i);
     assert.match(setCookie, /(?:^|;\s*)Path=\/(?:;|$)/i);
+    assert.match(setCookie, /(?:^|;\s*)Expires=Fri, 31 Dec 9999 23:59:59 GMT(?:;|$)/i,
+      "a non-expiring guest needs a persistent cookie to survive browser shutdown");
     const cookiePair = setCookie.split(";", 1)[0]!;
     const rawCredential = cookiePair.slice(cookiePair.indexOf("=") + 1);
     const bodyText = JSON.stringify(session);
@@ -166,6 +168,8 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     });
     assert.equal(restoredResponse.status, 200);
     assert.equal(restoredResponse.headers.get("cache-control"), "no-store");
+    assert.equal(restoredResponse.headers.get("set-cookie"), setCookie,
+      "restoring an old session cookie upgrades persistence without rotating the credential");
     const restoredSession = await restoredResponse.json();
     assert.deepEqual(restoredSession, session);
     assert.equal(JSON.stringify(restoredSession).includes(decodeURIComponent(rawCredential)), false);
@@ -260,6 +264,20 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
       knownVersion: 0,
     }) as { room?: { viewer: { playerId: string } } };
     assert.equal(roomSync.room?.viewer.playerId, session.player.playerId);
+
+    authenticated.disconnect();
+    const reopened = createSocketClient(baseUrl, {
+      transports: ["websocket"], extraHeaders: { Cookie: cookiePair }, reconnection: false, timeout: 2_000,
+    });
+    sockets.push(reopened);
+    await connected(reopened);
+    const reopenedRoom = await acknowledged(reopened, "room:sync", {
+      protocolVersion: 1, requestId: "runtime-reopened-owner", roomId: createdRoom.roomId, knownVersion: 0,
+    }) as { room?: { viewer: { playerId: string; isOwner: boolean } } };
+    assert.deepEqual(reopenedRoom.room?.viewer, { playerId: session.player.playerId, isOwner: true },
+      "a fresh connection using the persisted cookie retains the original owner seat");
+    authenticated.connect();
+    await connected(authenticated);
 
     const unexpectedChanges: unknown[] = [];
     const observeReadyChange = (payload: unknown) => {
