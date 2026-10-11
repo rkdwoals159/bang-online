@@ -135,7 +135,7 @@ function cookieCredential(header: string | undefined, cookieName: string): strin
   return matches[0];
 }
 
-function playerIdFor(socket: GatewaySocket): string | undefined {
+export function playerIdFor(socket: GatewaySocket): string | undefined {
   const playerId = socket.data[AUTHENTICATED_PLAYER_DATA_KEY];
   return isText(playerId) ? playerId : undefined;
 }

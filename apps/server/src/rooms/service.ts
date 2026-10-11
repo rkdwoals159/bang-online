@@ -8,6 +8,7 @@ import type {
   CreateRoomPayload,
   GuestSessionResponse,
   RoomView,
+  RoomConnectionState,
 } from "../../../../packages/contracts/src/protocol.js";
 import { withClient } from "../storage/database-runtime.js";
 import type { PgPoolLike } from "../storage/database.js";
@@ -31,6 +32,7 @@ interface GuestProfileRow {
 }
 
 export interface RoomServiceOptions {
+  connectionStateForPlayer?: (playerId: string) => RoomConnectionState;
   /** Omitted means guest credentials do not expire automatically. */
   guestSessionTtlMs?: number;
   /** Omitted means closed room records are retained indefinitely. */
@@ -588,7 +590,9 @@ export class RoomService {
     const members = stored.players.map(({ playerId, seatIndex, ready }) => {
       const displayName = displayNames.get(playerId);
       if (displayName === undefined) throw new RoomServiceError("ROOM_PROFILE_MISSING", "Room member profile is missing.");
-      return { playerId, displayName, seatIndex, ready };
+      return { playerId, displayName, seatIndex, ready,
+        ...(this.options.connectionStateForPlayer ? { connectionState: this.options.connectionStateForPlayer(playerId) } : {}),
+      };
     });
     const hasStartedMatch = stored.status === "in_game" || stored.status === "paused" || stored.status === "completed";
     const activeMatchId = hasStartedMatch ? await this.storage.getLatestMatchIdForRoom(roomId) : null;

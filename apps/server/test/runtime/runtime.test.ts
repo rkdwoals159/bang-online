@@ -356,9 +356,49 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     const replay = await acknowledged(authenticated, "room:command", kickPayload) as { version: number; members: unknown[] };
     assert.equal(replay.version, 3);
     assert.equal(replay.members.length, 1);
+    const leakedPresence: unknown[] = [];
+    memberSocket.on("room:presence", payload => leakedPresence.push(payload));
+    reopened.disconnect();
+    authenticated.disconnect();
+    let ownerDisconnected = false;
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const response = await fetch(`${baseUrl}/api/guest-sessions/rooms`, { headers: { Cookie: cookiePair } });
+      const rooms = await response.json() as Array<{ members: { playerId: string; connectionState: string }[] }>;
+      ownerDisconnected = rooms[0]?.members.some(member => member.playerId === session.player.playerId && member.connectionState === "disconnected") === true;
+      if (ownerDisconnected) break;
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    assert.equal(ownerDisconnected, true);
+    const ownerOnline = serverEvent(authenticated, "room:presence", payload =>
+      (payload as { members?: { playerId: string; connectionState: string }[] }).members?.some(member => member.playerId === session.player.playerId && member.connectionState === "connected") === true);
+    const ownerReconnected = connected(authenticated); authenticated.connect(); await ownerReconnected; await ownerOnline;
+    assert.deepEqual(leakedPresence, [], "removed members in stale lobby channels cannot receive presence");
     const rejoined = await acknowledged(memberSocket, "room:command", { ...joinPayload, commandId: "018f8e3d-7b11-7c82-8a7b-123456789a04", expectedVersion: 3 }) as { version: number; members: unknown[] };
     assert.equal(rejoined.version, 4);
     assert.equal(rejoined.members.length, 2);
+
+    const presenceState = (reply: unknown, playerId: string) =>
+      (reply as { members?: { playerId: string; connectionState: string }[] }).members?.find(member => member.playerId === playerId)?.connectionState;
+    const currentRoom = await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "presence-initial", roomId: createdRoom.roomId, knownVersion: 4 }) as { version: number; room: unknown };
+    assert.equal(presenceState(currentRoom.room, joined.viewer.playerId), "connected");
+    const offline = serverEvent(authenticated, "room:presence", payload => presenceState(payload, joined.viewer.playerId) === "disconnected");
+    memberSocket.disconnect();
+    await offline;
+    const disconnectedRoom = await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "presence-offline", roomId: createdRoom.roomId, knownVersion: 4 }) as { version: number; room: unknown };
+    assert.equal(disconnectedRoom.version, 4, "presence must not mutate the room version");
+    assert.equal(presenceState(disconnectedRoom.room, joined.viewer.playerId), "disconnected");
+    const online = serverEvent(authenticated, "room:presence", payload => presenceState(payload, joined.viewer.playerId) === "connected");
+    const reconnected = connected(memberSocket); memberSocket.connect(); await reconnected; await online;
+    const secondTab = createSocketClient(baseUrl, { transports: ["websocket"], extraHeaders: { Cookie: secondGuestCookie }, reconnection: false });
+    sockets.push(secondTab); await connected(secondTab);
+    memberSocket.disconnect();
+    const multiTabRoom = await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "presence-multi-tab", roomId: createdRoom.roomId, knownVersion: 4 }) as { version: number; room: unknown };
+    assert.equal(presenceState(multiTabRoom.room, joined.viewer.playerId), "connected", "one remaining tab keeps a guest connected");
+    const finalOffline = serverEvent(authenticated, "room:presence", payload => presenceState(payload, joined.viewer.playerId) === "disconnected");
+    secondTab.disconnect(); await finalOffline;
+    const finalRoom = await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "presence-final", roomId: createdRoom.roomId, knownVersion: 4 }) as { version: number; room: { members: unknown[] } };
+    assert.equal(finalRoom.version, 4);
+    assert.equal(finalRoom.room.members.length, 2, "disconnecting does not remove a seat");
 
     const anonymous = createSocketClient(baseUrl, {
       transports: ["websocket"],

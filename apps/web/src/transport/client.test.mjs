@@ -155,6 +155,38 @@ function countEmits(socket, event) {
 }
 
 const publicCard = { cardInstanceId: "public-card", typeId: "beer", rank: "6", suit: "HEARTS" };
+test("Socket.IO presence updates without room versions, ignores stale/invalid messages, and refreshes on reconnect", async () => {
+  const socket = new FakeSocket(); let connectedState = "connected";
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event !== "room:sync") return;
+    const reply = roomSync(payload);
+    reply.room.members.push({ playerId: "player-2", displayName: "Two", seatIndex: 1, ready: true, connectionState: connectedState });
+    acknowledgement(reply);
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.watchRoom("room-1"); transport.connect();
+  const memberState = () => transport.getSnapshot().rooms["room-1"]?.room.members[1]?.connectionState;
+  await waitUntil(() => memberState() === "connected", "initial presence missing");
+  const presence = { protocolVersion: 1, roomId: "room-1", observedAt: "2026-10-11T15:00:00.000Z",
+    members: [{ playerId: "player-2", connectionState: "disconnected" }] };
+  socket.fire("room:presence", presence);
+  assert.equal(memberState(), "disconnected");
+  assert.equal(transport.getSnapshot().rooms["room-1"].version, 1);
+  for (const invalid of [ { ...presence, roomId: "other" }, { ...presence, secret: true },
+    { ...presence, observedAt: "2026-10-11T14:00:00.000Z", members: [{ playerId: "player-2", connectionState: "connected" }] } ]) socket.fire("room:presence", invalid);
+  assert.equal(memberState(), "disconnected");
+  socket.disconnect(); socket.connect();
+  await waitUntil(() => memberState() === "connected", "same-version reconnect did not refresh presence");
+  const pendingAck = [];
+  socket.onEmit = ({ event, payload, acknowledgement }) => { if (event === "room:sync") pendingAck.push({ payload, acknowledgement }); };
+  const sync = transport.syncRoom("room-1");
+  await waitUntil(() => pendingAck.length > 0, "sync not sent");
+  socket.fire("room:presence", { ...presence, observedAt: "2026-10-11T15:00:01.000Z" });
+  const reply = roomSync(pendingAck[0].payload); reply.room.members.push({ playerId: "player-2", displayName: "Two", seatIndex: 1, ready: true, connectionState: "connected" });
+  pendingAck[0].acknowledgement(reply); await sync;
+  assert.equal(memberState(), "disconnected", "late sync cannot overwrite a newer presence event");
+  transport.disconnect();
+});
 function storeSnapshot(response, observer = false) {
   response.snapshot.publicTable.generalStoreCards = [publicCard];
   response.snapshot.pendingInteraction = { interactionId: "store", kind: "GENERAL_STORE_PICK",

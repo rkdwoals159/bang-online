@@ -26,6 +26,7 @@ import {
   parseRoomSyncRequest,
   parseRoomSyncResponse,
   parseRoomView,
+  parseRoomPresenceView,
   parseSyncRejectedResponse,
 } from "../../../../packages/contracts/src/validation.js";
 import type { RoomEntryCreateResult, RoomEntryPreview } from "../features/room-entry/model.js";
@@ -580,6 +581,10 @@ export class BrowserGameTransport implements GameTransport {
       this.abortActiveAttempts(new BrowserTransportError("NOT_CONNECTED"));
     });
     this.socket.on("room:changed", (payload) => this.handleRoomChanged(payload));
+    this.socket.on("room:presence", (payload) => {
+      const parsed = parseRoomPresenceView(payload);
+      if (parsed.ok && this.roomIds.has(parsed.value.roomId)) this.store.applyRoomPresence(parsed.value);
+    });
     this.socket.on("match:changed", (payload) => this.handleMatchChanged(payload));
     this.socket.on("session:expired", (payload) => {
       if (!isRecord(payload) || payload.protocolVersion !== 1) return;
@@ -757,7 +762,10 @@ export class BrowserGameTransport implements GameTransport {
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
       this.store.restoreResourceAccess("room", roomId);
-      this.store.applyRoomSync(parsed.value);
+      // A reconnect can change presence without changing the room version.
+      // Preserve any newer notification that arrived while the ACK was in flight.
+      const presenceUnchanged = this.store.getSnapshot().rooms[roomId]?.presenceObservedAt === current?.presenceObservedAt;
+      this.store.applyRoomSync(parsed.value, presenceUnchanged);
       this.trackRoomMatch(roomId, parsed.value.room.activeMatchId);
       if (parsed.value.room.activeMatchId && syncActiveMatch && this.socket.connected) {
         void this.syncMatch(parsed.value.room.activeMatchId).catch(() => undefined);

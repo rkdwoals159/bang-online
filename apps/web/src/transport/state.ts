@@ -103,7 +103,7 @@ export class BrowserTransportStore {
     this.update({ pendingCommandIds: Object.freeze(pendingCommandIds) });
   }
 
-  applyRoomSync(response: RoomSyncResponse): boolean {
+  applyRoomSync(response: RoomSyncResponse, refreshPresence = false): boolean {
     if (!this.isCurrentViewer(response.room.viewer.playerId)) return false;
     const previous = this.current.rooms[response.roomId];
     if (previous && response.version < previous.version) {
@@ -111,11 +111,18 @@ export class BrowserTransportStore {
       return false;
     }
     if (previous && response.version === previous.version) {
-      if (previous.requiresFullSnapshot === response.requiresFullSnapshot) {
+      const members = previous.room.members.map(member => {
+        const incoming = refreshPresence ? response.room.members.find(value => value.playerId === member.playerId) : undefined;
+        return incoming?.connectionState !== undefined && incoming.connectionState !== member.connectionState
+          ? { ...member, connectionState: incoming.connectionState } : member;
+      });
+      const presenceChanged = members.some((member, index) => member !== previous.room.members[index]);
+      if (!presenceChanged && previous.requiresFullSnapshot === response.requiresFullSnapshot) {
         this.setError(null);
         return false;
       }
-      const next = Object.freeze({ ...previous, requiresFullSnapshot: response.requiresFullSnapshot });
+      const next = Object.freeze({ ...previous, room: presenceChanged ? { ...previous.room, members } : previous.room,
+        requiresFullSnapshot: response.requiresFullSnapshot });
       this.update({
         rooms: Object.freeze({ ...this.current.rooms, [response.roomId]: next }),
         lastError: null,
@@ -123,7 +130,7 @@ export class BrowserTransportStore {
       return true;
     }
 
-    const room = preserveRoomPresence(response.room, previous?.room);
+    const room = preserveRoomPresence(response.room, previous?.room, refreshPresence);
     const next: RoomProjectionState = Object.freeze({
       version: response.version,
       room,
@@ -251,10 +258,11 @@ function mergeHistoryEvents(previous: readonly PublicMatchEvent[], received: rea
   return [...events.values()].sort((a, b) => a.eventSeq - b.eventSeq);
 }
 
-function preserveRoomPresence(incoming: RoomView, previous?: RoomView): RoomView {
+function preserveRoomPresence(incoming: RoomView, previous?: RoomView, refreshPresence = false): RoomView {
   if (!previous) return incoming;
   const previousByPlayer = new Map(previous.members.map((member) => [member.playerId, member] as const));
   const members = incoming.members.map((member) => {
+    if (refreshPresence && member.connectionState !== undefined) return member;
     const prior = previousByPlayer.get(member.playerId);
     return prior?.connectionState === undefined ? member : { ...member, connectionState: prior.connectionState };
   });

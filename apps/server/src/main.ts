@@ -20,6 +20,7 @@ import { createSyncProjectionHandlers } from "./projections/sync.js";
 import { RecoveryService } from "./recovery/index.js";
 import { RoomService, RoomServiceError } from "./rooms/service.js";
 import { installSocketGateway, type GatewayHandlers, type GatewayIo } from "./socket/gateway.js";
+import { RoomPresence } from "./socket/presence.js";
 import { withClient } from "./storage/database-runtime.js";
 import type { PgClientLike, PgPoolLike, PgQueryResult } from "./storage/database.js";
 import { applyStorageMigrations } from "./storage/migrations.js";
@@ -578,11 +579,13 @@ export async function createRuntimeServer(
 
   const storage = new StorageRepository(pool);
   const lifecycle = new RoomLifecycleRepository(pool);
+  const presence = new RoomPresence();
   const rooms = new RoomService({
     storage,
     lifecycle,
     pool,
     options: {
+      connectionStateForPlayer: presence.stateForPlayer,
       ...(config.guestSessionTtlMs === undefined ? {} : { guestSessionTtlMs: config.guestSessionTtlMs }),
       ...(config.roomRetentionMs === undefined ? {} : { roomRetentionMs: config.roomRetentionMs }),
     },
@@ -617,10 +620,12 @@ export async function createRuntimeServer(
     handlers: gatewayHandlers(storage, rooms, logger),
     sessionCookieName: config.sessionCookieName,
   });
+  const stopPresence = presence.install(io, pool, () => logger.error("room_presence_publish_failed"));
 
   try {
     await listen(httpServer, config);
   } catch (error) {
+    await stopPresence();
     await new Promise<void>((resolve) => io.close(() => resolve()));
     await closeHttpServer(httpServer).catch(() => undefined);
     throw error;
@@ -632,6 +637,7 @@ export async function createRuntimeServer(
     if (closing) return closing;
     closing = (async () => {
       await stopOutboxPublisher();
+      await stopPresence();
       await new Promise<void>((resolve, reject) => {
         io.close((error) => error ? reject(error) : resolve());
       });
