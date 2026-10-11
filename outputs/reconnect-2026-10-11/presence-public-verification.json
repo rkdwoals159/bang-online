@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-11T15:00:58.878Z",
+  "origin": "https://bang-online.site",
+  "checks": [
+    "both real browser transports receive initial connected states",
+    "closing final tab updates other client without refresh",
+    "reconnect broadcasts connected state",
+    "closing one of two tabs leaves guest connected",
+    "same-version reconnect repairs presence events missed while offline",
+    "presence preserves room version and seats; unrelated guest gets no events",
+    "dedicated verification room closed",
+    "public HTML and browser client match the local build"
+  ],
+  "clientFile": "client-BQm7zFmo.js",
+  "clientSha256": "43d3adae72d74f49f20df07b72c260ee2af97009864a43b475a5cc4f4f5909c8",
+  "serverSha256": "11893b77ae836ebdaee34c06a9791aa23da47ebd7e877d80847f726681378a87",
+  "ok": true
+}

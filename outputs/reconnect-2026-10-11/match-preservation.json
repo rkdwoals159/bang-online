@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-11T15:02:04.190Z",
+  "status": "playing",
+  "versionBefore": 26,
+  "versionAfter": 26,
+  "eventSeqBefore": 46,
+  "eventSeqAfter": 46,
+  "seatCount": 5,
+  "stateSha256Before": "12019e788270031970d00da739749fce2a0c90bb89b7028efd63460b5873918d",
+  "stateSha256After": "12019e788270031970d00da739749fce2a0c90bb89b7028efd63460b5873918d",
+  "identical": true,
+  "actualUserRejoinConfirmed": false
+}
