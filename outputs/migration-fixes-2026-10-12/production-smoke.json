@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "origin": "https://bang-online.site",
+  "checks": [
+    "HTTP health response (TLS verified by fetch when HTTPS)",
+    "SPA deep link",
+    "secure session cookies",
+    "four authenticated WebSocket connections",
+    "room creation/join",
+    "match start",
+    "four private match projections",
+    "nickname change",
+    "four lobby seats show connected",
+    "all four clients disconnect/reconnect and recover",
+    "unchanged sync for all four viewers"
+  ],
+  "roomId": "r_szAIunq4_DpT63HM2JxomCSc",
+  "matchId": "m_pj4x5_hCM99JnILXkW9zdE-F"
+}

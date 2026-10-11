@@ -1,0 +1,7 @@
+{
+  "sourceCommit": "7d274d39129bae14433b3be5de64f9e6989e19db",
+  "previousRelease": "/Users/rkdwoals159/.bang-online/releases/2026-10-11-presence",
+  "release": "/Users/rkdwoals159/.bang-online/releases/2026-10-12-parity",
+  "deployedAt": "2026-10-12T00:49:38+0900",
+  "change": "Complete Node/Sites migration parity fixes F01-F12"
+}

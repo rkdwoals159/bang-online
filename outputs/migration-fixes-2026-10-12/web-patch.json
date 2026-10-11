@@ -1,0 +1,6 @@
+{
+  "webSourceCommit": "5ca5d2d80981df14126d2ffb16bb3d552b4d213b",
+  "deployedAt": "2026-10-12T00:55:48+0900",
+  "serverRestarted": false,
+  "reason": "Restore active match after unchanged recovered room response"
+}

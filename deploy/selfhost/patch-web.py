@@ -6,7 +6,11 @@ archive, commit = sys.argv[1:]
 stage = base / ('web-stage-' + commit[:12])
 stage.mkdir(exist_ok=False)
 with tarfile.open(Path(archive).expanduser()) as bundle:
-    bundle.extractall(stage, filter='data')
+    for member in bundle.getmembers():
+        target = (stage / member.name).resolve()
+        if (target != stage.resolve() and stage.resolve() not in target.parents) or not (member.isfile() or member.isdir()):
+            raise ValueError('Unsafe archive member')
+    bundle.extractall(stage)
 web = (base / 'current/web').resolve(strict=True)
 for source in stage.rglob('*'):
     if not source.is_file() or source.name == 'index.html':
