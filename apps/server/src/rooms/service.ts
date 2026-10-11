@@ -303,6 +303,15 @@ export class RoomService {
     };
   }
 
+  async reissueInvite(playerId: string, roomId: string, expectedVersion: number): Promise<{roomId: string; version: number; inviteCode: string; duplicate: false}> {
+    ensureText(playerId, 'Authenticated player ID');
+    ensureText(roomId, 'Room ID');
+    ensureVersion(expectedVersion);
+    const inviteCode = opaqueSecret();
+    const version = await this.lifecycle.rotateRoomInvite(roomId, playerId, expectedVersion, sha256(inviteCode), opaqueId('evt'));
+    return {roomId, version, inviteCode, duplicate: false};
+  }
+
   async joinPrivateRoom(
     authenticatedPlayerId: string,
     input: JoinPrivateRoomInput,

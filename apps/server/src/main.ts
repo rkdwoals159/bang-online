@@ -177,6 +177,28 @@ async function handleHttpRequest(
     return;
   }
 
+  const invitePath = path.match(/^\/api\/rooms\/([^/]+)\/invite$/u);
+  if (invitePath) {
+    if (request.method !== 'POST') { response.setHeader('Allow', 'POST, OPTIONS'); writeJson(response, 405, {error:{code:'METHOD_NOT_ALLOWED'}}); return; }
+    if (request.headers.origin !== config.webOrigin) { writeJson(response, 403, {error:{code:'BAD_ORIGIN'}}); return; }
+    try {
+      const body = await readJsonBody(request);
+      if (!isRecord(body) || Object.keys(body).length !== 2 || body.protocolVersion !== 1 ||
+          !Number.isSafeInteger(body.expectedVersion) || (body.expectedVersion as number) < 0) throw new HttpInputError(400, 'Invalid invite request');
+      const credential = sessionCredential(request, config.sessionCookieName);
+      const guest = credential ? await rooms.authenticateGuestCredential(credential) : null;
+      if (!guest) { writeJson(response, 401, {error:{code:'SESSION_EXPIRED'}}); return; }
+      const result = await rooms.reissueInvite(guest.playerId, decodeURIComponent(invitePath[1]!), body.expectedVersion as number);
+      writeJson(response, 200, result);
+    } catch (error) {
+      if (error instanceof HttpInputError || error instanceof URIError) writeJson(response, 400, {error:{code:'BAD_REQUEST'}});
+      else if (error instanceof RoomVersionConflictError) writeJson(response, 409, {error:{code:error.code}});
+      else if (error instanceof RoomLifecycleError || error instanceof RoomServiceError) writeJson(response, 403, {error:{code:error.code}});
+      else { logger.error('room_invite_reissue_failed'); writeJson(response, 500, {error:{code:'INTERNAL_ERROR'}}); }
+    }
+    return;
+  }
+
   if (request.method === "GET" && path === "/api/guest-sessions") {
     const credential = sessionCredential(request, config.sessionCookieName);
     if (!credential) {

@@ -307,6 +307,28 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     );
     assert.equal(pendingOutbox.rows[0]?.count, "0");
 
+    const inviteEndpoint = `${baseUrl}/api/rooms/${createdRoom.roomId}/invite`;
+    const rotateHeaders = { Origin: 'http://localhost:5173', 'Content-Type': 'application/json', Cookie: cookiePair };
+    const rotateBody = JSON.stringify({protocolVersion:1, expectedVersion:0});
+    assert.equal((await fetch(inviteEndpoint,{method:'POST',headers:{...rotateHeaders,Cookie:secondGuestCookie},body:rotateBody})).status,403);
+    assert.equal((await fetch(inviteEndpoint,{method:'POST',headers:{...rotateHeaders,Origin:'https://other.test'},body:rotateBody})).status,403);
+    const rotatedResponse = await fetch(inviteEndpoint,{method:'POST',headers:rotateHeaders,body:rotateBody});
+    assert.equal(rotatedResponse.status,200);
+    const rotated = await rotatedResponse.json() as {roomId:string; version:number; inviteCode:string};
+    assert.equal(rotated.roomId,createdRoom.roomId);
+    assert.equal(rotated.version,1);
+    assert.notEqual(rotated.inviteCode,createdRoom.inviteCode);
+    const staleRotation = await fetch(inviteEndpoint,{method:'POST',headers:rotateHeaders,body:rotateBody});
+    assert.equal(staleRotation.status,409,'a stale retry must not rotate the successful invite again');
+    const oldInvite = await acknowledged(authenticated,'room:preview',{protocolVersion:1,requestId:'old-rotated-invite',inviteCode:createdRoom.inviteCode}) as {status?:string};
+    assert.equal(oldInvite.status,'rejected');
+    const newInvite = await acknowledged(authenticated,'room:preview',{protocolVersion:1,requestId:'new-rotated-invite',inviteCode:rotated.inviteCode}) as {roomId?:string};
+    assert.equal(newInvite.roomId,createdRoom.roomId);
+    const roomsAfterRotation = await fetch(`${baseUrl}/api/guest-sessions/rooms`,{headers:{Cookie:cookiePair}});
+    const [ownerAfterRotation] = await roomsAfterRotation.json() as Array<{viewer:{isOwner:boolean};members:unknown[]}>;
+    assert.equal(ownerAfterRotation?.viewer.isOwner,true);
+    assert.equal(ownerAfterRotation?.members.length,1,'invite rotation preserves the roster');
+
     const anonymous = createSocketClient(baseUrl, {
       transports: ["websocket"],
       reconnection: false,

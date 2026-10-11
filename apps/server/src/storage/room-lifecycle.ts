@@ -458,6 +458,25 @@ export class RoomLifecycleRepository {
     this.pool = pool;
   }
 
+  /** Owner-only invite rotation with the same row lock/version boundary as JOIN. */
+  async rotateRoomInvite(roomId: string, playerId: string, expectedVersion: number, inviteCodeHash: string, eventId: string): Promise<number> {
+    return withTransaction(this.pool, async client => {
+      const { rows: [room] } = await client.query<RoomRow>(
+        'SELECT id, owner_player_id, invite_code_hash, status, capacity, version FROM rooms WHERE id=$1 FOR UPDATE', [roomId]);
+      if (!room) throw new RoomNotFoundError(roomId);
+      if (room.owner_player_id !== playerId) throw new RoomOwnerRequiredError();
+      const { rows: members } = await client.query('SELECT player_id FROM room_players WHERE room_id=$1 AND player_id=$2', [roomId, playerId]);
+      if (members.length !== 1) throw new RoomMembershipRequiredError(playerId);
+      if (room.status !== 'waiting') throw new RoomLockedError(room.status);
+      const currentVersion = safeInteger(room.version, 'room version');
+      if (currentVersion !== expectedVersion) throw new RoomVersionConflictError(expectedVersion, currentVersion);
+      const version = currentVersion + 1;
+      await client.query('UPDATE rooms SET invite_code_hash=$2, version=$3, updated_at=now() WHERE id=$1', [roomId, inviteCodeHash, version]);
+      await insertRoomOutbox(client, eventId, roomId, version);
+      return version;
+    });
+  }
+
   async findActiveGuestSessionByTokenHash(
     tokenHash: string,
     at: Date = new Date(),

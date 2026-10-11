@@ -401,6 +401,20 @@ export class BrowserGameTransport implements GameTransport {
     return body;
   }
 
+  async reissueRoomInvite(roomId: string, expectedVersion: number): Promise<RoomEntryCreateResult> {
+    this.assertResourceId(roomId);
+    const response = await this.fetcher(`/api/rooms/${encodeURIComponent(roomId)}/invite`, {
+      method: 'POST', credentials: 'include', cache: 'no-store',
+      headers: {'Content-Type':'application/json'}, body: JSON.stringify({protocolVersion:1, expectedVersion}),
+    });
+    if (response.status === 401) { this.markSessionExpired(); throw new BrowserTransportError('SESSION_EXPIRED'); }
+    if (response.status !== 200) { await this.syncRoom(roomId).catch(() => undefined); throw new BrowserTransportError('REQUEST_REJECTED'); }
+    const body: unknown = await response.json();
+    if (!isRoomCreateResult(body) || body.roomId !== roomId || !body.inviteCode) throw new BrowserTransportError('INVALID_RESPONSE');
+    await this.syncRoom(roomId).catch(() => undefined);
+    return body;
+  }
+
   async updateGuestName(input: GuestSessionRequest): Promise<GuestSessionResponse> {
     if (!isRecord(input) || !exactKeys(input, ["protocolVersion", "displayName"]) || input.protocolVersion !== 1 || typeof input.displayName !== "string")
       throw new BrowserTransportError("INVALID_RESPONSE");
