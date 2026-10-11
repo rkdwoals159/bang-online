@@ -812,6 +812,11 @@ export class BrowserGameTransport implements GameTransport {
             unchanged.value.roomId === roomId && unchanged.value.version === request.knownVersion && cached?.version === request.knownVersion &&
             !this.unavailableRoomIds.has(roomId)) {
           this.store.setError(null);
+          this.trackRoomMatch(roomId, cached.room.activeMatchId);
+          if (cached.room.activeMatchId && syncActiveMatch && this.socket.connected &&
+              !this.getSnapshot().matches[cached.room.activeMatchId]) {
+            void this.syncMatch(cached.room.activeMatchId).catch(() => undefined);
+          }
           return this.roomResponseFromCache(request.requestId, roomId, cached);
         }
         if (!allowUnchanged) throw new BrowserTransportError("INVALID_RESPONSE");

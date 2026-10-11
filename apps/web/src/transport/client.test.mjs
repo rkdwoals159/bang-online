@@ -626,6 +626,30 @@ test("cookie restore lists assigned rooms but syncs only the room the player ope
   transport.disconnect();
 });
 
+test("refreshing an existing game loads its match when recovered room sync is unchanged", async () => {
+  const socket = new FakeSocket();
+  const assignedRoom = { ...roomView("room-1", { activeMatchId: "match-1" }), version: 7 };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket,
+    fetcher: async url => Response.json(url === "/api/guest-sessions" ? {
+      protocolVersion: 1, player: { playerId: "player-1", displayName: "Player One" }, sessionExpiresAt: "9999-12-31T23:59:59Z",
+    } : [assignedRoom]) });
+  await transport.restoreGuestSession();
+  await transport.recoverAssignedSeats();
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "room:sync") {
+      assert.equal(payload.acceptUnchanged, true);
+      acknowledgement({ protocolVersion: 1, requestId: payload.requestId, roomId: payload.roomId, version: 7, status: "unchanged" });
+    }
+    if (event === "match:sync") acknowledgement(matchSync(payload, { version: 97, eventSeq: 202 }));
+  };
+  transport.connect();
+  const unwatch = transport.watchRoom("room-1");
+  await waitUntil(() => transport.getSnapshot().matches["match-1"]?.version === 97, "unchanged room must still hydrate its active match");
+  socket.fire("match:changed", { matchId: "match-1", version: 98, eventSeq: 203 });
+  await waitUntil(() => countEmits(socket, "match:sync") >= 2, "active match must stay subscribed");
+  unwatch(); transport.disconnect();
+});
+
 test("default fetch keeps the global receiver for all guest session HTTP operations", async () => {
   const originalFetch = globalThis.fetch;
   const guest = {
