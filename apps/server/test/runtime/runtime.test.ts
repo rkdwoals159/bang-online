@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
 import { io as createSocketClient, type Socket } from "socket.io-client";
-import { parseMatchCommand } from "../../../../packages/contracts/src/validation.ts";
+import { parseCommandAck, parseMatchCommand } from "../../../../packages/contracts/src/validation.ts";
 import { createRuntimeServer, startServer } from "../../src/main.ts";
 import { readPGliteDevConfig, readServerConfig, ServerConfigurationError } from "../../src/config.ts";
 import { withClient } from "../../src/storage/database-runtime.js";
@@ -123,7 +123,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
 
     const created = await fetch(`${baseUrl}/api/guest-sessions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { Origin: "http://localhost:5173", "Content-Type": "application/json" },
       body: JSON.stringify({ protocolVersion: 1, displayName: "런타임 확인" }),
     });
     assert.equal(created.status, 201);
@@ -191,7 +191,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
 
     const authenticated = createSocketClient(baseUrl, {
       transports: ["websocket"],
-      extraHeaders: { Cookie: cookiePair },
+      extraHeaders: { Origin: "http://localhost:5173", Cookie: cookiePair },
       reconnection: false,
       timeout: 2_000,
     });
@@ -245,7 +245,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
 
     const secondGuestResponse = await fetch(`${baseUrl}/api/guest-sessions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { Origin: "http://localhost:5173", "Content-Type": "application/json" },
       body: JSON.stringify({ protocolVersion: 1, displayName: "다른 게스트" }),
     });
     assert.equal(secondGuestResponse.status, 201);
@@ -267,7 +267,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
 
     authenticated.disconnect();
     const reopened = createSocketClient(baseUrl, {
-      transports: ["websocket"], extraHeaders: { Cookie: cookiePair }, reconnection: false, timeout: 2_000,
+      transports: ["websocket"], extraHeaders: { Origin: "http://localhost:5173", Cookie: cookiePair }, reconnection: false, timeout: 2_000,
     });
     sockets.push(reopened);
     await connected(reopened);
@@ -330,7 +330,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     assert.equal(ownerAfterRotation?.members.length,1,'invite rotation preserves the roster');
 
     const memberSocket = createSocketClient(baseUrl, {
-      transports: ["websocket"], extraHeaders: { Cookie: secondGuestCookie }, reconnection: false, timeout: 2_000,
+      transports: ["websocket"], extraHeaders: { Origin: "http://localhost:5173", Cookie: secondGuestCookie }, reconnection: false, timeout: 2_000,
     });
     sockets.push(memberSocket);
     await connected(memberSocket);
@@ -389,7 +389,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     assert.equal(presenceState(disconnectedRoom.room, joined.viewer.playerId), "disconnected");
     const online = serverEvent(authenticated, "room:presence", payload => presenceState(payload, joined.viewer.playerId) === "connected");
     const reconnected = connected(memberSocket); memberSocket.connect(); await reconnected; await online;
-    const secondTab = createSocketClient(baseUrl, { transports: ["websocket"], extraHeaders: { Cookie: secondGuestCookie }, reconnection: false });
+    const secondTab = createSocketClient(baseUrl, { transports: ["websocket"], extraHeaders: { Origin: "http://localhost:5173", Cookie: secondGuestCookie }, reconnection: false });
     sockets.push(secondTab); await connected(secondTab);
     memberSocket.disconnect();
     const multiTabRoom = await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "presence-multi-tab", roomId: createdRoom.roomId, knownVersion: 4 }) as { version: number; room: unknown };
@@ -401,6 +401,7 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     assert.equal(finalRoom.room.members.length, 2, "disconnecting does not remove a seat");
 
     const anonymous = createSocketClient(baseUrl, {
+      extraHeaders: { Origin: "http://localhost:5173" },
       transports: ["websocket"],
       reconnection: false,
       timeout: 2_000,
@@ -436,7 +437,7 @@ test("START_MATCH enforces owner and minimum roster, automatically prepares arri
     for (const displayName of ["Start Owner", "Start Member 1", "Start Member 2", "Start Member 3", "Not Seated"]) {
       const response = await fetch(`${baseUrl}/api/guest-sessions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { Origin: "http://localhost:5173", "Content-Type": "application/json" },
         body: JSON.stringify({ protocolVersion: 1, displayName }),
       });
       assert.equal(response.status, 201);
@@ -445,7 +446,7 @@ test("START_MATCH enforces owner and minimum roster, automatically prepares arri
       assert.ok(cookiePair);
       const socket = createSocketClient(baseUrl, {
         transports: ["websocket"],
-        extraHeaders: { Cookie: cookiePair },
+        extraHeaders: { Origin: "http://localhost:5173", Cookie: cookiePair },
         reconnection: false,
         timeout: 2_000,
       });
@@ -643,6 +644,10 @@ test("START_MATCH enforces owner and minimum roster, automatically prepares arri
     }) as { status?: string; aggregateVersion?: number; error?: { code: string } };
     assert.equal(endTurnAck.status, "accepted", JSON.stringify(endTurnAck));
     assert.equal(endTurnAck.aggregateVersion, beforeTurn.version + 1);
+    const canonicalAck = parseCommandAck(endTurnAck);
+    assert.ok(canonicalAck.ok && canonicalAck.value.status === "accepted");
+    assert.equal(canonicalAck.value.matchProjection?.baseEventSeq, beforeTurn.eventSeq);
+    assert.equal(canonicalAck.value.matchProjection?.snapshot.viewer.playerId, beforeTurn.state.turn.currentPlayerId);
 
     let afterTurn = await matchStorage.getMatch(matchId);
     assert.ok(afterTurn);
@@ -917,7 +922,7 @@ test("node-postgres runtime uses PGlite Socket and preserves sessions and migrat
 
     const created = await fetch(`${baseUrl}/api/guest-sessions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { Origin: "http://localhost:5173", "Content-Type": "application/json" },
       body: JSON.stringify({ protocolVersion: 1, displayName: "소켓 저장 확인" }),
     });
     assert.equal(created.status, 201);
@@ -936,7 +941,7 @@ test("node-postgres runtime uses PGlite Socket and preserves sessions and migrat
 
     const authenticated = createSocketClient(baseUrl, {
       transports: ["websocket"],
-      extraHeaders: { Cookie: cookiePair },
+      extraHeaders: { Origin: "http://localhost:5173", Cookie: cookiePair },
       reconnection: false,
       timeout: 2_000,
     });
@@ -954,6 +959,7 @@ test("node-postgres runtime uses PGlite Socket and preserves sessions and migrat
     });
 
     const anonymous = createSocketClient(baseUrl, {
+      extraHeaders: { Origin: "http://localhost:5173" },
       transports: ["websocket"],
       reconnection: false,
       timeout: 2_000,
@@ -992,7 +998,7 @@ test("node-postgres runtime uses PGlite Socket and preserves sessions and migrat
 
     const restored = createSocketClient(restartedBaseUrl, {
       transports: ["websocket"],
-      extraHeaders: { Cookie: cookiePair! },
+      extraHeaders: { Origin: "http://localhost:5173", Cookie: cookiePair! },
       reconnection: false,
       timeout: 2_000,
     });

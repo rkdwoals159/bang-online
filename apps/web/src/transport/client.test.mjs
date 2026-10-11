@@ -586,7 +586,7 @@ test("room-derived match watches release together and old resources are not sync
   assert.deepEqual(syncCounts, beforeRelease, "a route that released its only watch must leave no reconnect targets");
 });
 
-test("cookie restore uses the T81 endpoints and schedules authoritative sync", async () => {
+test("cookie restore lists assigned rooms but syncs only the room the player opens", async () => {
   const socket = new FakeSocket();
   const calls = [];
   const guest = {
@@ -617,8 +617,13 @@ test("cookie restore uses the T81 endpoints and schedules authoritative sync", a
     if (event === "match:sync") acknowledgement(matchSync(payload, { version: 2, eventSeq: 2 }));
   };
   transport.connect();
+  await new Promise(resolve => setTimeout(resolve, 5));
+  assert.equal(countEmits(socket, "room:sync"), 0, "historical rooms must not be subscribed automatically");
+  const unwatch = transport.watchRoom("room-1");
   await waitUntil(() => transport.getSnapshot().rooms["room-1"]?.version === 2 &&
     transport.getSnapshot().matches["match-1"]?.version === 2, "recovered room and active match did not sync");
+  unwatch();
+  transport.disconnect();
 });
 
 test("default fetch keeps the global receiver for all guest session HTTP operations", async () => {

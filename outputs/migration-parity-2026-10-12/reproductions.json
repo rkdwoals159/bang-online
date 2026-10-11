@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-10-11T15:21:54.864Z",
+  "purpose": "Detect and document differences; observed gaps are not correctness passes",
+  "observations": [
+    {
+      "id": "F01",
+      "nodeLateAckRetainedAsPending": true,
+      "nodeReceiptAccessor": false,
+      "siteReceiptAccessor": true,
+      "nodeUiRecoveryCallbacksAfterSuccessfulRetry": 0
+    },
+    {
+      "id": "F02",
+      "nodeSyncAttempts": 1,
+      "nodeRecovered": false,
+      "siteSyncAttempts": 2,
+      "siteRecovered": true
+    },
+    {
+      "id": "F04",
+      "nodeRejectsCanonicalInlineProjection": true,
+      "nodeServerCurrentlyOmitsInlineProjection": true
+    },
+    {
+      "id": "F10",
+      "nodeKeepsDeniedMatchSnapshot": true,
+      "nodeReadsAfterRejection": 3,
+      "siteKeepsDeniedMatchSnapshot": false
+    },
+    {
+      "id": "F06",
+      "foreignOriginGuestCreate": {
+        "node": 201,
+        "site": 403
+      },
+      "foreignOriginProfileUpdate": {
+        "node": 200,
+        "site": 403
+      },
+      "note": "Cookie authentication still required; this is missing Origin enforcement, not an authentication bypass"
+    },
+    {
+      "id": "F06-WebSocket",
+      "foreignOriginAuthenticatedWebSocketAccepted": true
+    },
+    {
+      "id": "F03",
+      "nodeRecoversClosedRoom": true,
+      "siteRecoversClosedRoom": false
+    },
+    {
+      "id": "F07",
+      "nodeExistingSocketStillReadsAfterSessionRevocation": true,
+      "siteNextRequestStatus": 401
+    },
+    {
+      "id": "F05",
+      "nodeSyncEvents": 250,
+      "siteSyncEvents": 100,
+      "nodeResponseBytes": 35735,
+      "siteResponseBytes": 15292
+    },
+    {
+      "id": "F11",
+      "nodeUnchangedResponseBytes": 1591,
+      "siteUnchangedResponseBytes": 114,
+      "nodeReturnsFullSnapshot": true
+    },
+    {
+      "id": "D-HASH",
+      "sameEnvelopeDifferentRequestHash": true,
+      "currentDatabasesAreSeparate": true
+    },
+    {
+      "id": "F08",
+      "nodeProjectsUnsupportedSchemaAtReadBoundary": true,
+      "siteRejectsWith": "RECOVERY_REQUIRED",
+      "note": "Node startup recovery checks active snapshots but individual reads lack this guard"
+    }
+  ]
+}

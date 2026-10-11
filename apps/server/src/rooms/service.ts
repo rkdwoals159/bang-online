@@ -256,17 +256,25 @@ export class RoomService {
     const guest = await this.authenticateGuestCredential(credential);
     if (!guest) return null;
     const result = await withClient(this.pool, (client) =>
-      client.query<{ room_id: string }>(
-        "SELECT room_id FROM room_players WHERE player_id = $1 ORDER BY room_id",
+      client.query<{ id: string; version: number; status: RoomView["status"]; owner_player_id: string;
+        capacity: RoomView["capacity"]; latest_match_id: string | null; members: RoomView["members"] }>(
+        `SELECT r.id, r.version::integer, r.status, r.owner_player_id, r.capacity,
+          (SELECT id FROM matches WHERE room_id=r.id ORDER BY created_at DESC, started_at DESC, id DESC LIMIT 1) AS latest_match_id,
+          json_agg(json_build_object('playerId', rp.player_id, 'displayName', gs.display_name,
+            'seatIndex', rp.seat_index, 'ready', rp.ready) ORDER BY rp.seat_index) AS members
+         FROM rooms r JOIN room_players viewer ON viewer.room_id=r.id AND viewer.player_id=$1
+         JOIN room_players rp ON rp.room_id=r.id JOIN guest_sessions gs ON gs.id=rp.player_id
+         WHERE r.status <> 'closed'
+         GROUP BY r.id ORDER BY r.id`,
         [guest.playerId],
       ),
     );
-    const views: RoomView[] = [];
-    for (const { room_id: roomId } of result.rows) {
-      const view = await this.roomViewForMember(roomId, guest.playerId);
-      if (view) views.push(view);
-    }
-    return views;
+    return result.rows.map(row => ({ roomId: row.id, version: row.version, status: row.status,
+      activeMatchId: ["in_game", "paused", "completed"].includes(row.status) ? row.latest_match_id : null,
+      ownerPlayerId: row.owner_player_id, capacity: row.capacity, rulesetVersion: BASE_DECK_RULESET_VERSION,
+      members: row.members.map(member => ({ ...member, ...(this.options.connectionStateForPlayer
+        ? { connectionState: this.options.connectionStateForPlayer(member.playerId) } : {}) })),
+      viewer: { playerId: guest.playerId, isOwner: row.owner_player_id === guest.playerId } }));
   }
 
   async createPrivateRoom(
@@ -391,6 +399,11 @@ export class RoomService {
     ensureText(input.roomId, "Room ID");
     ensureText(input.commandId, "Command ID");
     ensureVersion(input.expectedVersion);
+
+    const prior = await this.lifecycle.findStartReceipt({ ...input, actorPlayerId: authenticatedPlayerId,
+      requestHash: requestHash("START_MATCH", [authenticatedPlayerId, input.roomId, input.expectedVersion]) });
+    if (prior) return { mutation: prior, matchId: prior.outcome.matchId,
+      room: await this.roomViewForMember(input.roomId, authenticatedPlayerId) };
 
     const stored = await this.storage.getRoom(input.roomId);
     if (!stored) throw new RoomServiceError("ROOM_NOT_FOUND", "Room does not exist.");

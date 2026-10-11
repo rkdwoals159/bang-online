@@ -124,8 +124,8 @@ export interface RoomPreviewRequest {
   inviteCode: string;
 }
 
-export type RoomPreviewErrorCode = "BAD_REQUEST" | "INVITE_INVALID" | "RATE_LIMITED";
-export type SyncRejectedErrorCode = "BAD_REQUEST" | "NOT_FOUND_OR_FORBIDDEN" | "RECOVERY_REQUIRED";
+export type RoomPreviewErrorCode = "BAD_REQUEST" | "INVITE_INVALID" | "RATE_LIMITED" | "INTERNAL_ERROR";
+export type SyncRejectedErrorCode = "BAD_REQUEST" | "NOT_FOUND_OR_FORBIDDEN" | "RECOVERY_REQUIRED" | "INTERNAL_ERROR";
 
 /** A preview response intentionally contains neither the raw invite code nor a session credential. */
 export interface RoomPreviewSuccess {
@@ -141,7 +141,7 @@ export interface RoomPreviewRejected {
   requestId: string;
   status: "rejected";
   error:
-    | { code: "BAD_REQUEST" | "INVITE_INVALID" }
+    | { code: "BAD_REQUEST" | "INVITE_INVALID" | "INTERNAL_ERROR" }
     | { code: "RATE_LIMITED"; retryAfterMs: number };
 }
 export type RoomPreviewResponse = RoomPreviewSuccess | RoomPreviewRejected;

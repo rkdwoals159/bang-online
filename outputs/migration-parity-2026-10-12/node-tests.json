@@ -1,0 +1,27 @@
+{
+  "group": "node",
+  "startedAt": "2026-10-11T15:08:19.891Z",
+  "completedAt": "2026-10-11T15:12:03.779Z",
+  "exitCode": 0,
+  "counts": {
+    "tests": 106,
+    "pass": 106,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "files": [
+    "apps/server/test/commands/command-relay.test.ts",
+    "apps/server/test/projections/outbox.test.ts",
+    "apps/server/test/projections/public-movements.test.ts",
+    "apps/server/test/projections/sync.test.ts",
+    "apps/server/test/recovery/recovery.test.ts",
+    "apps/server/test/rooms/service.test.ts",
+    "apps/server/test/runtime/runtime.test.ts",
+    "apps/server/test/socket/gateway.test.ts",
+    "apps/server/test/socket/invite-rate-limiter.test.ts",
+    "apps/server/test/storage/repository.test.ts",
+    "apps/server/test/storage/room-lifecycle.test.ts"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "group": "site",
+  "startedAt": "2026-10-11T15:39:51.377Z",
+  "completedAt": "2026-10-11T15:43:32.447Z",
+  "exitCode": 0,
+  "counts": {
+    "tests": 67,
+    "pass": 67,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "files": [
+    "apps/site/test/server/audit-fixes-integration.test.mjs",
+    "apps/site/test/server/match-sync.test.ts",
+    "apps/site/test/server/session-room.test.ts",
+    "apps/site/test/storage/d1-storage.test.ts",
+    "apps/site/test/storage/migrations.test.ts",
+    "apps/site/test/storage/platform-upgrade.test.ts",
+    "apps/site/test/ui/game-app-mount.test.ts",
+    "apps/site/test/ui/persistent-shell.test.ts"
+  ]
+}

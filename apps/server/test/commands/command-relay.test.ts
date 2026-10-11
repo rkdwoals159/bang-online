@@ -25,14 +25,14 @@ function commandId(number: number): string {
 }
 
 function initialState(): GameState {
-  const cardsByInstanceId: GameState["zones"]["cardsByInstanceId"] = {};
+  const cardsByInstanceId: GameState["zones"]["cardsByInstanceId"] = Object.fromEntries(BASE_PHYSICAL_CARDS.slice(4).map(card => [card.definitionId, { cardInstanceId: card.definitionId, cardDefinitionId: card.definitionId, rank: card.rank, suit: card.suit }]));
   const seats: GameState["seats"] = PLAYER_IDS.map((playerId, seatIndex) => {
     const cardInstanceId = "card-" + playerId;
     cardsByInstanceId[cardInstanceId] = {
       cardInstanceId,
-      cardDefinitionId: "card-definition-test",
-      rank: 2,
-      suit: "SPADES",
+      cardDefinitionId: BASE_PHYSICAL_CARDS[seatIndex]!.definitionId,
+      rank: BASE_PHYSICAL_CARDS[seatIndex]!.rank,
+      suit: BASE_PHYSICAL_CARDS[seatIndex]!.suit,
     };
     return {
       public: {
@@ -63,7 +63,7 @@ function initialState(): GameState {
     seats,
     zones: {
       cardsByInstanceId,
-      drawPileCardInstanceIds: [],
+      drawPileCardInstanceIds: BASE_PHYSICAL_CARDS.slice(4).map(card => card.definitionId),
       discardPileCardInstanceIds: [],
       revealedPoolCardInstanceIds: [],
     },

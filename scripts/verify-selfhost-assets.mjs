@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
+const html = await readFile('dist/selfhost/web/index.html', 'utf8');
+const script = html.match(/src="([^"]+\.js)"/)[1];
+const source = await readFile('dist/selfhost/web' + script, 'utf8');
+assert.ok(source.includes('?v='), 'card URLs must change when asset content changes');
+const config = await readFile('deploy/selfhost/configure-macos.py', 'utf8');
+assert.ok(config.includes('not path /assets/cards/*'));
+assert.ok(config.includes('public, max-age=3600, must-revalidate'));
+const result = { checkedAt: new Date().toISOString(), finding: 'F09', contentRevisionInBuild: true, cardCacheSeparatedFromHashedBundles: true };
+await writeFile('outputs/migration-fixes-2026-10-12/asset-check.json', JSON.stringify(result, null, 2) + '\n');
+console.log(JSON.stringify(result));

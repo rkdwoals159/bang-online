@@ -1,0 +1,259 @@
+{
+  "count": 42,
+  "siteCount": 42,
+  "allEqual": true,
+  "assets": [
+    {
+      "path": "assets/cards/characters/01_bartcassidy.png",
+      "bytes": 124520,
+      "sha256": "042cd8d8bf1b02ac8688ed508a2f887a1574d3f413e9b9903579bda2e5280a3f",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_blackjack.png",
+      "bytes": 118683,
+      "sha256": "9309aecdad5145a5712a3ba6ea50fc26d954c5815dda3f7e07a397ecd18f975a",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_calamityjanet.png",
+      "bytes": 122673,
+      "sha256": "e4a1ecf667463efb6457c25d98a7cd05843ec6e7c7e7169520f8af5dae1f7846",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_elgringo.png",
+      "bytes": 121088,
+      "sha256": "5368b69731d0acdd52ed9832b61258d81e0da7e7b464654cfe8a36e7af142193",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_jessejones.png",
+      "bytes": 122034,
+      "sha256": "76260a4d49b20bf8cc6e9b51c36a4fc1e1b861c879d8996a31df97c76b4c6818",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_jourdonnais.png",
+      "bytes": 124426,
+      "sha256": "981cf0c3e2f9b3232fccbf040386ca6ddfc9550f6119810cf006d4be15e67fcd",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_kitcarlson.png",
+      "bytes": 125160,
+      "sha256": "9eab50d6278381009b2cdbbbc7e7ff2641a96a697398301d5149fad2e12de4e0",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_luckyduke.png",
+      "bytes": 122246,
+      "sha256": "05b421387dc6575079bed1eeb078cf5b34ef1cdc515f499d59677b2eb0cfe11e",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_paulregret.png",
+      "bytes": 114778,
+      "sha256": "dbd179c036e30666e60ef3ba7c4acefca57a6704525b68dfe20b66b30cea14c2",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_pedroramirez.png",
+      "bytes": 121533,
+      "sha256": "5cb6b6978f1e40961a9414d23a4ead8e23f29bbd0585773933de14ae2efc7785",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_rosedoolan.png",
+      "bytes": 118172,
+      "sha256": "312a004388f45dd36bb581ae5317d087be5e61a4f966e0f8fb077323a901f3fc",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_sidketchum.png",
+      "bytes": 120801,
+      "sha256": "728a46a6a73cbb5479e6da0d59e3decc6b0a0f6382b35cd45e43b8a759f063ea",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_slab.png",
+      "bytes": 118904,
+      "sha256": "ca5e29a82f86998c8bd4a8b5609dc994cdfefe39fca583769c8df5bd295649c3",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_suzylafayette.png",
+      "bytes": 122421,
+      "sha256": "bed1203648ccf40dc28116c07e799a148c213f8f448cd2194f04a2c193a6d5aa",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_vulturesam.png",
+      "bytes": 111003,
+      "sha256": "be8ad98e9af27784565c7cc4c616ebbe8701a64aa33ec5caf7d6d86a06a0878e",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/characters/01_willythekid.png",
+      "bytes": 116614,
+      "sha256": "c9b9bbb272f458efbd0d77ced8ef604b7b6bfc700305912ffccbde9833103231",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_bang.png",
+      "bytes": 116634,
+      "sha256": "e128d0ab400c075a7b30a9bdd807d185f324733e09608872af2da64d43ba538a",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_barile.png",
+      "bytes": 105795,
+      "sha256": "0698f3c2bcc87e91270de9fc860487fa3a47d798359c9a48bc0173515566e885",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_birra.png",
+      "bytes": 113559,
+      "sha256": "2d9998f56821b01c631e9bdfd8fc5cc3001a489b8aab2b65b82dde4bcbf28ded",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_carabine.png",
+      "bytes": 40901,
+      "sha256": "e219412ced8edd2cff06c5c42b3b429c5c5cc631bb2bf75990577b9e9da7bc0f",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_catbalou.png",
+      "bytes": 110807,
+      "sha256": "47799175dc5c4c6740875dcadce1090af51c0b17a3bae713c80ec7baec55a028",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_diligenza.png",
+      "bytes": 113972,
+      "sha256": "ace247f46671a2b6b3732995853c945ff117962c72b0ad1e9cd54cac8d5abc8c",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_dinamite.png",
+      "bytes": 121176,
+      "sha256": "37eb4893c37a087adb23d02ea3b8bc1a1283cf305a370575ab3fae7e962a3e76",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_duello.png",
+      "bytes": 118005,
+      "sha256": "5d1b41564abc4788686b9439838724d3c5b5eaa35e87b7edca6b9bea674a2ead",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_emporio.png",
+      "bytes": 129589,
+      "sha256": "77a589847ff4e538b7d366399a1dcb6813ae4570661d05ca8db45f766a4a5c9d",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_gatling.png",
+      "bytes": 119290,
+      "sha256": "62663044a783e7779a36c096c7e19ec21e768e328bee7c21b789a69bb489c6ba",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_indiani.png",
+      "bytes": 119310,
+      "sha256": "a894f4122d9197647ab74047b16da00a79f9d879699f3a39776f14a3d3317fbe",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_mancato.png",
+      "bytes": 109920,
+      "sha256": "c6d028ddb4d0560434e741b0ef1e1e0ee8be6f136b085d61de7aa7a1f2bc7ad9",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_mirino.png",
+      "bytes": 106894,
+      "sha256": "d44a3ad600d73f809200ba86a46c1756b68452e35fe5c90743268573cfac86c8",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_mustang.png",
+      "bytes": 111490,
+      "sha256": "b854c19143070e88ab0799978a37f2ccce6bdd3a652e72491df0d83daf817373",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_panico.png",
+      "bytes": 109130,
+      "sha256": "b4b94d1f8a07e17eb687ca1563ff6d88929f3c75929fd8efa18369bddd5ace9c",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_prigione.png",
+      "bytes": 126328,
+      "sha256": "6e7ef8b917e0e3793d39976b0c4c255a3bffb763c9a8896e032d2c06ffeb66a7",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_remington.png",
+      "bytes": 45435,
+      "sha256": "e0e6d13d1c176656ce016ce5a393e3220f06fd92cf84dc73969edc124beaa091",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_saloon.png",
+      "bytes": 111306,
+      "sha256": "aba83f6f8d0b494983b942f6cd18ea3d0462d42ef24537e271ef3e244c8e3e06",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_schofield.png",
+      "bytes": 43781,
+      "sha256": "487c868c21c6b0dd970fcd72bbbe83e53e06bb83c2e22f8ee1a49c73fc111210",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_volcanic.png",
+      "bytes": 43504,
+      "sha256": "f7a729201c651d3a1563f51c86255cea3c2aaf6dc304f4a59ff1b0f02fedcbc0",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_wellsfargo.png",
+      "bytes": 112814,
+      "sha256": "1c0b233859c24d2cece61e899c52d4a53dacae7d2f6893b9e54aa23c4942911d",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/playing/01_winchester.png",
+      "bytes": 38684,
+      "sha256": "ee39f0259ca3d64be92de4305baae9181cbd9204a75e1637505926ee73143249",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/roles/01_fuorilegge.png",
+      "bytes": 94082,
+      "sha256": "c4d5912c75b3f420ae0031b54a04940559d45db329b47db78010b14dd91575a2",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/roles/01_rinnegato.png",
+      "bytes": 102124,
+      "sha256": "ec405a6c54c786df19ab73ac60a88d9445206647ef204cac8c3e083e2eb07a32",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/roles/01_sceriffo.png",
+      "bytes": 102352,
+      "sha256": "641999333ac6a05fdd803e34393b1a2499b483e72e012b17235e900c277d1abd",
+      "equal": true
+    },
+    {
+      "path": "assets/cards/roles/01_vice.png",
+      "bytes": 98213,
+      "sha256": "65126385e0fff2e1053696f7b14951aa023111e314815e7265d73907da65d453",
+      "equal": true
+    }
+  ]
+}

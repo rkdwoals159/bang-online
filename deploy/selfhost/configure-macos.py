@@ -60,8 +60,13 @@ http://:8088 {
   }
   handle {
     root * /Users/rkdwoals159/.bang-online/current/web
-    @hashed path /assets/*
+    @hashed {
+      path /assets/*
+      not path /assets/cards/*
+    }
     header @hashed Cache-Control "public, max-age=31536000, immutable"
+    @cards path /assets/cards/*
+    header @cards Cache-Control "public, max-age=3600, must-revalidate"
     @html path / /index.html /rooms/*
     header @html Cache-Control "no-cache"
     try_files {path} /index.html

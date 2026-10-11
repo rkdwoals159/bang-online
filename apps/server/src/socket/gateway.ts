@@ -18,6 +18,7 @@ import {
 } from "../../../../packages/contracts/src/validation.js";
 import type { RoomService } from "../rooms/service.js";
 import { InviteRateLimiter, type InviteLookupOutcome } from "./invite-rate-limiter.js";
+import { StoredDataInvariantError } from "../../../../packages/engine/src/state/schema.js";
 
 export interface SocketHeaderHandshake {
   readonly headers: Readonly<Record<string, string | readonly string[] | undefined>>;
@@ -33,6 +34,7 @@ export interface GatewaySocket {
   onAny(listener: (eventName: string, ...args: unknown[]) => void): unknown;
   join(channel: string): void | Promise<void>;
   disconnect(close?: boolean): void;
+  emit?(event: string, payload: unknown): unknown;
 }
 
 /** The subset of a Socket.IO server used by the gateway. */
@@ -76,6 +78,8 @@ export interface GatewayHandlers {
 }
 
 export interface SocketGatewayOptions {
+  onError?: () => void;
+  sessionCheckIntervalMs?: number;
   roomService: RoomServiceForGateway;
   authorizeMatchMember: MatchMembershipAuthorizer;
   handlers: GatewayHandlers;
@@ -321,12 +325,44 @@ function invoke(socket: GatewaySocket, operation: () => void | Promise<void>): v
   }
 }
 
+async function sessionIsCurrent(socket: GatewaySocket, options: SocketGatewayOptions): Promise<boolean> {
+  const credential = cookieCredential(cookieHeader(socket.handshake.headers), options.sessionCookieName);
+  const guest = credential ? await options.roomService.authenticateGuestCredential(credential) : null;
+  if (guest && guest.playerId === playerIdFor(socket)) return true;
+  socket.emit?.("session:expired", { protocolVersion: 1 });
+  socket.disconnect(true);
+  return false;
+}
+
+function invokeAuthenticated(socket: GatewaySocket, options: SocketGatewayOptions, args: unknown[], operation: () => void | Promise<void>): void {
+  void (async () => {
+    if (await sessionIsCurrent(socket, options)) await operation();
+  })().catch(error => {
+    options.onError?.();
+    const ack = ackFrom(args), payload = payloadFrom(args);
+    if (!ack || !isRecord(payload)) { socket.disconnect(true); return; }
+    const code = error instanceof StoredDataInvariantError ? "RECOVERY_REQUIRED" : "INTERNAL_ERROR";
+    if (typeof payload.commandId === "string") commandAck(ack, payload.commandId, code, `server.${code.toLowerCase()}`, code === "INTERNAL_ERROR");
+    else if (typeof payload.requestId === "string") ack({ protocolVersion: 1, requestId: payload.requestId,
+      status: "rejected", error: { code } });
+  });
+}
+
 function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, inviteRateLimiter: InviteRateLimiter): void {
   const context = contextFor(socket, options);
   if (!context) {
     socket.disconnect(true);
     return;
   }
+
+  let checkingSession = false;
+  const sessionTimer = setInterval(() => {
+    if (checkingSession) return;
+    checkingSession = true;
+    void sessionIsCurrent(socket, options).catch(() => options.onError?.()).finally(() => { checkingSession = false; });
+  }, options.sessionCheckIntervalMs ?? 30_000);
+  sessionTimer.unref?.();
+  socket.on("disconnect", () => clearInterval(sessionTimer));
 
   try {
     void Promise.resolve(socket.join(`${PLAYER_CHANNEL_PREFIX}${context.playerId}`)).catch(() => socket.disconnect(true));
@@ -348,7 +384,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       return;
     }
     const command = parsed.value as Extract<RoomCommand, { type: "CREATE_ROOM" }>;
-    invoke(socket, () => options.handlers.roomCreate(context, command, ack));
+    invokeAuthenticated(socket, options, args, () => options.handlers.roomCreate(context, command, ack));
   });
 
   socket.on("room:command", (...args) => {
@@ -360,7 +396,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       return;
     }
     const command = parsed.value as Exclude<RoomCommand, { type: "CREATE_ROOM" }>;
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       // A JOIN is the one room command that must start without membership; T44 verifies invite and version.
       if (command.type !== "JOIN" && !(await context.roomMembership(command.roomId))) {
         commandAck(ack, command.commandId, "NOT_FOUND_OR_FORBIDDEN", "room.notFoundOrForbidden");
@@ -400,7 +436,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       rejectedMalformedCommand(socket, args);
       return;
     }
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       if (!(await context.matchMembership(parsed.value.matchId))) {
         commandAck(ack, parsed.value.commandId, "NOT_A_PLAYER", "match.notAPlayer");
         return;
@@ -422,7 +458,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       syncRejectedAck(ack, requestId, "BAD_REQUEST");
       return;
     }
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       const room = await context.roomMembership(parsed.value.roomId);
       if (!room) {
         syncRejectedAck(ack, parsed.value.requestId, "NOT_FOUND_OR_FORBIDDEN");
@@ -449,7 +485,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       syncRejectedAck(ack, requestId, "BAD_REQUEST");
       return;
     }
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       if (!(await context.joinMatchChannel(parsed.value.matchId))) {
         syncRejectedAck(ack, parsed.value.requestId, "NOT_FOUND_OR_FORBIDDEN");
         return;
@@ -463,7 +499,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
     const parsed = parseMatchHistoryRequest(args[0]);
     if (!ack || requestId === null) { socket.disconnect(true); return; }
     if (args.length !== 2 || !parsed.ok) { syncRejectedAck(ack, requestId, "BAD_REQUEST"); return; }
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       if (!await context.matchMembership(parsed.value.matchId)) { syncRejectedAck(ack, requestId, "NOT_FOUND_OR_FORBIDDEN"); return; }
       if (!options.handlers.matchHistory) { syncRejectedAck(ack, requestId, "RECOVERY_REQUIRED"); return; }
       await options.handlers.matchHistory(context, parsed.value, ack);
@@ -483,7 +519,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
       roomPreviewRejectedAck(ack, requestId, "BAD_REQUEST");
       return;
     }
-    invoke(socket, async () => {
+    invokeAuthenticated(socket, options, args, async () => {
       const reservation = inviteRateLimiter.reserve(inviteRateLimitKey(socket, context.playerId));
       if (!reservation.allowed) {
         roomPreviewRejectedAck(ack, parsed.value.requestId, "RATE_LIMITED", reservation.retryAfterMs);

@@ -742,6 +742,13 @@ export class RoomLifecycleRepository {
   }
 
   /** Atomically starts a match from the locked room roster. */
+  async findStartReceipt(input: Pick<StartRoomWithMatchInput, "actorPlayerId" | "commandId" | "roomId" | "requestHash">): Promise<StartRoomWithMatchResult | null> {
+    return withClient(this.pool, async client => {
+      const receipt = await findReceipt(client, input.actorPlayerId, input.commandId);
+      return receipt ? checkStartReceipt(receipt, input) : null;
+    });
+  }
+
   async startRoomWithMatch(input: StartRoomWithMatchInput): Promise<StartRoomWithMatchResult> {
     validateCommand(input);
     if (!input.matchId.trim() || !input.matchOutboxEventId.trim()) {

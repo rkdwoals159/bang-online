@@ -124,6 +124,17 @@ function acceptedAck(commandId = "00000000-0000-4000-8000-000000000001"): Record
   };
 }
 
+test("handler exceptions return correlated errors without disconnecting authenticated players", async () => {
+  const harness = createHarness({ handlers: { matchSync() { throw new Error("private database failure"); } } });
+  const { socket } = await harness.io.connect({ cookie: "guest_session=secret-token" });
+  const reply = await new Promise<unknown>(resolve => socket.receive("match:sync", {
+    protocolVersion: 1, requestId: "temporary-failure", matchId: "match-1", knownVersion: 0, afterEventSeq: 0,
+  }, resolve));
+  assert.deepEqual(reply, { protocolVersion: 1, requestId: "temporary-failure", status: "rejected", error: { code: "INTERNAL_ERROR" } });
+  assert.equal(socket.disconnected, false);
+  socket.disconnect();
+});
+
 function createHarness(overrides: {
   credential?: string | null;
   playerIdsByCredential?: Readonly<Record<string, string>>;
@@ -482,6 +493,7 @@ test("preview failures and invalid JOIN failures share one bucket; the sixth loo
     roomId: "room-1",
     payload: { inviteCode: "also-not-looked-up" },
   }, limitedJoin.ack);
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(limitedJoin.values[0], {
     protocolVersion: 1,
     commandId: "00000000-0000-4000-8000-000000000002",

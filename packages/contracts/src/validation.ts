@@ -48,9 +48,9 @@ const MATCH_STATUSES: readonly MatchStatus[] = ["playing", "paused", "completed"
 const ROLE_IDS = new Set(["sheriff", "deputy", "outlaw", "renegade"]);
 const isRoomStatus = (value: unknown): value is RoomStatus => ROOM_STATUSES.includes(value as RoomStatus);
 const isMatchStatus = (value: unknown): value is MatchStatus => MATCH_STATUSES.includes(value as MatchStatus);
-const isRoomPreviewErrorCode = (value: unknown): value is RoomPreviewErrorCode => value === "BAD_REQUEST" || value === "INVITE_INVALID" || value === "RATE_LIMITED";
+const isRoomPreviewErrorCode = (value: unknown): value is RoomPreviewErrorCode => value === "BAD_REQUEST" || value === "INVITE_INVALID" || value === "RATE_LIMITED" || value === "INTERNAL_ERROR";
 const isSyncRejectedErrorCode = (value: unknown): value is SyncRejectedErrorCode =>
-  value === "BAD_REQUEST" || value === "NOT_FOUND_OR_FORBIDDEN" || value === "RECOVERY_REQUIRED";
+  value === "BAD_REQUEST" || value === "NOT_FOUND_OR_FORBIDDEN" || value === "RECOVERY_REQUIRED" || value === "INTERNAL_ERROR";
 const isCommandBase = (value: Record<string, unknown>): boolean => value.protocolVersion === 1 && typeof value.commandId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.commandId) && isVersion(value.expectedVersion);
 const bad = <T>(path = "$"): ParseResult<T> => ({ ok: false, code: "BAD_REQUEST", path });
 const good = <T>(value: unknown): ParseResult<T> => ({ ok: true, value: value as T });

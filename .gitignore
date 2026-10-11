@@ -17,3 +17,6 @@ outputs/logic-audit-2026-10-06/delay-deployment-result.json
 outputs/logic-audit-2026-10-06/history-deployment-result.json
 outputs/nickname-effects-2026-10-07/logs/
 outputs/nickname-effects-2026-10-07/deployment-result.json
+outputs/migration-parity-2026-10-12/logs/
+outputs/migration-fixes-2026-10-12/logs/
+**/__pycache__/

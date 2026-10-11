@@ -55,6 +55,31 @@ function hash(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
+test("START_MATCH receipt survives return to lobby and a roster shrinking below four", async () => {
+  const { database, service, storage } = await createFixture();
+  try {
+    const players = await Promise.all(["a", "b", "c", "d"].map(name => guest(service, name)));
+    const owner = players[0]!.authenticated.playerId;
+    const created = await service.createPrivateRoom(owner, { commandId: "receipt-create", capacity: 4, rulesetVersion: BASE_DECK_RULESET_VERSION });
+    assert.ok(created.room);
+    let version = created.version;
+    for (const player of players.slice(1)) {
+      const joined = await service.joinPrivateRoom(player.authenticated.playerId, { commandId: `join-${player.authenticated.playerId}`, roomId: created.room.roomId, inviteCode: created.inviteCode!, expectedVersion: version });
+      version = joined.mutation.outcome.version;
+    }
+    const input = { commandId: "original-start", roomId: created.room.roomId, expectedVersion: version };
+    const started = await service.startMatch(owner, input);
+    await database.query(`UPDATE matches SET status='completed', state_json=jsonb_set(state_json,'{status}','"completed"'::jsonb), ended_at=now() WHERE id=$1`, [started.matchId]);
+    const returned = await service.returnToLobby(owner, { roomId: input.roomId, expectedVersion: started.mutation.outcome.version, commandId: "receipt-return" });
+    await service.kickMember(owner, { roomId: input.roomId, expectedVersion: returned.mutation.outcome.version, commandId: "receipt-kick", targetPlayerId: players[3]!.authenticated.playerId });
+    const duplicate = await service.startMatch(owner, input);
+    assert.equal(duplicate.mutation.status, "duplicate");
+    assert.equal(duplicate.matchId, started.matchId);
+    assert.equal((await storage.getRoom(input.roomId))?.players.length, 3);
+    assert.equal((await database.query("SELECT count(*)::int AS count FROM matches WHERE room_id=$1", [input.roomId])).rows[0]!.count, 1);
+  } finally { await database.close(); }
+});
+
 test("renaming a guest updates the current room and match atomically without changing their seat or cards", async () => {
   const { database, service, storage } = await createFixture();
   try {

@@ -14,6 +14,10 @@
 
 워크스페이스 의존성을 설치한 상태에서 `node scripts/build-selfhost.mjs`로 `dist/selfhost`를 생성한다. 프런트엔드는 Socket.IO를 명시적으로 사용한다. Sites 진입점은 기존 HTTP/SSE 어댑터를 계속 사용한다.
 
+카드 이미지의 내용 해시를 빌드 시 URL 쿼리에 넣는다. 해시 번들만 1년 immutable이며 `/assets/cards/*`는 1시간 뒤 재검증한다.
+
+후속 배포는 `deploy-release.py RELEASE SOURCE_COMMIT ARCHIVE`를 사용한다. 서버의 `preflight-state.mjs`와 동일 소스에서 번들한 `state-validator.mjs`를 먼저 준비한다. 이 스크립트는 전체 설치 스크립트를 다시 실행하지 않고 DB 백업 후 Node/Caddy만 한 번 전환하며, 상태 확인 실패 시 이전 릴리스로 되돌린다.
+
 `dist/selfhost`를 `bang-selfhost-release.tar.gz`로 묶어 서버 홈에 전송한다. 최초 설치는 `install-runtime-macos.sh`, `configure-macos.py` 순서로 실행한다. 후자는 이 이전의 릴리스 디렉터리 `2026-10-08`을 사용한다. 향후 릴리스는 새 디렉터리를 사용하고, 백업 후 서비스의 실행 경로와 `current` 링크를 전환한다. 실행 중인 릴리스 디렉터리를 덮어쓰지 않는다.
 
 Node 22.23.3, Caddy 2.11.7, cloudflared 2026.10.0, Postgres.app 2.9.6 / PostgreSQL 18.6을 사용한다. Node/Caddy는 공식 배포 체크섬을 확인한다. Postgres.app은 공식 GitHub 릴리스에서 받아 macOS 코드 서명을 검증한다. 런타임 npm 의존성은 `package-lock.json`과 `npm ci`로 고정한다.

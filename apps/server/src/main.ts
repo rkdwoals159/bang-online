@@ -173,6 +173,10 @@ async function handleHttpRequest(
   }
 
   const path = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`).pathname;
+  if (request.method === "POST" && path.startsWith("/api/") && request.headers.origin !== config.webOrigin) {
+    writeJson(response, 403, { error: { code: "BAD_ORIGIN" } });
+    return;
+  }
   if (request.method === "GET" && path === "/healthz") {
     writeJson(response, 200, { status: "ok" });
     return;
@@ -406,6 +410,7 @@ function gatewayHandlers(
 ): GatewayHandlers {
   const syncHandlers = createSyncProjectionHandlers({ storage });
   const matchCommand = createMatchCommandHandler({
+    includeMatchProjection: true,
     storage,
     prepareEngineContext: ({ matchId }) => {
       const random = {
@@ -603,6 +608,7 @@ export async function createRuntimeServer(
     });
   });
   const io = new SocketIoServer(httpServer, {
+    allowRequest: (request, done) => done(null, request.headers.origin === config.webOrigin),
     serveClient: false,
     maxHttpBufferSize: MAX_HTTP_BODY_BYTES,
     cors: {
@@ -614,9 +620,11 @@ export async function createRuntimeServer(
   installSocketGateway(io as unknown as GatewayIo, {
     roomService: rooms,
     authorizeMatchMember: async (playerId, matchId) => {
-      const match = await storage.getMatch(matchId);
-      return match?.players.some((player) => player.playerId === playerId) ?? false;
+      return withClient(pool, async client => (await client.query(
+        "SELECT 1 FROM match_players WHERE match_id=$1 AND player_id=$2", [matchId, playerId],
+      )).rows.length === 1);
     },
+    onError: () => logger.error("socket_request_failed"),
     handlers: gatewayHandlers(storage, rooms, logger),
     sessionCookieName: config.sessionCookieName,
   });

@@ -1,4 +1,5 @@
-import { BASE_PHYSICAL_CARDS } from "../../../../packages/catalog/src/cards/index.js";
+import { BASE_PHYSICAL_CARDS, BASE_DECK_RULESET_VERSION } from "../../../../packages/catalog/src/cards/index.js";
+import { parseMatchState, StoredDataInvariantError, UnsupportedMatchStateError } from "../../../../packages/engine/src/state/schema.js";
 import type {
   MatchSyncRequest,
   MatchSyncResponse,
@@ -189,10 +190,27 @@ function roomRecordMatchesView(
 
 /** Build server sync callbacks for T45's authenticated gateway context. */
 export function createSyncProjectionHandlers(dependencies: SyncProjectionDependencies): SyncHandlers {
+  const loadMatch = async (matchId: string, requestId: string, ack: GatewayAck) => {
+    try {
+      const match = await dependencies.storage.getMatch(matchId);
+      if (match) {
+        parseMatchState(match.state, 1);
+        if (match.rulesetVersion !== BASE_DECK_RULESET_VERSION || match.status === "recovery_required") {
+          throw new UnsupportedMatchStateError(match.stateSchemaVersion, match.rulesetVersion);
+        }
+      }
+      return match;
+    } catch (error) {
+      if (!(error instanceof StoredDataInvariantError)) throw error;
+      ack({ protocolVersion: 1, requestId, status: "rejected", error: { code: "RECOVERY_REQUIRED" } });
+      return undefined;
+    }
+  };
   return {
     matchHistory: async (context: SyncContext, request: MatchHistoryRequest, ack: GatewayAck) => {
       if (!await context.matchMembership(request.matchId)) { reject(request.requestId, ack); return; }
-      const match = await dependencies.storage.getMatch(request.matchId);
+      const match = await loadMatch(request.matchId, request.requestId, ack);
+      if (match === undefined) return;
       if (!match || !match.players.some(player => player.playerId === context.playerId)) { reject(request.requestId, ack); return; }
       const before = Math.min(request.beforeEventSeq, match.eventSeq + 1);
       const events = dependencies.storage.listMatchEventsBefore
@@ -214,6 +232,11 @@ export function createSyncProjectionHandlers(dependencies: SyncProjectionDepende
         return;
       }
 
+      if (request.acceptUnchanged && request.knownVersion === roomRecord.version) {
+        ack({ protocolVersion: 1, requestId: request.requestId, status: "unchanged",
+          roomId: request.roomId, version: roomRecord.version });
+        return;
+      }
       const response: RoomSyncResponse = {
         protocolVersion: 1,
         requestId: request.requestId,
@@ -232,14 +255,20 @@ export function createSyncProjectionHandlers(dependencies: SyncProjectionDepende
         return;
       }
 
-      const match = await dependencies.storage.getMatch(request.matchId);
+      const match = await loadMatch(request.matchId, request.requestId, ack);
+      if (match === undefined) return;
       if (!match || !match.players.some(({ playerId }) => playerId === context.playerId)) {
         reject(request.requestId, ack);
         return;
       }
 
+      if (request.acceptUnchanged && request.knownVersion === match.version && request.afterEventSeq === match.eventSeq) {
+        ack({ protocolVersion: 1, requestId: request.requestId, status: "unchanged", matchId: request.matchId,
+          version: match.version, eventSeq: match.eventSeq });
+        return;
+      }
       const matchEvents = request.afterEventSeq <= match.eventSeq
-        ? (await dependencies.storage.listMatchEvents(request.matchId, request.afterEventSeq))
+        ? (await dependencies.storage.listMatchEvents(request.matchId, Math.max(request.afterEventSeq, match.eventSeq - 100)))
           .filter(event => event.eventSeq <= match.eventSeq)
         : [];
       const replayable = cursorIsReplayable(request.afterEventSeq, match.eventSeq, matchEvents);

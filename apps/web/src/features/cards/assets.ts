@@ -85,7 +85,8 @@ export function publicAssetPathFromCatalog(assetPath: string): string | undefine
   }
 
   if (publicPath.split("/").some((segment) => segment === ".." || segment === ".")) return undefined;
-  return `/${publicPath}`;
+  const revision = (import.meta.env as { readonly VITE_CARD_ASSET_VERSION?: string } | undefined)?.VITE_CARD_ASSET_VERSION;
+  return `/${publicPath}${revision ? `?v=${encodeURIComponent(revision)}` : ""}`;
 }
 
 export const CARD_ASSET_MANIFEST = {

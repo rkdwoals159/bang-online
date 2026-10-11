@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { BASE_DECK_RULESET_VERSION } from "../../../../packages/catalog/src/cards/index.js";
+import { decodeMatchState } from "../../../../packages/engine/src/state/schema.js";
 import { withClient, withTransaction } from "../storage/database-runtime.js";
 import type { PgPoolLike } from "../storage/database.js";
 import type { RoomService } from "../rooms/service.js";
@@ -12,7 +13,8 @@ type ActiveMatchStatus = "playing" | "paused";
 export type MatchRecoveryIssue =
   | "UNSUPPORTED_SCHEMA"
   | "UNSUPPORTED_RULESET"
-  | "SNAPSHOT_METADATA_MISMATCH";
+  | "SNAPSHOT_METADATA_MISMATCH"
+  | "SNAPSHOT_STRUCTURE_INVALID";
 
 export type MatchRecoveryResult =
   | { matchId: string; status: "resumable" }
@@ -104,6 +106,7 @@ function issueFor(row: ActiveMatchRow): MatchRecoveryIssue | undefined {
   ) {
     return "SNAPSHOT_METADATA_MISMATCH";
   }
+  try { decodeMatchState(row.state_json); } catch { return "SNAPSHOT_STRUCTURE_INVALID"; }
   return undefined;
 }
 

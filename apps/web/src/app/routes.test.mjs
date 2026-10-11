@@ -556,7 +556,7 @@ test("room operations can wait for the new cookie-authenticated socket connectio
   };
 
   try {
-    globalThis.window = { setTimeout, clearTimeout };
+    globalThis.window = { setTimeout, clearTimeout, addEventListener() {}, removeEventListener() {} };
     const transport = new BrowserGameTransport({ socketFactory: () => socket });
     await waitForTransportConnection(transport, 500);
     assert.equal(socket.connected, true);

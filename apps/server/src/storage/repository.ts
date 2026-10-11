@@ -1,4 +1,5 @@
 import type { GameState, JsonValue } from "../../../../packages/engine/src/state/types.js";
+import { decodeMatchState, parseMatchState, StoredDataInvariantError } from "../../../../packages/engine/src/state/schema.js";
 import { withClient, withTransaction } from "./database-runtime.js";
 import type { PgClientLike, PgPoolLike } from "./database.js";
 
@@ -313,6 +314,7 @@ function encodeJson(value: JsonValue): string {
 }
 
 function assertStateMetadata(state: GameState): void {
+  parseMatchState(state);
   if (!Number.isSafeInteger(state.schemaVersion) || state.schemaVersion < 1) {
     throw new MatchStateInvariantError("Match state schemaVersion must be a positive safe integer.");
   }
@@ -416,6 +418,12 @@ function mapReceipt(row: ReceiptRow): CommandReceiptRecord {
 }
 
 function mapMatch(row: MatchRow, players: MatchPlayerRow[]): MatchRecord {
+  const state = decodeMatchState(row.state_json);
+  if (state.schemaVersion !== row.state_schema_version || state.rulesetVersion !== row.ruleset_version ||
+      state.version !== safeInteger(row.version, "match version") ||
+      state.eventSeq !== safeInteger(row.event_seq, "match event sequence") || state.status !== row.status) {
+    throw new StoredDataInvariantError("Stored match metadata does not match its snapshot.");
+  }
   return {
     id: row.id,
     roomId: row.room_id,
@@ -424,7 +432,7 @@ function mapMatch(row: MatchRow, players: MatchPlayerRow[]): MatchRecord {
     eventSeq: safeInteger(row.event_seq, "match event sequence"),
     rulesetVersion: row.ruleset_version,
     stateSchemaVersion: row.state_schema_version,
-    state: parseJson<GameState>(row.state_json),
+    state,
     createdAt: date(row.created_at),
     startedAt: date(row.started_at),
     updatedAt: date(row.updated_at),

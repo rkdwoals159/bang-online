@@ -4,7 +4,11 @@ import type {
   CommandRejected,
   MatchCommand,
 } from "../../../../packages/contracts/src/protocol.js";
-import { parseMatchCommand } from "../../../../packages/contracts/src/validation.js";
+import { parseCommandAck, parseMatchCommand } from "../../../../packages/contracts/src/validation.js";
+import { BASE_DECK_RULESET_VERSION, BASE_PHYSICAL_CARDS } from "../../../../packages/catalog/src/cards/index.js";
+import { projectMatchSnapshot } from "../../../../packages/engine/src/state/projection.js";
+import { parseMatchState, StoredDataInvariantError, UnsupportedMatchStateError } from "../../../../packages/engine/src/state/schema.js";
+import { syncProjectionInternals } from "../projections/sync.js";
 import {
   applyMatchCommand,
   type ApplyMatchCommandContext,
@@ -47,6 +51,7 @@ export interface PreparedMatchCommandContext extends ApplyMatchCommandContext {
 }
 
 export interface MatchCommandRelayDependencies {
+  readonly includeMatchProjection?: boolean;
   readonly storage: MatchCommandStorage;
   /** Supply replayable RNG and server-owned continuation metadata for this one evaluation. */
   readonly prepareEngineContext: (input: PreparedMatchCommand) => PreparedMatchCommandContext | Promise<PreparedMatchCommandContext>;
@@ -225,6 +230,10 @@ async function loadAuthorizedMatch(
   if (!text(context.playerId) || !(await context.matchMembership(matchId))) return null;
   const match = await storage.getMatch(matchId);
   if (!match || !actorHasSeat(match, context.playerId)) return null;
+  parseMatchState(match.state, 1);
+  if (match.rulesetVersion !== BASE_DECK_RULESET_VERSION || match.status === "recovery_required") {
+    throw new UnsupportedMatchStateError(match.stateSchemaVersion, match.rulesetVersion);
+  }
   if (match.state.version !== match.version || match.state.eventSeq !== match.eventSeq) {
     throw new Error("Stored match row metadata does not match its authoritative snapshot.");
   }
@@ -236,7 +245,7 @@ function eventWrites(
   version: number,
   firstEventSeq: number,
   idFactory: () => string,
-): { eventId: string; eventSeq: number; version: number; type: string; actorPlayerId: string | null; payload: JsonValue }[] {
+): { eventId: string; eventSeq: number; version: number; type: string; actorPlayerId: string | null; payload: JsonValue; createdAt: Date }[] {
   return drafts.map((draft, index) => ({
     eventId: idFactory(),
     eventSeq: firstEventSeq + index + 1,
@@ -244,6 +253,7 @@ function eventWrites(
     type: draft.type,
     actorPlayerId: draft.actorPlayerId,
     payload: draft.payload as JsonValue,
+    createdAt: new Date(),
   }));
 }
 
@@ -350,7 +360,7 @@ async function serializeMatchCommand<T>(
 
 /**
  * Validates, authorizes, evaluates once, and atomically persists a match command.
- * It does not send projections or broadcasts; callers ACK only after this resolves.
+ * Optional viewer projections are returned only after persistence; broadcasts use the outbox.
  */
 export async function processMatchCommand(
   context: Pick<AuthenticatedSocketContext, "playerId" | "matchMembership">,
@@ -364,6 +374,9 @@ export async function processMatchCommand(
   const command = parsed.value;
   return serializeMatchCommand(dependencies, command.matchId, async () => {
     const requestHash = matchCommandRequestHash(command);
+    if (!await context.matchMembership(command.matchId)) return rejected(command.commandId, "NOT_A_PLAYER");
+    const initialReceipt = await findPriorOutcome(context, command, requestHash, dependencies.storage);
+    if (initialReceipt) return initialReceipt;
     let match = await loadAuthorizedMatch(context, command.matchId, dependencies.storage);
     if (!match) return rejected(command.commandId, "NOT_A_PLAYER");
 
@@ -428,6 +441,16 @@ export async function processMatchCommand(
         eventSeq: match.eventSeq + events.length,
       };
       const response = accepted(command.commandId, nextState);
+      const reply: CommandAck = dependencies.includeMatchProjection && response.status === "accepted"
+        ? { ...response, matchProjection: {
+          baseEventSeq: match.eventSeq,
+          snapshot: projectMatchSnapshot(nextState, context.playerId, BASE_PHYSICAL_CARDS),
+          visibleEvents: events.flatMap(event => {
+            const projected = syncProjectionInternals.projectEvent(event, nextState);
+            return projected ? [projected] : [];
+          }),
+        } } : response;
+      if (!parseCommandAck(reply).ok) throw new StoredDataInvariantError("Command projection failed its contract.");
       const receipt: MatchCommandReceiptInput = {
         actorPlayerId: context.playerId,
         commandId: command.commandId,
@@ -447,7 +470,7 @@ export async function processMatchCommand(
         if (commit.status === "duplicate") {
           return receiptOutcomeAsAck(commit.outcome, command.commandId) ?? rejected(command.commandId, "INTERNAL_ERROR");
         }
-        return response;
+        return reply;
       } catch (error) {
         if (error instanceof CommandIdReusedError) return rejected(command.commandId, "COMMAND_ID_REUSED");
         if (error instanceof MatchMembershipRequiredError || error instanceof MatchNotFoundError) {
@@ -476,6 +499,9 @@ export async function processMatchCommand(
     }
 
     return rejected(command.commandId, "SERVER_BUSY", { retryable: true });
+  }).catch(error => {
+    if (error instanceof StoredDataInvariantError) return rejected(command.commandId, "RECOVERY_REQUIRED");
+    throw error;
   });
 }
 

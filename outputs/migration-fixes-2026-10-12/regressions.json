@@ -1,0 +1,84 @@
+{
+  "checkedAt": "2026-10-11T15:45:44.832Z",
+  "purpose": "Assert corrected migration behavior in isolated runtimes",
+  "observations": [
+    {
+      "id": "F01-late",
+      "passed": true,
+      "uiRecoveries": 1
+    },
+    {
+      "id": "F01-retry",
+      "passed": true,
+      "uiRecoveries": 1
+    },
+    {
+      "id": "F02",
+      "nodeSyncAttempts": 3,
+      "nodeRecovered": true,
+      "siteSyncAttempts": 2,
+      "siteRecovered": true
+    },
+    {
+      "id": "F04",
+      "canonicalInlineProjectionApplied": true,
+      "extraReadAvoided": true
+    },
+    {
+      "id": "F10",
+      "nodeKeepsDeniedMatchSnapshot": false,
+      "nodeReadsAfterRejection": 2,
+      "siteKeepsDeniedMatchSnapshot": false
+    },
+    {
+      "id": "F06",
+      "foreignOriginGuestCreate": {
+        "node": 403,
+        "site": 403
+      },
+      "foreignOriginProfileUpdate": {
+        "node": 403,
+        "site": 403
+      },
+      "note": "Both authenticated entry points enforce the configured Origin"
+    },
+    {
+      "id": "F06-WebSocket",
+      "foreignOriginAuthenticatedWebSocketAccepted": false
+    },
+    {
+      "id": "F03",
+      "nodeRecoversClosedRoom": false,
+      "siteRecoversClosedRoom": false
+    },
+    {
+      "id": "F07",
+      "nodeExistingSocketStillReadsAfterSessionRevocation": false,
+      "siteNextRequestStatus": 401
+    },
+    {
+      "id": "F05",
+      "nodeSyncEvents": 100,
+      "siteSyncEvents": 100,
+      "nodeResponseBytes": 15292,
+      "siteResponseBytes": 15292
+    },
+    {
+      "id": "F11",
+      "nodeUnchangedResponseBytes": 114,
+      "siteUnchangedResponseBytes": 114,
+      "nodeReturnsFullSnapshot": false
+    },
+    {
+      "id": "D-HASH",
+      "sameEnvelopeDifferentRequestHash": true,
+      "currentDatabasesAreSeparate": true
+    },
+    {
+      "id": "F08",
+      "nodeProjectsUnsupportedSchemaAtReadBoundary": false,
+      "siteRejectsWith": "RECOVERY_REQUIRED",
+      "note": "Both startup and per-request snapshot boundaries are guarded"
+    }
+  ]
+}

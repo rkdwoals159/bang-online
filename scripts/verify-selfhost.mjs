@@ -37,6 +37,9 @@ try {
     assert.ok(joined.members, JSON.stringify(joined));
     version++;
   }
+  const lobby = await emit(owner.socket, 'room:sync', { protocolVersion: 1, requestId: randomUUID(), roomId: created.roomId, knownVersion: 0 });
+  assert.equal(lobby.room.members.length, 4);
+  assert.ok(lobby.room.members.every(member => member.connectionState === 'connected'), 'all lobby seats show connected');
   const started = await emit(owner.socket, 'room:command', command('START_MATCH', version, {}, { roomId: created.roomId }));
   assert.equal(started.status, 'in_game', JSON.stringify(started));
   assert.ok(started.activeMatchId);
@@ -49,6 +52,20 @@ try {
   const renamed = await fetch(origin + '/api/guest-sessions/profile', { method: 'POST', headers: { ...headers, Cookie: owner.cookie }, body: JSON.stringify({ protocolVersion: 1, displayName: '서버 이전 검증 완료' }) });
   assert.equal(renamed.status, 200);
   const checks = ['HTTP health response (TLS verified by fetch when HTTPS)', 'SPA deep link', 'secure session cookies', 'four authenticated WebSocket connections', 'room creation/join', 'match start', 'four private match projections', 'nickname change'];
+  checks.push('four lobby seats show connected');
+  for (const player of players) player.socket.disconnect();
+  for (const player of players) {
+    const restoredGuest = await fetch(origin + '/api/guest-sessions', { headers: { Cookie: player.cookie } });
+    assert.equal(restoredGuest.status, 200);
+    const reconnecting = new Promise((resolve, reject) => { player.socket.once('connect', resolve); player.socket.once('connect_error', reject); });
+    player.socket.connect();
+    await reconnecting;
+    const restored = await emit(player.socket, 'match:sync', { protocolVersion: 1, requestId: randomUUID(), matchId: started.activeMatchId, knownVersion: 0, afterEventSeq: 0 });
+    assert.ok(restored.snapshot, JSON.stringify(restored));
+    const unchanged = await emit(player.socket, 'match:sync', { protocolVersion: 1, requestId: randomUUID(), matchId: started.activeMatchId, knownVersion: restored.version, afterEventSeq: restored.eventSeq, acceptUnchanged: true });
+    assert.equal(unchanged.status, 'unchanged');
+  }
+  checks.push('all four clients disconnect/reconnect and recover', 'unchanged sync for all four viewers');
   if (process.env.BANG_VERIFY_RESTART === '1') {
     for (const socket of sockets) socket.disconnect();
     execFileSync('ssh', ['-o', 'BatchMode=yes', 'rkdwoals159@100.124.235.102', 'launchctl kickstart -k gui/502/site.bang-online.server'], { stdio: 'inherit' });

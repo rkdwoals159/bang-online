@@ -16,6 +16,8 @@ import type {
   RoomView,
 } from "../../../../packages/contracts/src/protocol.js";
 import {
+  parseCommandAck,
+  parseSyncUnchangedResponse,
   parseMatchCommand,
   parseMatchSyncRequest,
   parseMatchSyncResponse,
@@ -53,6 +55,10 @@ export interface BrowserTransportOptions {
   readonly fetcher?: typeof fetch;
   readonly createId?: () => string;
   readonly acknowledgementTimeoutMs?: number;
+  readonly syncRetryIntervalMs?: number;
+  readonly commandRetryIntervalMs?: number;
+  readonly visibilityTarget?: Pick<Document, "visibilityState" | "addEventListener" | "removeEventListener">;
+  readonly onlineTarget?: Pick<Window, "addEventListener" | "removeEventListener">;
 }
 
 interface PendingCommand {
@@ -152,6 +158,18 @@ export class BrowserGameTransport implements GameTransport {
   private readonly fetcher: typeof fetch;
   private readonly createId: () => string;
   private readonly acknowledgementTimeoutMs: number;
+  private readonly syncRetryIntervalMs: number;
+  private readonly commandRetryIntervalMs: number;
+  private readonly visibilityTarget?: BrowserTransportOptions["visibilityTarget"];
+  private readonly onlineTarget?: BrowserTransportOptions["onlineTarget"];
+  private readonly commandAcknowledgements = new Map<string, CommandAck>();
+  private readonly retries = new Map<string, ReturnType<typeof setTimeout>>();
+  private readonly retryDelays = new Map<string, number>();
+  private readonly unavailableRoomIds = new Set<string>();
+  private readonly unavailableMatchIds = new Set<string>();
+  private readonly closedRoomIds = new Set<string>();
+  private stopped = false;
+  private observingVisibility = false;
   private readonly roomIds = new Set<string>();
   private readonly matchIds = new Set<string>();
   private readonly roomWatchCounts = new Map<string, number>();
@@ -181,6 +199,10 @@ export class BrowserGameTransport implements GameTransport {
     this.fetcher = options.fetcher ?? ((input, init) => globalThis.fetch(input, init));
     this.createId = options.createId ?? defaultId;
     this.acknowledgementTimeoutMs = options.acknowledgementTimeoutMs ?? 5_000;
+    this.syncRetryIntervalMs = options.syncRetryIntervalMs ?? 750;
+    this.commandRetryIntervalMs = options.commandRetryIntervalMs ?? 750;
+    this.visibilityTarget = options.visibilityTarget ?? (typeof document === "undefined" ? undefined : document);
+    this.onlineTarget = options.onlineTarget ?? (typeof window === "undefined" ? undefined : window);
     this.bindSocketEvents();
   }
 
@@ -188,6 +210,12 @@ export class BrowserGameTransport implements GameTransport {
   readonly subscribe = (listener: () => void): (() => void) => this.store.subscribe(listener);
 
   connect(): void {
+    this.stopped = false;
+    if (!this.observingVisibility) {
+      this.visibilityTarget?.addEventListener("visibilitychange", this.resumeVisibleResources);
+      this.onlineTarget?.addEventListener("online", this.resumeVisibleResources);
+      this.observingVisibility = true;
+    }
     if (this.socket.connected) return;
     this.sessionExpired = false;
     this.store.setConnection("connecting", null);
@@ -195,7 +223,17 @@ export class BrowserGameTransport implements GameTransport {
   }
 
   disconnect(): void {
+    this.stopped = true;
+    this.clearRetries();
+    this.visibilityTarget?.removeEventListener("visibilitychange", this.resumeVisibleResources);
+    this.onlineTarget?.removeEventListener("online", this.resumeVisibleResources);
+    this.observingVisibility = false;
     this.socket.disconnect();
+  }
+
+  getCommandAcknowledgement(commandId: string): CommandAck | undefined {
+    const ack = this.commandAcknowledgements.get(commandId);
+    return ack ? cloneProtocolValue(ack) : undefined;
   }
 
   watchRoom(roomId: string): () => void {
@@ -234,6 +272,7 @@ export class BrowserGameTransport implements GameTransport {
 
   async syncRoom(roomId: string): Promise<RoomSyncResponse> {
     this.assertResourceId(roomId);
+    if (this.unavailableRoomIds.has(roomId)) throw new BrowserTransportError("REQUEST_REJECTED", "NOT_FOUND_OR_FORBIDDEN");
     this.retainRoomForSync(roomId);
     const existing = this.roomSyncs.get(roomId);
     if (existing) return existing;
@@ -243,6 +282,10 @@ export class BrowserGameTransport implements GameTransport {
     let response: RoomSyncResponse;
     try {
       response = await request;
+      this.clearRetry(`room:${roomId}`);
+    } catch (error) {
+      if (!(error instanceof BrowserTransportError) || error.code !== "REQUEST_REJECTED") this.scheduleSyncRetry("room", roomId);
+      throw error;
     } finally {
       this.roomSyncs.delete(roomId);
     }
@@ -260,6 +303,7 @@ export class BrowserGameTransport implements GameTransport {
 
   async syncMatch(matchId: string): Promise<MatchSyncResponse> {
     this.assertResourceId(matchId);
+    if (this.unavailableMatchIds.has(matchId)) throw new BrowserTransportError("REQUEST_REJECTED", "NOT_FOUND_OR_FORBIDDEN");
     this.retainMatchForSync(matchId);
     const existing = this.matchSyncs.get(matchId);
     if (existing) return existing;
@@ -268,6 +312,10 @@ export class BrowserGameTransport implements GameTransport {
     let response: MatchSyncResponse;
     try {
       response = await request;
+      this.clearRetry(`match:${matchId}`);
+    } catch (error) {
+      if (!(error instanceof BrowserTransportError) || error.code !== "REQUEST_REJECTED") this.scheduleSyncRetry("match", matchId);
+      throw error;
     } finally {
       this.matchSyncs.delete(matchId);
     }
@@ -291,7 +339,12 @@ export class BrowserGameTransport implements GameTransport {
     if (!parseMatchHistoryRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
     const playerId = this.restoredPlayerId;
     const raw = await this.emitAck("match:history", request);
-    if (parseSyncRejectedResponse(raw).ok) throw new BrowserTransportError("REQUEST_REJECTED");
+    const rejected = parseSyncRejectedResponse(raw);
+    if (rejected.ok) {
+      if (rejected.value.requestId !== request.requestId) throw new BrowserTransportError("INVALID_RESPONSE");
+      if (rejected.value.error.code === "NOT_FOUND_OR_FORBIDDEN") this.rejectResource("match", matchId);
+      throw requestError("REQUEST_REJECTED", rejected.value);
+    }
     const parsed = parseMatchHistoryResponse(raw);
     if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId ||
         parsed.value.beforeEventSeq !== beforeEventSeq || playerId !== this.restoredPlayerId) throw new BrowserTransportError("INVALID_RESPONSE");
@@ -324,8 +377,7 @@ export class BrowserGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     if (!isGuestSessionResponse(body)) throw new BrowserTransportError("INVALID_RESPONSE");
-    this.store.setViewerPlayerId(body.player.playerId);
-    this.restoredPlayerId = body.player.playerId;
+    this.adoptPlayer(body.player.playerId);
     return body;
   }
 
@@ -383,7 +435,7 @@ export class BrowserGameTransport implements GameTransport {
     }
 
     if (response.status === 204) {
-      this.restoredPlayerId = undefined;
+      this.adoptPlayer(undefined);
       this.store.setConnection(this.store.getSnapshot().connection, false);
       return null;
     }
@@ -396,16 +448,15 @@ export class BrowserGameTransport implements GameTransport {
       throw new BrowserTransportError("INVALID_RESPONSE");
     }
     if (!isGuestSessionResponse(body)) throw new BrowserTransportError("INVALID_RESPONSE");
-    this.store.setViewerPlayerId(body.player.playerId);
-    this.restoredPlayerId = body.player.playerId;
+    this.adoptPlayer(body.player.playerId);
     this.store.setConnection(this.store.getSnapshot().connection, true);
     return body;
   }
 
   /**
    * Discover this cookie's assigned rooms after refresh. The returned RoomViews
-   * are a navigation hint only; each room is registered for authoritative
-   * room:sync (and then match:sync) on the current or next socket connection.
+   * are navigation hints. Only the room currently opened by the player is
+   * registered for live room:sync and its active match:sync.
    */
   recoverAssignedSeats(): Promise<readonly RoomView[]> {
     if (this.assignedSeatsRequest) return this.assignedSeatsRequest;
@@ -469,9 +520,9 @@ export class BrowserGameTransport implements GameTransport {
     this.confirmedMatchIds.clear();
     this.roomMatchIds.clear();
     for (const room of rooms) {
-      this.recoveredRoomIds.add(room.roomId);
-      if (room.activeMatchId) {
-        this.recoveredMatchIds.add(room.activeMatchId);
+      if (room.status === "closed") continue;
+      this.store.applyRoomCommand(room);
+      if (room.activeMatchId && this.roomWatchCounts.has(room.roomId)) {
         this.roomMatchIds.set(room.roomId, room.activeMatchId);
       }
     }
@@ -482,15 +533,10 @@ export class BrowserGameTransport implements GameTransport {
       this.reconcileMatchResource(matchId);
     }
 
-    if (this.socket.connected && rooms.length > 0) {
-      await Promise.all(rooms.map((room) => this.syncRoom(room.roomId)));
-      const activeMatchIds = rooms
-        .map((room) => this.store.getSnapshot().rooms[room.roomId]?.room.activeMatchId ?? null)
-        .filter((matchId): matchId is string => matchId !== null);
-      await Promise.all([...new Set(activeMatchIds)].map((matchId) => this.syncMatch(matchId)));
-      return rooms.map((room) => this.store.getSnapshot().rooms[room.roomId]?.room ?? room);
-    }
-    return rooms;
+    const liveRooms = rooms.filter(room => room.status !== "closed");
+    if (this.socket.connected) await Promise.allSettled(liveRooms
+      .filter(room => this.roomWatchCounts.has(room.roomId)).map(room => this.syncRoom(room.roomId)));
+    return liveRooms.map(room => this.store.getSnapshot().rooms[room.roomId]?.room ?? room);
   }
 
   async createRoom(command: Extract<RoomCommand, { type: "CREATE_ROOM" }>): Promise<RoomEntryCreateResult> {
@@ -576,6 +622,7 @@ export class BrowserGameTransport implements GameTransport {
       this.abortActiveAttempts(new BrowserTransportError(unauthenticated ? "SESSION_EXPIRED" : "NOT_CONNECTED"));
     });
     this.socket.on("disconnect", () => {
+      this.clearRetries();
       this.connectionGeneration += 1;
       if (!this.sessionExpired) this.store.setConnection("disconnected", null);
       this.abortActiveAttempts(new BrowserTransportError("NOT_CONNECTED"));
@@ -608,11 +655,11 @@ export class BrowserGameTransport implements GameTransport {
     const activeMatchIds = new Set<string>();
     await Promise.all([...roomTargets].map(async (roomId) => {
       try {
-        const response = await this.performRoomSync(roomId, false);
+        const response = await this.performRoomSync(roomId, false, false);
         roomSyncSucceeded.add(roomId);
         if (response.room.activeMatchId) activeMatchIds.add(response.room.activeMatchId);
       } catch {
-        // Leave the resource unsynchronized so its pending commands stay queued.
+        this.scheduleSyncRetry("room", roomId);
       }
     }));
 
@@ -626,15 +673,15 @@ export class BrowserGameTransport implements GameTransport {
         await this.performMatchSync(matchId);
         matchSyncSucceeded.add(matchId);
       } catch {
-        // Leave the resource unsynchronized so its pending commands stay queued.
+        this.scheduleSyncRetry("match", matchId);
       }
     }));
 
     if (!this.socket.connected || generation !== this.connectionGeneration) return;
 
     for (const entry of pendingCommands) {
-      if (entry.roomId && !roomSyncSucceeded.has(entry.roomId)) continue;
-      if (entry.matchId && !matchSyncSucceeded.has(entry.matchId)) continue;
+      if ((entry.roomId && !roomSyncSucceeded.has(entry.roomId)) ||
+          (entry.matchId && !matchSyncSucceeded.has(entry.matchId))) { this.scheduleCommandRetry(entry); continue; }
       void this.attemptPending(entry).catch(() => undefined);
     }
   }
@@ -692,11 +739,12 @@ export class BrowserGameTransport implements GameTransport {
   }
 
   private reconcileRoomResource(roomId: string): void {
-    const retained = this.roomWatchCounts.has(roomId) || this.recoveredRoomIds.has(roomId) ||
-      this.confirmedRoomIds.has(roomId);
+    const retained = (this.roomWatchCounts.has(roomId) || this.confirmedRoomIds.has(roomId)) &&
+      !this.unavailableRoomIds.has(roomId) && !this.closedRoomIds.has(roomId);
     if (retained) this.roomIds.add(roomId);
     else {
       this.roomIds.delete(roomId);
+      this.clearRetry(`room:${roomId}`);
       this.roomHints.delete(roomId);
       this.roomFollowupHints.delete(roomId);
       this.roomMutationGenerations.delete(roomId);
@@ -709,11 +757,12 @@ export class BrowserGameTransport implements GameTransport {
   private reconcileMatchResource(matchId: string): void {
     const referencedByRoom = [...this.roomMatchIds].some(([roomId, roomMatchId]) =>
       roomMatchId === matchId && this.roomIds.has(roomId));
-    const retained = this.matchWatchCounts.has(matchId) || this.recoveredMatchIds.has(matchId) ||
-      this.confirmedMatchIds.has(matchId) || referencedByRoom;
+    const retained = (this.matchWatchCounts.has(matchId) || this.confirmedMatchIds.has(matchId) || referencedByRoom) &&
+      !this.unavailableMatchIds.has(matchId);
     if (retained) this.matchIds.add(matchId);
     else {
       this.matchIds.delete(matchId);
+      this.clearRetry(`match:${matchId}`);
       this.matchHints.delete(matchId);
       this.matchFollowupHints.delete(matchId);
     }
@@ -735,13 +784,14 @@ export class BrowserGameTransport implements GameTransport {
     if (matchId) this.reconcileMatchResource(matchId);
   }
 
-  private async performRoomSync(roomId: string, syncActiveMatch = true): Promise<RoomSyncResponse> {
+  private async performRoomSync(roomId: string, syncActiveMatch = true, allowUnchanged = true): Promise<RoomSyncResponse> {
     const current = this.store.getSnapshot().rooms[roomId];
     const request: RoomSyncRequest = {
       protocolVersion: 1,
       requestId: this.createId(),
       roomId,
       knownVersion: current?.version ?? 0,
+      ...(allowUnchanged && current ? { acceptUnchanged: true as const } : {}),
     };
     if (!parseRoomSyncRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
     try {
@@ -750,10 +800,22 @@ export class BrowserGameTransport implements GameTransport {
       if (rejected.ok) {
         if (rejected.value.requestId !== request.requestId) throw new BrowserTransportError("INVALID_RESPONSE");
         if (rejected.value.error.code === "NOT_FOUND_OR_FORBIDDEN") {
-          this.store.setResourceUnavailable("room", roomId);
-          this.trackRoomMatch(roomId, null);
+          this.rejectResource("room", roomId);
         } else this.store.setError("SYNC_REJECTED");
+        if (rejected.value.error.code === "INTERNAL_ERROR") throw new BrowserTransportError("HTTP_SERVER_ERROR");
         throw requestError("REQUEST_REJECTED", rejected.value);
+      }
+      const unchanged = parseSyncUnchangedResponse(raw);
+      if (unchanged.ok) {
+        const cached = this.getSnapshot().rooms[roomId];
+        if (request.acceptUnchanged && unchanged.value.requestId === request.requestId && "roomId" in unchanged.value &&
+            unchanged.value.roomId === roomId && unchanged.value.version === request.knownVersion && cached?.version === request.knownVersion &&
+            !this.unavailableRoomIds.has(roomId)) {
+          this.store.setError(null);
+          return this.roomResponseFromCache(request.requestId, roomId, cached);
+        }
+        if (!allowUnchanged) throw new BrowserTransportError("INVALID_RESPONSE");
+        return this.performRoomSync(roomId, syncActiveMatch, false);
       }
       const parsed = parseRoomSyncResponse(raw);
       if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.roomId !== roomId ||
@@ -761,16 +823,20 @@ export class BrowserGameTransport implements GameTransport {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
+      if (this.unavailableRoomIds.has(roomId)) throw new BrowserTransportError("REQUEST_REJECTED");
       this.store.restoreResourceAccess("room", roomId);
       // A reconnect can change presence without changing the room version.
       // Preserve any newer notification that arrived while the ACK was in flight.
       const presenceUnchanged = this.store.getSnapshot().rooms[roomId]?.presenceObservedAt === current?.presenceObservedAt;
       this.store.applyRoomSync(parsed.value, presenceUnchanged);
+      if (parsed.value.room.status === "closed") { this.closedRoomIds.add(roomId); this.reconcileRoomResource(roomId); }
       this.trackRoomMatch(roomId, parsed.value.room.activeMatchId);
       if (parsed.value.room.activeMatchId && syncActiveMatch && this.socket.connected) {
         void this.syncMatch(parsed.value.room.activeMatchId).catch(() => undefined);
       }
-      return parsed.value;
+      const latest = this.getSnapshot().rooms[roomId];
+      return latest && latest.version > parsed.value.version
+        ? this.roomResponseFromCache(request.requestId, roomId, latest) : parsed.value;
     } catch (error) {
       if (error instanceof BrowserTransportError && error.code === "REQUEST_REJECTED") throw error;
       if (error instanceof BrowserTransportError && error.code === "INVALID_RESPONSE") throw error;
@@ -779,7 +845,7 @@ export class BrowserGameTransport implements GameTransport {
     }
   }
 
-  private async performMatchSync(matchId: string): Promise<MatchSyncResponse> {
+  private async performMatchSync(matchId: string, allowUnchanged = true): Promise<MatchSyncResponse> {
     const current = this.store.getSnapshot().matches[matchId];
     const request: MatchSyncRequest = {
       protocolVersion: 1,
@@ -787,6 +853,7 @@ export class BrowserGameTransport implements GameTransport {
       matchId,
       knownVersion: current?.version ?? 0,
       afterEventSeq: current?.eventSeq ?? 0,
+      ...(allowUnchanged && current ? { acceptUnchanged: true as const } : {}),
     };
     if (!parseMatchSyncRequest(request).ok) throw new BrowserTransportError("INVALID_RESPONSE");
     try {
@@ -794,8 +861,23 @@ export class BrowserGameTransport implements GameTransport {
       const rejected = parseSyncRejectedResponse(raw);
       if (rejected.ok) {
         if (rejected.value.requestId !== request.requestId) throw new BrowserTransportError("INVALID_RESPONSE");
-        this.store.setError("SYNC_REJECTED");
+        if (rejected.value.error.code === "NOT_FOUND_OR_FORBIDDEN") this.rejectResource("match", matchId);
+        else this.store.setError("SYNC_REJECTED");
+        if (rejected.value.error.code === "INTERNAL_ERROR") throw new BrowserTransportError("HTTP_SERVER_ERROR");
         throw requestError("REQUEST_REJECTED", rejected.value);
+      }
+      const unchanged = parseSyncUnchangedResponse(raw);
+      if (unchanged.ok) {
+        const cached = this.getSnapshot().matches[matchId];
+        if (request.acceptUnchanged && unchanged.value.requestId === request.requestId && "matchId" in unchanged.value &&
+            unchanged.value.matchId === matchId && unchanged.value.version === request.knownVersion &&
+            unchanged.value.eventSeq === request.afterEventSeq && cached?.version === request.knownVersion &&
+            cached.eventSeq === request.afterEventSeq && !this.unavailableMatchIds.has(matchId)) {
+          this.store.setError(null);
+          return this.matchResponseFromCache(request.requestId, matchId, cached);
+        }
+        if (!allowUnchanged) throw new BrowserTransportError("INVALID_RESPONSE");
+        return this.performMatchSync(matchId, false);
       }
       const parsed = parseMatchSyncResponse(raw);
       if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId ||
@@ -803,8 +885,11 @@ export class BrowserGameTransport implements GameTransport {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
+      if (this.unavailableMatchIds.has(matchId)) throw new BrowserTransportError("REQUEST_REJECTED");
       this.store.applyMatchSync(parsed.value);
-      return parsed.value;
+      const latest = this.getSnapshot().matches[matchId];
+      return latest && (latest.version > parsed.value.version || latest.eventSeq > parsed.value.eventSeq)
+        ? this.matchResponseFromCache(request.requestId, matchId, latest) : parsed.value;
     } catch (error) {
       if (error instanceof BrowserTransportError &&
           (error.code === "REQUEST_REJECTED" || error.code === "INVALID_RESPONSE")) throw error;
@@ -859,29 +944,40 @@ export class BrowserGameTransport implements GameTransport {
         if (pending.active !== attempt) return;
         pending.active = undefined;
         attempt.reject(new BrowserTransportError("ACK_TIMEOUT"));
+        this.scheduleCommandRetry(pending);
       }, this.acknowledgementTimeoutMs),
     };
     pending.active = attempt;
     this.socket.emit(pending.event, pending.payload, (response: unknown) => {
-      if (pending.active !== attempt) return;
+      if (this.pending.get(pending.commandId) !== pending || this.sessionExpired) return;
       if (!this.isValidCommandReply(pending, response)) {
+        if (pending.active !== attempt) return;
         clearTimeout(attempt.timer);
         pending.active = undefined;
         this.store.setError("INVALID_RESPONSE");
         attempt.reject(new BrowserTransportError("INVALID_RESPONSE"));
+        this.scheduleCommandRetry(pending);
         return;
       }
       clearTimeout(attempt.timer);
+      const currentAttempt = pending.active;
+      if (currentAttempt) clearTimeout(currentAttempt.timer);
       pending.active = undefined;
+      this.clearRetry(`command:${pending.commandId}`);
       this.pending.delete(pending.commandId);
-      this.updatePendingIds();
       const ack = isCommandAck(response, pending.commandId) ? response : null;
+      if (ack) {
+        this.commandAcknowledgements.set(pending.commandId, cloneProtocolValue(ack));
+        if (this.commandAcknowledgements.size > 50) this.commandAcknowledgements.delete(this.commandAcknowledgements.keys().next().value!);
+      }
       const accepted = ack === null || ack.status === "accepted";
       if (accepted && pending.roomId) {
         const room = parseRoomView(response);
         let roomProjectionApplied = false;
         if (room.ok && room.value.roomId === pending.roomId && room.value.version !== undefined) {
           const previous = this.store.getSnapshot().rooms[pending.roomId];
+          this.unavailableRoomIds.delete(pending.roomId);
+          this.reconcileRoomResource(pending.roomId);
           this.store.restoreResourceAccess("room", pending.roomId);
           this.store.applyRoomCommand(room.value);
           const latestRoom = this.store.getSnapshot().rooms[pending.roomId]?.room ?? room.value;
@@ -899,12 +995,23 @@ export class BrowserGameTransport implements GameTransport {
         if (!roomProjectionApplied) void this.syncRoom(pending.roomId).catch(() => undefined);
       }
       if (accepted && pending.matchId) {
+        let projectionApplied = false;
         if (ack?.status === "accepted") {
           this.recordMatchHint(pending.matchId, { version: ack.aggregateVersion, eventSeq: ack.eventSeq });
+          const projection = ack.matchProjection;
+          const cached = this.getSnapshot().matches[pending.matchId];
+          if (projection && cached && projection.baseEventSeq !== undefined && projection.baseEventSeq <= cached.eventSeq) {
+            this.store.applyMatchSync({ protocolVersion: 1, requestId: pending.commandId,
+              matchId: pending.matchId, version: ack.aggregateVersion, eventSeq: ack.eventSeq,
+              requiresFullSnapshot: false, snapshot: projection.snapshot, visibleEvents: projection.visibleEvents });
+            projectionApplied = true;
+          }
         }
-        void this.syncMatch(pending.matchId).catch(() => undefined);
+        if (!projectionApplied) void this.syncMatch(pending.matchId).catch(() => undefined);
       }
+      this.updatePendingIds();
       attempt.resolve(response);
+      if (currentAttempt !== attempt) currentAttempt?.resolve(response);
     });
     return promise;
   }
@@ -916,7 +1023,9 @@ export class BrowserGameTransport implements GameTransport {
     if (pending.event === "room:command") {
       return parseRoomView(response).ok || isCommandRejected(response, pending.commandId);
     }
-    return isCommandAck(response, pending.commandId);
+    return isCommandAck(response, pending.commandId) &&
+      (response.status !== "accepted" || !response.matchProjection ||
+        this.store.isCurrentViewer(response.matchProjection.snapshot.viewer.playerId));
   }
 
   private abortActiveAttempts(error: BrowserTransportError): void {
@@ -955,12 +1064,105 @@ export class BrowserGameTransport implements GameTransport {
     this.store.setPendingCommandIds([...this.pending.keys()]);
   }
 
+  private readonly resumeVisibleResources = (): void => {
+    if (this.stopped || this.sessionExpired) return;
+    if (this.visibilityTarget?.visibilityState === "hidden") { this.clearRetries(); return; }
+    if (!this.socket.connected) { this.socket.connect(); return; }
+    void this.syncAfterConnect(this.connectionGeneration);
+  };
+
+  private clearRetry(key: string): void {
+    clearTimeout(this.retries.get(key));
+    this.retries.delete(key);
+    this.retryDelays.delete(key);
+  }
+
+  private clearRetries(): void {
+    for (const timer of this.retries.values()) clearTimeout(timer);
+    this.retries.clear();
+    this.retryDelays.clear();
+  }
+
+  private scheduleRetry(key: string, initialDelay: number, action: () => void): void {
+    if (this.stopped || this.sessionExpired || !this.socket.connected ||
+        this.visibilityTarget?.visibilityState === "hidden" || this.retries.has(key)) return;
+    const delay = this.retryDelays.get(key) ?? initialDelay;
+    this.retryDelays.set(key, Math.min(10_000, delay * 2));
+    const timer = setTimeout(() => {
+      this.retries.delete(key);
+      if (!this.stopped && !this.sessionExpired && this.socket.connected) action();
+    }, delay);
+    (timer as unknown as { unref?: () => void }).unref?.();
+    this.retries.set(key, timer);
+  }
+
+  private scheduleSyncRetry(kind: "room" | "match", id: string): void {
+    const resources = kind === "room" ? this.roomIds : this.matchIds;
+    if (!resources.has(id)) return;
+    this.scheduleRetry(`${kind}:${id}`, this.syncRetryIntervalMs, () => {
+      if (resources.has(id)) void (kind === "room" ? this.syncRoom(id) : this.syncMatch(id)).catch(() => undefined);
+    });
+  }
+
+  private scheduleCommandRetry(pending: PendingCommand): void {
+    if (this.pending.get(pending.commandId) !== pending) return;
+    this.scheduleRetry(`command:${pending.commandId}`, this.commandRetryIntervalMs, () => {
+      if (this.pending.get(pending.commandId) === pending) void this.attemptPending(pending).catch(() => undefined);
+    });
+  }
+
+  private rejectResource(kind: "room" | "match", id: string): void {
+    if (kind === "room") {
+      const matchId = this.roomMatchIds.get(id) ?? this.getSnapshot().rooms[id]?.room.activeMatchId;
+      this.unavailableRoomIds.add(id);
+      this.reconcileRoomResource(id);
+      if (matchId) this.rejectResource("match", matchId);
+    } else {
+      this.unavailableMatchIds.add(id);
+      this.reconcileMatchResource(id);
+    }
+    this.store.setResourceUnavailable(kind, id);
+  }
+
+  private roomResponseFromCache(requestId: string, roomId: string, cached: BrowserTransportState["rooms"][string]): RoomSyncResponse {
+    return { protocolVersion: 1, requestId, roomId, version: cached.version,
+      requiresFullSnapshot: cached.requiresFullSnapshot, room: cached.room };
+  }
+
+  private matchResponseFromCache(requestId: string, matchId: string, cached: BrowserTransportState["matches"][string]): MatchSyncResponse {
+    return { protocolVersion: 1, requestId, matchId, version: cached.version, eventSeq: cached.eventSeq,
+      requiresFullSnapshot: cached.requiresFullSnapshot, snapshot: cached.snapshot, visibleEvents: cached.visibleEvents };
+  }
+
   private markSessionExpired(): void {
     this.sessionExpired = true;
+    this.clearRetries();
+    this.commandAcknowledgements.clear();
     this.store.setConnection("expired", false);
     this.store.setError("SESSION_EXPIRED");
     this.abortActiveAttempts(new BrowserTransportError("SESSION_EXPIRED"));
+    this.pending.clear();
+    this.updatePendingIds();
     this.socket.disconnect();
+  }
+
+  private adoptPlayer(playerId: string | undefined): void {
+    if (this.restoredPlayerId !== undefined && this.restoredPlayerId !== playerId) {
+      this.clearRetries();
+      this.abortActiveAttempts(new BrowserTransportError("SESSION_EXPIRED"));
+      this.pending.clear();
+      this.commandAcknowledgements.clear();
+      this.roomHints.clear();
+      this.matchHints.clear();
+      this.confirmedRoomIds.clear();
+      this.confirmedMatchIds.clear();
+      this.roomMatchIds.clear();
+      this.roomIds.clear();
+      this.matchIds.clear();
+      this.updatePendingIds();
+    }
+    this.restoredPlayerId = playerId;
+    if (playerId !== undefined) this.store.setViewerPlayerId(playerId);
   }
 }
 
@@ -973,11 +1175,8 @@ function isGuestSessionResponse(input: unknown): input is GuestSessionResponse {
 }
 
 function isCommandAck(input: unknown, commandId: string): input is CommandAck {
-  if (isCommandRejected(input, commandId)) return true;
-  return isRecord(input) && exactKeys(input,
-    ["protocolVersion", "commandId", "status", "duplicate", "aggregateVersion", "eventSeq"],
-  ) && input.protocolVersion === 1 && input.commandId === commandId && input.status === "accepted" &&
-    typeof input.duplicate === "boolean" && isVersion(input.aggregateVersion) && isVersion(input.eventSeq);
+  const parsed = parseCommandAck(input);
+  return parsed.ok && parsed.value.commandId === commandId;
 }
 
 function parseRoomPreviewRequestLocally(input: unknown): input is {

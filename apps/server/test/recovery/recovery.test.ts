@@ -405,7 +405,10 @@ test("unsupported active snapshots are quarantined without changing cursor, pend
     ]);
 
     for (const candidate of candidates) {
-      const restored = await storage.getMatch(candidate.matchId);
+      // Inspect quarantined bytes directly: the application repository must reject inconsistent metadata.
+      const row = (await database.query<{ status: string; state_json: GameState; version: number; event_seq: number }>("SELECT status,state_json,version,event_seq FROM matches WHERE id=$1", [candidate.matchId])).rows[0]!;
+      const restored = { status: row.status, state: row.state_json, version: Number(row.version), eventSeq: Number(row.event_seq) };
+      if (candidate.matchId === "match-inconsistent") await assert.rejects(storage.getMatch(candidate.matchId), /metadata does not match/);
       assert.equal(restored?.status, "recovery_required");
       assert.equal(restored?.state.status, "recovery_required");
       assert.equal(restored?.version, candidate.state.version);
