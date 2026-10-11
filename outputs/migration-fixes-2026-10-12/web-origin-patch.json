@@ -1,0 +1,20 @@
+{
+  "webSourceCommit": "92564bb29afb775c01733ef67f61550ba4e12871",
+  "deployedAt": "2026-10-12T01:01:41+0900",
+  "serverRestarted": false,
+  "reason": "Browser_WebSocket_Origin_handshake",
+  "reproduction": {
+    "sameOriginPollingWithoutOrigin": 403,
+    "pollingWithAllowedOrigin": 200
+  },
+  "verification": {
+    "focusedTransportTests": { "passed": 28, "failed": 0 },
+    "webTests": { "passed": 258, "failed": 0 },
+    "webTypecheck": "passed",
+    "selfhostBuild": "passed",
+    "chromeExistingLobbyRecoveryAndReload": "passed",
+    "affectedGameUserConfirmation": "게임판이 열림"
+  },
+  "publicEntryAsset": "index-BUbRQGzP.js",
+  "publicTransportAsset": "client-I6lA1X6y.js"
+}
