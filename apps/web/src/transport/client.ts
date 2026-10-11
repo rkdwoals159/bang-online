@@ -817,7 +817,10 @@ export class BrowserGameTransport implements GameTransport {
       const rejected = parseSyncRejectedResponse(raw);
       if (rejected.ok) {
         if (rejected.value.requestId !== request.requestId) throw new BrowserTransportError("INVALID_RESPONSE");
-        this.store.setError("SYNC_REJECTED");
+        if (rejected.value.error.code === "NOT_FOUND_OR_FORBIDDEN") {
+          this.store.setResourceUnavailable("room", roomId);
+          this.trackRoomMatch(roomId, null);
+        } else this.store.setError("SYNC_REJECTED");
         throw requestError("REQUEST_REJECTED", rejected.value);
       }
       const parsed = parseRoomSyncResponse(raw);
@@ -826,6 +829,7 @@ export class BrowserGameTransport implements GameTransport {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
+      this.store.restoreResourceAccess("room", roomId);
       this.store.applyRoomSync(parsed.value);
       this.trackRoomMatch(roomId, parsed.value.room.activeMatchId);
       if (parsed.value.room.activeMatchId && syncActiveMatch && this.socket.connected) {
@@ -942,6 +946,7 @@ export class BrowserGameTransport implements GameTransport {
         let roomProjectionApplied = false;
         if (room.ok && room.value.roomId === pending.roomId && room.value.version !== undefined) {
           const previous = this.store.getSnapshot().rooms[pending.roomId];
+          this.store.restoreResourceAccess("room", pending.roomId);
           this.store.applyRoomCommand(room.value);
           const latestRoom = this.store.getSnapshot().rooms[pending.roomId]?.room ?? room.value;
           this.trackRoomMatch(pending.roomId, latestRoom.activeMatchId);

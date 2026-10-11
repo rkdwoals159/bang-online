@@ -177,6 +177,30 @@ test("socket history retains older records without changing the live cursor and 
   transport.disconnect();
 });
 
+test("a kicked member loses the stale lobby projection and regains access on rejoin", async () => {
+  const socket = new FakeSocket();
+  let denied = false;
+  socket.onEmit = ({ event, payload, acknowledgement }) => {
+    if (event === "room:sync") acknowledgement(denied
+      ? { protocolVersion: 1, requestId: payload.requestId, status: "rejected", error: { code: "NOT_FOUND_OR_FORBIDDEN" } }
+      : roomSync(payload, { version: 2 }));
+    if (event === "room:command") acknowledgement({ ...roomView("room-1"), version: 4 });
+  };
+  const transport = new BrowserGameTransport({ socketFactory: () => socket });
+  transport.watchRoom("room-1"); transport.connect();
+  await waitUntil(() => transport.getSnapshot().rooms["room-1"]?.version === 2, "initial lobby missing");
+  denied = true;
+  socket.fire("room:changed", { roomId: "room-1", version: 3 });
+  await waitUntil(() => transport.getSnapshot().unavailableRooms.includes("room-1"), "kicked lobby was not marked unavailable");
+  assert.equal(transport.getSnapshot().rooms["room-1"], undefined);
+  assert.equal(socket.connected, true, "removal from one room must not sign out the guest");
+  await transport.sendRoomCommand({ protocolVersion: 1, commandId: "00000000-0000-4000-8000-000000000252", roomId: "room-1",
+    expectedVersion: 3, type: "JOIN", payload: { inviteCode: "invite" } });
+  assert.equal(transport.getSnapshot().rooms["room-1"].version, 4);
+  assert.equal(transport.getSnapshot().unavailableRooms.includes("room-1"), false);
+  transport.disconnect();
+});
+
 test("outbox notifications trigger sync and duplicate or older hints do not update projections", async () => {
   const socket = new FakeSocket();
   let roomVersion = 2;

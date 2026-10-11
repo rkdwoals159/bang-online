@@ -39,6 +39,10 @@ export interface JoinRoomInput extends RoomCommandBase {
 
 export interface LeaveRoomInput extends RoomCommandBase {}
 
+export interface KickMemberInput extends RoomCommandBase {
+  targetPlayerId: string;
+}
+
 export interface SetReadyInput extends RoomCommandBase {
   ready: boolean;
 }
@@ -657,6 +661,39 @@ export class RoomLifecycleRepository {
         playerId: input.actorPlayerId,
         seatIndex: member.rows[0].seat_index,
         ready: member.rows[0].ready,
+      };
+    });
+  }
+
+  async kickMember(input: KickMemberInput): Promise<RoomMutationResult> {
+    validateCommand(input);
+    if (!input.targetPlayerId.trim()) throw new TypeError("Target player ID is required.");
+    return this.mutateRoom(input, async (client, room) => {
+      this.assertMembershipMutable(room.status);
+      const members = await client.query<RoomPlayerRow>(
+        "SELECT player_id, seat_index, ready FROM room_players WHERE room_id = $1",
+        [room.id],
+      );
+      if (!members.rows.some(member => member.player_id === input.actorPlayerId)) {
+        throw new RoomMembershipRequiredError(input.actorPlayerId);
+      }
+      if (room.owner_player_id !== input.actorPlayerId) {
+        throw new RoomLifecycleError("ROOM_FORBIDDEN", "Only the room owner can remove a member.");
+      }
+      if (input.targetPlayerId === input.actorPlayerId) {
+        throw new RoomLifecycleError("CANNOT_KICK_SELF", "The owner cannot remove themselves.");
+      }
+      const target = members.rows.find(member => member.player_id === input.targetPlayerId);
+      if (!target) throw new RoomLifecycleError("MEMBER_NOT_FOUND", "The target is not a room member.");
+      await client.query("DELETE FROM room_players WHERE room_id = $1 AND player_id = $2", [room.id, input.targetPlayerId]);
+      return {
+        changed: true,
+        roomStatus: room.status,
+        ownerPlayerId: room.owner_player_id,
+        occupancy: members.rows.length - 1,
+        playerId: target.player_id,
+        seatIndex: target.seat_index,
+        ready: target.ready,
       };
     });
   }

@@ -417,6 +417,44 @@ test("readiness, owner transfer, voluntary closure and D10 retention preserve th
   }
 });
 
+test("owner kicks only a waiting member atomically, with receipts, version guards and rejoin support", async () => {
+  const { database, service, lifecycle, storage } = await createFixture();
+  try {
+    const [owner, target, other] = await Promise.all(["Owner", "Target", "Other"].map(name => guest(service, name)));
+    const ownerId = owner!.authenticated.playerId, targetId = target!.authenticated.playerId, otherId = other!.authenticated.playerId;
+    const created = await service.createPrivateRoom(ownerId, { commandId: "create-kick", capacity: 4, rulesetVersion: BASE_DECK_RULESET_VERSION });
+    const roomId = created.room.roomId;
+    for (const [index, playerId] of [targetId, otherId].entries()) {
+      await service.joinPrivateRoom(playerId, { roomId, expectedVersion: index, inviteCode: created.inviteCode!, commandId: `join-kick-${index}` });
+    }
+    const input = { roomId, expectedVersion: 2, commandId: "kick-target", targetPlayerId: targetId };
+    const code = (expected: string) => (error: unknown) => error instanceof Error && "code" in error && error.code === expected;
+    await assert.rejects(service.kickMember(otherId, { ...input, commandId: "non-owner-kick" }), code("ROOM_FORBIDDEN"));
+    await assert.rejects(service.kickMember(ownerId, { ...input, targetPlayerId: ownerId }), code("CANNOT_KICK_SELF"));
+    await assert.rejects(service.kickMember(ownerId, { ...input, targetPlayerId: "absent" }), code("MEMBER_NOT_FOUND"));
+    await assert.rejects(service.kickMember(ownerId, { ...input, expectedVersion: 1 }), RoomVersionConflictError);
+    assert.equal((await storage.getRoom(roomId))!.players.length, 3);
+    const kicked = await service.kickMember(ownerId, input);
+    assert.equal(kicked.mutation.status, "applied");
+    assert.equal(kicked.mutation.outcome.version, 3);
+    assert.equal(kicked.room?.version, 3);
+    assert.equal(kicked.room?.ownerPlayerId, ownerId);
+    assert.deepEqual(kicked.room?.members.map(member => member.playerId), [ownerId, otherId]);
+    assert.equal(await service.roomViewForMember(roomId, targetId), null);
+    const outboxCount = async () => Number((await database.query<{ count: number }>("SELECT count(*) AS count FROM outbox WHERE aggregate_id = $1", [roomId])).rows[0]!.count);
+    const count = await outboxCount();
+    assert.equal((await service.kickMember(ownerId, input)).mutation.status, "duplicate");
+    assert.equal(await outboxCount(), count, "receipt replay does not notify or remove twice");
+    await assert.rejects(service.kickMember(ownerId, { ...input, targetPlayerId: otherId }), code("COMMAND_ID_REUSED"));
+    await service.joinPrivateRoom(targetId, { roomId, expectedVersion: 3, inviteCode: created.inviteCode!, commandId: "rejoin-kicked" });
+    await service.kickMember(ownerId, input);
+    assert.ok(await service.roomViewForMember(roomId, targetId), "an old retry cannot kick a member who rejoined");
+    await lifecycle.setRoomStatus({ roomId, actorPlayerId: ownerId, expectedVersion: 4, commandId: "lock-kick-room", requestHash: "lock-kick", outboxEventId: "lock-kick-event", status: "in_game" });
+    await assert.rejects(service.kickMember(ownerId, { ...input, expectedVersion: 5, commandId: "kick-in-game" }), code("ROOM_LOCKED"));
+    assert.equal((await storage.getRoom(roomId))!.players.length, 3);
+  } finally { await database.close(); }
+});
+
 test("only the owner can voluntarily close a room through the service", async () => {
   const { database, service } = await createFixture();
   try {

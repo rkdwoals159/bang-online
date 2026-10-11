@@ -329,6 +329,37 @@ test("runtime applies migrations, serves guest sessions, authenticates Socket.IO
     assert.equal(ownerAfterRotation?.viewer.isOwner,true);
     assert.equal(ownerAfterRotation?.members.length,1,'invite rotation preserves the roster');
 
+    const memberSocket = createSocketClient(baseUrl, {
+      transports: ["websocket"], extraHeaders: { Cookie: secondGuestCookie }, reconnection: false, timeout: 2_000,
+    });
+    sockets.push(memberSocket);
+    await connected(memberSocket);
+    const joinPayload = { protocolVersion: 1, commandId: "018f8e3d-7b11-7c82-8a7b-123456789a01", roomId: createdRoom.roomId,
+      expectedVersion: 1, type: "JOIN", payload: { inviteCode: rotated.inviteCode } };
+    const joined = await acknowledged(memberSocket, "room:command", joinPayload) as { version: number; viewer: { playerId: string }; members: unknown[] };
+    assert.equal(joined.version, 2, JSON.stringify(joined));
+    assert.equal(joined.members.length, 2);
+    await acknowledged(authenticated, "room:sync", { protocolVersion: 1, requestId: "owner-before-kick", roomId: createdRoom.roomId, knownVersion: 2 });
+    await acknowledged(memberSocket, "room:sync", { protocolVersion: 1, requestId: "member-before-kick", roomId: createdRoom.roomId, knownVersion: 2 });
+    const removedHint = serverEvent(memberSocket, "room:changed", payload => (payload as { version?: number }).version === 3);
+    const ownerHint = serverEvent(authenticated, "room:changed", payload => (payload as { version?: number }).version === 3);
+    const kickPayload = { protocolVersion: 1, commandId: "018f8e3d-7b11-7c82-8a7b-123456789a02", roomId: createdRoom.roomId,
+      expectedVersion: 2, type: "KICK_MEMBER", payload: { targetPlayerId: joined.viewer.playerId } };
+    const kicked = await acknowledged(authenticated, "room:command", kickPayload) as { version: number; members: unknown[] };
+    assert.equal(kicked.version, 3, JSON.stringify(kicked));
+    assert.equal(kicked.members.length, 1);
+    await Promise.all([removedHint, ownerHint]);
+    const forbidden = await acknowledged(memberSocket, "room:sync", { protocolVersion: 1, requestId: "member-after-kick", roomId: createdRoom.roomId, knownVersion: 2 }) as { error: { code: string } };
+    assert.equal(forbidden.error.code, "NOT_FOUND_OR_FORBIDDEN");
+    const removedCommand = await acknowledged(memberSocket, "room:command", { ...kickPayload, commandId: "018f8e3d-7b11-7c82-8a7b-123456789a03", expectedVersion: 3 }) as { error: { code: string } };
+    assert.equal(removedCommand.error.code, "NOT_FOUND_OR_FORBIDDEN");
+    const replay = await acknowledged(authenticated, "room:command", kickPayload) as { version: number; members: unknown[] };
+    assert.equal(replay.version, 3);
+    assert.equal(replay.members.length, 1);
+    const rejoined = await acknowledged(memberSocket, "room:command", { ...joinPayload, commandId: "018f8e3d-7b11-7c82-8a7b-123456789a04", expectedVersion: 3 }) as { version: number; members: unknown[] };
+    assert.equal(rejoined.version, 4);
+    assert.equal(rejoined.members.length, 2);
+
     const anonymous = createSocketClient(baseUrl, {
       transports: ["websocket"],
       reconnection: false,
@@ -478,6 +509,12 @@ test("START_MATCH enforces owner and minimum roster, automatically prepares arri
     const matchId = started.activeMatchId;
     assert.ok(started.members.every(({ ready }) => ready));
     const startedRoomVersion = roomVersion + 1;
+
+    const inGameKick = await acknowledged(owner.socket, "room:command", {
+      protocolVersion: 1, commandId: "018f8e3d-7b11-7c82-8a7b-223456789a05", roomId: created.roomId,
+      expectedVersion: startedRoomVersion, type: "KICK_MEMBER", payload: { targetPlayerId: guests[1]!.playerId },
+    }) as { error: { code: string } };
+    assert.equal(inGameKick.error.code, "ROOM_LOCKED");
 
     const duplicate = await acknowledged(owner.socket, "room:command", startPayload) as {
       status: string;

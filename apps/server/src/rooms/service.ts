@@ -515,7 +515,29 @@ export class RoomService {
     };
   }
 
-  /** Voluntary lobby close is owner-only; seat removal and transfer remain in T64. */
+  async kickMember(
+    authenticatedPlayerId: string,
+    input: RoomCommandInput & { targetPlayerId: string },
+  ): Promise<RoomMutationServiceResult> {
+    ensureText(authenticatedPlayerId, "Authenticated player ID");
+    ensureText(input.roomId, "Room ID");
+    ensureText(input.commandId, "Command ID");
+    ensureText(input.targetPlayerId, "Target player ID");
+    ensureVersion(input.expectedVersion);
+    const mutation = await this.lifecycle.kickMember({
+      ...input,
+      actorPlayerId: authenticatedPlayerId,
+      requestHash: requestHash("KICK_MEMBER", [authenticatedPlayerId, input.roomId, input.expectedVersion, input.targetPlayerId]),
+      outboxEventId: opaqueId("evt"),
+    });
+    return {
+      mutation,
+      room: await this.roomViewForMember(input.roomId, authenticatedPlayerId),
+      cleanupEligibleAt: await this.cleanupDeadlineForRoom(input.roomId, mutation.outcome.roomStatus),
+    };
+  }
+
+  /** Voluntary lobby close is owner-only. */
   async closeRoom(
     authenticatedPlayerId: string,
     input: RoomCommandInput,
@@ -575,6 +597,7 @@ export class RoomService {
     }
     return {
       roomId: stored.id,
+      version: stored.version,
       status: stored.status,
       activeMatchId,
       ownerPlayerId: stored.ownerPlayerId,

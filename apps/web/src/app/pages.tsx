@@ -438,6 +438,9 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
           onCommand={async (command) => {
             const response = await transport.sendRoomCommand(command);
             if (!isVersionedRoomView(response, roomId)) await transport.syncRoom(roomId);
+            if (typeof response === "object" && response !== null && "status" in response && response.status === "rejected") {
+              throw new Error("Room command was rejected.");
+            }
           }}
         />
       </RoomProjectionFrame>

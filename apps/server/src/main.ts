@@ -378,20 +378,13 @@ function roomCommandHandler(
           return;
         }
         case "KICK_MEMBER": {
-          const room = await rooms.roomViewForMember(command.roomId, context.playerId);
-          if (!room) {
-            ack(rejectedCommand(command.commandId, "NOT_FOUND_OR_FORBIDDEN"));
-            return;
-          }
-          if (!room.viewer.isOwner) {
-            ack(rejectedCommand(command.commandId, "ROOM_FORBIDDEN"));
-            return;
-          }
-          if (room.activeMatchId !== null) {
-            ack(rejectedCommand(command.commandId, "ROOM_LOCKED"));
-            return;
-          }
-          ack(rejectedCommand(command.commandId, "COMMAND_UNAVAILABLE"));
+          const result = await rooms.kickMember(context.playerId, {
+            roomId: command.roomId,
+            expectedVersion: command.expectedVersion,
+            commandId: command.commandId,
+            targetPlayerId: command.payload.targetPlayerId,
+          });
+          ack(result.room ?? rejectedCommand(command.commandId, "NOT_FOUND_OR_FORBIDDEN"));
           return;
         }
         case "SET_RULESET":
