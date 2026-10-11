@@ -4,11 +4,9 @@ import type {
   GuestSessionRequest,
   GuestSessionResponse,
   MatchCommand,
-  MatchSnapshotView,
   MatchSyncRequest,
   MatchSyncResponse,
   MatchHistoryResponse,
-  PublicMatchEvent,
   RoomCommand,
   RoomPreviewRequest,
   RoomPreviewResponse,
@@ -18,13 +16,11 @@ import type {
   RoomView,
 } from "../../../../packages/contracts/src/protocol.js";
 import {
-  parseLegalActionProposal,
   parseMatchCommand,
-  parseMatchOutcomeForStatus,
   parseMatchSyncRequest,
+  parseMatchSyncResponse,
   parseMatchHistoryRequest,
   parseMatchHistoryResponse,
-  parsePendingInteractionView,
   parseRoomCommand,
   parseRoomPreviewResponse,
   parseRoomSyncRequest,
@@ -80,10 +76,6 @@ interface NotificationCursor {
   eventSeq?: number;
 }
 
-const MATCH_STATUSES = new Set(["playing", "paused", "completed", "recovery_required"]);
-const ROLE_IDS = new Set(["sheriff", "deputy", "outlaw", "renegade"]);
-const SUITS = new Set(["SPADES", "HEARTS", "DIAMONDS", "CLUBS"]);
-
 function isRecord(input: unknown): input is Record<string, unknown> {
   return typeof input === "object" && input !== null && !Array.isArray(input);
 }
@@ -99,71 +91,6 @@ function isText(input: unknown): input is string {
 
 function isVersion(input: unknown): input is number {
   return Number.isSafeInteger(input) && (input as number) >= 0;
-}
-
-function isCardFace(input: unknown): boolean {
-  return isRecord(input) && exactKeys(input, ["cardInstanceId", "typeId", "rank", "suit"]) &&
-    isText(input.cardInstanceId) && isText(input.typeId) && typeof input.rank === "string" &&
-    SUITS.has(input.suit as string);
-}
-
-function isPublicPlayer(input: unknown): boolean {
-  if (!isRecord(input) || !exactKeys(input, [
-    "playerId", "displayName", "seatIndex", "characterId", "hp", "maxHp", "eliminated", "handCount", "role", "inPlay",
-  ])) return false;
-  return isText(input.playerId) && isText(input.displayName) && isVersion(input.seatIndex) &&
-    isText(input.characterId) && Number.isSafeInteger(input.hp) && Number.isSafeInteger(input.maxHp) &&
-    typeof input.eliminated === "boolean" && isVersion(input.handCount) &&
-    (input.role === null || ROLE_IDS.has(input.role as string)) &&
-    Array.isArray(input.inPlay) && input.inPlay.every(isCardFace);
-}
-
-function isMatchSnapshot(input: unknown): input is MatchSnapshotView {
-  if (!isRecord(input) || !exactKeys(input,
-    ["status", "viewer", "publicTable", "selfPrivate", "pendingInteraction"], ["legalActions", "outcome"],
-  )) return false;
-  if (!MATCH_STATUSES.has(input.status as string) || !isRecord(input.viewer) ||
-      !exactKeys(input.viewer, ["playerId", "seatIndex", "mode"]) || !isText(input.viewer.playerId) ||
-      !isVersion(input.viewer.seatIndex) || !["active", "eliminated_observer"].includes(input.viewer.mode as string)) return false;
-
-  const table = input.publicTable;
-  if (!isRecord(table) || !exactKeys(table, ["players", "turn", "deckCount", "publicDiscard"]) ||
-      !Array.isArray(table.players) || !table.players.every(isPublicPlayer) || !isRecord(table.turn) ||
-      !exactKeys(table.turn, ["currentPlayerId", "phase"]) || !isText(table.turn.currentPlayerId) ||
-      !isText(table.turn.phase) || !isVersion(table.deckCount) || !isRecord(table.publicDiscard) ||
-      !exactKeys(table.publicDiscard, ["topCard", "count"]) ||
-      (table.publicDiscard.topCard !== null && !isCardFace(table.publicDiscard.topCard)) ||
-      !isVersion(table.publicDiscard.count)) return false;
-
-  if (input.selfPrivate !== null) {
-    if (!isRecord(input.selfPrivate) || !exactKeys(input.selfPrivate, ["role", "hand"]) ||
-        !ROLE_IDS.has(input.selfPrivate.role as string) || !Array.isArray(input.selfPrivate.hand) ||
-        !input.selfPrivate.hand.every(isCardFace)) return false;
-  }
-  if (input.legalActions !== undefined && (!Array.isArray(input.legalActions) ||
-      !input.legalActions.every((action) => parseLegalActionProposal(action).ok))) return false;
-  if (input.pendingInteraction !== null &&
-      !parsePendingInteractionView(input.pendingInteraction, input.viewer.playerId).ok) return false;
-  return parseMatchOutcomeForStatus(input.status as MatchSnapshotView["status"], input.outcome).ok;
-}
-
-function isPublicMatchEvent(input: unknown): input is PublicMatchEvent {
-  return isRecord(input) && exactKeys(input, ["eventSeq", "type", "occurredAt", "payload"]) &&
-    isVersion(input.eventSeq) && input.eventSeq > 0 && isText(input.type) &&
-    typeof input.occurredAt === "string" && Number.isFinite(Date.parse(input.occurredAt)) && isRecord(input.payload);
-}
-
-function isMatchSyncResponse(input: unknown): input is MatchSyncResponse {
-  if (!isRecord(input) || !exactKeys(input, [
-    "protocolVersion", "requestId", "matchId", "version", "eventSeq", "requiresFullSnapshot", "snapshot", "visibleEvents",
-  ])) return false;
-  if (input.protocolVersion !== 1 || !isText(input.requestId) || !isText(input.matchId) ||
-      !isVersion(input.version) || !isVersion(input.eventSeq) || typeof input.requiresFullSnapshot !== "boolean" ||
-      !isMatchSnapshot(input.snapshot) || !Array.isArray(input.visibleEvents) ||
-      !input.visibleEvents.every(isPublicMatchEvent)) return false;
-  const events = input.visibleEvents as PublicMatchEvent[];
-  return events.every((event, index) => event.eventSeq <= (input.eventSeq as number) &&
-    (index === 0 || event.eventSeq > events[index - 1]!.eventSeq));
 }
 
 function isCommandRejected(input: unknown, commandId: string): input is Extract<CommandAck, { status: "rejected" }> {
@@ -862,13 +789,14 @@ export class BrowserGameTransport implements GameTransport {
         this.store.setError("SYNC_REJECTED");
         throw requestError("REQUEST_REJECTED", rejected.value);
       }
-      if (!isMatchSyncResponse(raw) || raw.requestId !== request.requestId || raw.matchId !== matchId ||
-          !this.store.isCurrentViewer(raw.snapshot.viewer.playerId)) {
+      const parsed = parseMatchSyncResponse(raw);
+      if (!parsed.ok || parsed.value.requestId !== request.requestId || parsed.value.matchId !== matchId ||
+          !this.store.isCurrentViewer(parsed.value.snapshot.viewer.playerId)) {
         this.store.setError("INVALID_RESPONSE");
         throw new BrowserTransportError("INVALID_RESPONSE");
       }
-      this.store.applyMatchSync(raw);
-      return raw;
+      this.store.applyMatchSync(parsed.value);
+      return parsed.value;
     } catch (error) {
       if (error instanceof BrowserTransportError &&
           (error.code === "REQUEST_REJECTED" || error.code === "INVALID_RESPONSE")) throw error;

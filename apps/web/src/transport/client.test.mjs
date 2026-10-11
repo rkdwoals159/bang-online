@@ -154,6 +154,69 @@ function countEmits(socket, event) {
   return socket.emitted.filter((item) => item.event === event).length;
 }
 
+const publicCard = { cardInstanceId: "public-card", typeId: "beer", rank: "6", suit: "HEARTS" };
+function storeSnapshot(response, observer = false) {
+  response.snapshot.publicTable.generalStoreCards = [publicCard];
+  response.snapshot.pendingInteraction = { interactionId: "store", kind: "GENERAL_STORE_PICK",
+    allowedChoices: observer ? [] : ["CHOOSE_CARD"], currentResponderPlayerId: observer ? "player-2" : "player-1",
+    step: { current: 1, total: 4 }, ...(observer ? {} : { responseOptions: [
+      { interactionId: "store", choice: "CHOOSE_CARD", selectedCardInstanceId: publicCard.cardInstanceId },
+    ] }) };
+}
+function attackSnapshot(response, kind) {
+  response.snapshot.publicTable.players.push({ ...response.snapshot.publicTable.players[0], playerId: "player-2", seatIndex: 1, role: null });
+  response.snapshot.publicTable.tablewideAttack = { attackId: "attack", kind, sourcePlayerId: "player-1",
+    targets: [{ playerId: "player-2", status: "submitted", response: kind === "indians" ? "USE_BANG" : "USE_MISSED" }] };
+}
+function luckySnapshot(response) {
+  response.snapshot.pendingInteraction = { interactionId: "lucky", kind: "LUCKY_DRAW", allowedChoices: ["CHOOSE_CARD"],
+    currentResponderPlayerId: "player-1", step: { current: 1, total: 1 }, responseOptions: [
+      { interactionId: "lucky", choice: "CHOOSE_CARD", selectedCardInstanceId: publicCard.cardInstanceId },
+    ] };
+  response.snapshot.publicTable.luckyJudgment = { sourceKind: "barrel", cards: [publicCard, { ...publicCard, cardInstanceId: "other-judgment" }] };
+}
+for (const [name, extend] of [
+  ["General Store responder", response => storeSnapshot(response)],
+  ["General Store observer", response => storeSnapshot(response, true)],
+  ["Gatling", response => attackSnapshot(response, "gatling")],
+  ["Indians", response => attackSnapshot(response, "indians")],
+  ["Lucky Duke judgment", luckySnapshot],
+  ["Lucky Duke during a tablewide attack", response => { attackSnapshot(response, "gatling"); luckySnapshot(response); }],
+]) {
+  test(`Socket.IO accepts canonical ${name} snapshots on load and reconnect`, async () => {
+    const socket = new FakeSocket(); let version = 1;
+    socket.onEmit = ({ event, payload, acknowledgement }) => {
+      if (event !== "match:sync") return;
+      const response = matchSync(payload, { version }); extend(response); acknowledgement(response);
+    };
+    const transport = new BrowserGameTransport({ socketFactory: () => socket });
+    transport.watchMatch("match-1"); transport.connect();
+    await waitUntil(() => transport.getSnapshot().matches["match-1"]?.version === 1, `${name} initial sync rejected`);
+    assert.equal(transport.getSnapshot().lastError, null);
+    socket.disconnect(); version = 2; socket.connect();
+    await waitUntil(() => transport.getSnapshot().matches["match-1"]?.version === 2, `${name} reconnect sync rejected`);
+    assert.equal(transport.getSnapshot().lastError, null);
+    transport.disconnect();
+  });
+}
+
+test("Socket.IO still rejects private or malformed data in public interaction extensions", async () => {
+  for (const corrupt of [
+    response => { storeSnapshot(response); response.snapshot.publicTable.generalStoreCards[0] = { ...publicCard, privatePayload: "hidden" }; },
+    response => { storeSnapshot(response); response.snapshot.publicTable.generalStoreCards.push(publicCard); },
+    response => { attackSnapshot(response, "indians"); response.snapshot.publicTable.tablewideAttack.targets[0].cardInstanceId = "private-hand-card"; },
+    response => { luckySnapshot(response); response.snapshot.publicTable.luckyJudgment.cards.pop(); },
+    response => { response.snapshot.publicTable.unknownField = true; },
+  ]) {
+    const socket = new FakeSocket(); socket.connected = true;
+    socket.onEmit = ({ payload, acknowledgement }) => { const response = matchSync(payload); corrupt(response); acknowledgement(response); };
+    const transport = new BrowserGameTransport({ socketFactory: () => socket });
+    await assert.rejects(transport.syncMatch("match-1"), error => error.code === "INVALID_RESPONSE");
+    assert.equal(transport.getSnapshot().matches["match-1"], undefined);
+    transport.disconnect();
+  }
+});
+
 test("socket history retains older records without changing the live cursor and rejects mismatched replies", async () => {
   const socket = new FakeSocket();
   let mismatch = false;
