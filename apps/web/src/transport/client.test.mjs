@@ -1,8 +1,21 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BrowserGameTransport, BrowserTransportError } from "./client.ts";
+import { BrowserGameTransport, BrowserTransportError, defaultSocketFactory } from "./client.ts";
 import { BrowserTransportStore } from "./state.ts";
 import { sendAndRefreshAction } from "../features/actions/model.ts";
+
+test("browser handshake uses WebSocket, which supplies Origin for same-origin authentication", () => {
+  const socket = defaultSocketFactory();
+  try {
+    assert.equal(socket.io.opts.autoConnect, false);
+    assert.equal(socket.io.opts.withCredentials, true);
+    assert.equal(socket.io.opts.path, "/socket.io");
+    assert.deepEqual(socket.io.opts.transports, ["websocket"]);
+    assert.equal(socket.connected, false);
+  } finally {
+    socket.disconnect();
+  }
+});
 
 test("same guest restoration preserves cached projections", () => {
   const store = new BrowserTransportStore();

@@ -139,9 +139,12 @@ function requestError(code: "REQUEST_REJECTED" | "SESSION_EXPIRED", response: un
   return new BrowserTransportError(code);
 }
 
-function defaultSocketFactory(): BrowserSocket {
+export function defaultSocketFactory(): BrowserSocket {
   // Same-origin cookie auth is browser managed. Credentials never enter a URL or JS state.
-  return io({ path: "/socket.io", withCredentials: true, autoConnect: false }) as unknown as BrowserSocket;
+  // The server requires Origin on every handshake. Browsers supply it for
+  // WebSocket, but omit it on the initial same-origin polling GET. Starting
+  // with polling would therefore fail before any authenticated room sync.
+  return io({ path: "/socket.io", transports: ["websocket"], withCredentials: true, autoConnect: false }) as unknown as BrowserSocket;
 }
 
 function defaultId(): string {

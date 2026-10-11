@@ -2,7 +2,8 @@
 from pathlib import Path
 import os, shutil, tarfile, sys, json, time
 base = Path.home() / '.bang-online'
-archive, commit = sys.argv[1:]
+archive, commit = sys.argv[1:3]
+reason = sys.argv[3] if len(sys.argv) > 3 else 'Restore active match after unchanged recovered room response'
 stage = base / ('web-stage-' + commit[:12])
 stage.mkdir(exist_ok=False)
 with tarfile.open(Path(archive).expanduser()) as bundle:
@@ -25,6 +26,6 @@ temporary = web / 'index.html.next'
 shutil.copy2(stage / 'index.html', temporary)
 os.replace(temporary, web / 'index.html')
 metadata = {'webSourceCommit': commit, 'deployedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'serverRestarted': False, 'reason': 'Restore active match after unchanged recovered room response'}
+            'serverRestarted': False, 'reason': reason}
 (base / 'current/web-patch-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
 print(json.dumps(metadata))
