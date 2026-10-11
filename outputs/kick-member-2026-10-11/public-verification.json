@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-11T14:40:58.836Z",
+  "origin": "https://bang-online.site",
+  "checks": [
+    "three guests joined and subscribed",
+    "ROOM_FORBIDDEN",
+    "CANNOT_KICK_SELF",
+    "STALE_VERSION",
+    "MEMBER_NOT_FOUND",
+    "owner kick updates roster and all three sockets receive committed hint",
+    "removed member loses sync and command permission",
+    "duplicate kick does not mutate twice",
+    "other member stays seated",
+    "rejoin allowed; old kick replay cannot remove rejoined member",
+    "dedicated verification room closed"
+  ],
+  "ok": true,
+  "localServerSha256": "7d51178d3e2c5df9cd2d9d79483b80e756721ac9bba7b7e3b27aff0d6969c398"
+}
