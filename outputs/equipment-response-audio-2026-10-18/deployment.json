@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "sourceCommit": "16acdf10d24e76100ad2eaa9faf65c34985e4270",
+  "previousRelease": "/Users/rkdwoals159/.bang-online/releases/2026-10-18-indians-cleanup",
+  "release": "/Users/rkdwoals159/.bang-online/releases/2026-10-18-equipment-response-audio",
+  "deployedAt": "2026-10-18T01:46:04+0900",
+  "backup": "bang-online-20261017T164601Z-96a85b.dump",
+  "preflight": {"total":22,"valid":22,"invalid":0,"invalidActive":0,"active":15},
+  "automaticEliminationScan": {"checked":13,"pending":[]},
+  "publicHealthStatus": 200,
+  "publicPageStatus": 200,
+  "serverSha256": "78eeddec1025e3e0ac5a157ed5215a4e7bab2d087b448a116ca67126af9aa1dd",
+  "frontend": ["index-CYRLH9cW.js", "client-GKvJ9PWc.js", "index-CrCLNHDQ.css"],
+  "publicAudioSha256": {
+    "revolver-9e32bed6.mp3":"9e32bed68066c6d19db64ca20d73583e88bf28183266dccd459b545f4368b5a6",
+    "gatling-ee9a571c.mp3":"ee9a571c87d799084c8f588e2a8f19b027b221c4ed4ca057f9a76c603ad9add9"
+  }
+}
