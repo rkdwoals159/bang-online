@@ -1,0 +1,26 @@
+{
+  "sourceCommit": "f12e4decb9309c51ce9a65bae3989febb29ddbad",
+  "deployedAt": "2026-10-18T01:07:41+09:00",
+  "release": "/Users/rkdwoals159/.bang-online/releases/2026-10-18-indians-cleanup",
+  "previousRelease": "/Users/rkdwoals159/.bang-online/releases/2026-10-18-room-management",
+  "backup": "bang-online-20261017T160738Z-b5d246.dump",
+  "preflight": {"total":21,"valid":21,"invalid":0,"invalidActive":0},
+  "serverBundleSha256": "273abbf7f9849a782e09c16e5aee137df92a0a6b29964fd1e3a4f01b040ca92e",
+  "publicEntry": "index-pTzbIM0o.js",
+  "publicTransport": "client-B1HIM2e_.js",
+  "releaseSwitches": 1,
+  "postgresRestarted": false,
+  "tunnelRestarted": false,
+  "productionSmokePassed": true,
+  "repairedRoom": {
+    "roomId":"r_ea7WPFsKc_evyj3nzUxxl_XN",
+    "fromVersion":62,
+    "toVersion":63,
+    "eventCount":8,
+    "status":"playing",
+    "pendingKind":null,
+    "remainingEffects":0,
+    "validatedProjections":7,
+    "repeatChanged":false
+  }
+}

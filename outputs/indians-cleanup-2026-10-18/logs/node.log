@@ -1,0 +1,783 @@
+TAP version 13
+# (node:5212) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:5212) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: same-version tablewide responses all commit and preserve private reservations
+ok 1 - same-version tablewide responses all commit and preserve private reservations
+  ---
+  duration_ms: 3650.913
+  type: 'test'
+  ...
+# Subtest: D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+ok 2 - D01: repeated accepted command returns its receipt without reapplying or duplicating persistence
+  ---
+  duration_ms: 2631.506
+  type: 'test'
+  ...
+# Subtest: D02: reusing a command ID with another payload fails before engine evaluation
+ok 3 - D02: reusing a command ID with another payload fails before engine evaluation
+  ---
+  duration_ms: 2757.4434
+  type: 'test'
+  ...
+# Subtest: D03: same-version concurrent valid commands commit once and save the losing stale outcome
+ok 4 - D03: same-version concurrent valid commands commit once and save the losing stale outcome
+  ---
+  duration_ms: 3426.8704
+  type: 'test'
+  ...
+# Subtest: D04: actor spoofing fails strict validation and another player's card fails ownership checks
+ok 5 - D04: actor spoofing fails strict validation and another player's card fails ownership checks
+  ---
+  duration_ms: 2876.3114
+  type: 'test'
+  ...
+# Subtest: known-match rule rejection is saved and replayed without another engine evaluation
+ok 6 - known-match rule rejection is saved and replayed without another engine evaluation
+  ---
+  duration_ms: 3080.6771
+  type: 'test'
+  ...
+# Subtest: known-match stale version rejection is stored and replayed before engine evaluation
+ok 7 - known-match stale version rejection is stored and replayed before engine evaluation
+  ---
+  duration_ms: 3085.9535
+  type: 'test'
+  ...
+# Subtest: rejection receipt version race reloads state and records the revalidated stale result
+ok 8 - rejection receipt version race reloads state and records the revalidated stale result
+  ---
+  duration_ms: 2517.3272
+  type: 'test'
+  ...
+# Subtest: stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+ok 9 - stale rejection race re-enters engine evaluation when the competing commit makes expectedVersion current
+  ---
+  duration_ms: 2463.4448
+  type: 'test'
+  ...
+# Subtest: a non-member cannot obtain or persist a command receipt
+ok 10 - a non-member cannot obtain or persist a command receipt
+  ---
+  duration_ms: 2393.5188
+  type: 'test'
+  ...
+# Subtest: T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+ok 11 - T67 advances END_TURN through start and two-card draw in one commit, then replays the receipt
+  ---
+  duration_ms: 2184.1878
+  type: 'test'
+  ...
+# Subtest: a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+ok 12 - a saved T67 Kit draw prompt resumes through executeTurnDraw and reaches play
+  ---
+  duration_ms: 2318.4088
+  type: 'test'
+  ...
+# Subtest: the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+ok 13 - the registered effect runtime applies PLAY_CARD, resumes RESPOND, and executes Sid ability
+  ---
+  duration_ms: 4010.5586
+  type: 'test'
+  ...
+# Subtest: a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+ok 14 - a saved Jail start interaction resumes T66, then T67 completes draw before the same commit
+  ---
+  duration_ms: 2042.9164
+  type: 'test'
+  ...
+# (node:18048) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18048) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: departure resumes a saved kit_carlson private draw and moves to the next living player
+ok 15 - departure resumes a saved kit_carlson private draw and moves to the next living player
+  ---
+  duration_ms: 20.9533
+  type: 'test'
+  ...
+# Subtest: departure resumes a saved jesse_jones private draw and moves to the next living player
+ok 16 - departure resumes a saved jesse_jones private draw and moves to the next living player
+  ---
+  duration_ms: 3.7989
+  type: 'test'
+  ...
+# (node:18712) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18712) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: indians: automatic cleanup resumes queued responses after target 0 is eliminated
+ok 17 - indians: automatic cleanup resumes queued responses after target 0 is eliminated
+  ---
+  duration_ms: 28.9717
+  type: 'test'
+  ...
+# Subtest: indians: automatic cleanup resumes queued responses after target 1 is eliminated
+ok 18 - indians: automatic cleanup resumes queued responses after target 1 is eliminated
+  ---
+  duration_ms: 5.7676
+  type: 'test'
+  ...
+# Subtest: indians: automatic cleanup resumes queued responses after target 3 is eliminated
+ok 19 - indians: automatic cleanup resumes queued responses after target 3 is eliminated
+  ---
+  duration_ms: 4.9317
+  type: 'test'
+  ...
+# Subtest: gatling: automatic cleanup resumes queued responses after target 0 is eliminated
+ok 20 - gatling: automatic cleanup resumes queued responses after target 0 is eliminated
+  ---
+  duration_ms: 5.8795
+  type: 'test'
+  ...
+# Subtest: gatling: automatic cleanup resumes queued responses after target 1 is eliminated
+ok 21 - gatling: automatic cleanup resumes queued responses after target 1 is eliminated
+  ---
+  duration_ms: 5.014
+  type: 'test'
+  ...
+# Subtest: gatling: automatic cleanup resumes queued responses after target 3 is eliminated
+ok 22 - gatling: automatic cleanup resumes queued responses after target 3 is eliminated
+  ---
+  duration_ms: 4.0853
+  type: 'test'
+  ...
+# Subtest: living player's hand-limit discard is never chosen automatically
+ok 23 - living player's hand-limit discard is never chosen automatically
+  ---
+  duration_ms: 1.1684
+  type: 'test'
+  ...
+# Subtest: Vulture Sam still inherits cards instead of automatic discarding
+ok 24 - Vulture Sam still inherits cards instead of automatic discarding
+  ---
+  duration_ms: 4.757
+  type: 'test'
+  ...
+# (node:16008) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:16008) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: match outbox projection emits only aggregate ID, version, and event sequence
+ok 25 - match outbox projection emits only aggregate ID, version, and event sequence
+  ---
+  duration_ms: 1.8347
+  type: 'test'
+  ...
+# Subtest: room outbox projection follows the protocol room:changed shape
+ok 26 - room outbox projection follows the protocol room:changed shape
+  ---
+  duration_ms: 0.1877
+  type: 'test'
+  ...
+# Subtest: outbox projection rejects malformed aggregate cursors
+ok 27 - outbox projection rejects malformed aggregate cursors
+  ---
+  duration_ms: 0.7717
+  type: 'test'
+  ...
+# (node:18160) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18160) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: all equipment types, jail and dynamite placement have named public records
+ok 28 - all equipment types, jail and dynamite placement have named public records
+  ---
+  duration_ms: 4.2204
+  type: 'test'
+  ...
+# Subtest: turn discards, Sid costs, weapon replacement and elimination cleanup are public discard records
+ok 29 - turn discards, Sid costs, weapon replacement and elimination cleanup are public discard records
+  ---
+  duration_ms: 0.3299
+  type: 'test'
+  ...
+# Subtest: Panic and Cat records name the public effect and target zone without a hidden hand face
+ok 30 - Panic and Cat records name the public effect and target zone without a hidden hand face
+  ---
+  duration_ms: 0.5528
+  type: 'test'
+  ...
+# Subtest: Jesse, El Gringo and Vulture transfers omit private hand identities
+ok 31 - Jesse, El Gringo and Vulture transfers omit private hand identities
+  ---
+  duration_ms: 0.9606
+  type: 'test'
+  ...
+# Subtest: General Store picks and public discard-pile pickups name the already public card
+ok 32 - General Store picks and public discard-pile pickups name the already public card
+  ---
+  duration_ms: 1.5355
+  type: 'test'
+  ...
+# Subtest: Stagecoach, Wells Fargo and General Store usage has a record; hidden draws expose count only
+ok 33 - Stagecoach, Wells Fargo and General Store usage has a record; hidden draws expose count only
+  ---
+  duration_ms: 1.1721
+  type: 'test'
+  ...
+# Subtest: elimination, reshuffle, resource exhaustion and match completion have readable records
+ok 34 - elimination, reshuffle, resource exhaustion and match completion have readable records
+  ---
+  duration_ms: 0.8837
+  type: 'test'
+  ...
+# (node:11876) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:11876) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: Panic/Cat presentation reveals affected seats without the hidden victim card
+ok 35 - Panic/Cat presentation reveals affected seats without the hidden victim card
+  ---
+  duration_ms: 6.459
+  type: 'test'
+  ...
+# Subtest: R05 only Black Jack's explicitly public second draw reaches the shared event projection
+ok 36 - R05 only Black Jack's explicitly public second draw reaches the shared event projection
+  ---
+  duration_ms: 1.0106
+  type: 'test'
+  ...
+# Subtest: match sync bounds concurrently committed events to its loaded snapshot
+ok 37 - match sync bounds concurrently committed events to its loaded snapshot
+  ---
+  duration_ms: 9.4357
+  type: 'test'
+  ...
+# Subtest: match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+ok 38 - match sync rechecks membership and returns only the viewer snapshot plus allowlisted public events
+  ---
+  duration_ms: 1.4754
+  type: 'test'
+  ...
+# Subtest: match sync rejects an actor when membership is absent or the saved roster no longer contains them
+ok 39 - match sync rejects an actor when membership is absent or the saved roster no longer contains them
+  ---
+  duration_ms: 1.1183
+  type: 'test'
+  ...
+# Subtest: match sync flags a truncated or future event cursor for a full snapshot
+ok 40 - match sync flags a truncated or future event cursor for a full snapshot
+  ---
+  duration_ms: 1.7352
+  type: 'test'
+  ...
+# Subtest: room sync rechecks both authenticated view and persisted membership without returning invite material
+ok 41 - room sync rechecks both authenticated view and persisted membership without returning invite material
+  ---
+  duration_ms: 0.9869
+  type: 'test'
+  ...
+# Subtest: room sync carries the persisted active match route after START_MATCH
+ok 42 - room sync carries the persisted active match route after START_MATCH
+  ---
+  duration_ms: 0.4561
+  type: 'test'
+  ...
+# Subtest: room sync rejects a missing membership without disclosing the room ID
+ok 43 - room sync rejects a missing membership without disclosing the room ID
+  ---
+  duration_ms: 0.518
+  type: 'test'
+  ...
+# Subtest: room sync rejects when persisted membership has expired after an earlier member view
+ok 44 - room sync rejects when persisted membership has expired after an earlier member view
+  ---
+  duration_ms: 0.6076
+  type: 'test'
+  ...
+# (node:16252) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:16252) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: restart recovery restores pending cursors, same credential seat, private sync, public history, and one command receipt
+ok 45 - restart recovery restores pending cursors, same credential seat, private sync, public history, and one command receipt
+  ---
+  duration_ms: 3829.4856
+  type: 'test'
+  ...
+# Subtest: unsupported active snapshots are quarantined without changing cursor, pending state, receipt, or history
+ok 46 - unsupported active snapshots are quarantined without changing cursor, pending state, receipt, or history
+  ---
+  duration_ms: 2261.6212
+  type: 'test'
+  ...
+# (node:9412) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:9412) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: a failed departure rolls back the room, forfeit snapshot, history, and match outbox together
+ok 47 - a failed departure rolls back the room, forfeit snapshot, history, and match outbox together
+  ---
+  duration_ms: 2958.7044
+  type: 'test'
+  ...
+# Subtest: START_MATCH receipt survives return to lobby and a roster shrinking below four
+ok 48 - START_MATCH receipt survives return to lobby and a roster shrinking below four
+  ---
+  duration_ms: 2241.5856
+  type: 'test'
+  ...
+# Subtest: renaming a guest updates the current room and match atomically without changing their seat or cards
+ok 49 - renaming a guest updates the current room and match atomically without changing their seat or cards
+  ---
+  duration_ms: 2613.2957
+  type: 'test'
+  ...
+# Subtest: trims display names and enforces 1–20 Unicode code points without controls
+ok 50 - trims display names and enforces 1–20 Unicode code points without controls
+  ---
+  duration_ms: 2629.0537
+  type: 'test'
+  ...
+# Subtest: issues hashed credentials, validates expiry and revocation, and disables expiry by default
+ok 51 - issues hashed credentials, validates expiry and revocation, and disables expiry by default
+  ---
+  duration_ms: 1962.6109
+  type: 'test'
+  ...
+# Subtest: injects guest TTL and room retention without enabling default cleanup
+ok 52 - injects guest TTL and room retention without enabling default cleanup
+  ---
+  duration_ms: 1971.4413
+  type: 'test'
+  ...
+# Subtest: creates private rooms with one-time invite secrets and public allowlisted outbox
+ok 53 - creates private rooms with one-time invite secrets and public allowlisted outbox
+  ---
+  duration_ms: 1940.2509
+  type: 'test'
+  ...
+# Subtest: joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+ok 54 - joins from preview version, rejects stale/duplicate/full access, and recovers the assigned identity seat
+  ---
+  duration_ms: 2094.377
+  type: 'test'
+  ...
+# Subtest: readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+ok 55 - readiness, owner transfer, voluntary closure and D10 retention preserve the room record
+  ---
+  duration_ms: 2067.7436
+  type: 'test'
+  ...
+# Subtest: owner kicks only a waiting member atomically, with receipts, version guards and rejoin support
+ok 56 - owner kicks only a waiting member atomically, with receipts, version guards and rejoin support
+  ---
+  duration_ms: 2959.729
+  type: 'test'
+  ...
+# Subtest: only the owner can voluntarily close a room through the service
+ok 57 - only the owner can voluntarily close a room through the service
+  ---
+  duration_ms: 2838.2265
+  type: 'test'
+  ...
+# Subtest: the owner can close a room after its lobby is locked
+ok 58 - the owner can close a room after its lobby is locked
+  ---
+  duration_ms: 2217.8291
+  type: 'test'
+  ...
+# Subtest: starts a room directly after arrival once, returns the same match on retry, and projects its route
+ok 59 - starts a room directly after arrival once, returns the same match on retry, and projects its route
+  ---
+  duration_ms: 2205.1585
+  type: 'test'
+  ...
+# Subtest: restarts a completed match with a fresh seeded setup and preserves the prior record
+ok 60 - restarts a completed match with a fresh seeded setup and preserves the prior record
+  ---
+  duration_ms: 2078.4373
+  type: 'test'
+  ...
+# Subtest: requires at least four members and starts a seven-member room
+ok 61 - requires at least four members and starts a seven-member room
+  ---
+  duration_ms: 2174.7188
+  type: 'test'
+  ...
+# Subtest: returns a completed room to the same lobby and requires readiness before starting again
+ok 62 - returns a completed room to the same lobby and requires readiness before starting again
+  ---
+  duration_ms: 2036.7677
+  type: 'test'
+  ...
+# (node:18348) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18348) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: room exit and owner deletion are atomic, idempotent, and revoke every live access path
+ok 63 - room exit and owner deletion are atomic, idempotent, and revoke every live access path
+  ---
+  duration_ms: 4301.0371
+  type: 'test'
+  ...
+# Subtest: startup config reports missing PostgreSQL settings before opening the listener
+ok 64 - startup config reports missing PostgreSQL settings before opening the listener
+  ---
+  duration_ms: 2.1662
+  type: 'test'
+  ...
+# Subtest: runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+ok 65 - runtime applies migrations, serves guest sessions, authenticates Socket.IO cookies, and shuts down
+  ---
+  duration_ms: 2944.1483
+  type: 'test'
+  ...
+# Subtest: START_MATCH enforces owner and minimum roster, automatically prepares arrivals, and persists once
+ok 66 - START_MATCH enforces owner and minimum roster, automatically prepares arrivals, and persists once
+  ---
+  duration_ms: 3189.0799
+  type: 'test'
+  ...
+# Subtest: node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+ok 67 - node-postgres runtime uses PGlite Socket and preserves sessions and migrations across database restart
+  ---
+  duration_ms: 5043.051
+  type: 'test'
+  ...
+# (node:8296) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:8296) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: handler exceptions return correlated errors without disconnecting authenticated players
+ok 68 - handler exceptions return correlated errors without disconnecting authenticated players
+  ---
+  duration_ms: 8.256
+  type: 'test'
+  ...
+# Subtest: history checks current membership and strict input before invoking its read handler
+ok 69 - history checks current membership and strict input before invoking its read handler
+  ---
+  duration_ms: 29.5694
+  type: 'test'
+  ...
+# Subtest: handshake authenticates the configured cookie and sets only the server-resolved identity
+ok 70 - handshake authenticates the configured cookie and sets only the server-resolved identity
+  ---
+  duration_ms: 15.5258
+  type: 'test'
+  ...
+# Subtest: missing, invalid, expired, and duplicate session cookies fail the handshake
+ok 71 - missing, invalid, expired, and duplicate session cookies fail the handshake
+  ---
+  duration_ms: 61.995
+  type: 'test'
+  ...
+# Subtest: room commands are strictly parsed and membership is rechecked before dispatch
+ok 72 - room commands are strictly parsed and membership is rechecked before dispatch
+  ---
+  duration_ms: 46.9872
+  type: 'test'
+  ...
+# Subtest: JOIN bypasses pre-membership but its handler can join only after T44 confirms membership
+ok 73 - JOIN bypasses pre-membership but its handler can join only after T44 confirms membership
+  ---
+  duration_ms: 3.6304
+  type: 'test'
+  ...
+# Subtest: authenticated room preview needs no membership and returns only the shared success DTO
+ok 74 - authenticated room preview needs no membership and returns only the shared success DTO
+  ---
+  duration_ms: 27.3934
+  type: 'test'
+  ...
+# Subtest: invalid and unknown preview invites share INVITE_INVALID; malformed preview ACKs BAD_REQUEST without echoing secrets
+ok 75 - invalid and unknown preview invites share INVITE_INVALID; malformed preview ACKs BAD_REQUEST without echoing secrets
+  ---
+  duration_ms: 16.0712
+  type: 'test'
+  ...
+# Subtest: preview failures and invalid JOIN failures share one bucket; the sixth lookup is blocked before dispatch
+ok 76 - preview failures and invalid JOIN failures share one bucket; the sixth lookup is blocked before dispatch
+  ---
+  duration_ms: 75.8532
+  type: 'test'
+  ...
+# Subtest: malformed JOIN payloads do not consume failed-invite allowance
+ok 77 - malformed JOIN payloads do not consume failed-invite allowance
+  ---
+  duration_ms: 76.9111
+  type: 'test'
+  ...
+# Subtest: valid invite JOIN state errors never count as guessing failures
+ok 78 - valid invite JOIN state errors never count as guessing failures
+  ---
+  duration_ms: 421.7641
+  type: 'test'
+  ...
+# Subtest: a successful JOIN clears prior preview failures for its IP and player key
+ok 79 - a successful JOIN clears prior preview failures for its IP and player key
+  ---
+  duration_ms: 126.1841
+  type: 'test'
+  ...
+# Subtest: undefined and unknown JOIN ACKs do not clear prior invite failures
+ok 80 - undefined and unknown JOIN ACKs do not clear prior invite failures
+  ---
+  duration_ms: 123.1628
+  type: 'test'
+  ...
+# Subtest: limiter keys use raw peer address and authenticated player ID, ignoring forwarded headers
+ok 81 - limiter keys use raw peer address and authenticated player ID, ignoring forwarded headers
+  ---
+  duration_ms: 139.6381
+  type: 'test'
+  ...
+# Subtest: match commands fail closed without fresh membership; match channel joins recheck too
+ok 82 - match commands fail closed without fresh membership; match channel joins recheck too
+  ---
+  duration_ms: 31.0395
+  type: 'test'
+  ...
+# Subtest: sync envelopes are exact and room/match membership is checked before sync handlers
+ok 83 - sync envelopes are exact and room/match membership is checked before sync handlers
+  ---
+  duration_ms: 61.702
+  type: 'test'
+  ...
+# Subtest: the accepted client event list is exact and unknown/server-only events are rejected
+ok 84 - the accepted client event list is exact and unknown/server-only events are rejected
+  ---
+  duration_ms: 47.3151
+  type: 'test'
+  ...
+# Subtest: disconnect maps only to presence callback and never invokes seat removal
+ok 85 - disconnect maps only to presence callback and never invokes seat removal
+  ---
+  duration_ms: 2.4366
+  type: 'test'
+  ...
+# (node:15588) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:15588) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: allows five failed lookups in a rolling minute and rejects the sixth before lookup
+ok 86 - allows five failed lookups in a rolling minute and rejects the sixth before lookup
+  ---
+  duration_ms: 4.1265
+  type: 'test'
+  ...
+# Subtest: reserves in-flight lookup slots so concurrent preview and JOIN work cannot exceed five lookups
+ok 87 - reserves in-flight lookup slots so concurrent preview and JOIN work cannot exceed five lookups
+  ---
+  duration_ms: 0.3985
+  type: 'test'
+  ...
+# Subtest: doubles early retry delay and caps it at fifteen minutes
+ok 88 - doubles early retry delay and caps it at fifteen minutes
+  ---
+  duration_ms: 0.3739
+  type: 'test'
+  ...
+# Subtest: continues to block after the initial retry delay until a rolling failure expires
+ok 89 - continues to block after the initial retry delay until a rolling failure expires
+  ---
+  duration_ms: 0.2563
+  type: 'test'
+  ...
+# Subtest: a successful preview releases its reservation without clearing prior failed lookups
+ok 90 - a successful preview releases its reservation without clearing prior failed lookups
+  ---
+  duration_ms: 0.1976
+  type: 'test'
+  ...
+# Subtest: successful JOIN clears failure history and backoff for that key
+ok 91 - successful JOIN clears failure history and backoff for that key
+  ---
+  duration_ms: 0.1961
+  type: 'test'
+  ...
+# Subtest: idle cleanup removes bucket state after fifteen minutes without invalid input
+ok 92 - idle cleanup removes bucket state after fifteen minutes without invalid input
+  ---
+  duration_ms: 0.4358
+  type: 'test'
+  ...
+# Subtest: raw peer and authenticated player ID form isolated bucket keys
+ok 93 - raw peer and authenticated player ID form isolated bucket keys
+  ---
+  duration_ms: 0.2173
+  type: 'test'
+  ...
+# (node:17952) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:17952) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: applies the initial schema to an empty database, skips an identical migration, and rejects checksum changes
+ok 94 - applies the initial schema to an empty database, skips an identical migration, and rejects checksum changes
+  ---
+  duration_ms: 2840.2247
+  type: 'test'
+  ...
+# Subtest: creates and reads rooms and the complete internal match snapshot
+ok 95 - creates and reads rooms and the complete internal match snapshot
+  ---
+  duration_ms: 2041.2097
+  type: 'test'
+  ...
+# Subtest: looks up the latest current-or-last match route for a room
+ok 96 - looks up the latest current-or-last match route for a room
+  ---
+  duration_ms: 1918.6824
+  type: 'test'
+  ...
+# Subtest: atomically commits snapshot, events, receipt, and a state-free outbox signal
+ok 97 - atomically commits snapshot, events, receipt, and a state-free outbox signal
+  ---
+  duration_ms: 2193.5234
+  type: 'test'
+  ...
+# Subtest: records a rejected command receipt without changing snapshot, version, events, or outbox
+ok 98 - records a rejected command receipt without changing snapshot, version, events, or outbox
+  ---
+  duration_ms: 2286.7112
+  type: 'test'
+  ...
+# Subtest: does not record a rejection receipt for an actor without a match seat
+ok 99 - does not record a rejection receipt for an actor without a match seat
+  ---
+  duration_ms: 1982.5191
+  type: 'test'
+  ...
+# Subtest: returns the current version without recording a rejection receipt after an observed-version race
+ok 100 - returns the current version without recording a rejection receipt after an observed-version race
+  ---
+  duration_ms: 2231.7693
+  type: 'test'
+  ...
+# Subtest: rejects stale and lower-version commits without writing any associated records
+ok 101 - rejects stale and lower-version commits without writing any associated records
+  ---
+  duration_ms: 2184.8558
+  type: 'test'
+  ...
+# Subtest: rolls back the snapshot, event, and receipt when the outbox insert fails
+ok 102 - rolls back the snapshot, event, and receipt when the outbox insert fails
+  ---
+  duration_ms: 2005.1517
+  type: 'test'
+  ...
+# (node:18452) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./packages/engine/test/setup/ts-source-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18452) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+# Subtest: looks up only active hashed sessions and creates an idempotent room with a safe preview
+ok 103 - looks up only active hashed sessions and creates an idempotent room with a safe preview
+  ---
+  duration_ms: 2881.5872
+  type: 'test'
+  ...
+# Subtest: starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+ok 104 - starts a room and persists the initialized match, receipt, and both allowlisted outboxes atomically
+  ---
+  duration_ms: 2035.1984
+  type: 'test'
+  ...
+# Subtest: a duplicate room-start command returns the original match outcome without additional writes
+ok 105 - a duplicate room-start command returns the original match outcome without additional writes
+  ---
+  duration_ms: 2142.3508
+  type: 'test'
+  ...
+# Subtest: restarts directly from the latest completed match with atomic writes and preserved history
+ok 106 - restarts directly from the latest completed match with atomic writes and preserved history
+  ---
+  duration_ms: 2033.6142
+  type: 'test'
+  ...
+# Subtest: rejects in-game starts unless the latest same-room match is completed, with no writes
+ok 107 - rejects in-game starts unless the latest same-room match is completed, with no writes
+  ---
+  duration_ms: 8572.5177
+  type: 'test'
+  ...
+# Subtest: serializes concurrent direct restarts so only one new match becomes active
+ok 108 - serializes concurrent direct restarts so only one new match becomes active
+  ---
+  duration_ms: 2399.9178
+  type: 'test'
+  ...
+# Subtest: direct restart rechecks unchanged membership before writing
+ok 109 - direct restart rechecks unchanged membership before writing
+  ---
+  duration_ms: 4692.3312
+  type: 'test'
+  ...
+# Subtest: start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+ok 110 - start rejects unauthorized, stale, incomplete, locked, and mismatched snapshots without side effects
+  ---
+  duration_ms: 15089.0416
+  type: 'test'
+  ...
+# Subtest: outbox failure rolls back the room, match, players, receipt, and preceding signal
+ok 111 - outbox failure rolls back the room, match, players, receipt, and preceding signal
+  ---
+  duration_ms: 1995.4118
+  type: 'test'
+  ...
+# Subtest: concurrent retries of one room-start command commit one match and return its original ID
+ok 112 - concurrent retries of one room-start command commit one match and return its original ID
+  ---
+  duration_ms: 2089.4009
+  type: 'test'
+  ...
+# Subtest: serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+ok 113 - serializes join, readiness, owner transfer, and D10 closure with room receipts and allowlisted signals
+  ---
+  duration_ms: 2078.5999
+  type: 'test'
+  ...
+# Subtest: persists room status changes and locks lobby membership outside WAITING
+ok 114 - persists room status changes and locks lobby membership outside WAITING
+  ---
+  duration_ms: 2555.7316
+  type: 'test'
+  ...
+# Subtest: rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+ok 115 - rolls back member, room version, receipt, and outbox when an outbox ID conflicts
+  ---
+  duration_ms: 2286.517
+  type: 'test'
+  ...
+# Subtest: rejects leave by a non-member without changing the room
+ok 116 - rejects leave by a non-member without changing the room
+  ---
+  duration_ms: 2066.1283
+  type: 'test'
+  ...
+# Subtest: returns a completed match room to the lobby atomically and replays the original receipt
+ok 117 - returns a completed match room to the lobby atomically and replays the original receipt
+  ---
+  duration_ms: 2099.2415
+  type: 'test'
+  ...
+# Subtest: rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+ok 118 - rejects return-to-lobby authorization, stale versions, and incomplete latest matches without writes
+  ---
+  duration_ms: 10507.0794
+  type: 'test'
+  ...
+# Subtest: rolls back automatic readiness restoration, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+ok 119 - rolls back automatic readiness restoration, room version, receipt, and outbox when return-to-lobby outbox insertion fails
+  ---
+  duration_ms: 2146.3557
+  type: 'test'
+  ...
+# Subtest: room arrivals are automatically ready and legacy unready flags allow start and direct restart
+ok 120 - room arrivals are automatically ready and legacy unready flags allow start and direct restart
+  ---
+  duration_ms: 2089.6939
+  type: 'test'
+  ...
+1..120
+# tests 120
+# suites 0
+# pass 120
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 198427.8201
+

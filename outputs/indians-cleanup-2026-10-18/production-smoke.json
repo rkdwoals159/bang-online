@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-17T16:08:18.029Z",
+  "origin": "https://bang-online.site",
+  "roomId": "r_Yfc5VIyZcuJaeYJBugE7uhP8",
+  "checks": [
+    "five authenticated clients",
+    "five-player game starts",
+    "non-owner deletion denied",
+    "outlaw departure eliminates only that player",
+    "remaining game stays playing",
+    "departure retry is idempotent",
+    "departed player cannot sync match",
+    "departed room absent from recovery",
+    "playing clients receive room closure",
+    "owner close retry is idempotent",
+    "all five clients lose game access",
+    "all five recovered room lists are empty",
+    "old invitation cannot rejoin"
+  ],
+  "passed": true
+}
