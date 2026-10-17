@@ -369,7 +369,7 @@ export function ReactionPrompt({
               ))}
             </ul>
           ) : null}
-          {!currentSnapshot.publicTable.tablewideAttack ? <p className="reaction-prompt__progress" role="status" aria-live="polite">
+          {!currentSnapshot.publicTable.tablewideAttack || !["INDIANS_RESPONSE", "GATLING_RESPONSE"].includes(pending.kind) ? <p className="reaction-prompt__progress" role="status" aria-live="polite">
           {currentResponderName
             ? pending.kind === "GENERAL_STORE_PICK"
               ? `${currentResponderName} 님이 잡화점 카드를 고르고 있어요.`
@@ -382,7 +382,7 @@ export function ReactionPrompt({
   );
   const usesStage = variant === "scene" || pending.kind === "LUCKY_DRAW" || (pending.kind === "KIT_CARLSON_PICK" && isResponder);
   const attack = currentSnapshot.publicTable.tablewideAttack;
-  if (attack) return <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
+  if (attack && ["INDIANS_RESPONSE", "GATLING_RESPONSE"].includes(pending.kind)) return <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={attack.attackId} title={attack.kind === "gatling" ? "개틀링! 모두 대응하세요" : "인디언! 모두 대응하세요"} attentionKey={isResponder ? pending.interactionId : undefined} dockLabel="대응 보기">
     <TablewideAttackStage attack={attack} snapshot={currentSnapshot}>{content}</TablewideAttackStage>
   </ChoiceStage>;
   return usesStage ? <ChoiceStage presentation={variant === "scene" ? "table" : "modal"} interactionId={pending.interactionId} title={interactionLabel(pending.kind)}>{content}</ChoiceStage> : content;

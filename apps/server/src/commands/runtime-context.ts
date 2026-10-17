@@ -6,6 +6,7 @@ import { settleForfeits } from "../../../../packages/engine/src/endgame/forfeit.
 import type { GameState } from "../../../../packages/engine/src/state/types.js";
 import type { EffectEventDraft } from "../../../../packages/engine/src/effects/api.js";
 import { advanceTurnPhases, createTurnAwareCommandHandlers } from "./turn-runtime.js";
+import { hasAutomaticEliminationCleanup, settleEliminationCleanup } from "./elimination-cleanup.js";
 
 export function prepareGameRuntime(matchId: string) {
   const random = { nextFloat: () => {
@@ -24,12 +25,14 @@ export function prepareGameRuntime(matchId: string) {
     for (let transition = 0; transition < 64; transition++) {
       const settled = settleForfeits(state, context);
       events.push(...settled.events);
-      const advanced = advanceTurnPhases(settled.state, runtime);
+      const cleaned = settleEliminationCleanup(settled.state, context);
+      events.push(...cleaned.events);
+      const advanced = advanceTurnPhases(cleaned.state, runtime);
       events.push(...advanced.events);
       state = advanced.state;
       const pendingActor = state.resolution.pendingInteraction?.actorPlayerIds.some(id => state.forfeitedPlayerIds?.includes(id));
-      if (!pendingActor) return { state, events };
+      if (!pendingActor && !hasAutomaticEliminationCleanup(state)) return { state, events };
     }
-    throw new Error("Departure turn progression exceeded its bounded loop.");
+    throw new Error("Automatic turn progression exceeded its bounded loop.");
   } };
 }

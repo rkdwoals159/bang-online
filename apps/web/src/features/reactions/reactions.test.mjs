@@ -68,6 +68,30 @@ const responseOptions = [
   { interactionId: "interaction-1", choice: "TAKE_HIT" },
 ];
 
+for (const attackKind of ["indians", "gatling"]) {
+  for (const kind of ["DISCARDS_ORDER", "DEATH_RESCUE", "LUCKY_DRAW"]) {
+    test(`${attackKind}: ${kind} takes precedence over the attack banner for observers`, () => {
+      const view = snapshot({ viewerId: "player-b", pendingInteraction: {
+        interactionId: "nested", kind, currentResponderPlayerId: "player-a", allowedChoices: [], step: {current:1,total:1},
+      } });
+      view.publicTable.tablewideAttack = { attackId:"attack-1", kind:attackKind, sourcePlayerId:"player-b",
+        targets:[{playerId:"player-a",status:"responding",response:"TAKE_HIT"}] };
+      const markup=renderToStaticMarkup(createElement(ReactionPrompt,{matchId:"match-a",version:25,snapshot:view,variant:"scene",
+        transport:{sendMatchCommand:async()=>{},syncMatch:async()=>{}}}));
+      assert.match(markup,/초원 별 님이 응답 중이에요/);
+      assert.doesNotMatch(markup,/모두 대응하세요|순서를 기다리지 않고|광역 공격 대응 상황/);
+    });
+  }
+  test(`${attackKind}: direct response still shows the shared attack and legal choices`,()=>{
+    const kind=attackKind==="indians"?"INDIANS_RESPONSE":"GATLING_RESPONSE";
+    const view=snapshot({pendingInteraction:responderPending({kind,options:[{interactionId:"interaction-1",choice:"TAKE_HIT"}]})});
+    view.publicTable.tablewideAttack={attackId:"attack-1",kind:attackKind,sourcePlayerId:"player-b",targets:[{playerId:"player-a",status:"responding"}]};
+    const markup=renderToStaticMarkup(createElement(ReactionPrompt,{matchId:"match-a",version:25,snapshot:view,variant:"scene",
+      transport:{sendMatchCommand:async()=>{},syncMatch:async()=>{}}}));
+    assert.match(markup,/모두 대응하세요/);assert.match(markup,/피해 받기/);assert.match(markup,/광역 공격 대응 상황/);
+  });
+}
+
 test("General Store selection shows public card names, suits, images and zoom while keeping exact commands", () => {
   const options = [
     { interactionId: "interaction-1", choice: "CHOOSE_CARD", selectedCardInstanceId: "store-beer" },
