@@ -30,3 +30,23 @@ test('volume is clamped, mute stops sources, and invalid levels leave output unc
 test('source budget stops allocating nodes when a large sound batch fills it',()=>{
   const calls=install(),audio=new GameAudio();audio.unlock();for(let i=0;i<6;i++)audio.play('burst');assert.equal(calls.noise+calls.tones,48);const allocations=calls.nodes.length;assert.equal(audio.play('store'),false);assert.equal(calls.nodes.length,allocations);audio.dispose();
 });
+
+test('recorded revolver and automatic burst load once and play as reusable single buffers',async()=>{
+  const calls=install(),files=[];
+  globalThis.window.AudioContext.prototype.decodeAudioData=async()=>({duration:1.25});
+  globalThis.window.fetch=async url=>{files.push(url);return {ok:true,arrayBuffer:async()=>new ArrayBuffer(12)};};
+  const audio=new GameAudio();audio.unlock();audio.unlock();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(files.sort(),['/assets/audio/gatling-ee9a571c.mp3','/assets/audio/revolver-9e32bed6.mp3']);
+  assert.equal(audio.play('shot'),true);assert.equal(audio.play('burst'),true);
+  assert.equal(calls.noise,2,'each recorded effect uses one buffer source');assert.equal(calls.tones,0);
+  const stopped=calls.stops;audio.setEnabled(false);assert.equal(calls.stops,stopped+2);assert.equal(audio.play('shot'),false);audio.dispose();
+});
+test('missing recordings never delay gameplay and use the synthesized fallback',async()=>{
+  const calls=install();let requests=0;
+  globalThis.window.AudioContext.prototype.decodeAudioData=async()=>{throw new Error('unsupported');};
+  globalThis.window.fetch=async()=>{requests++;throw new Error('offline');};
+  const audio=new GameAudio();audio.unlock();assert.equal(audio.play('shot'),true);
+  await new Promise(resolve=>setImmediate(resolve));audio.unlock();assert.equal(requests,2);
+  assert.equal(audio.play('burst'),true);assert.equal(calls.noise,6);assert.equal(calls.tones,6);audio.dispose();
+});

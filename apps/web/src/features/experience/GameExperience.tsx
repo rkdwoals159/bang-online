@@ -19,6 +19,7 @@ interface ExperienceValue {
   motionAllowed: boolean;
   toggleSound: () => void;
   toggleMotion: () => void;
+  previewSound: (kind:"shot"|"burst") => void;
 }
 const ExperienceContext = createContext<ExperienceValue | null>(null);
 export const useGameExperience = () => useContext(ExperienceContext);
@@ -82,7 +83,8 @@ export function GameExperience({ version, snapshot, visibleEvents, children, sce
     try{localStorage.setItem("bang:sound-volume",String(volume));}catch{ /* Preferences are optional. */ }
   },[]);
   const toggleMotion = useCallback(() => { const next = !motionEnabled; setMotionEnabled(next); try { localStorage.setItem("bang:motion", next ? "on" : "off"); } catch { /* Optional. */ } }, [motionEnabled]);
-  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion }), [cue, targeting, version, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion]);
+  const previewSound = useCallback((kind:"shot"|"burst")=>{if(soundEnabled){audio.current?.unlock();audio.current?.play(kind);}},[soundEnabled]);
+  const value = useMemo(() => ({ cue, targeting: targeting?.version === version ? targeting : null, setTargeting, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion, previewSound }), [cue, targeting, version, soundEnabled, soundVolume, changeSoundVolume, motionEnabled, motionAllowed, toggleSound, toggleMotion, previewSound]);
   return <ExperienceContext.Provider value={value}>
     <div className={`game-experience${scene ? " game-experience--scene" : ""}${motionAllowed ? "" : " game-experience--still"}`} data-last-sound={lastSound || undefined}>{children}
       {!scene && snapshot.status === "playing" && (snapshot.viewer.mode === "active" || ownResponse) ? <nav className="game-navigation" aria-label="게임 화면 바로가기"><a href="#game-table-title">테이블</a><a href={ownResponse ? "#reaction-prompt-title" : "#game-actions-title"}>{ownResponse ? "내 응답" : "내 손패"}</a></nav> : null}
@@ -101,6 +103,8 @@ export function GameExperienceControls() {
     <button type="button" aria-pressed={game.soundEnabled} onClick={game.toggleSound}>효과음 {game.soundEnabled ? "켜짐" : "꺼짐"}</button>
     <label className="game-experience__volume">음량 <input aria-label="효과음 음량" type="range" min="0" max="100" step="5" value={Math.round(game.soundVolume*100)} onChange={event=>game.changeSoundVolume(Number(event.target.value)/100)}/><span>{Math.round(game.soundVolume*100)}%</span></label>
     <button type="button" aria-pressed={game.motionEnabled} onClick={game.toggleMotion}>연출 {game.motionEnabled ? "켜짐" : "꺼짐"}</button>
+    <button type="button" disabled={!game.soundEnabled} onClick={()=>game.previewSound("shot")}>권총 소리 듣기</button>
+    <button type="button" disabled={!game.soundEnabled} onClick={()=>game.previewSound("burst")}>기관총 소리 듣기</button>
   </div>;
 }
 

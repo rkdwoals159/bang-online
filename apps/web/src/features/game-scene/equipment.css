@@ -1,0 +1,94 @@
+/* Approved mini-card layout: equipment belongs to its public seat, never to a hidden drawer. */
+.game-scene{min-height:720px}
+.scene-seat{width:220px;top:clamp(142px,var(--seat-top),calc(100% - 142px))!important}
+.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(2),.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(7),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(2),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(6){--seat-top:78%!important}
+.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(3),.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(6),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(3),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(5){--seat-top:26%!important}
+.scene-seat--self{visibility:hidden}
+@media(min-width:601px) and (min-height:851px){.scene-center{inset:calc(64px + (100% - 329px)*.50) 27% 275px}}
+.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(2){left:12%!important}.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(5){left:88%!important}
+.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(3){left:35%!important}.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(4){left:65%!important}
+.scene-equipment-strip{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:8px 0 0;margin:8px 0 0;border-top:1px solid #74846966;min-width:0}
+.scene-seat .scene-equipment-strip{grid-column:1/-1;grid-row:5}
+.scene-equipment-strip>li{position:relative;display:flex;flex:0 0 auto;flex-direction:column;align-items:center;justify-content:start;gap:2px;width:max-content;min-width:48px;max-width:100%;padding:2px;border:1px solid #637657;border-radius:6px;background:#11281d}
+.scene-equipment-strip>li.is-weapon{border-color:#c0a066}
+.scene-equipment-strip>li.is-hazard{border-color:#c47b5b;background:#39291f}
+.game-scene .scene-equipment-strip .card-zoom{width:100%;min-width:0}
+.game-scene .scene-equipment-strip .card-zoom__trigger{display:flex;justify-content:center;align-items:center;width:100%;min-width:44px;min-height:48px;padding:0;border:0;background:none;border-radius:4px}
+.game-scene .scene-equipment-strip .playing-card{width:30px;flex:0 0 30px;max-width:100%}
+.scene-equipment-strip__name{color:#f9e9be;font-size:11px;line-height:1.2;text-align:center;white-space:nowrap;max-width:100%}
+.scene-equipment-strip__range{position:absolute;right:1px;top:0;min-width:17px;height:17px;padding:0 3px;border-radius:4px;background:#d4b779;color:#17251b;font-weight:800;text-align:center;font-size:11px;line-height:17px;pointer-events:none}
+.scene-seat .scene-seat__target{bottom:auto;height:98px}
+.scene-hand-dock{grid-template-columns:340px minmax(0,1fr)}
+@media(min-width:601px){.game-actions--scene .game-actions__choice{left:380px}}
+.scene-self{display:grid;grid-template-columns:60px minmax(0,1fr);gap:5px 12px;align-content:start;align-items:center;padding:0 0 55px}
+.scene-self>.scene-equipment-strip{grid-column:1/-1;grid-template-columns:repeat(6,minmax(0,1fr));margin:2px 0 0}
+.scene-self>.scene-equipment-strip>li{padding-inline:0;min-width:44px}
+.scene-self .scene-equipment-strip .playing-card{width:29px;flex-basis:29px}
+.scene-self .scene-equipment-strip .card-zoom__trigger{min-height:46px}
+.scene-self .scene-equipment-strip__name{font-size:10px}
+.automatic-responses{display:grid;gap:6px;min-width:0;margin:20px 0;padding:12px 0;border:0;border-top:1px solid #75836566}
+.automatic-responses legend{padding-right:10px;font-weight:750;color:#f7dfad}
+.automatic-responses label{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:48px;padding:8px 12px;background:#142c21;border:1px solid #58725c;border-radius:8px;font-size:14px;cursor:pointer}
+.automatic-responses input{appearance:none;flex:0 0 44px;width:44px;height:26px;position:relative;cursor:pointer;border-radius:20px;border:1px solid #91a08a;background:#354238;margin:0}
+.automatic-responses input:before{content:"";display:block;position:absolute;left:3px;top:3px;width:18px;height:18px;background:#d3d9ce;border-radius:50%;transition:transform 120ms}
+.automatic-responses input:checked{background:#aa8140;border-color:#f0c87c}.automatic-responses input:checked:before{transform:translateX(18px);background:#fff3cf}
+.automatic-responses input:focus-visible{outline:3px solid #ffe4a4;outline-offset:3px}
+.automatic-responses p{font-size:12px;color:#d1c9b3;line-height:1.7;margin:6px 0}
+@media(max-width:1000px) and (min-width:601px){.scene-seat{width:180px}.scene-hand-dock{grid-template-columns:340px minmax(0,1fr)}.scene-self{grid-template-columns:48px minmax(0,1fr);gap:5px 9px}.scene-seat .scene-equipment-strip .playing-card{width:31px;flex-basis:31px}.scene-equipment-strip{gap:4px}.scene-seat .scene-equipment-strip .card-zoom__trigger{min-height:50px}.scene-equipment-strip__name{font-size:10px}}
+@media(min-width:601px) and (max-height:850px){
+  .scene-seat{width:clamp(130px,15vw,190px);top:clamp(142px,var(--seat-top),calc(100% - 142px))!important}
+  .scene-seat .scene-equipment-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin-top:4px;padding-top:4px}
+  .scene-seat .scene-equipment-strip>li{padding:2px 0;gap:1px;min-width:44px}
+  .game-scene .scene-seat .scene-equipment-strip .playing-card{width:25px;flex-basis:25px}
+  .game-scene .scene-seat .scene-equipment-strip .card-zoom__trigger{min-width:0;min-height:44px}
+  .scene-seat .scene-equipment-strip__name{font-size:10px;line-height:1.2}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(2),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(2),.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(2){left:8%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(7),.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(6),.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(5){left:92%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(3){left:24%!important}.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(4){left:42%!important}.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(5){left:58%!important}.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(6){left:76%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(3){left:27%!important}.scene-seats[data-seat-count="6"]>.scene-seat:nth-child(5){left:73%!important}
+  .scene-seats[data-seat-count="5"]>.scene-seat:nth-child(3){left:34%!important}.scene-seats[data-seat-count="5"]>.scene-seat:nth-child(4){left:66%!important}
+}
+@media(max-width:600px){
+  .game-scene{min-height:1020px}.scene-board{bottom:365px;min-height:580px}.scene-seat{width:112px;top:clamp(100px,var(--seat-top),calc(100% - 100px))!important}
+  .scene-seat article{padding:5px;grid-template-columns:28px minmax(0,1fr)}
+  .scene-equipment-strip{gap:3px;padding-top:5px;margin-top:5px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .game-scene .scene-equipment-strip .playing-card{width:26px;flex-basis:26px}.game-scene .scene-equipment-strip .card-zoom__trigger{min-height:44px;min-width:44px}
+  .scene-equipment-strip__name{font-size:10px}.scene-seat .scene-seat__target{height:86px}
+  .scene-equipment-strip>li{padding-inline:0;min-width:44px}
+  .scene-seat{left:clamp(62px,var(--seat-left),calc(100% - 62px))!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(4){left:32%!important}.scene-seats[data-seat-count="7"]>.scene-seat:nth-child(5){left:68%!important}
+  .scene-hand-dock{height:365px}.scene-self{left:12px;right:12px;top:4px;height:auto;grid-template-columns:32px minmax(0,1fr);padding:0;gap:4px 7px}
+  .game-scene:has(.scene-center .reaction-prompt) .scene-hand-dock{height:365px}
+  .scene-center,.scene-center:has(.reaction-prompt){bottom:379px}
+  .scene-self>.scene-equipment-strip{grid-column:1/-1;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;min-height:72px}
+  .scene-self .scene-equipment-strip .playing-card{width:26px;flex-basis:26px}.scene-self .scene-equipment-strip__name{font-size:10px}
+  .scene-hand-dock:has(.scene-self>.scene-equipment-strip) .game-actions{padding-top:126px}.scene-hand-dock:not(:has(.scene-self>.scene-equipment-strip)) .game-actions{padding-top:50px}
+}
+@media(prefers-reduced-motion:reduce){.automatic-responses input:before{transition:none}}
+/* Portrait phones keep clockwise seating on a taller oval, with readable equipment instead of overlapping seats. */
+@media(max-width:600px){
+  .game-scene{--mobile-board-height:960px;height:calc(var(--mobile-board-height) + 419px);min-height:calc(var(--mobile-board-height) + 419px)}
+  .game-scene:has(.scene-seats[data-seat-count="4"]){--mobile-board-height:600px}.game-scene:has(.scene-seats[data-seat-count="5"]){--mobile-board-height:740px}
+  .scene-board{min-height:var(--mobile-board-height)}
+  .scene-seat{width:124px;top:clamp(164px,var(--seat-top),calc(100% - 164px))!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(2){left:25%!important;--seat-top:84%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(3){left:17%!important;--seat-top:50%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(4){left:25%!important;--seat-top:16%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(5){left:75%!important;--seat-top:16%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(6){left:83%!important;--seat-top:50%!important}
+  .scene-seats[data-seat-count="7"]>.scene-seat:nth-child(7){left:75%!important;--seat-top:84%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(2){left:25%!important;--seat-top:84%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(3){left:17%!important;--seat-top:50%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(4){left:50%!important;--seat-top:16%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(5){left:83%!important;--seat-top:50%!important}
+  .scene-seats[data-seat-count="6"]>.scene-seat:nth-child(6){left:75%!important;--seat-top:84%!important}
+  .scene-seats[data-seat-count="5"]>.scene-seat:nth-child(2){left:25%!important;--seat-top:78%!important}
+  .scene-seats[data-seat-count="5"]>.scene-seat:nth-child(3){left:25%!important;--seat-top:22%!important}
+  .scene-seats[data-seat-count="5"]>.scene-seat:nth-child(4){left:75%!important;--seat-top:22%!important}
+  .scene-seats[data-seat-count="5"]>.scene-seat:nth-child(5){left:75%!important;--seat-top:78%!important}
+  .scene-seats[data-seat-count="4"]>.scene-seat:nth-child(2){left:62px!important;--seat-top:55%!important}
+  .scene-seats[data-seat-count="4"]>.scene-seat:nth-child(3){left:50%!important;--seat-top:16%!important}
+  .scene-seats[data-seat-count="4"]>.scene-seat:nth-child(4){left:calc(100% - 62px)!important;--seat-top:55%!important}
+  .scene-self>div:not(.character-detail){display:flex;flex-wrap:wrap;gap:4px 7px;align-items:center}
+  .scene-self .scene-hearts{flex-basis:100%}
+}

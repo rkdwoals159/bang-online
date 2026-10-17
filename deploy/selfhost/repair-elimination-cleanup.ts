@@ -7,17 +7,22 @@ import { decodeMatchState, parseMatchState } from "../../packages/engine/src/sta
 import { projectMatchSnapshot } from "../../packages/engine/src/state/projection.js";
 import { BASE_PHYSICAL_CARDS } from "../../packages/catalog/src/cards/index.js";
 import { parseMatchSyncResponse } from "../../packages/contracts/src/validation.js";
-import { hasAutomaticEliminationCleanup } from "../../apps/server/src/commands/elimination-cleanup.js";
+import { hasAutomaticEliminationCleanup, hasUnavoidableElimination } from "../../apps/server/src/commands/elimination-cleanup.js";
 import { prepareGameRuntime } from "../../apps/server/src/commands/runtime-context.js";
 
 const [roomId, mode] = process.argv.slice(2);
-if (!/^r_[\w-]+$/.test(roomId ?? "") || (mode && mode !== "--apply")) throw new Error("Usage: repair-elimination-cleanup.mjs ROOM_ID [--apply]");
+if ((roomId!=="--scan" && !/^r_[\w-]+$/.test(roomId ?? "")) || (mode && (mode !== "--apply" || roomId==="--scan"))) throw new Error("Usage: repair-elimination-cleanup.mjs ROOM_ID [--apply] | --scan");
 const base = homedir() + "/.bang-online";
 const { Client } = createRequire(base + "/current/package.json")("pg");
 const env = Object.fromEntries((await readFile(base + "/config/server.env", "utf8")).split("\n").filter(line => line.includes("=")).map(line => [line.slice(0,line.indexOf("=")),line.slice(line.indexOf("=")+1)]));
 const db = new Client({connectionString:env.DATABASE_URL});
 await db.connect();
 try {
+  if(roomId==="--scan"){
+    const rows=(await db.query("SELECT r.id AS room_id,m.version,m.state_json FROM rooms r JOIN LATERAL (SELECT version,status,state_json FROM matches WHERE room_id=r.id ORDER BY created_at DESC,started_at DESC,id DESC LIMIT 1) m ON true WHERE r.status<>'closed' AND m.status='playing'")).rows;
+    const pending=rows.flatMap((row:any)=>{const state=decodeMatchState(row.state_json);return hasAutomaticEliminationCleanup(state)||hasUnavoidableElimination(state)?[{roomId:row.room_id,version:Number(row.version),pendingKind:state.resolution.pendingInteraction!.kind}]:[];});
+    console.log(JSON.stringify({checked:rows.length,pending}));
+  }else{
   await db.query("BEGIN");
   const room = (await db.query("SELECT status FROM rooms WHERE id=$1 FOR UPDATE",[roomId])).rows[0];
   if (!room || room.status === "closed") throw new Error("Room missing or closed.");
@@ -25,8 +30,8 @@ try {
   if (!row) throw new Error("Match missing.");
   const state = decodeMatchState(row.state_json);
   if (state.version !== Number(row.version) || state.eventSeq !== Number(row.event_seq)) throw new Error("Match metadata mismatch.");
-  if (!hasAutomaticEliminationCleanup(state)) {
-    await db.query("ROLLBACK");console.log(JSON.stringify({roomId,changed:false,reason:"No eliminated-owner cleanup pending",version:state.version}));
+  if (!hasAutomaticEliminationCleanup(state) && !hasUnavoidableElimination(state)) {
+    await db.query("ROLLBACK");console.log(JSON.stringify({roomId,changed:false,reason:"No automatic elimination pending",version:state.version}));
   } else {
     const settled = prepareGameRuntime(row.id).continueTurnPhases(state);
     const next = {...settled.state,version:state.version+1,eventSeq:state.eventSeq+settled.events.length};
@@ -43,5 +48,6 @@ try {
       await db.query("COMMIT");
     } else await db.query("ROLLBACK");
     console.log(JSON.stringify({roomId,applied:mode==="--apply",fromVersion:state.version,toVersion:next.version,eventCount:settled.events.length,status:next.status,pendingKind:next.resolution.pendingInteraction?.kind??null,remainingEffects:next.resolution.effectQueue.length,validatedProjections:next.seats.length}));
+  }
   }
 } catch(error) {await db.query("ROLLBACK");throw error;} finally {await db.end();}

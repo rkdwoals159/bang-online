@@ -1,0 +1,92 @@
+{
+  "dockChecks": [
+    {
+      "size": {
+        "width": 1440,
+        "height": 900
+      },
+      "choiceWidth": 890,
+      "horizontalOverflow": false,
+      "overlap": false
+    },
+    {
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "choiceWidth": 730,
+      "horizontalOverflow": false,
+      "overlap": false
+    },
+    {
+      "size": {
+        "width": 820,
+        "height": 900
+      },
+      "choiceWidth": 280,
+      "horizontalOverflow": false,
+      "overlap": false
+    },
+    {
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "choiceWidth": 355,
+      "horizontalOverflow": false,
+      "overlap": false
+    }
+  ],
+  "responseLayouts": [
+    {
+      "count": 4,
+      "equipmentAboveHand": true,
+      "footerHeight": 365,
+      "horizontalOverflow": false,
+      "seatPositions": [
+        "absolute",
+        "absolute",
+        "absolute"
+      ]
+    },
+    {
+      "count": 5,
+      "equipmentAboveHand": true,
+      "footerHeight": 365,
+      "horizontalOverflow": false,
+      "seatPositions": [
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute"
+      ]
+    },
+    {
+      "count": 6,
+      "equipmentAboveHand": true,
+      "footerHeight": 365,
+      "horizontalOverflow": false,
+      "seatPositions": [
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute"
+      ]
+    },
+    {
+      "count": 7,
+      "equipmentAboveHand": true,
+      "footerHeight": 365,
+      "horizontalOverflow": false,
+      "seatPositions": [
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute",
+        "absolute"
+      ]
+    }
+  ]
+}

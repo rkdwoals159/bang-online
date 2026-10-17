@@ -24,6 +24,17 @@ test('inspection host is outside compact seats, hand and action regions with no 
 test('scene never renders hidden opponent role, card identities or deck contents',()=>{const markup=render(survivorSnapshot);for(const secret of forbiddenSentinels)assert.equal(markup.includes(secret),false);assert.doesNotMatch(markup,/deckCount|privateResolutionContext/);});
 test('opponent hand back icons exactly reflect public counts, including more than 80',()=>{const view=structuredClone(survivorSnapshot);view.publicTable.players[0].handCount=81;const markup=render(view);assert.equal((markup.match(/class="scene-seat__hand"/g)??[]).length,4);const first=markup.match(/aria-label="손패 81장"[^>]*>(.*?)<\/span>/s);assert.ok(first);assert.equal((first[1].match(/<i /g)??[]).length,81);});
 test('public distance and role use authenticated projection while own HUD shows own role',()=>{const markup=render(survivorSnapshot);assert.match(markup,/나에게서 거리/);assert.match(markup,/배신자/);assert.match(markup,/보안관/);assert.match(markup,/역할 비공개/);});
+
+test('public equipment is always rendered with card art, names and range; self equipment belongs to the HUD',()=>{
+  const view=structuredClone(survivorSnapshot);
+  const own=view.publicTable.players.find(p=>p.playerId===view.viewer.playerId);
+  own.inPlay=[{cardInstanceId:'equipped-weapon',typeId:'winchester',rank:'8',suit:'SPADES'},{cardInstanceId:'equipped-danger',typeId:'dynamite',rank:'2',suit:'HEARTS'}];
+  const markup=render(view);assert.match(markup,/내 장착 카드/);assert.match(markup,/윈체스터, 사거리 5 상세 보기/);
+  assert.match(markup,/class="is-hazard"/);assert.match(markup,/단풍의 머스탱 상세 보기/);
+  assert.doesNotMatch(markup,/장착 카드 \d+장 보기|class="scene-seat__equipment"/);
+  assert.match(markup,/<footer[^>]*>[\s\S]*내 장착 카드/);
+  assert.doesNotMatch(markup,/equipped-weapon|equipped-danger/);
+});
 test('observer retains public scene without any private hand input',()=>{const markup=render(eliminatedSnapshot);assert.match(markup,/탈락 · 경기를 지켜보고 있어요/);assert.doesNotMatch(markup,/id="game-actions-title"|내 손패에서 카드 선택/);});
 test('zero healing beer retains confirmation and image selection uses legal candidates',()=>{const view=structuredClone(survivorSnapshot);view.publicTable.turn.currentPlayerId=view.viewer.playerId;view.legalActions=[{type:'PLAY_CARD',payload:{cardInstanceId:view.selfPrivate.hand[0].cardInstanceId}},{type:'END_TURN',payload:{}}];const markup=render(view);assert.match(markup,/맥주 선택/);assert.match(markup,/차례 마치기/);assert.doesNotMatch(markup,/맥주 6 하트, 사용 가능/);});
 test('empty hand uses its own compact status and preserves the legal end-turn action',()=>{

@@ -7,7 +7,7 @@ import { BASE_PHYSICAL_CARDS } from "../../../packages/catalog/src/cards/index.t
 import { parseMatchState } from "../../../packages/engine/src/state/schema.ts";
 import type { GameState } from "../../../packages/engine/src/state/types.ts";
 import { prepareGameRuntime } from "../src/commands/runtime-context.ts";
-import { hasAutomaticEliminationCleanup } from "../src/commands/elimination-cleanup.ts";
+import { hasAutomaticEliminationCleanup, hasUnavoidableElimination } from "../src/commands/elimination-cleanup.ts";
 
 function setup() {
   const state = initializeGame({ players: Array.from({length:5},(_,i)=>({playerId:`p${i}`,displayName:`Player ${i}`})), random:{nextFloat:()=>.51} });
@@ -49,7 +49,8 @@ for(const type of ["indians","gatling"]){
       for(let i=0;i<8&&next.resolution.pendingInteraction?.kind!=="DEATH_RESCUE";i++)next=respond(next,"TAKE_HIT",runtime);
       assert.equal(next.resolution.pendingInteraction?.kind,"DEATH_RESCUE");
       const rescue=runtime.continueTurnPhases(next);
-      assert.equal(rescue.state,next,"never accept a living player's rescue on their behalf");
+      if(next.resolution.pendingInteraction!.options.length>1)assert.equal(rescue.state,next,"never decline a legal rescue on their behalf");
+      else assert.equal(rescue.state.seats[victimIndex]!.public.eliminated,true,"no recovery option needs no confirmation");
       next=respond(next,"ACCEPT_ELIMINATION",runtime);
       assert.ok(hasAutomaticEliminationCleanup(next));
       // A serialized legacy snapshot must use the same path as a newly generated prompt.
@@ -109,4 +110,40 @@ test("automatic cleanup preserves an unanswered future Indians target",()=>{
   assert.equal(cleaned.resolution.pendingInteraction?.kind,"INDIANS_RESPONSE");
   assert.deepEqual(cleaned.resolution.pendingInteraction?.actorPlayerIds,["p1"]);
   assert.ok(projectTablewideAttack(cleaned));assert.equal(cleaned.seats[1]!.public.hp,next.seats[1]!.public.hp);
+});
+
+function clearBeer(state:GameState,playerId:string){
+  const seat=state.seats.find(s=>s.public.playerId===playerId)!;
+  const beerIds=seat.private.handCardInstanceIds.filter(id=>BASE_PHYSICAL_CARDS.find(c=>c.definitionId===state.zones.cardsByInstanceId[id]!.cardDefinitionId)?.typeId==="beer");
+  seat.private.handCardInstanceIds=seat.private.handCardInstanceIds.filter(id=>!beerIds.includes(id));state.zones.drawPileCardInstanceIds.push(...beerIds);
+}
+function lethalBang(state:GameState,runtime:ReturnType<typeof prepareGameRuntime>){
+  state.turn.currentPlayerId="p0";state.seats[1]!.public.hp=1;
+  const bang=give(state,"bang","p0");
+  return respond(apply(state,"p0",{type:"PLAY_CARD",payload:{cardInstanceId:bang,targetPlayerId:"p1"}},runtime),"TAKE_HIT",runtime);
+}
+test("no recovery: lethal damage, discarded cards and elimination finish without player input",()=>{
+  const {state,runtime}=setup();clearBeer(state,"p1");const next=lethalBang(state,runtime);
+  assert.ok(hasUnavoidableElimination(next));
+  const result=runtime.continueTurnPhases(parseMatchState(JSON.parse(JSON.stringify(next)),1));
+  assert.equal(result.state.seats[1]!.public.eliminated,true);assert.deepEqual(result.state.seats[1]!.private.handCardInstanceIds,[]);
+  assert.equal(result.state.resolution.pendingInteraction,null);assert.equal(result.state.resolution.pendingDeath,null);
+  assert.equal(result.events.filter(e=>e.type==="PLAYER_ELIMINATED").length,1);parseMatchState(result.state,1);
+  assert.deepEqual(runtime.continueTurnPhases(result.state).events,[]);
+});
+test("a usable Beer keeps rescue choices and is never silently consumed or declined",()=>{
+  const {state,runtime}=setup();give(state,"beer","p1");const next=lethalBang(state,runtime);
+  assert.equal(hasUnavoidableElimination(next),false);assert.ok(next.resolution.pendingInteraction?.options.some(o=>o.choice==="USE_BEER"));
+  assert.equal(runtime.continueTurnPhases(next).state,next);
+});
+test("Sid's two-card rescue keeps the manual choice even with no Beer",()=>{
+  const {state,runtime}=setup();state.seats[1]!.public.characterId="sid_ketchum";clearBeer(state,"p1");
+  const next=lethalBang(state,runtime);assert.ok(next.resolution.pendingInteraction?.options.some(o=>o.choice==="USE_SID"));
+  assert.equal(hasUnavoidableElimination(next),false);assert.equal(runtime.continueTurnPhases(next).state,next);
+});
+test("Beer cannot stall automatic elimination in the final two-player duel",()=>{
+  const {state,runtime}=setup();give(state,"beer","p1");
+  for(const seat of state.seats.slice(2)){seat.public.eliminated=true;seat.public.hp=0;state.zones.discardPileCardInstanceIds.push(...seat.private.handCardInstanceIds);seat.private.handCardInstanceIds=[];}
+  const next=lethalBang(state,runtime);assert.ok(hasUnavoidableElimination(next));
+  const result=runtime.continueTurnPhases(next);assert.equal(result.state.status,"completed");assert.equal(result.state.seats[1]!.public.eliminated,true);
 });

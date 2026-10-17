@@ -186,8 +186,14 @@ test("death rescue presents only saved Beer and elimination choices", () => {
 
   assert.match(markup, /생명력 구제/);
   assert.match(markup, /맥주로 구제/);
-  assert.match(markup, /탈락 수락/);
+  assert.match(markup, /회복하지 않고 관전하기/);
   assert.doesNotMatch(markup, /빗나감! 사용|피해 받기/);
+});
+
+test("unavoidable elimination has no confirmation or decline button",()=>{
+  const view=snapshot({pendingInteraction:responderPending({kind:"DEATH_RESCUE",options:[{interactionId:"interaction-1",choice:"ACCEPT_ELIMINATION"}]})});
+  const markup=renderToStaticMarkup(createElement(ReactionPrompt,{matchId:"match-a",version:1,snapshot:view,transport:{}}));
+  assert.match(markup,/탈락 처리 중/);assert.doesNotMatch(markup,/탈락 수락|탈락 확정|회복하지 않고 관전하기|<button/);
 });
 
 test("Vulture Sam cleanup discard prompt uses only server-projected candidates and count", () => {

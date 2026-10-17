@@ -28,6 +28,7 @@ import {
 import "./reactions.css";
 import { useCommandRecovery } from "../feedback/hooks.js";
 import type { RecoveryTransport } from "../feedback/recovery.js";
+import { AutomaticResponseController } from "./AutomaticResponseControls.js";
 
 export interface ReactionTransport extends RecoveryTransport {
   sendMatchCommand(command: MatchCommand): Promise<CommandAck>;
@@ -64,7 +65,6 @@ export function ReactionPrompt({
     readonly interactionId: string;
     readonly cardInstanceIds: readonly string[];
   } | null>(null);
-  const [eliminationConfirmation, setEliminationConfirmation] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const busyRef = useRef(false);
@@ -92,7 +92,6 @@ export function ReactionPrompt({
   }, [matchId, pendingInteractionId]);
   useEffect(() => {
     setSelectedOrder(null);
-    setEliminationConfirmation(null);
   }, [matchId, projection.version, pendingInteractionId]);
   const activePendingCommand = pendingCommand?.matchId === matchId ? pendingCommand : null;
   useCommandRecovery(transport, activePendingCommand, busy, (ack, response) => {
@@ -118,8 +117,9 @@ export function ReactionPrompt({
     option.choice === "ORDER_CARDS" && !("orderedCardInstanceIds" in option),
   );
   const discardOrder = responderPrompt?.discardOrder;
+  const unavoidableElimination = pending.kind === "DEATH_RESCUE" && responderPrompt?.responseOptions.length === 1 && responderPrompt.responseOptions[0]?.choice === "ACCEPT_ELIMINATION";
   const selectableOptions = responderPrompt?.responseOptions.filter(option =>
-    option.choice !== "ORDER_CARDS" || "orderedCardInstanceIds" in option,
+    !unavoidableElimination && (option.choice !== "ORDER_CARDS" || "orderedCardInstanceIds" in option),
   ) ?? [];
   const visibleOrder = selectedOrder?.matchId === matchId &&
     selectedOrder.version === projection.version &&
@@ -178,9 +178,6 @@ export function ReactionPrompt({
 
   function submitOption(option: PendingRespondOption, orderedCardInstanceIds?: readonly string[]): void {
     if (!canRespond || !responderPrompt || !responderPrompt.responseOptions.includes(option)) return;
-    if (option.choice === "ACCEPT_ELIMINATION" && eliminationConfirmation !== pendingInteractionId) {
-      setEliminationConfirmation(pendingInteractionId); return;
-    }
     const command = createRespondCommand(
       matchId,
       projection.version,
@@ -223,6 +220,7 @@ export function ReactionPrompt({
 
   const content = (
     <section className={`reaction-prompt reaction-prompt--${pending.kind.toLowerCase()}`} aria-labelledby="reaction-prompt-title" aria-busy={busy}>
+      <AutomaticResponseController matchId={matchId} version={projection.version} snapshot={currentSnapshot} enabled={canRespond} onRespond={submitOption}/>
       <header className="reaction-prompt__header">
         <div>
           <h2 id="reaction-prompt-title">{pending.kind === "DISCARDS_ORDER" && currentSnapshot.publicTable.turn.phase === "discard" ? "초과 카드 버리기" : interactionLabel(pending.kind)}</h2>
@@ -329,7 +327,7 @@ export function ReactionPrompt({
                         disabled={!canRespond || isOrderTemplate}
                         onClick={() => submitOption(option)}
                       >
-                        <strong>{option.choice === "ACCEPT_ELIMINATION" && eliminationConfirmation === pendingInteractionId ? "확인 · 탈락하고 관전하기" : presentation.label}</strong>
+                        <strong>{presentation.label}</strong>
                         {presentation.detail ? <span>{presentation.detail}</span> : null}
                       </button>
                       {cardFaces.map((card) => (
@@ -347,7 +345,7 @@ export function ReactionPrompt({
               })}
             </ul>
           ) : !discardOrder ? (
-            <p className="reaction-prompt__empty" role="status">선택할 수 있는 응답이 없어요.</p>
+            <p className="reaction-prompt__empty" role="status">{unavoidableElimination ? "탈락 처리 중…" : "선택할 수 있는 응답이 없어요."}</p>
           ) : null}
           {activePendingCommand && !busy ? (
             <div className="reaction-prompt__retry">

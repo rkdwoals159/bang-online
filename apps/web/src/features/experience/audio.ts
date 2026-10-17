@@ -1,6 +1,6 @@
 import type { SoundKind } from "./model.js";
 
-/** Small original synthesized effects; no downloads or sound-library dependency. */
+/** Recorded firearm transients with a small synthesized fallback; one reusable audio context. */
 export class GameAudio {
   private context: AudioContext | null = null;
   private output: GainNode | null = null;
@@ -9,6 +9,9 @@ export class GameAudio {
   private visible = true;
   private volume = .7;
   private sources = new Set<AudioScheduledSourceNode>();
+  private recordings: Partial<Record<"shot" | "burst", AudioBuffer>> = {};
+  private recordingsRequested = false;
+  private recordingRequest: AbortController | null = null;
   private stopSources(): void { for (const source of this.sources) { try { source.stop(); } catch { /* Already ended. */ } } this.sources.clear(); }
   setVisible(value: boolean): void {
     this.visible = value;
@@ -43,6 +46,7 @@ export class GameAudio {
         for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
       }
       if (this.context.state === "suspended") void this.context.resume().catch(() => {});
+      this.loadRecordings();
     } catch { /* Audio support must never block a game action. */ }
   }
   play(kind: SoundKind, offset = 0, count = 1): boolean {
@@ -50,6 +54,10 @@ export class GameAudio {
     const t = this.context.currentTime + (Number.isFinite(offset) ? Math.max(0, Math.min(.6, offset)) : 0);
     const cards = Number.isFinite(count) ? Math.max(1, Math.min(4, Math.floor(count))) : 1;
     try {
+      if ((kind === "shot" || kind === "burst") && this.recordings[kind]) {
+        this.sample(this.recordings[kind]!, t);
+        return true;
+      }
       if (kind === "shot" || kind === "burst" || kind === "explosion") {
         const count = kind === "burst" ? 5 : 1;
         for (let i = 0; i < count; i++) { this.hiss(t + i * .105, kind === "explosion" ? .65 : .13, kind === "explosion" ? 780 : 1800); this.tone(t + i * .105, kind === "explosion" ? 95 : 110, kind === "explosion" ? .45 : .13, "triangle", kind === "explosion" ? 28 : 40); }
@@ -79,6 +87,30 @@ export class GameAudio {
       return true;
     } catch { return false; /* Keep visual feedback when sound is unavailable. */ }
   }
+  private loadRecordings(): void {
+    const context = this.context;
+    if (this.recordingsRequested || !context || typeof context.decodeAudioData !== "function" || typeof window.fetch !== "function") return;
+    this.recordingsRequested = true;
+    const controller = new AbortController(); this.recordingRequest = controller;
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const files = {shot:"/assets/audio/revolver-9e32bed6.mp3",burst:"/assets/audio/gatling-ee9a571c.mp3"} as const;
+    void Promise.all(Object.entries(files).map(async ([kind,url]) => {
+      try {
+        const response = await window.fetch(url, {signal:controller.signal});
+        if (!response.ok) return;
+        const data = await response.arrayBuffer();
+        if (data.byteLength > 200_000 || !data.byteLength) return;
+        const buffer = await context.decodeAudioData(data);
+        if (this.context === context && !controller.signal.aborted) this.recordings[kind as "shot" | "burst"] = buffer;
+      } catch { /* A missing/unsupported recording uses the synchronous fallback. */ }
+    })).finally(() => {clearTimeout(timer);if(this.recordingRequest===controller)this.recordingRequest=null;});
+  }
+  private sample(buffer: AudioBuffer, start: number): void {
+    const source = this.context!.createBufferSource();source.buffer = buffer;
+    this.sources.add(source);source.connect(this.output!);
+    source.onended=()=>{this.sources.delete(source);source.disconnect();};
+    source.start(start);source.stop(start+buffer.duration+.02);
+  }
   private tone(start: number, frequency: number, duration: number, type: OscillatorType, endFrequency = frequency, amplitude = .45): void {
     if (this.sources.size >= 48) return;
     const c = this.context!, oscillator = c.createOscillator(), gain = c.createGain();
@@ -95,5 +127,5 @@ export class GameAudio {
     this.sources.add(source);
     source.connect(filter); filter.connect(gain); gain.connect(this.output!); source.onended = () => { this.sources.delete(source); source.disconnect(); filter.disconnect(); gain.disconnect(); }; source.start(start); source.stop(start + duration);
   }
-  dispose(): void { this.stopSources(); if (this.context) void this.context.close().catch(() => {}); this.context = null; this.output = null; this.noise = null; }
+  dispose(): void { this.recordingRequest?.abort();this.recordingRequest=null;this.recordingsRequested=false;this.recordings={};this.stopSources(); if (this.context) void this.context.close().catch(() => {}); this.context = null; this.output = null; this.noise = null; }
 }

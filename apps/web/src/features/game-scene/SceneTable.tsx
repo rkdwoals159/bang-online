@@ -2,9 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { MatchSnapshotView, PublicPlayerView } from "../../../../../packages/contracts/src/protocol.js";
 import { CharacterPortrait, PlayingCardZoomButton } from "../cards/CardFaces.js";
 import { getCharacterCardPresentation } from "../cards/assets.js";
-import { cardName } from "../actions/model.js";
 import { useGameExperience } from "../experience/GameExperience.js";
-import { ChoiceStage } from "../experience/ChoiceStage.js";
+import { EquipmentStrip } from "./EquipmentStrip.js";
 import { playSeatMotion } from "../experience/motion.js";
 import { viewerDistance } from "../game-table/layout.js";
 import { sceneSeatPosition } from "./layout.js";
@@ -43,7 +42,6 @@ export function HealthHearts({ hp, maxHp }: { hp: number; maxHp: number }) {
 function SceneSeat({player,snapshot,position}: {player:PublicPlayerView;snapshot:MatchSnapshotView;position:CSSProperties}) {
   const game = useGameExperience(), cue = game?.cue;
   const seat = useRef<HTMLElement>(null);
-  const [equipmentOpen,setEquipmentOpen] = useState(false);
   const effect = cue?.targetIds.includes(player.playerId) ? cue.kind : cue?.actorId===player.playerId ? "source" : undefined;
   useEffect(() => { if (seat.current) return playSeatMotion(seat.current,effect,game?.motionAllowed ?? false); },[cue?.id,effect,game?.motionAllowed]);
   const mine=player.playerId===snapshot.viewer.playerId, turn=player.playerId===snapshot.publicTable.turn.currentPlayerId;
@@ -51,7 +49,7 @@ function SceneSeat({player,snapshot,position}: {player:PublicPlayerView;snapshot
   const character=getCharacterCardPresentation(player.characterId).name;
   const distance=viewerDistance(snapshot,player);
   const targeting=game?.targeting, available=targeting?.playerIds.includes(player.playerId), selected=available&&targeting?.selectedPlayerId===player.playerId;
-  return <li style={{...position,"--seat-top":position.top} as CSSProperties} className={`scene-seat${mine?" scene-seat--self":""}${turn?" scene-seat--turn":""}${player.eliminated?" scene-seat--eliminated":""}`}>
+  return <li style={{...position,"--seat-top":position.top,"--seat-left":position.left} as CSSProperties} className={`scene-seat${mine?" scene-seat--self":""}${turn?" scene-seat--turn":""}${player.eliminated?" scene-seat--eliminated":""}`}>
     <article ref={seat} data-player-seat={player.playerId} data-effect={effect} data-target={available ? selected?"selected":"available":undefined} aria-label={`${mine?"내 자리":player.displayName}, ${character}, 생명력 ${player.hp}/${player.maxHp}, ${role?roleName(role):"역할 비공개"}, 손패 ${player.handCount}장${turn?", 현재 차례":""}`}>
       <CharacterPortrait characterId={player.characterId} />
       <strong className="scene-seat__name" title={player.displayName}>{mine?"나":player.displayName}</strong>
@@ -59,10 +57,9 @@ function SceneSeat({player,snapshot,position}: {player:PublicPlayerView;snapshot
       <HealthHearts hp={player.hp} maxHp={player.maxHp} />
       <span className="scene-seat__hand" role="img" aria-label={`손패 ${player.handCount}장`} style={{"--hand-count":Math.max(1,player.handCount)} as CSSProperties}>{Array.from({length:player.handCount},(_,i)=><i key={i} aria-hidden="true" />)}</span>
       {distance!==null?<span className="scene-seat__distance" aria-label={`나에게서 거리 ${distance}`}>{distance}</span>:null}
-      {player.inPlay.length?<button className="scene-seat__equipment" onClick={()=>setEquipmentOpen(true)} aria-label={`${player.displayName}의 장착 카드 ${player.inPlay.length}장 보기`}>장착 {player.inPlay.length}</button>:null}
+      {!mine?<EquipmentStrip cards={player.inPlay} owner={player.displayName}/>:null}
       {available?<button className="scene-seat__target" type="button" aria-pressed={selected} aria-label={`${player.displayName} 대상 선택`} onClick={()=>targeting?.choosePlayer(player.playerId)}>{selected?"선택됨":"조준"}</button>:null}
       {player.eliminated?<span className="scene-seat__out">탈락</span>:null}
     </article>
-    {equipmentOpen?<ChoiceStage interactionId={`equipment:${player.playerId}`} title={`${player.displayName} · 장착 카드`} onDismiss={()=>setEquipmentOpen(false)}><div className="scene-equipment">{player.inPlay.map(card=><div key={card.cardInstanceId}><PlayingCardZoomButton card={card} /><strong>{cardName(card.typeId)}</strong></div>)}</div></ChoiceStage>:null}
   </li>;
 }

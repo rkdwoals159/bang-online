@@ -67,6 +67,6 @@ python3 ~/.bang-online/backup.py
 
 `BANG_VERIFY_RESTART=1`을 지정하면 **정훈서버의 게임 프로세스를 재시작**해 세션과 게임 복구까지 검증한다. 운영 중에는 유지보수 시간에만 사용한다. 검증용 방과 플레이어를 새로 생성한다.
 
-탈락자 버림 순서에 멈춘 기존 게임은 `repair-elimination-cleanup.ts`를 esbuild로 Node ESM 번들한 뒤 서버에서 실행할 수 있다. `node repair-elimination-cleanup.mjs ROOM_ID`는 실제 DB 트랜잭션을 롤백하는 예행 연습이다. 같은 명령에 `--apply`를 붙이기 전에 백업하고 출력의 기존 버전·다음 pending·전체 참가자 projection 검증을 확인한다. 방/게임 행을 잠근 뒤 현재 서버의 D14 정책만 실행하며, 게임 재생성·살아 있는 사람의 응답 대신 선택·기록 삭제는 하지 않는다. 적용 후 버전·이벤트·탈락 상태·outbox를 한 트랜잭션으로 저장한다.
+탈락자 버림 순서나 회복 선택이 전혀 없는 구제 창에 멈춘 기존 게임은 `repair-elimination-cleanup.ts`를 esbuild로 Node ESM 번들한 뒤 서버에서 실행할 수 있다. `node repair-elimination-cleanup.mjs --scan`은 활성 방을 읽기만 하여 자동 처리 가능한 대상을 찾는다. `node repair-elimination-cleanup.mjs ROOM_ID`는 실제 DB 트랜잭션을 롤백하는 예행 연습이다. 같은 명령에 `--apply`를 붙이기 전에 백업하고 출력의 기존 버전·다음 pending·전체 참가자 projection 검증을 확인한다. 방/게임 행을 잠근 뒤 현재 서버의 D14/D15 정책만 실행하며, 게임 재생성·선택 가능한 회복/방어 대신 결정·기록 삭제는 하지 않는다. 적용 후 버전·이벤트·탈락 상태·outbox를 한 트랜잭션으로 저장한다.
 
 DNS 전파 전에는 SSH 로컬 포워딩 `5210:127.0.0.1:8088`을 열고 `BANG_VERIFY_ORIGIN=http://localhost:5210`, `BANG_VERIFY_WEB_ORIGIN=https://bang-online.site`로 서버 내부 경로를 검증할 수 있다. 이 검증은 공개 DNS/HTTPS 검증을 대신하지 않는다.

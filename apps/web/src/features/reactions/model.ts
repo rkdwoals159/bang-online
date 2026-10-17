@@ -188,7 +188,7 @@ const choiceLabels: Readonly<Record<string, string>> = Object.freeze({
   USE_JOURDONNAIS: "주르도네 판정",
   TAKE_HIT: "피해 받기",
   YIELD: "결투 포기",
-  ACCEPT_ELIMINATION: "탈락 수락",
+  ACCEPT_ELIMINATION: "회복하지 않고 관전하기",
   DRAW_PILE: "덱에서 뽑기",
   DRAW_FROM_PILE: "덱에서 가져오기",
   TAKE_FROM_HAND: "손패에서 가져오기",

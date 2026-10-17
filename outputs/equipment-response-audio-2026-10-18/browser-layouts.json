@@ -1,0 +1,350 @@
+[
+  {
+    "size": {
+      "width": 1440,
+      "height": 900
+    },
+    "count": 4,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 72,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 66
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 3
+  },
+  {
+    "size": {
+      "width": 1440,
+      "height": 900
+    },
+    "count": 5,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 72,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 66
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 4
+  },
+  {
+    "size": {
+      "width": 1440,
+      "height": 900
+    },
+    "count": 6,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 72,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 66
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 5
+  },
+  {
+    "size": {
+      "width": 1440,
+      "height": 900
+    },
+    "count": 7,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 72,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 66
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 6
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "count": 4,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 3
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "count": 5,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 4
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "count": 6,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 5
+  },
+  {
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "count": 7,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 6
+  },
+  {
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "count": 4,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 3
+  },
+  {
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "count": 5,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 4
+  },
+  {
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "count": 6,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 5
+  },
+  {
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "count": 7,
+    "footerClear": true,
+    "headerClear": true,
+    "horizontalOverflow": false,
+    "labelFailures": [],
+    "longLabels": [
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      },
+      {
+        "cell": 62,
+        "clipped": false,
+        "name": "다이너마이트",
+        "oneLine": true,
+        "width": 60
+      }
+    ],
+    "overlaps": [],
+    "visibleOpponents": 6
+  }
+]

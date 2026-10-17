@@ -697,11 +697,10 @@ export class StorageRepository {
         ],
       );
 
-      const departed = (input.state.forfeitedPlayerIds ?? []).filter(id =>
-        input.state.seats.some(seat => seat.public.playerId === id && seat.public.eliminated));
-      if (departed.length) await client.query(`UPDATE match_players SET alive=false,
+      const eliminated = input.state.seats.filter(seat => seat.public.eliminated).map(seat => seat.public.playerId);
+      if (eliminated.length) await client.query(`UPDATE match_players SET alive=false,
         eliminated_at=COALESCE(eliminated_at,now()) WHERE match_id=$1 AND player_id=ANY($2::text[]) AND alive=true`,
-        [input.matchId, departed]);
+        [input.matchId, eliminated]);
 
       for (const event of input.events) {
         await client.query(

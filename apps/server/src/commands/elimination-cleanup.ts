@@ -1,6 +1,25 @@
 import { applyMatchCommand, type ApplyMatchCommandContext } from "../../../../packages/engine/src/commands/index.js";
 import type { GameState } from "../../../../packages/engine/src/state/types.js";
 
+/** The engine's legal rescue options are authoritative, including Beer/Sid and two-player exceptions. */
+export function hasUnavoidableElimination(state: GameState): boolean {
+  const pending = state.resolution.pendingInteraction, death = state.resolution.pendingDeath;
+  return state.status === "playing" && pending?.kind === "DEATH_RESCUE" &&
+    death?.consequenceStage === "rescue" && pending.actorPlayerIds.length === 1 &&
+    pending.actorPlayerIds[0] === death.victimPlayerId &&
+    pending.options.length === 1 && pending.options[0]?.choice === "ACCEPT_ELIMINATION";
+}
+
+export function settleUnavoidableElimination(state: GameState, context: ApplyMatchCommandContext) {
+  if (!hasUnavoidableElimination(state)) return { state, events: [] };
+  const pending = state.resolution.pendingInteraction!;
+  const result = applyMatchCommand(state, pending.actorPlayerIds[0]!, { type: "RESPOND", payload: {
+    interactionId: pending.interactionId, choice: "ACCEPT_ELIMINATION",
+  } }, context);
+  if (!result.ok) throw new Error(`Automatic elimination failed: ${result.error.code}`);
+  return { state: result.state, events: result.events };
+}
+
 /** Product policy: an eliminated owner never has to order their remaining cards. */
 export function hasAutomaticEliminationCleanup(state: GameState): boolean {
   const pending = state.resolution.pendingInteraction;

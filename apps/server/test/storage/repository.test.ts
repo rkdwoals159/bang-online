@@ -281,6 +281,20 @@ test("looks up the latest current-or-last match route for a room", async () => {
   }
 });
 
+test("ordinary and automatic elimination update persisted alive flags in the same transaction",async()=>{
+  const {database,pool}=await createDatabase();
+  try{
+    await applyStorageMigrations(pool);const repository=new StorageRepository(pool);await seedRoomAndPlayers(repository);
+    await repository.createMatch(makeMatch("match-auto-death"));const next=makeNextState(makeState());
+    const victim=next.seats[1]!;victim.public.hp=0;victim.public.eliminated=true;victim.public.roleRevealed=true;
+    next.zones.discardPileCardInstanceIds.push(...victim.private.handCardInstanceIds);victim.private.handCardInstanceIds=[];
+    await repository.commitMatch(makeCommit("match-auto-death",next));
+    const saved=await repository.getMatch("match-auto-death");assert.equal(saved?.players[1]?.alive,false);assert.ok(saved?.players[1]?.eliminatedAt);assert.equal(saved?.players[0]?.alive,true);
+    await repository.commitMatch(makeCommit("match-auto-death",next));
+    assert.equal((await repository.getMatch("match-auto-death"))?.players[1]?.eliminatedAt?.getTime(),saved?.players[1]?.eliminatedAt?.getTime());
+  }finally{await database.close();}
+});
+
 test("atomically commits snapshot, events, receipt, and a state-free outbox signal", async () => {
   const { database, pool } = await createDatabase();
   try {
