@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "65fe571d2a1a78f0bd742a9e13bdbb5e43100118",
+  "deployedAt": "2026-10-18T00:58:01+09:00",
+  "release": "/Users/rkdwoals159/.bang-online/releases/2026-10-18-room-management",
+  "previousRelease": "/Users/rkdwoals159/.bang-online/releases/2026-10-12-parity",
+  "backup": "bang-online-20261017T155758Z-55a81e.dump",
+  "preflight": {"total":20,"valid":20,"invalid":0,"recentlyChangedGames":0},
+  "serverBundleSha256": "e63af9c485aae02373e525c1538c73da762d78e85a27b1957f25da294ce5e27f",
+  "publicEntry": "index-BQWQ1gRV.js",
+  "publicTransport": "client-4o8KYn_W.js",
+  "releaseSwitches": 1,
+  "postgresRestarted": false,
+  "tunnelRestarted": false,
+  "productionSmokePassed": true
+}
