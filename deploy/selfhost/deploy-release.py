@@ -6,7 +6,8 @@ Prepare and validate the archive locally before running this script.
 from pathlib import Path
 import os, subprocess, plistlib, time, json, urllib.request, sys, re
 
-release_name, source_commit, archive_arg = sys.argv[1:]
+release_name, source_commit, archive_arg = sys.argv[1:4]
+change = sys.argv[4] if len(sys.argv) > 4 else 'Complete Node/Sites migration parity fixes F01-F12'
 if not re.fullmatch(r'[a-z0-9-]+', release_name) or not re.fullmatch(r'[a-f0-9]{40}', source_commit):
     raise ValueError('Invalid release metadata')
 base = Path.home() / '.bang-online'
@@ -94,6 +95,6 @@ except Exception:
     raise
 
 metadata = {'sourceCommit': source_commit, 'previousRelease': str(previous), 'release': str(release),
-            'deployedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'), 'change': 'Complete Node/Sites migration parity fixes F01-F12'}
+            'deployedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'), 'change': change}
 (release / 'release-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
 print(json.dumps({'ok': True, **metadata}))

@@ -555,3 +555,11 @@ SSE event ID는 D1 `outbox.cursor`의 증가 정수다. `data`에는 다음 allo
 - RoomView.members의 선택적 connectionState는 connected/disconnected/unknown이다. 비공개 게임 규칙·시간 제한·좌석 유지에는 영향을 주지 않는다.
 - SSE `presence` 이벤트는 RoomPresenceView(protocolVersion/roomId/observedAt/members[playerId,connectionState])만 전달한다. 인증된 현재 방 멤버에게만 노출하며, 권위 게임 버전과 분리한다. 마지막 접속 확인의 만료는 자동 탈락이나 자리 제거를 뜻하지 않는다.
 
+## 2026-10-18 정훈서버 방 관리 확장
+
+- RoomCommand에 `LEAVE_ROOM` 추가. `CLOSE_ROOM`과 함께 payload는 빈 객체, roomId/expectedVersion/UUID commandId를 요구한다.
+- 성공 응답은 CommandAccepted(protocolVersion, commandId, status=accepted, duplicate, aggregateVersion=방 버전, eventSeq=0). 탈퇴 후 RoomView를 노출하지 않는다. 실패는 기존 CommandRejected다.
+- 이 두 명령은 게이트웨이에서 현재 멤버 여부를 미리 거절하지 않고, 트랜잭션에서 영수증 조회 후 최신 멤버/방장 권한을 확인한다. 그래야 퇴장·삭제 후 같은 명령 재전송이 최초 결과를 복구할 수 있다. 다른 명령의 권한 검증은 그대로 유지한다.
+- 닫힌 방 또는 현재 좌석이 없는 플레이어는 기존 match_players 기록이 남아 있어도 match sync/command/history에 접근하지 못한다. room:changed는 게임 화면에도 구독시켜 삭제/방장 변경을 즉시 확인한다.
+- 저장 상태의 선택적 forfeitedPlayerIds는 퇴장자 ID만 보존하는 서버 전용 예약이다. 기존 스냅샷은 필드 없이 유효하며 브라우저에는 전체 저장 상태나 이 예약을 전송하지 않는다. 게임 규칙과 화면 결정은 01_RULES의 D13에 기록한다.
+

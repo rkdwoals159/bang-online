@@ -14,6 +14,9 @@ import { ChoiceStage, TableStageHost } from "../experience/ChoiceStage.js";
 import { GameExperienceControls, TableEffects } from "../experience/GameExperience.js";
 import { HealthHearts, roleName, SceneTable } from "./SceneTable.js";
 import "./scene.css";
+import { RoomExitActions } from "../room-entry/RoomExitActions.js";
+import { exitRoom } from "../room-entry/room-exit.js";
+import { navigateTo } from "../../app/router.js";
 
 export interface GameSceneProps {
   historyEvents?: readonly PublicMatchEvent[];
@@ -48,7 +51,7 @@ export function GameScene({matchId,version,snapshot,visibleEvents,historyEvents,
       {showActions&&!completed&&snapshot.viewer.mode==="active"?<ActionsPanel variant="scene" matchId={matchId} version={version} snapshot={snapshot} transport={transport}/>:<div className="scene-spectating">{completed?"이번 판이 끝났어요.":"탈락 · 경기를 지켜보고 있어요."}</div>}
     </footer>
     {logOpen?<aside className="scene-log" aria-label="게임 기록"><header><strong>게임 기록</strong><button type="button" onClick={()=>setLogOpen(false)}>닫기</button></header><StatusPanel {...statusProps} initialLogOpen/></aside>:null}
-    {settingsOpen?<ChoiceStage interactionId="scene-settings" title="경기 설정" onDismiss={()=>setSettingsOpen(false)}><NicknameSettings/><GameExperienceControls/><p>효과음은 직접 켜면 재생돼요. 기기의 동작 줄이기 설정도 적용합니다.</p>{fullscreenError?<p role="alert">{fullscreenError}</p>:null}</ChoiceStage>:null}
+    {settingsOpen?<ChoiceStage interactionId="scene-settings" title="경기 설정" onDismiss={()=>setSettingsOpen(false)}><NicknameSettings/><GameExperienceControls/><p>효과음은 직접 켜면 재생돼요. 기기의 동작 줄이기 설정도 적용합니다.</p><RoomExitActions room={room} onAction={(id,action)=>exitRoom(transport,id,action)} onExited={()=>navigateTo("/rooms/new")}/>{fullscreenError?<p role="alert">{fullscreenError}</p>:null}</ChoiceStage>:null}
     {fullscreenError&&!settingsOpen?<p className="scene-error" role="alert">{fullscreenError}<button type="button" onClick={()=>setFullscreenError("")}>닫기</button></p>:null}
     <TableEffects surface={surface}/>
     <div className="scene-inspections" ref={setInspectionHost}/>

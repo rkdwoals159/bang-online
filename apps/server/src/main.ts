@@ -1,14 +1,10 @@
-import { randomBytes, randomUUID } from "node:crypto";
 import { createServer as createHttpServer, type IncomingMessage, type Server as HttpServer, type ServerResponse } from "node:http";
 import { pathToFileURL } from "node:url";
 import { Pool } from "pg";
 import { Server as SocketIoServer } from "socket.io";
 import type { GuestSessionRequest, GuestSessionResponse, CommandRejected } from "../../../packages/contracts/src/protocol.js";
 import { createMatchCommandHandler } from "./commands/index.js";
-import { advanceTurnPhases, createTurnAwareCommandHandlers } from "./commands/turn-runtime.js";
-import { createEffectCommandHandlers } from "../../../packages/engine/src/effects/runtime/index.js";
-import { createEffectRegistry } from "../../../packages/engine/src/effects/registry.js";
-import { withTurnStartEffects } from "../../../packages/engine/src/turn/draw.js";
+import { prepareGameRuntime } from "./commands/runtime-context.js";
 import {
   readPGliteDevConfig,
   readServerConfig,
@@ -360,7 +356,14 @@ function roomCommandHandler(
             expectedVersion: command.expectedVersion,
             commandId: command.commandId,
           });
-          ack(result.room ?? rejectedCommand(command.commandId, "NOT_FOUND_OR_FORBIDDEN"));
+          ack({ protocolVersion: 1, commandId: command.commandId, status: "accepted",
+            duplicate: result.mutation.status === "duplicate", aggregateVersion: result.mutation.outcome.version, eventSeq: 0 });
+          return;
+        }
+        case "LEAVE_ROOM": {
+          const result = await rooms.leaveRoom(context.playerId, command);
+          ack({ protocolVersion: 1, commandId: command.commandId, status: "accepted",
+            duplicate: result.mutation.status === "duplicate", aggregateVersion: result.mutation.outcome.version, eventSeq: 0 });
           return;
         }
         case "START_MATCH": {
@@ -412,32 +415,7 @@ function gatewayHandlers(
   const matchCommand = createMatchCommandHandler({
     includeMatchProjection: true,
     storage,
-    prepareEngineContext: ({ matchId }) => {
-      const random = {
-        nextFloat: () => {
-          let value = 0;
-          for (const byte of Buffer.from(randomBytes(6).toString("base64url"), "base64url")) {
-            value = value * 256 + byte;
-          }
-          return value / 0x1_0000_0000_0000;
-        },
-      };
-      const nextInteractionIdentity = () => ({
-        interactionId: `interaction_${randomUUID()}`,
-        createdAt: new Date().toISOString(),
-      });
-      const runtimeOptions = withTurnStartEffects({
-        registry: createEffectRegistry(),
-        nextInteractionIdentity,
-      });
-      const turnRuntime = { matchId, random, nextInteractionIdentity, runtimeOptions };
-      return {
-        random,
-        interaction: nextInteractionIdentity(),
-        handlers: createTurnAwareCommandHandlers(createEffectCommandHandlers(runtimeOptions), turnRuntime),
-        continueTurnPhases: (state) => advanceTurnPhases(state, turnRuntime),
-      };
-    },
+    prepareEngineContext: ({ matchId }) => prepareGameRuntime(matchId),
   });
 
   return {
@@ -621,7 +599,9 @@ export async function createRuntimeServer(
     roomService: rooms,
     authorizeMatchMember: async (playerId, matchId) => {
       return withClient(pool, async client => (await client.query(
-        "SELECT 1 FROM match_players WHERE match_id=$1 AND player_id=$2", [matchId, playerId],
+        `SELECT 1 FROM match_players mp JOIN matches m ON m.id=mp.match_id
+         JOIN rooms r ON r.id=m.room_id JOIN room_players rp ON rp.room_id=r.id AND rp.player_id=mp.player_id
+         WHERE mp.match_id=$1 AND mp.player_id=$2 AND r.status <> 'closed'`, [matchId, playerId],
       )).rows.length === 1);
     },
     onError: () => logger.error("socket_request_failed"),

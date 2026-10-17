@@ -60,6 +60,7 @@ export type RoomCommand = CommandBase & (
   | { type: "START_MATCH"; roomId: string; payload: Record<string, never> }
   | { type: "RETURN_TO_LOBBY"; roomId: string; payload: Record<string, never> }
   | { type: "CLOSE_ROOM"; roomId: string; payload: Record<string, never> }
+  | { type: "LEAVE_ROOM"; roomId: string; payload: Record<string, never> }
   | { type: "KICK_MEMBER"; roomId: string; payload: { targetPlayerId: string } }
 );
 

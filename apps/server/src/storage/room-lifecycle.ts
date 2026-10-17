@@ -2,6 +2,7 @@ import type { GameState, JsonValue } from "../../../../packages/engine/src/state
 import { withClient, withTransaction } from "./database-runtime.js";
 import type { PgClientLike, PgPoolLike } from "./database.js";
 import { insertMatchInTransaction, type MatchEventRecord, type NewRoom, type RoomRecord } from "./repository.js";
+import { forfeitLatestMatch } from "../rooms/departure.js";
 
 type RoomStatus = RoomRecord["status"];
 type DatabaseInteger = number | string;
@@ -627,13 +628,15 @@ export class RoomLifecycleRepository {
   async leaveRoom(input: LeaveRoomInput): Promise<RoomMutationResult> {
     validateCommand(input);
     return this.mutateRoom(input, async (client, room) => {
-      this.assertMembershipMutable(room.status);
+      if (room.status === "closed") throw new RoomClosedError();
       const member = await client.query<RoomPlayerRow>(
         `SELECT player_id, seat_index, ready
          FROM room_players WHERE room_id = $1 AND player_id = $2`,
         [room.id, input.actorPlayerId],
       );
       if (!member.rows[0]) throw new RoomMembershipRequiredError(input.actorPlayerId);
+
+      if (room.status !== "waiting") await forfeitLatestMatch(client, room.id, input.actorPlayerId);
 
       await client.query("DELETE FROM room_players WHERE room_id = $1 AND player_id = $2", [
         room.id,
@@ -647,7 +650,7 @@ export class RoomLifecycleRepository {
       );
 
       let ownerPlayerId = room.owner_player_id;
-      let roomStatus = room.status;
+      let roomStatus: RoomStatus = room.status;
       if (remaining.rows.length === 0) {
         roomStatus = "closed";
       } else if (input.actorPlayerId === room.owner_player_id) {
@@ -695,6 +698,21 @@ export class RoomLifecycleRepository {
         seatIndex: target.seat_index,
         ready: target.ready,
       };
+    });
+  }
+
+  /** Logical deletion: revoke every seat and invite while retaining the game audit history. */
+  async closeRoom(input: RoomCommandBase): Promise<RoomMutationResult> {
+    validateCommand(input);
+    return this.mutateRoom(input, async (client, room) => {
+      if (room.owner_player_id !== input.actorPlayerId) throw new RoomOwnerRequiredError();
+      if (room.status === "closed") throw new RoomClosedError();
+      const member = await client.query("SELECT 1 FROM room_players WHERE room_id=$1 AND player_id=$2", [room.id,input.actorPlayerId]);
+      if (!member.rows.length) throw new RoomMembershipRequiredError(input.actorPlayerId);
+      // A card commit that was already evaluating must observe removal after this lock is released.
+      await client.query("SELECT id FROM matches WHERE room_id=$1 ORDER BY id FOR UPDATE", [room.id]);
+      await client.query("DELETE FROM room_players WHERE room_id=$1", [room.id]);
+      return { changed: true, roomStatus: "closed", ownerPlayerId: room.owner_player_id, occupancy: 0 };
     });
   }
 

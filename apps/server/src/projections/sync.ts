@@ -94,6 +94,7 @@ const PUBLIC_EVENT_FIELDS: Readonly<Record<string, readonly string[]>> = Object.
   JAIL_JUDGMENT_RESOLVED: ["suit", "heart", "turnSkipped"],
   GENERAL_STORE_CARD_REVEALED: [],
   PLAYER_ELIMINATED: ["playerId", "cause"],
+  PLAYER_LEFT: ["playerId"],
   MATCH_COMPLETED: ["winningFaction", "winningPlayerIds"],
   DRAW_PILE_RESHUFFLED: [],
   RULE_RESOURCE_EXHAUSTED: ["requestedCount", "fulfilledCount"],

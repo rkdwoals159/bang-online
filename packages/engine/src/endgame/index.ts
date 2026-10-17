@@ -354,6 +354,28 @@ export function checkVictoryAtBoundary(
   return commit(state, recordOutcome(state, outcome), { finished: outcome !== null, outcome });
 }
 
+/** User-selected online policy: voluntary departure is elimination without a killer reward. */
+export function eliminateForfeitAtBoundary(state: GameState, playerId: string): GameState {
+  if (!canCheckVictory({ ...state, status: "playing" })) throw new Error("Forfeit elimination requires an idle effect boundary.");
+  const victim = uniqueSeat(state, playerId);
+  if (!victim) throw new Error("Forfeit player must have one match seat.");
+  if (victim.public.eliminated || state.status === "completed" || state.status === "recovery_required") return state;
+  const cards = allOwnedCards(victim);
+  const sam = state.seats.find(seat => seat.public.playerId !== playerId && !seat.public.eliminated &&
+    !(state.forfeitedPlayerIds ?? []).includes(seat.public.playerId) && seat.public.characterId === "vulture_sam");
+  const next: GameState = {
+    ...state,
+    seats: state.seats.map(seat => seat.public.playerId === playerId
+      ? { ...seat, public: { ...seat.public, hp: 0, eliminated: true, roleRevealed: true, inPlayCardInstanceIds: [] },
+        private: { ...seat.private, handCardInstanceIds: [] } }
+      : seat === sam ? { ...seat, private: { ...seat.private, handCardInstanceIds: [...seat.private.handCardInstanceIds, ...cards] } } : seat),
+    zones: sam ? state.zones : { ...state.zones, discardPileCardInstanceIds: [...state.zones.discardPileCardInstanceIds, ...cards] },
+  };
+  const outcome = victoryOutcome(next);
+  if (typeof outcome === "string") throw new Error(outcome);
+  return recordOutcome(next, outcome);
+}
+
 /**
  * Begins elimination only after T12 has accepted or exhausted the victim's
  * rescue choices. It reveals the role, transfers custody, and opens any owner

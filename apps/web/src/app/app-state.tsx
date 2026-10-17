@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { GuestSessionResponse, RoomView } from "../../../../packages/contracts/src/protocol.js";
 import { BrowserTransportError } from "../transport/errors.js";
+import { exitRoom } from "../features/room-entry/room-exit.js";
 import { createSitesGameTransport } from "../transport/sites-client.js";
 import type { GameTransport } from "../transport/types.js";
 import { useBrowserTransportState } from "../transport/use-transport.js";
@@ -168,6 +169,10 @@ function ReadyAppStateProvider({ children, transport }: { children: ReactNode; t
   }, [transport]);
 
   const roomEntryTransport = useState<RoomEntryTransport>(() => ({
+    manageRoom: async (roomId, action) => {
+      await waitForTransportConnection(transport);
+      await exitRoom(transport, roomId, action);
+    },
     restoreGuestSession: () => transport.restoreGuestSession(),
     recoverAssignedSeats: () => transport.recoverAssignedSeats(),
     createGuestSession: async (request) => {

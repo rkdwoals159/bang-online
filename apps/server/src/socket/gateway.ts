@@ -234,7 +234,7 @@ function createContext(
     options.authorizeMatchMember(playerId, matchId);
   const joinLobbyChannel: AuthenticatedSocketContext["joinLobbyChannel"] = async (roomId) => {
     const room = await roomMembership(roomId);
-    if (!room || (room.status !== "waiting" && room.status !== "starting")) return false;
+    if (!room || room.status === "closed") return false;
     await socket.join(`${LOBBY_CHANNEL_PREFIX}${room.roomId}`);
     return true;
   };
@@ -398,7 +398,8 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
     const command = parsed.value as Exclude<RoomCommand, { type: "CREATE_ROOM" }>;
     invokeAuthenticated(socket, options, args, async () => {
       // A JOIN is the one room command that must start without membership; T44 verifies invite and version.
-      if (command.type !== "JOIN" && !(await context.roomMembership(command.roomId))) {
+      // Exit commands authorize inside their locked mutation so a retry after removal can find its receipt.
+      if (command.type !== "JOIN" && command.type !== "LEAVE_ROOM" && command.type !== "CLOSE_ROOM" && !(await context.roomMembership(command.roomId))) {
         commandAck(ack, command.commandId, "NOT_FOUND_OR_FORBIDDEN", "room.notFoundOrForbidden");
         return;
       }
@@ -464,7 +465,7 @@ function bindSocket(socket: GatewaySocket, options: SocketGatewayOptions, invite
         syncRejectedAck(ack, parsed.value.requestId, "NOT_FOUND_OR_FORBIDDEN");
         return;
       }
-      if ((room.status === "waiting" || room.status === "starting") && !(await context.joinLobbyChannel(room.roomId))) {
+      if (!(await context.joinLobbyChannel(room.roomId))) {
         syncRejectedAck(ack, parsed.value.requestId, "NOT_FOUND_OR_FORBIDDEN");
         return;
       }

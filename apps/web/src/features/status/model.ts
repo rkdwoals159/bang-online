@@ -241,8 +241,9 @@ export function formatPublicEvent(
     case "DISCARD_CARD_TAKEN": return actor ? `${actor} 님이 버림더미에서 ${cardName(String(payload.cardType ?? ""))} 1장을 가져왔어요.` : fallback;
     case "PLAYER_ELIMINATED": {
       const player = publicName(payload, "playerId", players);
-      return player ? `${player} 님이 탈락했어요.` : fallback;
+      return player ? `${player} 님이 ${payload.cause === "FORFEIT" ? "방을 나가 탈락했어요" : "탈락했어요"}.` : fallback;
     }
+    case "PLAYER_LEFT": { const player = publicName(payload, "playerId", players); return player ? `${player} 님이 방을 나갔어요.` : "참가자가 방을 나갔어요."; }
     case "MATCH_COMPLETED": return "게임이 끝났어요.";
     case "BANG_HIT": return actor && target ? `${actor} 님의 뱅!이 ${target} 님에게 적중했어요${damage}.` : fallback;
     case "BANG_MISSED": return target ? `${target} 님이 뱅!을 피했어요.` : fallback;

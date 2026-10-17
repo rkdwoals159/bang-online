@@ -952,16 +952,14 @@ test("persists room status changes and locks lobby membership outside WAITING", 
     assert.equal(inGame.outcome.version, 2);
 
     await assert.rejects(
-      lifecycle.leaveRoom(commandBase("room-1", playerIds[0], 2, "leave-in-game")),
-      RoomLockedError,
-    );
-    await assert.rejects(
       lifecycle.joinRoom({
         ...commandBase("room-1", playerIds[1], 2, "join-in-game"),
         inviteCodeHash: "invite-hash-room-1",
       }),
       RoomLockedError,
     );
+    const left = await lifecycle.leaveRoom(commandBase("room-1", playerIds[0], 2, "leave-in-game"));
+    assert.equal(left.outcome.roomStatus, "closed");
     await assert.rejects(
       lifecycle.setRoomStatus({
         ...commandBase("room-1", playerIds[0], 0, "stale-room-status"),
@@ -970,7 +968,7 @@ test("persists room status changes and locks lobby membership outside WAITING", 
       RoomVersionConflictError,
     );
     const closed = await lifecycle.setRoomStatus({
-      ...commandBase("room-1", playerIds[0], 2, "room-closed"),
+      ...commandBase("room-1", playerIds[0], left.outcome.version, "room-closed"),
       status: "closed",
     });
     assert.equal(closed.status, "applied");

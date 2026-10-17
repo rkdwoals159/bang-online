@@ -979,7 +979,9 @@ export class BrowserGameTransport implements GameTransport {
         if (this.commandAcknowledgements.size > 50) this.commandAcknowledgements.delete(this.commandAcknowledgements.keys().next().value!);
       }
       const accepted = ack === null || ack.status === "accepted";
-      if (accepted && pending.roomId) {
+      const exited = accepted && pending.roomId && (pending.payload.type === "LEAVE_ROOM" || pending.payload.type === "CLOSE_ROOM");
+      if (exited) this.rejectResource("room", pending.roomId!);
+      if (accepted && pending.roomId && !exited) {
         const room = parseRoomView(response);
         let roomProjectionApplied = false;
         if (room.ok && room.value.roomId === pending.roomId && room.value.version !== undefined) {
@@ -1029,7 +1031,8 @@ export class BrowserGameTransport implements GameTransport {
       return isRoomCreateResult(response) || isCommandRejected(response, pending.commandId);
     }
     if (pending.event === "room:command") {
-      return parseRoomView(response).ok || isCommandRejected(response, pending.commandId);
+      return parseRoomView(response).ok || isCommandRejected(response, pending.commandId) ||
+        ((pending.payload.type === "LEAVE_ROOM" || pending.payload.type === "CLOSE_ROOM") && isCommandAck(response, pending.commandId));
     }
     return isCommandAck(response, pending.commandId) &&
       (response.status !== "accepted" || !response.matchProjection ||

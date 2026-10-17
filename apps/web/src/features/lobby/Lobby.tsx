@@ -9,6 +9,8 @@ import {
   type LobbyRoomCommand,
 } from "./model.js";
 import "./lobby.css";
+import { RoomExitActions } from "../room-entry/RoomExitActions.js";
+import type { RoomExitAction } from "../room-entry/room-exit.js";
 
 export interface LobbyProps {
   room: RoomView;
@@ -23,6 +25,8 @@ export interface LobbyProps {
   onReissueInvite?: () => Promise<void>;
   createCommandId?: () => string;
   origin?: string;
+  onManageRoom?: (roomId: string, action: RoomExitAction) => Promise<void>;
+  onExited?: () => void;
 }
 
 function commandId(): string {
@@ -47,6 +51,8 @@ export function Lobby({
   onReissueInvite,
   createCommandId = commandId,
   origin,
+  onManageRoom,
+  onExited,
 }: LobbyProps) {
   const view = useMemo(() => buildRoomLobbyViewModel(room), [room]);
   const [busy, setBusy] = useState(false);
@@ -108,6 +114,7 @@ export function Lobby({
           {view.statusLabel}
         </span>
       </header>
+      {onManageRoom && onExited ? <RoomExitActions room={room} onAction={onManageRoom} onExited={onExited} /> : null}
 
       <section className="room-lobby__panel" aria-labelledby="room-lobby-members-title">
         <div className="room-lobby__section-heading">

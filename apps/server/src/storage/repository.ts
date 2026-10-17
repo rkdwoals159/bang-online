@@ -666,7 +666,9 @@ export class StorageRepository {
       });
 
       const membership = await client.query<{ player_id: string }>(
-        "SELECT player_id FROM match_players WHERE match_id = $1 AND player_id = $2",
+        `SELECT mp.player_id FROM match_players mp JOIN matches m ON m.id=mp.match_id
+         JOIN rooms r ON r.id=m.room_id JOIN room_players rp ON rp.room_id=r.id AND rp.player_id=mp.player_id
+         WHERE mp.match_id=$1 AND mp.player_id=$2 AND r.status <> 'closed'`,
         [input.matchId, input.receipt.actorPlayerId],
       );
       if (!membership.rows[0]) {
@@ -694,6 +696,12 @@ export class StorageRepository {
           input.expectedVersion,
         ],
       );
+
+      const departed = (input.state.forfeitedPlayerIds ?? []).filter(id =>
+        input.state.seats.some(seat => seat.public.playerId === id && seat.public.eliminated));
+      if (departed.length) await client.query(`UPDATE match_players SET alive=false,
+        eliminated_at=COALESCE(eliminated_at,now()) WHERE match_id=$1 AND player_id=ANY($2::text[]) AND alive=true`,
+        [input.matchId, departed]);
 
       for (const event of input.events) {
         await client.query(

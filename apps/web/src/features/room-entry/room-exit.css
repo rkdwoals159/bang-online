@@ -1,0 +1,14 @@
+.room-exit { min-width: 0; }
+.room-exit__buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.room-exit button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-ink); font-weight: 700; cursor: pointer; }
+.room-exit button:hover:not(:disabled) { background: var(--color-surface-soft); }
+.room-exit button:disabled { opacity: .6; cursor: wait; }
+.room-exit .room-exit__danger { color: var(--color-danger); border-color: var(--color-danger); }
+.room-exit .room-exit__danger:hover:not(:disabled) { background: var(--color-danger-soft); }
+.room-exit__confirmation { display: grid; gap: 10px; margin-top: 12px; padding: 16px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); color: var(--color-ink); text-align: left; }
+.room-exit__confirmation p { margin: 0; line-height: 1.6; font-size: 14px; }
+.room-exit__room-id { overflow-wrap: anywhere; color: var(--color-muted); font-size: 12px; }
+.room-exit__error { color: var(--color-danger); }
+.room-entry__assigned-list .room-entry__assigned-room { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.room-entry__assigned-room > .room-exit { grid-column: 1 / -1; }
+@media (max-width: 600px) { .room-entry__assigned-list .room-entry__assigned-room { grid-template-columns: minmax(0, 1fr); } .room-exit__buttons > button { flex: 1 1 auto; } }

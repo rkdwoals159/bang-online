@@ -3,6 +3,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer as createTcpServer } from "node:net";
+import { randomUUID } from "node:crypto";
+import { BASE_PHYSICAL_CARDS } from "../../../../packages/catalog/src/cards/index.ts";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
@@ -24,6 +26,95 @@ function testConfig(databaseUrl = "postgresql://postgres:postgres@localhost:5432
     WEB_ORIGIN: "http://localhost:5173",
   });
 }
+
+test("room exit and owner deletion are atomic, idempotent, and revoke every live access path", async () => {
+  const {database,pool}=await createDatabase();
+  const runtime=await createRuntimeServer(testConfig(),pool,{logger:{info(){},error(){}}});
+  const origin=`http://${runtime.host}:${runtime.port}`,webOrigin="http://localhost:5173";
+  const storage=new StorageRepository(pool), sockets:Socket[]=[];
+  const emit=(socket:Socket,event:string,payload:unknown):Promise<any>=>new Promise((resolve,reject)=>socket.timeout(10000).emit(event,payload,(error:unknown,reply:unknown)=>error?reject(error):resolve(reply)));
+  const command=(type:string,roomId:string,version:number,payload={})=>({protocolVersion:1,commandId:randomUUID(),type,roomId,expectedVersion:version,payload});
+  const players:{id:string;cookie:string;socket:Socket}[]=[];
+  try {
+    for(let index=0;index<6;index++){
+      const response=await fetch(origin+"/api/guest-sessions",{method:"POST",headers:{Origin:webOrigin,"Content-Type":"application/json"},body:JSON.stringify({protocolVersion:1,displayName:`exit-test-${index}`})});
+      const body=await response.json() as any;const cookie=response.headers.get("set-cookie")!.split(";")[0]!;
+      const socket=createSocketClient(origin,{transports:["websocket"],extraHeaders:{Cookie:cookie,Origin:webOrigin},reconnection:false});sockets.push(socket);
+      await new Promise<void>((resolve,reject)=>{socket.once("connect",resolve);socket.once("connect_error",reject);});players.push({id:body.player.playerId,cookie,socket});
+    }
+    const owner=players[0]!,guest=players[1]!,outsider=players[5]!;
+    const create=async()=>emit(owner.socket,"room:create",{protocolVersion:1,commandId:randomUUID(),expectedVersion:0,type:"CREATE_ROOM",payload:{capacity:5,rulesetVersion:"base4-ko-online-1.0",displayName:"exit-test-0"}});
+    const lobby=await create();
+    await emit(guest.socket,"room:command",command("JOIN",lobby.roomId,0,{inviteCode:lobby.inviteCode}));
+    const leaveOwner=command("LEAVE_ROOM",lobby.roomId,1);
+    assert.equal((await emit(owner.socket,"room:command",leaveOwner)).status,"accepted");
+    const inherited=await emit(guest.socket,"room:sync",{protocolVersion:1,requestId:randomUUID(),roomId:lobby.roomId,knownVersion:0});
+    assert.equal(inherited.room.viewer.isOwner,true);assert.equal(inherited.room.ownerPlayerId,guest.id);
+    assert.equal((await emit(owner.socket,"room:command",leaveOwner)).duplicate,true);
+    const last=await emit(guest.socket,"room:command",command("LEAVE_ROOM",lobby.roomId,2));assert.equal(last.status,"accepted");assert.equal((await storage.getRoom(lobby.roomId))?.status,"closed");
+
+    const created=await create();let version=created.version;
+    for(const player of players.slice(1,5)){const joined=await emit(player.socket,"room:command",command("JOIN",created.roomId,version,{inviteCode:created.inviteCode}));version=joined.version;}
+    const started=await emit(owner.socket,"room:command",command("START_MATCH",created.roomId,version));version=started.version;
+    // A Sheriff with Kit Carlson or Jesse Jones can start with a private draw prompt.
+    for(let step=0;step<12;step++){
+      const stored=(await storage.getMatch(started.activeMatchId))!;
+      const prompt=stored.state.resolution.pendingInteraction;if(!prompt)break;
+      const responder=players.find(player=>player.id===prompt.actorPlayerIds[0])!,option=prompt.options[0]!;
+      const ack=await emit(responder.socket,"match:command",{protocolVersion:1,commandId:randomUUID(),type:"RESPOND",matchId:started.activeMatchId,expectedVersion:stored.version,payload:{...option.payload,interactionId:prompt.interactionId,choice:option.choice}});
+      assert.equal(ack.status,"accepted");
+    }
+    let before=(await storage.getMatch(started.activeMatchId))!;assert.equal(before.state.resolution.pendingInteraction,null);
+    const leavingId=before.state.seats.find(seat=>seat.public.playerId!==owner.id&&seat.private.roleId==="outlaw")!.public.playerId;
+    const leaving=players.find(player=>player.id===leavingId)!;
+    const retained=players.find(player=>player.id!==owner.id&&player.id!==leavingId)!;
+    for(const player of players.slice(0,5)){
+      await emit(player.socket,"room:sync",{protocolVersion:1,requestId:randomUUID(),roomId:created.roomId,knownVersion:0});
+      const synced=await emit(player.socket,"match:sync",{protocolVersion:1,requestId:randomUUID(),matchId:started.activeMatchId,knownVersion:0,afterEventSeq:0});assert.ok(synced.snapshot);
+    }
+    const denied=await emit(outsider.socket,"room:command",command("CLOSE_ROOM",created.roomId,version));assert.equal(denied.status,"rejected");
+    assert.equal((await storage.getRoom(created.roomId))?.players.length,5);
+    // Seed a real General Store fixture so departure spans another player's saved choice.
+    const fixture=structuredClone(before.state),actor=fixture.seats.find(seat=>seat.public.playerId===fixture.turn.currentPlayerId)!;
+    const storeDefinition=BASE_PHYSICAL_CARDS.find(card=>card.typeId==="general_store")!.definitionId;
+    const storeCard=Object.values(fixture.zones.cardsByInstanceId).find(card=>card.cardDefinitionId===storeDefinition)!.cardInstanceId;
+    fixture.zones.drawPileCardInstanceIds=fixture.zones.drawPileCardInstanceIds.filter(id=>id!==storeCard);fixture.zones.discardPileCardInstanceIds=fixture.zones.discardPileCardInstanceIds.filter(id=>id!==storeCard);
+    fixture.seats.forEach(seat=>{seat.private.handCardInstanceIds=seat.private.handCardInstanceIds.filter(id=>id!==storeCard);});actor.private.handCardInstanceIds.push(storeCard);
+    await withClient(pool,client=>client.query("UPDATE matches SET state_json=$2::jsonb WHERE id=$1",[started.activeMatchId,JSON.stringify(fixture)]));
+    const storeActor=players.find(player=>player.id===actor.public.playerId)!;
+    const played=await emit(storeActor.socket,"match:command",{protocolVersion:1,commandId:randomUUID(),expectedVersion:before.version,matchId:started.activeMatchId,type:"PLAY_CARD",payload:{cardInstanceId:storeCard}});assert.equal(played.status,"accepted");
+    before=(await storage.getMatch(started.activeMatchId))!;
+    const exit=command("LEAVE_ROOM",created.roomId,version);
+    const left=await emit(leaving.socket,"room:command",exit);assert.equal(left.status,"accepted");assert.equal((await emit(leaving.socket,"room:command",exit)).duplicate,true);
+    version=left.aggregateVersion;
+    let after=(await storage.getMatch(started.activeMatchId))!;assert.equal(after.state.status,"playing");assert.equal(after.version,before.version+1);
+    assert.equal(after.state.resolution.pendingInteraction?.interactionId,before.state.resolution.pendingInteraction?.interactionId,"another player's store choice must survive departure");
+    for(let step=0;step<10&&after.state.resolution.pendingInteraction;step++){
+      const prompt=after.state.resolution.pendingInteraction,option=prompt.options[0]!,responder=players.find(player=>player.id===prompt.actorPlayerIds[0])!;
+      assert.notEqual(responder.id,leavingId,"server must resolve departed players without asking them");
+      const ack=await emit(responder.socket,"match:command",{protocolVersion:1,commandId:randomUUID(),expectedVersion:after.version,matchId:started.activeMatchId,type:"RESPOND",payload:{...option.payload,interactionId:prompt.interactionId,choice:option.choice}});assert.equal(ack.status,"accepted");
+      after=(await storage.getMatch(started.activeMatchId))!;
+    }
+    assert.equal(after.state.seats.find(seat=>seat.public.playerId===leavingId)?.public.eliminated,true);
+    assert.equal(after.players.find(player=>player.playerId===leavingId)?.alive,false);
+    const inaccessible=await emit(leaving.socket,"match:sync",{protocolVersion:1,requestId:randomUUID(),matchId:started.activeMatchId,knownVersion:0,afterEventSeq:0});assert.equal(inaccessible.status,"rejected");
+    const recovered=await fetch(origin+"/api/guest-sessions/rooms",{headers:{Cookie:leaving.cookie}});assert.deepEqual(await recovered.json(),[]);
+    const forbiddenPlay=await emit(leaving.socket,"match:command",{...command("END_TURN",created.roomId,after.version),roomId:undefined,matchId:started.activeMatchId});assert.equal(forbiddenPlay.status,"rejected");
+    const notified=new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error("playing room never received close invalidation")),10000);retained.socket.on("room:changed",payload=>{if(payload.roomId===created.roomId&&payload.version>version){clearTimeout(timer);resolve();}});});
+    const close=command("CLOSE_ROOM",created.roomId,version);
+    const closed=await emit(owner.socket,"room:command",close);assert.equal(closed.status,"accepted");await notified;
+    assert.equal((await emit(owner.socket,"room:command",close)).duplicate,true);
+    const storedRoom=(await storage.getRoom(created.roomId))!;assert.equal(storedRoom.status,"closed");assert.equal(storedRoom.players.length,0);
+    for(const player of players.slice(0,5)){
+      const sync=await emit(player.socket,"match:sync",{protocolVersion:1,requestId:randomUUID(),matchId:started.activeMatchId,knownVersion:0,afterEventSeq:0});assert.equal(sync.status,"rejected");
+      const rooms=await fetch(origin+"/api/guest-sessions/rooms",{headers:{Cookie:player.cookie}});assert.deepEqual(await rooms.json(),[]);
+      assert.equal((await fetch(origin+"/api/guest-sessions",{headers:{Cookie:player.cookie}})).status,200);
+    }
+    const preview=await emit(outsider.socket,"room:preview",{protocolVersion:1,requestId:randomUUID(),inviteCode:created.inviteCode});
+    assert.ok(preview.status==="rejected" || preview.room?.status==="closed" || preview.status==="closed");
+    const rejoin=await emit(outsider.socket,"room:command",command("JOIN",created.roomId,closed.aggregateVersion,{inviteCode:created.inviteCode}));assert.equal(rejoin.status,"rejected");
+  } finally { for(const socket of sockets)socket.disconnect();await runtime.close();await database.close(); }
+});
 
 function connected(socket: Socket): Promise<void> {
   return new Promise((resolve, reject) => {

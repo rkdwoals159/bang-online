@@ -135,7 +135,8 @@ export class RecoveryService {
     const active = await withClient(this.pool, async (client) => {
       const result = await client.query<ActiveMatchRow>(
         `SELECT id, status, version, event_seq, ruleset_version, state_schema_version, state_json
-         FROM matches WHERE status IN ('playing', 'paused') ORDER BY id`,
+         FROM matches WHERE status IN ('playing', 'paused')
+         AND EXISTS (SELECT 1 FROM rooms WHERE rooms.id=matches.room_id AND rooms.status <> 'closed') ORDER BY id`,
       );
       return result.rows;
     });

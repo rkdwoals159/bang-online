@@ -169,6 +169,11 @@ function validateStateShape(value: unknown): asserts value is GameState {
       throw new StoredDataInvariantError(`seats[${index}].private.handCardInstanceIds must be strings.`);
     }
   }
+  if (value.forfeitedPlayerIds !== undefined && (!isStringArray(value.forfeitedPlayerIds) ||
+      new Set(value.forfeitedPlayerIds).size !== value.forfeitedPlayerIds.length ||
+      value.forfeitedPlayerIds.some(id => !players.has(id)))) {
+    throw new StoredDataInvariantError("forfeitedPlayerIds must contain unique match player IDs.");
+  }
   if (!isObject(value.zones) || !isObject(value.zones.cardsByInstanceId) ||
       !isStringArray(value.zones.drawPileCardInstanceIds) ||
       !isStringArray(value.zones.discardPileCardInstanceIds) ||

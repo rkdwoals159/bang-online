@@ -166,7 +166,7 @@ export function parseRoomCommand(input: unknown): ParseResult<RoomCommand> {
     case "JOIN": return exactKeys(p, ["inviteCode"]) && isText(p.inviteCode) ? good(input) : bad("$.payload");
     case "SET_READY": return exactKeys(p, ["ready"]) && typeof p.ready === "boolean" ? good(input) : bad("$.payload");
     case "SET_RULESET": return exactKeys(p, ["rulesetVersion"]) && isText(p.rulesetVersion) ? good(input) : bad("$.payload");
-    case "START_MATCH": case "RETURN_TO_LOBBY": case "CLOSE_ROOM": return exactKeys(p, []) ? good(input) : bad("$.payload");
+    case "START_MATCH": case "RETURN_TO_LOBBY": case "CLOSE_ROOM": case "LEAVE_ROOM": return exactKeys(p, []) ? good(input) : bad("$.payload");
     case "KICK_MEMBER": return exactKeys(p, ["targetPlayerId"]) && isText(p.targetPlayerId) ? good(input) : bad("$.payload");
     default: return bad("$.type");
   }

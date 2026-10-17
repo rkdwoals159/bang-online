@@ -995,7 +995,7 @@ function cardLocations(state: GameState): Map<string, { zone: string; playerId: 
   return locations;
 }
 
-function stateMovementEvents(before: GameState, after: GameState): EffectEventDraft[] {
+export function stateMovementEvents(before: GameState, after: GameState): EffectEventDraft[] {
   const beforeLocations = cardLocations(before);
   const afterLocations = cardLocations(after);
   const orderedIds = [

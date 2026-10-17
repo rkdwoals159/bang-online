@@ -248,6 +248,8 @@ export async function handleRoomsRoute(
           ? jsonResponse(room)
           : jsonResponse(commandRejected(command.commandId, "NOT_FOUND_OR_FORBIDDEN"));
       }
+      case "LEAVE_ROOM":
+        return jsonResponse(commandRejected(command.commandId, "COMMAND_UNAVAILABLE"));
       case "KICK_MEMBER": {
         const room = await service.kickMember(playerId, { ...command, targetPlayerId: command.payload.targetPlayerId });
         return room ? jsonResponse(room) : jsonResponse(commandRejected(command.commandId, "NOT_FOUND_OR_FORBIDDEN"));

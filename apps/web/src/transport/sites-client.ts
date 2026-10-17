@@ -640,6 +640,9 @@ export class SitesGameTransport implements GameTransport {
     this.pending.delete(pending.commandId);
     this.updatePendingIds();
     const accepted = !ack.ok || ack.value.status === "accepted";
+    if (accepted && pending.roomId && (pending.command.type === "LEAVE_ROOM" || pending.command.type === "CLOSE_ROOM")) {
+      this.rejectResource("room", pending.roomId);
+    }
     if (accepted && pending.command.type === "JOIN" && pending.roomId) {
       this.unavailableRoomIds.delete(pending.roomId);
       this.closedRoomIds.delete(pending.roomId);

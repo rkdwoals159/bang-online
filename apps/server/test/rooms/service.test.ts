@@ -51,6 +51,26 @@ async function guest(service: RoomService, displayName: string) {
   return { issued, authenticated };
 }
 
+test("a failed departure rolls back the room, forfeit snapshot, history, and match outbox together", async () => {
+  const {database,pool,service,storage,lifecycle}=await createFixture();
+  try {
+    const players=await Promise.all(["a","b","c","d"].map(name=>guest(service,name)));
+    const owner=players[0]!.authenticated.playerId;
+    const created=await service.createPrivateRoom(owner,{commandId:"atomic-create",capacity:4,rulesetVersion:BASE_DECK_RULESET_VERSION});
+    let version=created.version;
+    for(const player of players.slice(1)){const joined=await service.joinPrivateRoom(player.authenticated.playerId,{roomId:created.room.roomId,commandId:`join-${player.authenticated.playerId}`,expectedVersion:version,inviteCode:created.inviteCode!});version=joined.mutation.outcome.version;}
+    const started=await service.startMatch(owner,{roomId:created.room.roomId,commandId:"atomic-start",expectedVersion:version});version=started.mutation.outcome.version;
+    const before=await storage.getMatch(started.matchId),roomBefore=await storage.getRoom(created.room.roomId),eventsBefore=await storage.listMatchEvents(started.matchId);
+    const client=await pool.connect();try{await client.query(`INSERT INTO outbox (event_id,aggregate_id,aggregate_version,event_seq,kind,payload_json)
+      VALUES ('departure-conflict',$1,$2,0,'room:changed',$3::jsonb)`,[created.room.roomId,version,JSON.stringify({roomId:created.room.roomId,version})]);}finally{client.release();}
+    await assert.rejects(lifecycle.leaveRoom({roomId:created.room.roomId,actorPlayerId:players[1]!.authenticated.playerId,expectedVersion:version,commandId:"failed-departure",requestHash:"failed-hash",outboxEventId:"departure-conflict"}));
+    assert.deepEqual(await storage.getMatch(started.matchId),before);
+    assert.deepEqual(await storage.getRoom(created.room.roomId),roomBefore);
+    assert.deepEqual(await storage.listMatchEvents(started.matchId),eventsBefore);
+    assert.equal(await storage.findCommandReceipt(players[1]!.authenticated.playerId,"failed-departure"),null);
+  }finally{await database.close();}
+});
+
 function hash(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
@@ -398,7 +418,7 @@ test("readiness, owner transfer, voluntary closure and D10 retention preserve th
         expectedVersion: ready.mutation.outcome.version,
         commandId: "non-owner-close",
       }),
-      RoomAuthorizationError,
+      (error: unknown) => error instanceof Error && "code" in error && error.code === "NOT_ROOM_OWNER",
     );
 
     const ownerLeave = await service.leaveRoom(owner.authenticated.playerId, {
@@ -504,7 +524,7 @@ test("only the owner can voluntarily close a room through the service", async ()
       commandId: "owner-close-room",
     });
     assert.equal(closed.mutation.outcome.roomStatus, "closed");
-    assert.equal(closed.room?.status, "closed");
+    assert.equal(closed.room, null);
     assert.equal(closed.cleanupEligibleAt, null);
     const duplicateClose = await service.closeRoom(owner.authenticated.playerId, {
       roomId: created.room.roomId,
@@ -517,7 +537,7 @@ test("only the owner can voluntarily close a room through the service", async ()
   }
 });
 
-test("the service does not close a room after its lobby is locked", async () => {
+test("the owner can close a room after its lobby is locked", async () => {
   const { database, service, lifecycle } = await createFixture();
   try {
     const owner = await guest(service, "Owner");
@@ -535,14 +555,13 @@ test("the service does not close a room after its lobby is locked", async () => 
       outboxEventId: "start-locked-room-event",
       status: "in_game",
     });
-    await assert.rejects(
-      service.closeRoom(owner.authenticated.playerId, {
+    const result = await service.closeRoom(owner.authenticated.playerId, {
         roomId: created.room.roomId,
         expectedVersion: 1,
         commandId: "close-after-start",
-      }),
-      (error: unknown) => error instanceof Error && "code" in error && error.code === "ROOM_LOCKED",
-    );
+      });
+    assert.equal(result.mutation.outcome.roomStatus, "closed");
+    assert.equal(result.mutation.outcome.occupancy, 0);
   } finally {
     await database.close();
   }

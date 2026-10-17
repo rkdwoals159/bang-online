@@ -12,6 +12,7 @@ import {
   type RoomEntryTransport,
 } from "./model";
 import "./room-entry.css";
+import { RoomExitActions } from "./RoomExitActions.js";
 
 export interface RoomEntryProps {
   transport: RoomEntryTransport;
@@ -261,14 +262,16 @@ export function RoomEntry({
               </div>
               <ul className="room-entry__assigned-list">
                 {assignedRooms.map((room) => (
-                  <li key={room.roomId}>
+                  <li key={room.roomId} className="room-entry__assigned-room">
                     <span>
                       <strong>{room.roomId}</strong>
-                      <small>{statusLabels[room.status]} · {room.members.length}명</small>
+                      <small>{statusLabels[room.status]} · {room.members.length}명{room.viewer.isOwner ? " · 방장" : ""}</small>
                     </span>
                     <button className="room-entry__button room-entry__button--secondary" onClick={() => onRoomReady?.(room)}>
                       좌석으로 돌아가기
                     </button>
+                    {transport.manageRoom ? <RoomExitActions room={room} onAction={transport.manageRoom}
+                      onExited={() => setAssignedRooms(current => current.filter(item => item.roomId !== room.roomId))} /> : null}
                   </li>
                 ))}
               </ul>

@@ -552,7 +552,7 @@ export class RoomService {
     };
   }
 
-  /** Voluntary lobby close is owner-only. */
+  /** Owner-only close is available in every live room state. */
   async closeRoom(
     authenticatedPlayerId: string,
     input: RoomCommandInput,
@@ -561,22 +561,13 @@ export class RoomService {
     ensureText(input.roomId, "Room ID");
     ensureText(input.commandId, "Command ID");
     ensureVersion(input.expectedVersion);
-    const room = await this.storage.getRoom(input.roomId);
-    if (!room) throw new RoomServiceError("ROOM_NOT_FOUND", "Room does not exist.");
-    if (room.ownerPlayerId !== authenticatedPlayerId || !room.players.some(({ playerId }) => playerId === authenticatedPlayerId)) {
-      throw new RoomAuthorizationError();
-    }
-    if (room.status !== "waiting" && room.status !== "closed") {
-      throw new RoomServiceError("ROOM_LOCKED", "Only a waiting room can be closed.");
-    }
-    const mutation = await this.lifecycle.setRoomStatus({
+    const mutation = await this.lifecycle.closeRoom({
       roomId: input.roomId,
       actorPlayerId: authenticatedPlayerId,
       expectedVersion: input.expectedVersion,
       commandId: input.commandId,
       requestHash: requestHash("CLOSE_ROOM", [authenticatedPlayerId, input.roomId, input.expectedVersion]),
       outboxEventId: opaqueId("evt"),
-      status: "closed",
     });
     const cleanupEligibleAt = await this.cleanupDeadlineForRoom(input.roomId, mutation.outcome.roomStatus);
     return {

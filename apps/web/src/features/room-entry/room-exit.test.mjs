@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { exitRoom, roomExitMessage } from './room-exit.ts';
+const room={roomId:'room-a',status:'in_game',ownerPlayerId:'me',viewer:{playerId:'me',isOwner:true},members:[{playerId:'me'},{playerId:'other'}]};
+function fixture(responses=[]){const calls=[];let version=8;return {calls,async syncRoom(id){calls.push(['sync',id]);return {version:version++,room};},async sendRoomCommand(command){calls.push(command);return responses.shift()??{protocolVersion:1,commandId:command.commandId,status:'accepted',duplicate:false,aggregateVersion:command.expectedVersion+1,eventSeq:0};}};}
+test('exit uses fresh server version instead of the old room list',async()=>{const t=fixture();await exitRoom(t,'room-a','LEAVE_ROOM',()=> 'exit-1');assert.equal(t.calls[1].expectedVersion,8);assert.equal(t.calls[1].type,'LEAVE_ROOM');});
+test('close checks latest ownership and rejects non-owner before sending',async()=>{const t=fixture();t.syncRoom=async()=>({version:8,room:{...room,viewer:{...room.viewer,isOwner:false}}});await assert.rejects(exitRoom(t,'room-a','CLOSE_ROOM'),/현재 방장/);assert.deepEqual(t.calls,[]);});
+test('stale response refreshes once and uses a new command ID',async()=>{let id=0;const t=fixture([{protocolVersion:1,commandId:'exit-1',status:'rejected',error:{code:'STALE_VERSION',messageKey:'stale',retryable:true,currentVersion:9}}]);await exitRoom(t,'room-a','CLOSE_ROOM',()=>`exit-${++id}`);assert.equal(t.calls[3].commandId,'exit-2');assert.equal(t.calls[3].expectedVersion,9);});
+test('unknown and mismatched ACKs never count as a successful exit',async()=>{for(const reply of [{},{protocolVersion:1,commandId:'wrong',status:'accepted',duplicate:false,aggregateVersion:9,eventSeq:0}]){const t=fixture([reply]);await assert.rejects(exitRoom(t,'room-a','LEAVE_ROOM',()=> 'exit-1'),/처리 결과/);}});
+test('confirmation explains forfeit, owner transfer and all-member removal',()=>{assert.match(roomExitMessage(room,'LEAVE_ROOM'),/탈락/);assert.match(roomExitMessage(room,'LEAVE_ROOM'),/방장/);assert.match(roomExitMessage(room,'CLOSE_ROOM'),/모두/);});

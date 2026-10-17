@@ -141,6 +141,8 @@ export interface GameState {
   turn: TurnState;
   resolution: ResolutionState;
   outcome: MatchOutcome | null;
+  /** Voluntary departures. Finish only their mandatory prompts, then eliminate at the next safe effect boundary. */
+  forfeitedPlayerIds?: string[];
 }
 
 /** Architecture documents call the persisted snapshot a MatchState. */

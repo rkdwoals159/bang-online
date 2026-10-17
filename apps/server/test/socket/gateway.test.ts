@@ -352,7 +352,7 @@ test("JOIN bypasses pre-membership but its handler can join only after T44 confi
 
   harness.setRoom(roomView("room-1", "player-1", "in_game"));
   const rejectedLobbyJoin = await dispatchedContext!.joinLobbyChannel("room-1");
-  assert.equal(rejectedLobbyJoin, false, "in-game rooms cannot be joined as lobby channels");
+  assert.equal(rejectedLobbyJoin, true, "playing members receive room closure and ownership invalidations");
 });
 
 test("authenticated room preview needs no membership and returns only the shared success DTO", async () => {

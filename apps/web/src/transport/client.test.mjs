@@ -27,6 +27,24 @@ test("same guest restoration preserves cached projections", () => {
   assert.equal(store.getSnapshot(), before);
 });
 
+for (const type of ["LEAVE_ROOM", "CLOSE_ROOM"]) {
+  test(`${type} ACK releases private caches and does not refetch a removed seat`, async () => {
+    const socket=new FakeSocket();
+    socket.onEmit=({event,payload,acknowledgement})=>{
+      if(event==='room:sync') acknowledgement(roomSync(payload,{activeMatchId:'match-1'}));
+      if(event==='match:sync') acknowledgement(matchSync(payload));
+      if(event==='room:command') acknowledgement({protocolVersion:1,commandId:payload.commandId,status:'accepted',duplicate:false,aggregateVersion:2,eventSeq:0});
+    };
+    const transport=new BrowserGameTransport({socketFactory:()=>socket});transport.watchRoom('room-1');transport.connect();
+    await waitUntil(()=>!!transport.getSnapshot().matches['match-1'],'initial match missing');
+    const reads=countEmits(socket,'room:sync');
+    await transport.sendRoomCommand({protocolVersion:1,commandId:crypto.randomUUID(),type,roomId:'room-1',expectedVersion:1,payload:{}});
+    assert.equal(transport.getSnapshot().rooms['room-1'],undefined);assert.equal(transport.getSnapshot().matches['match-1'],undefined);
+    socket.fire('room:changed',{roomId:'room-1',version:3});socket.fire('match:changed',{matchId:'match-1',version:3,eventSeq:3});
+    await new Promise(resolve=>setTimeout(resolve,10));assert.equal(countEmits(socket,'room:sync'),reads);transport.disconnect();
+  });
+}
+
 test("expired session clears private projections and ignores late guest responses", () => {
   const store = new BrowserTransportStore();
   store.setViewerPlayerId("player-1");

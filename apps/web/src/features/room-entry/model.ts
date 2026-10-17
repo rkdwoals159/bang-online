@@ -34,6 +34,7 @@ export interface RoomEntryCreateResult {
 
 /** T58 supplies this boundary and binds the requests to the HttpOnly cookie. */
 export interface RoomEntryTransport {
+  manageRoom?(roomId: string, action: import("./room-exit.js").RoomExitAction): Promise<void>;
   /** Read the current guest from the cookie; do not expose the credential to JavaScript. */
   restoreGuestSession(): Promise<GuestSessionResponse | null>;
   /** Read assigned seats for the cookie-authenticated player after a refresh. */

@@ -6,6 +6,7 @@ import { GameScene } from "../features/game-scene/GameScene.js";
 import { CharacterCardFace, RoleCardFace } from "../features/cards/CardFaces.js";
 import { Lobby } from "../features/lobby/Lobby.js";
 import { RoomEntry } from "../features/room-entry/RoomEntry.js";
+import { exitRoom } from "../features/room-entry/room-exit.js";
 import type { BrowserTransportState, MatchProjectionState, TransportConnectionState } from "../transport/types.js";
 import { AppLink, navigateTo, replaceTo, type AppRoute } from "./router.js";
 import { useAppState, type SessionRecovery } from "./app-state.js";
@@ -435,6 +436,8 @@ function RoomRoutePage({ route }: { route: Exclude<AppRoute, { kind: "home" | "n
             rememberCreatedRoom(result);
           } : undefined}
           viewerConnectionState={transportState.connection}
+          onManageRoom={(id, action) => exitRoom(transport, id, action)}
+          onExited={() => navigateTo("/rooms/new")}
           onCommand={async (command) => {
             const response = await transport.sendRoomCommand(command);
             if (!isVersionedRoomView(response, roomId)) await transport.syncRoom(roomId);
@@ -569,9 +572,9 @@ function RoomUnavailablePage() {
     <section className="state-frame" role="alert">
       <span className="state-icon state-icon-error" aria-hidden="true">!</span>
       <h1>방을 불러올 수 없어요</h1>
-      <p>참가한 방을 찾을 수 없어요. 초대 링크를 확인하거나 첫 화면으로 돌아가 주세요.</p>
+      <p>방에서 나갔거나 방장이 방을 삭제했을 수 있어요. 방 목록에서 현재 참여 중인 방을 확인해 주세요.</p>
       <div className="state-actions">
-        <AppLink className="button button-primary" to="/rooms/join">초대 링크로 참가</AppLink>
+        <AppLink className="button button-primary" to="/rooms/new">방 목록으로</AppLink>
         <AppLink className="button button-secondary" to="/">첫 화면으로</AppLink>
       </div>
     </section>
